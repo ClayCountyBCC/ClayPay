@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<ArrayOfArrayOfArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ArrayOfArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\models\paymentresponse.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\models\mycache.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\models\constants.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\content\main.scss</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\index.html</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\web.config</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\controllers\paycontroller.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\bundleconfig.json</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\scripts\app\tsconfig.json</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\scripts\app\tslint.json</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>U:\crap_code_WATS.vb</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\controllers\feecontroller.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\models\ccdata.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\controllers\querycontroller.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\controllers\apptypescontroller.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\models\activetransactions.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>C:\Users\mccartneyd\Documents\Visual Studio 2017\Projects\ClayPay\ClayPay\App_Start\WebApiConfig.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\models\charge.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\models\errorlog.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\models\apptype.cs</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\scripts\app\app.ts</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\scripts\app\charge.ts</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\scripts\app\ui.ts</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\scripts\app\ccdata.ts</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\scripts\app\xhr.ts</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\scripts\app\transport.ts</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\scripts\app\apptypes.ts</string>
+    </ArrayOfString>
+    <ArrayOfString>
+      <string>c:\users\mccartneyd\documents\visual studio 2017\projects\claypay\claypay\connectionstrings.config</string>
+    </ArrayOfString>
+  </ArrayOfArrayOfString>
+</ArrayOfArrayOfArrayOfString>

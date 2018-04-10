@@ -1,0 +1,511 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <title>Clay County Online Payment System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=11" />
+  <meta charset="utf-8" />  
+  <link href="Content/bootstrap.min.css" rel="stylesheet" />
+  <link href="Content/bootstrap-theme.min.css" rel="stylesheet" />
+  <link href="Content/Main.css" rel="stylesheet" />
+
+</head>
+<body class="container">
+
+  <nav id="navTopMenu"
+       class="navbar navbar-default container">
+    <div class="navbar-header">
+      <span class="hidden-sm hidden-xs hidden-md navbar-brand">
+        Clay County Payment Center
+      </span>
+      <span class="hidden-lg navbar-brand">
+        CCPC
+      </span>
+    </div>
+    <ul class="nav nav-tabs navbar-nav">
+      <li id="nav-home"
+          class="active">
+        <a onclick="clayPay.toggleNavDisplay('home')"
+           aria-controls="home"
+           role="tab">
+          <span class="glyphicon glyphicon-home"></span>
+          Home
+        </a>
+      </li>
+      <li id="nav-permit">
+        <a onclick="clayPay.toggleNavDisplay('permit')"
+           aria-controls="permit"
+           role="tab">
+          Building Permit Fees
+        </a>
+      </li>
+      <li id="nav-contractor">
+        <a onclick="clayPay.toggleNavDisplay('contractor')"
+           aria-controls="contractor"
+           role="tab">
+          Contractor License Fees
+        </a>
+      </li>
+      <li id="nav-application">
+        <a onclick="clayPay.toggleNavDisplay('application')"
+           aria-controls="application"
+           role="tab">
+          Application Fees
+        </a>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li id="nav-cart">        
+        <a id="CartNav"
+           aria-controls="application"
+           role="tab"
+           onclick="clayPay.toggleNavDisplay('cart')">
+          <span class="glyphicon glyphicon-shopping-cart"></span>
+          Cart: (<span style="color: darkgoldenrod">empty</span>)
+        </a>
+      </li>
+
+    </ul>
+  </nav>
+
+  <section id="receipt">
+    <div class="headerBox container bg-success">
+      <h3>
+        Payment Receipt
+      </h3>
+      <p>
+        NOTE: There will be a second transaction on your credit card statement for the convenience fee.  The charge for it is not reflected here.
+      </p>
+
+      <form style="margin: .5em;"
+            class="form-inline">
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">
+              Transaction Id
+            </div>
+            <input class="form-control"
+                   id="receiptUniqueId"
+                   readonly />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">
+              Payment Date
+            </div>
+            <input class="form-control"
+                   id="receiptTimestamp"
+                   readonly />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">
+              Payment Amount
+            </div>
+            <input class="form-control"
+                   id="receiptAmount"
+                   readonly />
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section id="home">
+    <div id="homeSuccess"
+         class="container bg-primary">
+      <h3>
+        Welcome!
+      </h3>
+      <p>
+        You can use this application to pay 
+        <a onclick="clayPay.toggleNavDisplay('permit')">Building Permit fees</a>, 
+        <a onclick="clayPay.toggleNavDisplay('contractor')">Contractor License fees</a>, 
+        and <a onclick="clayPay.toggleNavDisplay('application')">Application fees including Zoning applications, civil plans, concurrency, etc</a>.
+      </p>
+    </div>
+    <div id="homeError"
+         style="display: none;"
+         class="container bg-danger">
+      <h3>
+        Unable to procede
+      </h3>
+      <p>
+        The application was unable to contact the server.  Please try again, and contact the helpdesk if this issue persists.
+      </p>
+    </div>
+  </section>
+
+
+
+  <section id="permit">
+    <div class="headerBox container bg-info">
+      <h3>
+        Search by Permit number
+      </h3>
+      <p>
+        Searching by Permit number will show you all of the unpaid fees for a given permit number.
+      </p>
+      <form style="margin: .5em;"
+            class="form-inline">
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">Permit #</div>
+            <input type="text"
+                   class="form-control"
+                   id="PermitSearch"
+                   placeholder="">
+          </div>
+        </div>
+        <button onclick="clayPay.UI.Search(document.getElementById('PermitSearch').value); return false;"
+                type="submit" 
+                class="btn btn-primary">
+          Search
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <section id="contractor">
+    <div class="headerBox container bg-warning">
+      <h3>
+        Search by Contractor ID number
+      </h3>
+      <p>
+        Searching by Contractor ID will list any unpaid fees tied to that contractor.
+      </p>
+      <form style="margin: .5em;"
+            class="form-inline">
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">Contractor ID #</div>
+            <input type="text"
+                   class="form-control"
+                   id="ContractorSearch"
+                   placeholder="">
+          </div>
+        </div>
+        <button onclick="clayPay.UI.Search(document.getElementById('ContractorSearch').value); return false;"
+                type="submit"
+                class="btn btn-primary">
+        Search</button>
+      </form>
+    </div>
+  </section>
+
+  <section id="application">
+    <div class="headerBox container bg-success">
+      <h3>
+        Search by Application Type and Application Number
+      </h3>
+      <p>
+        Pick an application type and then enter an application number to see any unpaid fees associated with that application.
+      </p>
+      <form style="margin: .5em;"
+            class="form-inline">
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">App Type</div>
+            <select id="ApplicationTypeSelect"
+                    class="form-control"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">Application #</div>
+            <input type="text"
+                   class="form-control"
+                   id="ApplicationSearch"
+                   placeholder="">
+          </div>
+        </div>
+        <button onclick="clayPay.UI.Search(document.getElementById('ApplicationTypeSelect').value + '-' + document.getElementById('ApplicationSearch').value); return false;"
+                type="submit" 
+                class="btn btn-primary">
+          Search
+        </button>
+      </form>
+    </div>
+  </section>
+  
+  <section style="margin-top: 1em;"
+           class="highlight"
+           id="SearchResults">
+
+    <div id="Searching"
+         class="container row">
+      <h4 style="display: inline;">Searching...</h4>
+      <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+      
+    </div>
+
+    <div id="InvalidSearch"
+         class="container row">
+      <h4>Invalid search.  Please check your entry and try again.</h4>
+    </div>
+
+    <div id="SearchFailed"
+         class="container row">
+    </div>
+
+    <fieldset id="SearchSuccessful"
+         class="container">
+      <legend class="row">
+        <span class="col-md-6"
+              id="ChargesKey"></span>
+        <span class="col-md-6"
+              style="font-size: smaller;"
+              id="ChargesDetail"></span>
+      </legend>
+      <table id="ChargesLayout"
+             class="table">
+        <thead>
+          <tr>
+            <th class="left col-md-6">Description</th>
+            <th class="col-md-2">Date</th>
+            <th class="col-md-2">Amount</th>
+            <th class="col-md-2"></th>
+          </tr>
+        </thead>
+        <tbody id="Charges">
+        </tbody>
+      </table>
+    </fieldset>
+  </section>
+
+  <section id="cart">
+    <div class="headerBox container bg-info">
+      <h3>
+        Your Shopping Cart
+      </h3>
+      <p>
+        Shows the charges you have added to your shopping cart. You can pay for them here.
+      </p>
+    </div>
+
+    <div class="container row"
+         id="CartEmpty">
+      <h4>Your cart is currently empty.</h4>
+    </div>
+
+    <div id="CartNotEmpty">
+      <fieldset class="container">
+        <table id="CartLayout"
+               class="table">
+          <thead>
+            <tr>
+              <th class="col-md-2">Key</th>
+              <th class="left col-md-6">Description</th>
+              <th class="col-md-1 center">Date</th>
+              <th class="col-md-1 center">Amount</th>
+              <th class="col-md-2"></th>
+            </tr>
+          </thead>
+          <tbody id="CartCharges"></tbody>
+        </table>
+      </fieldset>
+
+      <div style="display: none;"
+           class="container"
+           id="PaymentPosting">
+        <div id="Posting"
+             class="container row col-md-offset-3">
+          <h4 style="display: inline;">Posting payment, this may take a few minutes...</h4>
+          <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+        </div>
+      </div>
+
+      <div id="CCForm"
+           style="text-align: center;">
+        <div class="col-xs-12 col-md-6 col-md-offset-3">
+
+          <div class="panel panel-default credit-card-box">
+            <div class="panel-heading display-table">
+              <div class="row display-tr">
+                <h3 class="panel-title display-td">Payment Details</h3>
+                <div class="display-td">
+                  <img class="img-responsive pull-right" src="Content/accepted.png" />
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-body">
+
+              <form onsubmit="clayPay.UI.Submit(); return false;"
+                    role="form"
+                    id="paymentForm">
+
+                <div class="row">
+                  <div class="col-xs-6 col-md-6">
+                    <div class="form-group">
+                      <label for="ccLastName">FIRST NAME</label>
+                      <input type="text"
+                             class="form-control"
+                             name="ccFirstName"
+                             id="ccFirstName"
+                             placeholder="First Name"
+                             onblur="this.value = this.value.trim();"
+                             required
+                             autofocus />
+                    </div>
+                  </div>
+                  <div class="col-xs-6 col-md-6">
+                    <div class="form-group">
+                      <label for="ccLastName">LAST NAME</label>
+                      <input class="form-control"
+                             name="ccLastName"
+                             id="ccLastName"
+                             placeholder="Last Name"
+                             onblur="this.value = this.value.trim();"
+                             required />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-xs-12 col-md-8">
+                    <div class="form-group">
+                      <label for="cardNumber">CARD NUMBER</label>
+                      <div class="input-group">
+                        <input type="tel"
+                               class="form-control"
+                               id="cardNumber"
+                               name="cardNumber"
+                               placeholder="Card Number"                               
+                               onblur="this.value = this.value.trim();"
+                               required />
+                        <span class="input-group-addon">
+                          <span class="glyphicon glyphicon-credit-card"></span>        
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-xs-4 col-md-4">
+                    <div class="form-group">
+                      <label for="ccTypes">CARD TYPE</label>
+                      <div class="input-group">
+                        <select id="ccTypes"
+                                name="ccTypes"
+                                required
+                                class="form-control"></select>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="row">
+                  <div class="col-xs-12 col-md-4">
+                    <div class="form-group">
+                      <label for="ccExpMonth">EXP. MONTH</label>
+                      <select id="ccExpMonth"
+                              name="ccExpMonth"
+                              required
+                              class="form-control"></select>
+                    </div>
+                  </div>
+                  <div class="col-xs-12 col-md-4">
+                    <div class="form-group">
+                      <label for="ccExpYear">EXP. YEAR</label>
+                      <select id="ccExpYear"
+                              name="ccExpYear"
+                              required
+                              class="form-control"></select>
+                    </div>
+                  </div>
+                  <div class="col-xs-12 col-md-4">
+                    <div class="form-group">
+                      <label for="ccCVV">CV CODE</label>
+                      <input type="tel"
+                             class="form-control"
+                             id="ccCVV"
+                             name="ccCVV"
+                             placeholder="CVC"
+                             onblur="this.value = this.value.trim();"
+                             maxlength="4"
+                             required />
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-xs-12">
+                    <div class="form-group">
+                      <label for="">ZIP CODE</label>
+                      <input type="text"
+                             class="form-control"
+                             name="ccZip"
+                             placeholder="Zip Code"
+                             onblur="this.value = this.value.trim();"
+                             id="ccZip"
+                             maxlength="10"
+                             required />
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-xs-12">
+                    <div class="form-group">
+                      <label for="emailAddress">Email Address For Receipts</label>
+                      <input type="email"
+                             class="form-control"
+                             name="emailAddress"
+                             placeholder="email@example.com"
+                             onblur="this.value = this.value.trim();"
+                             id="emailAddress"
+                             required />
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-xs-12">
+                    <button id="btnSubmit"
+                            class="btn btn-success btn-lg btn-block"
+                            type="submit">
+                      Pay Now
+                    </button>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-xs-12">
+                    <ol style="display:none; margin-top: 1em;"
+                        id="errorList">
+                    </ol>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </div>     
+    </div>
+    
+  </section>
+
+
+
+
+  <script src="Scripts/claypay/bundle.min.js"></script>
+  <!--<script src="Scripts/app/app.js"></script>
+  <script src="Scripts/app/XHR.js"></script>
+  <script src="Scripts/app/transport.js"></script>
+  <script src="Scripts/app/es6-promise.min.js"></script>
+  <script src="Scripts/app/UI.js"></script>
+  <script src="Scripts/app/CCData.js"></script>
+  <script src="Scripts/app/Charge.js"></script>-->
+  <script>
+    document.addEventListener("DOMContentLoaded", function (event) 
+    {
+      clayPay.start();      
+    });
+
+    function preventSubmit(e)
+    {
+      e.preventDefault();
+    };
+
+  </script>
+</body>
+</html>

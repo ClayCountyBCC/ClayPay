@@ -1,0 +1,413 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=11">
+  <title>Clay County Payment Application - Impact Fees</title>
+  <link href="Content/bulma.css" rel="stylesheet" />
+  <link href="Content/Main.min.css" rel="stylesheet" />
+  <link href="Content/Utliities.css" rel="stylesheet" />
+</head>
+<body class="container">
+  <nav class="navbar"
+       role="navigation"
+       aria-label="main navigation">
+    <div class="navbar-brand">
+      <a href="ImpactFees.html"
+         class="navbar-item has-text-weight-bold">
+        Clay County Payment Center
+      </a>
+    </div>
+    <div class="navbar-item has-dropdown is-hoverable">
+      <a class="navbar-link">
+        Impact Fee Agreements
+      </a>
+      <div class="navbar-dropdown">
+        <a id="nav-existingAllocations"
+           onclick="ImpactFees.Menu('existingAllocations')"
+           class="navbar-item">
+          View Existing Agreements and Allocations
+        </a>
+        <a onclick="ImpactFees.Menu('permitAllocations')"
+           id="nav-permitAllocations"
+           class="navbar-item">
+          Apply Allocation to Permit
+        </a>
+        <a onclick="ImpactFees.Menu('builderAllocations')"
+           id="nav-builderAllocations"
+           class="navbar-item">
+          Add a New Builder Allocation
+        </a>
+        <a onclick="ImpactFees.Menu('developerAgreement')"
+           id="nav-developerAgreement"
+           class="navbar-item">
+          Add a New Developer Agreement
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <section id="developerAgreement"
+           class="container hide">
+
+    <section class="hero box is-info">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title">Developer Agreements</h1>
+          <h2 class="subtitle">
+            Use this menu to add or make changes to existing developer agreements.
+          </h2>
+        </div>
+      </div>
+    </section>
+
+    <form id="formDeveloperAgreement">
+
+      <div class="field">
+        <label class="label">Developer Agreement</label>
+        <div class="control">
+          <div class="select">
+            <select tabindex="1"
+                    id="developerAgreementAdd">
+              <option>Select Agreement</option>
+              <option>Agreement Number 1</option>
+              <option>Agreement Number 2</option>
+            </select>
+          </div>
+          <p class="help">These agreements are added as IMS Application type Developer Agreement.</p>
+          <p class="help">Selecting an agreement will load the data for that agreement.</p>
+        </div>
+      </div>
+
+      <div id="developerAgreementSelected"
+           class="field">
+
+        <div class="field">
+          <label class="label">Developer Name</label>
+          <div class="control">
+            <input id="developerAggrementName"
+                   tabindex="2"
+                   class="input"
+                   type="text"
+                   placeholder="XYZ Builders" />
+            <p style="display: none;"
+               id="developerAgreementNameError"
+               class="help is-danger">
+              The Developer name is invalid, it should be atleast 3 characters long.
+            </p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Agreement Amount</label>
+          <div class="control">
+            <input id="developerAgreementAmount"
+                   tabindex="3"
+                   class="input"
+                   type="number"
+                   placeholder="0" />
+            <p style="display: none;"
+               id="developerAgreementAmountError"
+               class="help is-danger">
+              The amount entered is invalid.  Please enter numbers only.
+            </p>
+          </div>
+        </div>
+
+        <div id="existingDeveloperAgreement"
+             class="field">
+
+          <div class="field">
+            <label class="label">Added By</label>
+            <div class="control">
+              <input id="developerAgreementAddedBy"
+                     class="input"
+                     type="text"
+                     readonly />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Added On</label>
+            <div class="control">
+              <input id="developerAgreementAddedOn"
+                     class="input"
+                     type="text"
+                     readonly />
+            </div>
+          </div>
+
+        </div>
+
+        <div class="field is-grouped">
+          <div class="control">
+            <button tabindex="5"
+                    class="button is-primary">
+              Save Agreement
+            </button>
+          </div>
+          <div class="control">
+            <button tabindex="6"
+                    class="button is-warning">
+              Cancel
+            </button>
+
+          </div>
+        </div>
+
+      </div>
+
+    </form>
+  </section>
+
+  <section id="builderAllocations"
+           class="container hide">
+
+    <section class="hero box is-info">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title">Builder Allocations</h1>
+          <h2 class="subtitle">
+            Use this menu to add or make changes to existing builder allocations.
+          </h2>
+        </div>
+      </div>
+    </section>
+
+    <form id="formBuilderAllocations">
+
+      <div class="field">
+        <label class="label">Developer Agreement</label>
+        <div class="control">
+          <div class="select">
+            <select tabindex="1"
+                    id="builderAllocationAgreementAdd">
+              <option>Select Agreement</option>
+              <option>Agreement Number 1</option>
+              <option>Agreement Number 2</option>
+            </select>
+          </div>
+          <p class="help">Selecting a Developer Agreement will load the data for that specific agreement.</p>
+        </div>
+      </div>
+
+      <div id="agreementBuilderAllocationSelected"
+           class="field">
+
+        <div class="field">
+          <label class="label">Existing Builder Allocations</label>
+          <div class="control is-grouped">
+            <div class="select">
+              <select tabindex="1"
+                      id="existingBuilderNames">
+                <option>Select Builder or Add New</option>
+                <option>ABC Building</option>
+                <option>XYZ Building</option>
+              </select>
+            </div>
+            <button class="button is-primary">
+              Add New Builder
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">New Builder Name</label>
+          <div class="control">
+            <input id="builderAllocationName"
+                   tabindex="2"
+                   class="input"
+                   type="text"
+                   placeholder="XYZ Builders" />
+            <p style="display: none;"
+               id="builderAllocationNameError"
+               class="help is-danger">
+              The Builder name is invalid, it should be atleast 3 characters long.
+            </p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Amount Allocated to Builder</label>
+          <div class="control">
+            <input id="builderAllocationAmount"
+                   tabindex="3"
+                   class="input"
+                   type="number"
+                   placeholder="0" />
+            <p style="display: none;"
+               id="builderAllocationAmountError"
+               class="help is-danger">
+              The amount entered is invalid.  Please enter numbers only.
+            </p>
+          </div>
+        </div>
+
+        <div id="existingBuilderAllocation"
+             class="field hide">
+
+          <div class="field">
+            <label class="label">Added By</label>
+            <div class="control">
+              <input id="builderAllocationAddedBy"
+                     tabindex="2"
+                     class="input"
+                     type="text"
+                     readonly />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Added On</label>
+            <div class="control">
+              <input id="builderAllocationAddedOn"
+                     tabindex="2"
+                     class="input"
+                     type="text"
+                     readonly />
+            </div>
+          </div>
+
+        </div>
+
+        <div class="field is-grouped">
+          <div class="control">
+            <button tabindex="5"
+                    class="button is-primary">
+              Save Builder Allocation
+            </button>
+          </div>
+          <div class="control">
+            <button tabindex="6"
+                    class="button is-warning">
+              Cancel
+            </button>
+
+          </div>
+        </div>
+
+      </div>
+
+    </form>
+  </section>
+
+  <section id="permitAllocations"
+           class="container hide">
+
+    <section class="hero box is-info">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title">Permit Allocations</h1>
+          <h2 class="subtitle">
+            Use this menu to add or make changes to existing permit allocations.
+          </h2>
+        </div>
+      </div>
+    </section>
+
+    <form id="formPermitAllocations">
+
+      <div class="field">
+        <label class="label">Developer Agreement</label>
+        <div class="control">
+          <div class="select">
+            <select tabindex="1"
+                    id="permitAllocationAgreementAdd">
+              <option>Select Agreement</option>
+              <option>Agreement Number 1</option>
+              <option>Agreement Number 2</option>
+            </select>
+          </div>
+          <p class="help">Selecting a Developer Agreement will load the data for that specific agreement.</p>
+        </div>
+      </div>
+
+      <div id="agreementPermitAllocationSelected"
+           class="field">
+
+        <div class="field">
+          <label class="label">Permit Number</label>
+          <div class="control is-grouped">
+            <input id="permitNumber"
+                   class="input"
+                   type="number"
+                   placeholder="11800000" />
+            <button class="button is-primary">
+              Search
+            </button>
+          </div>
+        </div>
+
+
+
+        <div id="existingPermitAllocation"
+             class="field">
+
+          <div class="field">
+            <label class="label">Added By</label>
+            <div class="control">
+              <input id="permitAllocationAddedBy"
+                     tabindex="2"
+                     class="input"
+                     type="text"
+                     readonly />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Added On</label>
+            <div class="control">
+              <input id="permitAllocationAddedOn"
+                     tabindex="2"
+                     class="input"
+                     type="text"
+                     readonly />
+            </div>
+          </div>
+
+        </div>
+
+        <div class="field is-grouped">
+          <div class="control">
+            <button tabindex="5"
+                    class="button is-primary">
+              Save Permit Allocation
+            </button>
+          </div>
+          <div class="control">
+            <button tabindex="6"
+                    class="button is-warning">
+              Cancel
+            </button>
+
+          </div>
+        </div>
+
+      </div>
+
+    </form>
+  </section>
+
+  <section id="existingAllocations"
+           class="container show">
+    Existing Allocations will show here.
+  </section>
+
+  <script src="Scripts/app/Utilities.js"></script>
+  <script src="Scripts/impactfees/impactfees.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function (event)
+    {
+      //impactFees.start();
+    });
+
+      //function preventSubmit(e)
+      //{
+      //  e.preventDefault();
+      //};
+
+  </script>
+
+</body>
+</html>
