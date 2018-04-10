@@ -10,8 +10,8 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 ConnectionStrings.config
+[Cc]lay[Pp]ay/[Cc]onnection[Ss]trings.config
 ClayPay/ConnectionStrings.config
-ClayPay\ConnectionStrings.config
 [Pp]roperties/
 
 # Build results
