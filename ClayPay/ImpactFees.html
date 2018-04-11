@@ -84,22 +84,6 @@
            class="field">
 
         <div class="field">
-          <label class="label">Developer Name</label>
-          <div class="control">
-            <input id="developerAggrementName"
-                   tabindex="2"
-                   class="input"
-                   type="text"
-                   placeholder="XYZ Builders" />
-            <p style="display: none;"
-               id="developerAgreementNameError"
-               class="help is-danger">
-              The Developer name is invalid, it should be atleast 3 characters long.
-            </p>
-          </div>
-        </div>
-
-        <div class="field">
           <label class="label">Agreement Amount</label>
           <div class="control">
             <input id="developerAgreementAmount"
@@ -119,25 +103,15 @@
              class="field">
 
           <div class="field">
-            <label class="label">Added By</label>
+            <label class="label">Audit Log</label>
             <div class="control">
-              <input id="developerAgreementAddedBy"
-                     class="input"
-                     type="text"
-                     readonly />
+              <textarea id="developerAgreementAuditLog" 
+                        class="input"
+                        type="text"
+                        readonly>
+              </textarea>
             </div>
           </div>
-
-          <div class="field">
-            <label class="label">Added On</label>
-            <div class="control">
-              <input id="developerAgreementAddedOn"
-                     class="input"
-                     type="text"
-                     readonly />
-            </div>
-          </div>
-
         </div>
 
         <div class="field is-grouped">
@@ -248,27 +222,15 @@
              class="field hide">
 
           <div class="field">
-            <label class="label">Added By</label>
+            <label class="label">Audit Log</label>
             <div class="control">
-              <input id="builderAllocationAddedBy"
-                     tabindex="2"
-                     class="input"
-                     type="text"
-                     readonly />
+              <textarea id="builderAllocationAuditLog"
+                        class="input"
+                        type="text"
+                        readonly>
+              </textarea>
             </div>
           </div>
-
-          <div class="field">
-            <label class="label">Added On</label>
-            <div class="control">
-              <input id="builderAllocationAddedOn"
-                     tabindex="2"
-                     class="input"
-                     type="text"
-                     readonly />
-            </div>
-          </div>
-
         </div>
 
         <div class="field is-grouped">
@@ -309,6 +271,29 @@
     <form id="formPermitAllocations">
 
       <div class="field">
+        <label class="label">Permit Number</label>
+      </div>
+      <div class="field is-grouped">
+        <div class="control">
+          <input id="permitNumber"
+                 class="input"
+                 type="number"
+                 maxlength="8"
+                 placeholder="11800000" />
+        </div>
+        <div class="control">
+          <button class="button is-primary">
+            Search
+          </button>
+        </div>
+      </div>
+
+      <div>
+        Show the selected permit's applicable impact fees here
+      </div>
+
+
+      <div class="field">
         <label class="label">Developer Agreement</label>
         <div class="control">
           <div class="select">
@@ -323,25 +308,23 @@
         </div>
       </div>
 
-      <div id="agreementPermitAllocationSelected"
-           class="field">
-        <div class="field">
-          <label class="label">Permit Number</label>
-        </div>
-        <div class="field is-grouped">
-          <div class="control">
-            <input id="permitNumber"
-                   class="input"
-                   type="number"
-                   maxlength="8"
-                   placeholder="11800000" />
-            </div>
-          <div class="control">
-            <button class="button is-primary">
-              Search
-            </button>
+      <div class="field">
+        <label class="label">Builder</label>
+        <div class="control">
+          <div class="select">
+            <select tabindex="2"
+                    id="existingBuilderNames">
+              <option>Select Builder or Add New</option>
+              <option>ABC Building</option>
+              <option>XYZ Building</option>
+            </select>
           </div>
         </div>
+      </div>
+
+      <div id="agreementPermitAllocationSelected"
+           class="field">
+
 
 
 
