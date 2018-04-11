@@ -228,7 +228,10 @@
     <Compile Include="Models\Claypay\Charge.cs" />
     <Compile Include="Models\Constants.cs" />
     <Compile Include="Models\ErrorLog.cs" />
-    <Compile Include="Models\ImpactFees\ImpactAgreements.cs" />
+    <Compile Include="Models\ImpactFees\BuilderAllocation.cs" />
+    <Compile Include="Models\ImpactFees\CombinedAllocation.cs" />
+    <Compile Include="Models\ImpactFees\DeveloperAgreement.cs" />
+    <Compile Include="Models\ImpactFees\PermitAllocation.cs" />
     <Compile Include="Models\MyCache.cs" />
     <Compile Include="Models\Claypay\PaymentResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

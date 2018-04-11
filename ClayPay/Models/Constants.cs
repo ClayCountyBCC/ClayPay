@@ -18,8 +18,17 @@ namespace ClayPay.Models
       Building = 0,
       Rescue = 1
     }
-      
 
+    public static string Create_Audit_Log(string Username, string Message)
+    {
+      return $"{DateTime.Now.ToString("g1")} by {Username}: {Message}.";
+    }
+
+    public static string Create_Audit_Log(string Username, string FieldName, string OldValue, string NewValue)
+    {
+      return $"{DateTime.Now.ToString("g1")} by {Username}: {FieldName} changed from {OldValue} to {NewValue}.";
+    }
+    
     public static bool UseProduction()
     {
       switch (Environment.MachineName.ToUpper())
@@ -112,19 +121,21 @@ namespace ClayPay.Models
       }
     }
 
-    public static bool Save_Data<T>(string insertQuery, T item)
+    public static bool Save_Data<T>(string Query, T item)
     {
       try
       {
-        using (IDbConnection db = new SqlConnection(Get_ConnStr("Printing")))
+        using (IDbConnection db = 
+          new SqlConnection(
+            Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
         {
-          db.Execute(insertQuery, item);
+          db.Execute(Query, item);
           return true;
         }
       }
       catch (Exception ex)
       {
-        Log(ex, insertQuery);
+        Log(ex, Query);
         return false;
       }
     }
