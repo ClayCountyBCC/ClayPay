@@ -11,14 +11,31 @@ namespace ClayPay.Models.ImpactFees
     public string Agreement_Number { get; set; }
     public string Builder_Name { get; set; }
     public int Id { get; set; }
-    public decimal Amount_Allocated { get; set; }
-    public string Amount_Allocated_Formatted
+    public decimal Allocation_Amount { get; set; }
+    public string Allocation_Amount_Formatted
     {
       get
       {
         try
         {
-          return Amount_Allocated.ToString("C2");
+          return Allocation_Amount.ToString("C2");
+        }
+        catch (Exception ex)
+        {
+          new ErrorLog(ex);
+          return "";
+        }
+
+      }
+    }
+    public decimal Amount_Currently_Allocated { get; set; }
+    public string Amount_Currently_Allocated_Formatted
+    {
+      get
+      {
+        try
+        {
+          return Amount_Currently_Allocated.ToString("C2");
         }
         catch (Exception ex)
         {
@@ -49,13 +66,22 @@ namespace ClayPay.Models.ImpactFees
       var dp = new DynamicParameters();
       dp.Add("@Builder_Id", Builder_Id);
       string query = @"
+        WITH CurrentAllotment AS (
+          SELECT
+            Builder_Id,
+            SUM(Amount_Allocated) Amount_Currently_Allocated    
+          FROM ImpactFees_Permit_Allocations
+          GROUP BY Builder_Id
+        )
         SELECT
           Agreement_Number,
           Builder_Name,
-          Id,
+          B.Id,
           Amount_Allocated,
+          C.Amount_Currently_Allocated,
           Audit_Log
-        FROM ImpactFees_Builder_Allocations
+        FROM ImpactFees_Builder_Allocations B
+        INNER JOIN CurrentAllotment C ON B.Id = C.Builder_Id
         WHERE Id=@Builder_Id;";
       var data = Constants.Get_Data<BuilderAllocation>(query, dp);
       if (data.Count() == 1)
@@ -71,7 +97,7 @@ namespace ClayPay.Models.ImpactFees
     public List<string> Validate()
     {
       Agreement_Number = Agreement_Number.Trim();
-      Builder_Name = Builder_Name.Trim();
+      Builder_Name = Builder_Name.Trim().ToUpper();
       List<string> errors = new List<string>();
       if (Agreement_Number.Length == 0)
       {
@@ -81,9 +107,13 @@ namespace ClayPay.Models.ImpactFees
       {
         errors.Add("No Builder Name was specified.");
       }
-      if (Amount_Allocated < 0)
+      if (Allocation_Amount < 0)
       {
         errors.Add("The Amount Allocated cannot be a negative number.");
+      }
+      if(Allocation_Amount < Amount_Currently_Allocated)
+      {
+        errors.Add("The Amount Allocated cannot be set to less than the amount currently allocated to Permits.");
       }
       return errors;
     }

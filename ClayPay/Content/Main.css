@@ -95,9 +95,10 @@
     transform: rotate(360deg); } }
 
 /* Padding - just for asthetics on Bootsnipp.com */
-body {
-  margin-top: 20px; }
-
+/*body
+{
+  margin-top: 20px;
+}*/
 /* CSS for Credit Card Payment form */
 .credit-card-box .panel-title {
   display: inline;

@@ -215,6 +215,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\ImpactFees\AgreementsController.cs" />
     <Compile Include="Controllers\AppTypesController.cs" />
     <Compile Include="Controllers\FeeController.cs" />
     <Compile Include="Controllers\PayController.cs" />
@@ -265,7 +266,11 @@
     <None Include="Scripts\app\typings\es6-promise\es6-promise.d.ts" />
     <TypeScriptCompile Include="Scripts\claypay\UI.ts" />
     <TypeScriptCompile Include="Scripts\app\XHR.ts" />
+    <TypeScriptCompile Include="Scripts\impactfees\BuilderAllocation.ts" />
+    <TypeScriptCompile Include="Scripts\impactfees\CombinedAllocation.ts" />
+    <TypeScriptCompile Include="Scripts\impactfees\DeveloperAgreement.ts" />
     <TypeScriptCompile Include="Scripts\impactfees\impactfees.ts" />
+    <TypeScriptCompile Include="Scripts\impactfees\PermitAllocation.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

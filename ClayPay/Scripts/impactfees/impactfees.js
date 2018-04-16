@@ -1,7 +1,10 @@
 var ImpactFees;
 (function (ImpactFees) {
+    function Start() {
+    }
+    ImpactFees.Start = Start;
     function Menu(id) {
-        var sections = document.querySelectorAll("section.container");
+        var sections = document.querySelectorAll("body > section");
         if (sections.length > 0) {
             for (var i = 0; i < sections.length; i++) {
                 var item = sections.item(i);

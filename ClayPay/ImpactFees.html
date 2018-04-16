@@ -9,8 +9,8 @@
   <link href="Content/Main.min.css" rel="stylesheet" />
   <link href="Content/Utliities.css" rel="stylesheet" />
 </head>
-<body class="container">
-  <nav class="navbar"
+<body class="">
+  <nav class="container navbar"
        role="navigation"
        aria-label="main navigation">
     <div class="navbar-brand">
@@ -23,7 +23,8 @@
       <a class="navbar-link">
         Impact Fee Agreements
       </a>
-      <div class="navbar-dropdown">
+      <div id="ifDropdown"
+           class="navbar-dropdown">
         <a id="nav-existingAllocations"
            onclick="ImpactFees.Menu('existingAllocations')"
            class="navbar-item">
@@ -49,9 +50,9 @@
   </nav>
 
   <section id="developerAgreement"
-           class="container hide">
+           class="hide">
 
-    <section class="hero box is-info">
+    <section class="hero is-info box">
       <div class="hero-body">
         <div class="container">
           <h1 class="title">Developer Agreements</h1>
@@ -63,82 +64,101 @@
     </section>
 
     <form id="formDeveloperAgreement">
-
-      <div class="field">
-        <label class="label">Developer Agreement</label>
-        <div class="control">
-          <div class="select">
-            <select tabindex="1"
-                    id="developerAgreementAdd">
-              <option>Select Agreement</option>
-              <option>Agreement Number 1</option>
-              <option>Agreement Number 2</option>
-            </select>
-          </div>
-          <p class="help">These agreements are added as IMS Application type Developer Agreement.</p>
-          <p class="help">Selecting an agreement will load the data for that agreement.</p>
-        </div>
-      </div>
-
-      <div id="developerAgreementSelected"
-           class="field">
-
+      <div class="container">
         <div class="field">
-          <label class="label">Agreement Amount</label>
+          <label class="label">Developer Agreement</label>
           <div class="control">
-            <input id="developerAgreementAmount"
-                   tabindex="3"
-                   class="input"
-                   type="number"
-                   placeholder="0" />
-            <p style="display: none;"
-               id="developerAgreementAmountError"
-               class="help is-danger">
-              The amount entered is invalid.  Please enter numbers only.
-            </p>
+            <div class="select">
+              <select tabindex="1"
+                      id="developerAgreementAdd">
+                <option>Select Agreement</option>
+                <option>Agreement Number 1</option>
+                <option>Agreement Number 2</option>
+              </select>
+            </div>
+            <p class="help">These agreements are added as IMS Application type Impact Credit Agreement.</p>
+            <p class="help">Selecting an agreement will load the data for that agreement.</p>
           </div>
         </div>
 
-        <div id="existingDeveloperAgreement"
+        <div id="developerAgreementSelected"
              class="field">
+          <div class="columns">
 
-          <div class="field">
-            <label class="label">Audit Log</label>
-            <div class="control">
-              <textarea id="developerAgreementAuditLog" 
-                        class="input"
-                        type="text"
-                        readonly>
+            <div class="column field">
+              <label class="label">Agreement Amount</label>
+              <div class="control">
+                <input id="developerAgreementAmount"
+                       tabindex="3"
+                       class="input"
+                       type="number"
+                       placeholder="0" />
+                <p style="display: none;"
+                   id="developerAgreementAmountError"
+                   class="help is-danger">
+                  The amount entered is invalid.  Please enter numbers only.
+                </p>
+              </div>
+            </div>
+
+            <div class="column field">
+              <label class="label">Currently Allocated</label>
+              <div class="control">
+                <input id="developerCurrentlyAllocated"
+                       tabindex="3"
+                       class="input"
+                       type="number"
+                       readonly
+                       placeholder="0" />
+                <p style="display: none;"
+                   id="developerAgreementAmountError"
+                   class="help is-danger">
+                  The amount entered is invalid.  Please enter numbers only.
+                </p>
+              </div>
+            </div>
+
+          </div>
+          <div id="existingDeveloperAgreement"
+               class="field">
+
+            <div class="field">
+              <label class="label">Audit Log</label>
+              <div class="control">
+                <textarea id="developerAgreementAuditLog"
+                          class="input"
+                          type="text"
+                          readonly>
               </textarea>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="field is-grouped">
-          <div class="control">
-            <button tabindex="5"
-                    class="button is-primary">
-              Save Agreement
-            </button>
+          <div class="field is-grouped">
+            <div class="control">
+              <button tabindex="5"
+                      class="button is-primary">
+                Save Agreement
+              </button>
+            </div>
+            <div class="control">
+              <button tabindex="6"
+                      class="button is-warning">
+                Cancel
+              </button>
+
+            </div>
           </div>
-          <div class="control">
-            <button tabindex="6"
-                    class="button is-warning">
-              Cancel
-            </button>
 
-          </div>
         </div>
-
       </div>
-
     </form>
   </section>
 
   <section id="builderAllocations"
-           class="container hide">
+           class="hide">
 
-    <section class="hero box is-info">
+    <section class="hero is-info box">
       <div class="hero-body">
         <div class="container">
           <h1 class="title">Builder Allocations</h1>
@@ -255,7 +275,7 @@
   </section>
 
   <section id="permitAllocations"
-           class="container hide">
+           class="hide">
 
     <section class="hero box is-info">
       <div class="hero-body">
@@ -325,33 +345,21 @@
       <div id="agreementPermitAllocationSelected"
            class="field">
 
-
-
-
         <div id="existingPermitAllocation"
              class="field">
 
-          <div class="field">
-            <label class="label">Added By</label>
-            <div class="control">
-              <input id="permitAllocationAddedBy"
-                     tabindex="2"
-                     class="input"
-                     type="text"
-                     readonly />
-            </div>
-          </div>
+               class="field">
 
-          <div class="field">
-            <label class="label">Added On</label>
-            <div class="control">
-              <input id="permitAllocationAddedOn"
-                     tabindex="2"
-                     class="input"
-                     type="text"
-                     readonly />
+            <div class="field">
+              <label class="label">Audit Log</label>
+              <div class="control">
+                <textarea id="permitAllocationAuditLog"
+                          class="input"
+                          type="text"
+                          readonly>
+              </textarea>
+              </div>
             </div>
-          </div>
 
         </div>
 
@@ -377,7 +385,7 @@
   </section>
 
   <section id="existingAllocations"
-           class="container show">
+           class="show">
     Existing Allocations will show here.
   </section>
 

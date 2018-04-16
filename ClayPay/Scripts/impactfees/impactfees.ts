@@ -5,9 +5,13 @@
 namespace ImpactFees
 {
 
+  export function Start()
+  {
+  }
+
   export function Menu(id: string)
   {
-    let sections = <NodeListOf<HTMLElement>>document.querySelectorAll("section.container");
+    let sections = <NodeListOf<HTMLElement>>document.querySelectorAll("body > section");
     if (sections.length > 0)
     {
       for (let i = 0; i < sections.length; i++)
