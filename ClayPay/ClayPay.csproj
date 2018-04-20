@@ -216,12 +216,15 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AppTypesController.cs" />
+    <Compile Include="Controllers\Balancing\BalancingController.cs" />
     <Compile Include="Controllers\FeeController.cs" />
     <Compile Include="Controllers\PayController.cs" />
     <Compile Include="Controllers\QueryController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Balancing\Account.cs" />
+    <Compile Include="Models\Balancing\Payment.cs" />
     <Compile Include="Models\Claypay\ActiveTransactions.cs" />
     <Compile Include="Models\Claypay\AppType.cs" />
     <Compile Include="Models\Claypay\CCData.cs" />
@@ -250,7 +253,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\Balancing\" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\app\Utilities.ts" />
