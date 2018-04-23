@@ -3,17 +3,21 @@ var ImpactFees;
     var CombinedAllocation = (function () {
         function CombinedAllocation() {
         }
-        CombinedAllocation.prototype.GetAll = function () {
-            var x = XHR.Get("./API/ImpactFees/GetCombinedAllocations");
-            return new Promise(function (resolve, reject) {
-                x.then(function (response) {
-                    var ar = JSON.parse(response.Text);
-                    resolve(ar);
-                }).catch(function () {
-                    console.log("error in Get Combined Allocation");
-                    reject(null);
-                });
-            });
+        CombinedAllocation.GetAll = function (agreementNumber, builderId, permitNumber) {
+            var qs = "";
+            if (agreementNumber.length > 0) {
+                qs = "&agreementNumber=" + agreementNumber;
+            }
+            if (builderId != -1) {
+                qs = "&builderId=" + builderId.toString();
+            }
+            if (permitNumber.length > 0) {
+                qs = "&permitNumber=" + permitNumber;
+            }
+            if (qs.length > 0) {
+                qs = "?" + qs.substr(1);
+            }
+            return ImpactFees.GetArray("./API/ImpactFees/GetAgreements", qs);
         };
         return CombinedAllocation;
     }());

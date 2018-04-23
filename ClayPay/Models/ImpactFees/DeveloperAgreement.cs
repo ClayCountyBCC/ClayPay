@@ -103,6 +103,7 @@ namespace ClayPay.Models.ImpactFees
       }
       else
       {
+        Audit_Log = Constants.Create_Audit_Log(Username, "Record Created");
         SaveData = true;
       }
       if (SaveData)
@@ -142,7 +143,7 @@ namespace ClayPay.Models.ImpactFees
         )
 
         SELECT
-          A.ProjName Developer_Name,
+          LTRIM(RTRIM(UPPER(A.ProjName))) Developer_Name,
           LTRIM(RTRIM(A.ApplNum)) Agreement_Number,
           ISNULL(Agreement_Amount, 0) Agreement_Amount,
           ISNULL(C.Amount_Currently_Allocated, 0) Amount_Currently_Allocated,
@@ -155,7 +156,7 @@ namespace ClayPay.Models.ImpactFees
 ";
       if (Agreement_Number.Length > 0)
       {
-        query += "AND D.Agreement_Number = @Agreement_Number";
+        query += "AND A.ApplNum = @Agreement_Number";
         dp.Add("@Agreement_Number", Agreement_Number);
       }
       return Constants.Get_Data<DeveloperAgreement>(query, dp);

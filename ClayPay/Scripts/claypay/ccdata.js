@@ -91,4 +91,4 @@ var clayPay;
     }());
     clayPay.CCData = CCData;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=CCData.js.map
+//# sourceMappingURL=ccdata.js.map

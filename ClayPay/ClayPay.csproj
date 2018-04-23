@@ -18,8 +18,8 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
-    <IISExpressAnonymousAuthentication />
-    <IISExpressWindowsAuthentication />
+    <IISExpressAnonymousAuthentication>disabled</IISExpressAnonymousAuthentication>
+    <IISExpressWindowsAuthentication>enabled</IISExpressWindowsAuthentication>
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
@@ -269,7 +269,7 @@
     <TypeScriptCompile Include="Scripts\impactfees\BuilderAllocation.ts" />
     <TypeScriptCompile Include="Scripts\impactfees\CombinedAllocation.ts" />
     <TypeScriptCompile Include="Scripts\impactfees\DeveloperAgreement.ts" />
-    <TypeScriptCompile Include="Scripts\impactfees\impactfees.ts" />
+    <TypeScriptCompile Include="Scripts\impactfees\ImpactFees.ts" />
     <TypeScriptCompile Include="Scripts\impactfees\PermitAllocation.ts" />
   </ItemGroup>
   <ItemGroup>

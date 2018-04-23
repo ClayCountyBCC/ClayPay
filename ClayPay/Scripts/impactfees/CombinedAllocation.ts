@@ -6,55 +6,71 @@ namespace ImpactFees
   interface ICombinedAllocation
   {
     Developer_Name: string;
-    Agreement_Number: number;
+    Agreement_Number: string;
     Agreement_Amount: number;
+    Agreement_Amount_Formatted: string;
     Developer_Amount_Currently_Allocated: number;
+    Developer_Amount_Currently_Allocated_Formatted: string;
+    Developer_Audit_Log: string;
 
     Builder_Id: number;
     Builder_Name: string;
-    Builder_Amount_Allocated: number;
+    Builder_Allocation_Amount: number;
+    Builder_Allocation_Amount_Formatted: string;
     Builder_Amount_Currently_Allocated: number;
+    Builder_Amount_Currently_Allocated_Formatted: string;
+    Builder_Audit_Log: string;
 
     Permit_Number: string;
     Permit_Amount_Allocated: number;
-
-    GetAll(): Promise<Array<CombinedAllocation>>;
-
+    Permit_Audit_Log: string;
   }
 
   export class CombinedAllocation implements ICombinedAllocation
   {
     public Developer_Name: string;
-    public Agreement_Number: number;
+    public Agreement_Number: string;
     public Agreement_Amount: number;
+    public Agreement_Amount_Formatted: string;
     public Developer_Amount_Currently_Allocated: number;
+    public Developer_Amount_Currently_Allocated_Formatted: string;
+    public Developer_Audit_Log: string;
     public Builder_Id: number;
     public Builder_Name: string;
-    public Builder_Amount_Allocated: number;
+    public Builder_Allocation_Amount: number;
+    public Builder_Allocation_Amount_Formatted: string;
     public Builder_Amount_Currently_Allocated: number;
+    public Builder_Amount_Currently_Allocated_Formatted: string;
+    public Builder_Audit_Log: string;
     public Permit_Number: string;
     public Permit_Amount_Allocated: number;
+    public Permit_Audit_Log: string;
 
     constructor()
     {
 
     }
 
-    public GetAll(): Promise<Array<CombinedAllocation>>
+    public static GetAll(agreementNumber: string, builderId: number, permitNumber: string): Promise<Array<CombinedAllocation>>
     {
-      var x = XHR.Get("./API/ImpactFees/GetCombinedAllocations");
-      return new Promise<Array<CombinedAllocation>>(function (resolve, reject)
+      let qs: string = "";
+      if (agreementNumber.length > 0)
       {
-        x.then(function (response)
-        {
-          let ar: Array<CombinedAllocation> = JSON.parse(response.Text);
-          resolve(ar);
-        }).catch(function ()
-        {
-          console.log("error in Get Combined Allocation");
-          reject(null);
-        });
-      });
+        qs = "&agreementNumber=" + agreementNumber;
+      }
+      if (builderId != -1)
+      {
+        qs = "&builderId=" + builderId.toString();
+      }
+      if (permitNumber.length > 0)
+      {
+        qs = "&permitNumber=" + permitNumber;
+      }
+      if (qs.length > 0)
+      {
+        qs = "?" + qs.substr(1); // no matter which arguments we used, we'll always remove the leading & and add a ?
+      }
+      return GetArray<CombinedAllocation>("./API/ImpactFees/GetAgreements", qs);
     }
 
   }

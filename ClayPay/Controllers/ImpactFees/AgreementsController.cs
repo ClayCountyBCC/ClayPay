@@ -13,17 +13,10 @@ namespace ClayPay.Controllers.ImpactFees
   {
     // GET: api/Agreements
     [HttpGet]
-    [Route("GetDeveloperAgreements")]
-    public IHttpActionResult GetDeveloperAgreements()
+    [Route("GetAgreements")]
+    public IHttpActionResult GetAgreements(string agreementNumber = "", int builderId = -1, string permitNumber = "")
     {
-      return Ok(DeveloperAgreement.GetList());
-    }
-
-    [HttpGet]
-    [Route("GetCombinedAllocations")]
-    public IHttpActionResult GetCombinedAllocations()
-    {
-      return Ok(CombinedAllocation.Get());
+      return Ok(CombinedAllocation.Get(agreementNumber, builderId, permitNumber));
     }
 
     [HttpPost]
@@ -39,7 +32,34 @@ namespace ClayPay.Controllers.ImpactFees
       else
       {
         var Username = User.Identity.Name.Replace(@"CLAYBCC\", "").ToUpper();
-        return Ok(da.Update(Username));
+        if (!da.Update(Username))
+        {
+          errors.Add("An error occurred while saving this agreement, please try again.  If the error persists, please contact MIS.");
+          return Ok(errors);
+        }
+        return Ok();
+      }
+    }
+
+    [HttpPost]
+    [Route("SaveBuilderAllocation")]
+    public IHttpActionResult SaveBuilderAllocation(BuilderAllocation ba)
+    {
+
+      var errors = ba.Validate();
+      if (errors.Count() > 0)
+      {
+        return Ok(errors);
+      }
+      else
+      {
+        var Username = User.Identity.Name.Replace(@"CLAYBCC\", "").ToUpper();
+        if (!ba.Update(Username))
+        {
+          errors.Add("An error occurred while saving this builder's allocation, please try again.  If the error persists, please contact MIS.");
+          return Ok(errors);
+        }
+        return Ok();
       }
     }
 

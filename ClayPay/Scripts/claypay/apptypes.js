@@ -9,4 +9,4 @@ var clayPay;
     }());
     clayPay.AppType = AppType;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=AppTypes.js.map
+//# sourceMappingURL=apptypes.js.map

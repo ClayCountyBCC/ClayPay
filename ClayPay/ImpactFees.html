@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html>
+<html class="has-background-light">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8" />
@@ -9,8 +9,8 @@
   <link href="Content/Main.min.css" rel="stylesheet" />
   <link href="Content/Utliities.css" rel="stylesheet" />
 </head>
-<body class="">
-  <nav class="container navbar"
+<body>
+  <nav class="container navbar has-background-light"
        role="navigation"
        aria-label="main navigation">
     <div class="navbar-brand">
@@ -52,7 +52,7 @@
   <section id="developerAgreement"
            class="hide">
 
-    <section class="hero is-info box">
+    <section class="hero is-info is-bold hero-buffer">
       <div class="hero-body">
         <div class="container">
           <h1 class="title">Developer Agreements</h1>
@@ -69,20 +69,19 @@
           <label class="label">Developer Agreement</label>
           <div class="control">
             <div class="select">
-              <select tabindex="1"
+              <select onchange="ImpactFees.DeveloperAgreement.Load(this);"
+                      tabindex="1"
                       id="developerAgreementAdd">
                 <option>Select Agreement</option>
-                <option>Agreement Number 1</option>
-                <option>Agreement Number 2</option>
               </select>
             </div>
-            <p class="help">These agreements are added as IMS Application type Impact Credit Agreement.</p>
+            <p class="help">These agreements are added as IMS Application type Transport Impact.</p>
             <p class="help">Selecting an agreement will load the data for that agreement.</p>
           </div>
         </div>
 
         <div id="developerAgreementSelected"
-             class="field">
+             class="field hide">
           <div class="columns">
 
             <div class="column field">
@@ -101,52 +100,57 @@
               </div>
             </div>
 
-            <div class="column field">
-              <label class="label">Currently Allocated</label>
+            <div id="existingAgreementAmountAllocated"
+                 class="column field">
+              <label class="label">Currently Allocated to Builders</label>
               <div class="control">
                 <input id="developerCurrentlyAllocated"
                        tabindex="3"
                        class="input"
-                       type="number"
-                       readonly
-                       placeholder="0" />
-                <p style="display: none;"
-                   id="developerAgreementAmountError"
-                   class="help is-danger">
-                  The amount entered is invalid.  Please enter numbers only.
-                </p>
+                       type="text"
+                       readonly />
               </div>
             </div>
 
           </div>
+
           <div id="existingDeveloperAgreement"
                class="field">
-
             <div class="field">
               <label class="label">Audit Log</label>
               <div class="control">
                 <textarea id="developerAgreementAuditLog"
-                          class="input"
+                          class="textarea"
                           type="text"
+                          rows="4"
                           readonly>
-              </textarea>
+                </textarea>
+              </div>
+            </div>
+          </div>
+          <div id="developerAgreementError"
+               class="field hide">
+            <div class="field">
+              <label class="label">Errors</label>
+              <div class="control">
+                <textarea id="developerAgreementErrorList"
+                          class="textarea"
+                          type="text"
+                          rows="4"
+                          readonly>
+                </textarea>
               </div>
             </div>
           </div>
 
           <div class="field is-grouped">
             <div class="control">
-              <button tabindex="5"
+              <button onclick="ImpactFees.DeveloperAgreement.SaveAgreement(); return false;"
+                      type="button"
+                      tabindex="5"
                       class="button is-primary">
                 Save Agreement
               </button>
-            </div>
-            <div class="control">
-              <button tabindex="6"
-                      class="button is-warning">
-                Cancel
-              </button>
-
             </div>
           </div>
 
@@ -158,7 +162,7 @@
   <section id="builderAllocations"
            class="hide">
 
-    <section class="hero is-info box">
+    <section class="hero is-info is-bold hero-buffer">
       <div class="hero-body">
         <div class="container">
           <h1 class="title">Builder Allocations</h1>
@@ -168,116 +172,166 @@
         </div>
       </div>
     </section>
+    
+    <div class="container">
 
-    <form id="formBuilderAllocations">
+      <form id="formBuilderAllocations">
 
-      <div class="field">
-        <label class="label">Developer Agreement</label>
-        <div class="control">
-          <div class="select">
-            <select tabindex="1"
-                    id="builderAllocationAgreementAdd">
-              <option>Select Agreement</option>
-              <option>Agreement Number 1</option>
-              <option>Agreement Number 2</option>
-            </select>
-          </div>
-          <p class="help">Selecting a Developer Agreement will load the data for that specific agreement.</p>
-        </div>
-      </div>
-
-      <div id="agreementBuilderAllocationSelected"
-           class="field">
-
-        <div class="field">
-          <label class="label">Existing Builder Allocations</label>
-          <div class="control is-grouped">
-            <div class="select">
-              <select tabindex="1"
-                      id="existingBuilderNames">
-                <option>Select Builder or Add New</option>
-                <option>ABC Building</option>
-                <option>XYZ Building</option>
-              </select>
+        <div class="columns">
+          <div class="field column">
+            <label class="label">Developer Agreement</label>
+            <div class="control">
+              <div class="select">
+                <select onchange="ImpactFees.BuilderAllocation.LoadBuilders(this);"
+                        tabindex="1"
+                        id="builderAllocationAgreementAdd">
+                  <option>Select Agreement</option>
+                </select>
+              </div>
+              <p class="help">Selecting a Developer Agreement will load the data for that specific agreement.</p>
             </div>
-            <button class="button is-primary">
-              Add New Builder
-            </button>
           </div>
+
+          <div id="builderDeveloperSelectedAmount"
+               class="column field hide">
+            <label class="label">Agreement Amount</label>
+            <div class="control">
+              <input id="buildersDeveloperAgreementAmount"                     
+                     class="input"
+                     type="text"
+                     readonly />
+            </div>
+          </div>
+
+          <div id="builderDeveloperSelectedCurrentlyAllocated"
+               class="column field hide">
+            <label class="label">Currently Allocated to Builders</label>
+            <div class="control">
+              <input id="buildersDeveloperCurrentlyAllocated"
+                     class="input"
+                     type="text"
+                     readonly />
+            </div>
+          </div>
+
         </div>
 
-        <div class="field">
-          <label class="label">New Builder Name</label>
-          <div class="control">
-            <input id="builderAllocationName"
-                   tabindex="2"
-                   class="input"
-                   type="text"
-                   placeholder="XYZ Builders" />
-            <p style="display: none;"
-               id="builderAllocationNameError"
-               class="help is-danger">
-              The Builder name is invalid, it should be atleast 3 characters long.
-            </p>
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="label">Amount Allocated to Builder</label>
-          <div class="control">
-            <input id="builderAllocationAmount"
-                   tabindex="3"
-                   class="input"
-                   type="number"
-                   placeholder="0" />
-            <p style="display: none;"
-               id="builderAllocationAmountError"
-               class="help is-danger">
-              The amount entered is invalid.  Please enter numbers only.
-            </p>
-          </div>
-        </div>
-
-        <div id="existingBuilderAllocation"
+        <div id="builderAllocationAgreementSelected"
              class="field hide">
+          <div class="columns">
+            <div class="field column">
+              <label class="label">Existing Builders</label>
+              <div class="control is-grouped">
+                <div class="select">
+                  <select onchange="ImpactFees.BuilderAllocation.LoadSpecificBuilder(this);"
+                          tabindex="2"
+                          id="existingBuilders"></select>
+                </div>
+                <button onclick="ImpactFees.BuilderAllocation.AddNewBuilder(); return false;"
+                        tabindex="3"
+                        id="addNewBuilder"
+                        type="button"
+                        class="button is-primary">
+                  Add New Builder
+                </button>
+              </div>
+            </div>
+            <div class="field column">
+              <label class="label">Amount Allocated to Permits</label>
+              <div class="control">
+                <input id="buildersAmountAllocatedToPermits"
+                       class="input"
+                       type="text"
+                       value="$0.00"
+                       readonly />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field hide"
+             id="builderSelected">
+          <div class="field">
+            <label class="label">Builder Name</label>
+            <div class="control">
+              <input id="builderAllocationName"
+                     tabindex="4"
+                     class="input"
+                     type="text"
+                     placeholder="XYZ Builders" />
+              <p id="builderAllocationNameError"
+                 class="help is-danger hide">
+                The Builder name is invalid, it should be atleast 3 characters long.
+              </p>
+            </div>
+          </div>
 
           <div class="field">
-            <label class="label">Audit Log</label>
+            <label class="label">Amount Allocated to Builder</label>
             <div class="control">
-              <textarea id="builderAllocationAuditLog"
-                        class="input"
-                        type="text"
-                        readonly>
-              </textarea>
+              <input id="builderAllocationAmount"
+                     tabindex="5"
+                     class="input"
+                     type="number"
+                     placeholder="0" />
+              <p style="display: none;"
+                 id="builderAllocationAmountError"
+                 class="help is-danger">
+                The amount entered is invalid.  Please enter numbers only.
+              </p>
             </div>
           </div>
+
+          <div id="existingBuilderAllocation"
+               class="field hide">
+
+            <div class="field">
+              <label class="label">Audit Log</label>
+              <div class="control">
+                <textarea id="builderAllocationAuditLog"
+                          class="textarea"
+                          type="text"
+                          readonly>
+              </textarea>
+              </div>
+            </div>
+          </div>
+
+          <div id="builderAllocationError"
+               class="field hide">
+            <div class="field">
+              <label class="label">Errors</label>
+              <div class="control">
+                <textarea id="builderAllocationErrorList"
+                          class="textarea"
+                          type="text"
+                          rows="4"
+                          readonly>
+                </textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-grouped">
+            <div class="control">
+              <button onclick="ImpactFees.BuilderAllocation.SaveAllocation(); return false;"
+                      tabindex="6"
+                      type="button"
+                      class="button is-primary">
+                Save Builder Allocation
+              </button>
+            </div>
+          </div>
+
         </div>
 
-        <div class="field is-grouped">
-          <div class="control">
-            <button tabindex="5"
-                    class="button is-primary">
-              Save Builder Allocation
-            </button>
-          </div>
-          <div class="control">
-            <button tabindex="6"
-                    class="button is-warning">
-              Cancel
-            </button>
-
-          </div>
-        </div>
-
-      </div>
-
-    </form>
+      </form>
+    </div>
   </section>
 
   <section id="permitAllocations"
            class="hide">
 
-    <section class="hero box is-info">
+    <section class="hero is-primary is-bold hero-buffer">
       <div class="hero-body">
         <div class="container">
           <h1 class="title">Permit Allocations</h1>
@@ -288,119 +342,113 @@
       </div>
     </section>
 
-    <form id="formPermitAllocations">
+    <div class="container">
 
-      <div class="field">
-        <label class="label">Permit Number</label>
-      </div>
-      <div class="field is-grouped">
-        <div class="control">
-          <input id="permitNumber"
-                 class="input"
-                 type="number"
-                 maxlength="8"
-                 placeholder="11800000" />
+
+      <form id="formPermitAllocations">
+
+        <div class="field">
+          <label class="label">Permit Number</label>
         </div>
-        <div class="control">
-          <button class="button is-primary">
-            Search
-          </button>
-        </div>
-      </div>
-
-      <div>
-        Show the selected permit's applicable impact fees here
-      </div>
-
-
-      <div class="field">
-        <label class="label">Developer Agreement</label>
-        <div class="control">
-          <div class="select">
-            <select tabindex="1"
-                    id="permitAllocationAgreementAdd">
-              <option>Select Agreement</option>
-              <option>Agreement Number 1</option>
-              <option>Agreement Number 2</option>
-            </select>
+        <div class="field is-grouped">
+          <div class="control">
+            <input id="permitNumber"
+                   class="input"
+                   type="number"
+                   maxlength="8"
+                   placeholder="11800000" />
           </div>
-          <p class="help">Selecting a Developer Agreement will load the data for that specific agreement.</p>
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label">Builder</label>
-        <div class="control">
-          <div class="select">
-            <select tabindex="2"
-                    id="existingBuilderNames">
-              <option>Select Builder or Add New</option>
-              <option>ABC Building</option>
-              <option>XYZ Building</option>
-            </select>
+          <div class="control">
+            <button class="button is-primary">
+              Search
+            </button>
           </div>
         </div>
-      </div>
 
-      <div id="agreementPermitAllocationSelected"
-           class="field">
+        <div>
+          Show the selected permit's applicable impact fees here
+        </div>
 
-        <div id="existingPermitAllocation"
+
+        <div class="field">
+          <label class="label">Developer Agreement</label>
+          <div class="control">
+            <div class="select">
+              <select tabindex="1"
+                      id="permitAllocationAgreementAdd">
+                <option>Select Agreement</option>
+              </select>
+            </div>
+            <p class="help">Selecting a Developer Agreement will load the data for that specific agreement.</p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Builder</label>
+          <div class="control">
+            <div class="select">
+              <select tabindex="2"
+                      id="existingBuilderNames">
+                <option>Select Builder or Add New</option>
+                <option>ABC Building</option>
+                <option>XYZ Building</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="agreementPermitAllocationSelected"
              class="field">
 
+          <div id="existingPermitAllocation"
                class="field">
 
             <div class="field">
               <label class="label">Audit Log</label>
               <div class="control">
                 <textarea id="permitAllocationAuditLog"
-                          class="input"
+                          class="textarea"
                           type="text"
                           readonly>
               </textarea>
               </div>
             </div>
 
+          </div>
+
+          <div class="field is-grouped">
+            <div class="control">
+              <button type="button"
+                      tabindex="5"
+                      class="button is-primary">
+                Save Permit Allocation
+              </button>
+            </div>
+          </div>
+
         </div>
 
-        <div class="field is-grouped">
-          <div class="control">
-            <button tabindex="5"
-                    class="button is-primary">
-              Save Permit Allocation
-            </button>
-          </div>
-          <div class="control">
-            <button tabindex="6"
-                    class="button is-warning">
-              Cancel
-            </button>
-
-          </div>
-        </div>
-
-      </div>
-
-    </form>
+      </form>
+    </div>
   </section>
 
   <section id="existingAllocations"
            class="show">
     Existing Allocations will show here.
   </section>
-
+  <script src="Scripts/app/es6-promise.min.js"></script>
+  <script src="Scripts/app/XHR.js"></script>
   <script src="Scripts/app/Utilities.js"></script>
-  <script src="Scripts/impactfees/impactfees.js"></script>
+  <script src="Scripts/impactfees/PermitAllocation.js"></script>
+  <script src="Scripts/impactfees/DeveloperAgreement.js"></script>
+  <script src="Scripts/impactfees/BuilderAllocation.js"></script>
+  <script src="Scripts/impactfees/CombinedAllocation.js"></script>
+  <script src="Scripts/impactfees/ImpactFees.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function (event)
     {
-      //impactFees.start();
+      ImpactFees.Start();
     });
-
-      //function preventSubmit(e)
-      //{
-      //  e.preventDefault();
-      //};
 
   </script>
 

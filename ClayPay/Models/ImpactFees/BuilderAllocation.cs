@@ -10,7 +10,7 @@ namespace ClayPay.Models.ImpactFees
   {
     public string Agreement_Number { get; set; }
     public string Builder_Name { get; set; }
-    public int Id { get; set; }
+    public int? Id { get; set; } = null;
     public decimal Allocation_Amount { get; set; }
     public string Allocation_Amount_Formatted
     {
@@ -54,36 +54,16 @@ namespace ClayPay.Models.ImpactFees
 
     private bool Data_Changed(BuilderAllocation current)
     {
-      if (Amount_Allocated_Formatted != current.Amount_Allocated_Formatted) return true;
+      if (Allocation_Amount_Formatted != current.Allocation_Amount_Formatted) return true;
 
       if (Builder_Name != current.Builder_Name) return true;
 
       return false;
     }
 
-    public static BuilderAllocation Get(int Builder_Id)
+    public static BuilderAllocation Get(string Agreement_Number, int Builder_Id)
     {
-      var dp = new DynamicParameters();
-      dp.Add("@Builder_Id", Builder_Id);
-      string query = @"
-        WITH CurrentAllotment AS (
-          SELECT
-            Builder_Id,
-            SUM(Amount_Allocated) Amount_Currently_Allocated    
-          FROM ImpactFees_Permit_Allocations
-          GROUP BY Builder_Id
-        )
-        SELECT
-          Agreement_Number,
-          Builder_Name,
-          B.Id,
-          Amount_Allocated,
-          C.Amount_Currently_Allocated,
-          Audit_Log
-        FROM ImpactFees_Builder_Allocations B
-        INNER JOIN CurrentAllotment C ON B.Id = C.Builder_Id
-        WHERE Id=@Builder_Id;";
-      var data = Constants.Get_Data<BuilderAllocation>(query, dp);
+      var data = GetList(Agreement_Number, Builder_Id);
       if (data.Count() == 1)
       {
         return data.First();
@@ -96,9 +76,32 @@ namespace ClayPay.Models.ImpactFees
 
     public List<string> Validate()
     {
+
       Agreement_Number = Agreement_Number.Trim();
       Builder_Name = Builder_Name.Trim().ToUpper();
       List<string> errors = new List<string>();
+      if (Allocation_Amount > 0)
+      {
+        var currentAgreement = CombinedAllocation.Get(Agreement_Number).First();
+        if (Id.HasValue)
+        {
+          var currentAllocation = Get(Agreement_Number, Id.Value);
+          decimal p = currentAgreement.Developer_Amount_Currently_Allocated - currentAllocation.Allocation_Amount + Allocation_Amount;
+          if (currentAgreement.Agreement_Amount < p)
+          {
+            errors.Add("This allocation is for an amount greater than the amount remaining for this Developer.  Please check your numbers and try again.");
+          }
+        }
+        else
+        {
+          // this allocation has not yet been saved
+          decimal p = currentAgreement.Developer_Amount_Currently_Allocated + Allocation_Amount;
+          if (currentAgreement.Agreement_Amount < p )
+          {
+            errors.Add("This allocation is for an amount greater than the amount remaining for this Developer.  Please check your numbers and try again.");
+          }
+        }
+      }
       if (Agreement_Number.Length == 0)
       {
         errors.Add("No Agreement Number was specified.");
@@ -120,25 +123,29 @@ namespace ClayPay.Models.ImpactFees
 
     public bool Save(string Username)
     {
-      Audit_Log = DateTime.Now.ToString("g1") + " by " + Username + ": Record Created.";
+      Audit_Log = Constants.Create_Audit_Log(Username, "Record Created");
       string query = @"
         INSERT INTO ImpactFees_Builder_Allocations
           (Agreement_Number, Builder_Name, Amount_Allocated, Audit_Log)
         VALUES 
-          (@Agreement_Number, @Builder_Name, @Amount_Allocated, @Audit_Log)";
+          (@Agreement_Number, @Builder_Name, @Allocation_Amount, @Audit_Log)";
       return Constants.Save_Data<BuilderAllocation>(query, this);
     }
 
     public bool Update(string Username)
     {
-      var current = BuilderAllocation.Get(Id);
+      if (!Id.HasValue)
+      {
+        return Save(Username);
+      }
+      var current = BuilderAllocation.Get(Agreement_Number, Id.Value);
       if (current == null) return false;
       if (Data_Changed(current))
       {
         string s = "";
-        if (Amount_Allocated_Formatted != current.Amount_Allocated_Formatted)
+        if (Allocation_Amount_Formatted != current.Allocation_Amount_Formatted)
         {
-          s = Constants.Create_Audit_Log(Username, "Amount Allocated", current.Amount_Allocated_Formatted, Amount_Allocated_Formatted);
+          s = Constants.Create_Audit_Log(Username, "Amount Allocated", current.Allocation_Amount_Formatted, Allocation_Amount_Formatted);
           Audit_Log = s + '\n' + current.Audit_Log;
         }
 
@@ -151,7 +158,7 @@ namespace ClayPay.Models.ImpactFees
         string query = @"
         UPDATE ImpactFees_Builder_Allocations 
           SET 
-            Amount_Allocated=@Amount_Allocated,
+            Amount_Allocated=@Allocation_Amount,
             Builder_Name=@Builder_Name,
             Audit_Log=@Audit_Log
           WHERE 
@@ -162,6 +169,38 @@ namespace ClayPay.Models.ImpactFees
       {
         return true;
       }
+    }
+
+    public static List<BuilderAllocation> GetList(string Agreement_Number, int Builder_Id = -1)
+    {
+      var dp = new DynamicParameters();
+      dp.Add("@Agreement_Number", Agreement_Number);
+      string query = @"
+        WITH CurrentAllotment AS (
+          SELECT
+            Builder_Id,
+            SUM(Amount_Allocated) Amount_Currently_Allocated    
+          FROM ImpactFees_Permit_Allocations
+          GROUP BY Builder_Id
+        )
+        SELECT
+          Agreement_Number,
+          Builder_Name,
+          B.Id,
+          Amount_Allocated Allocation_Amount,
+          C.Amount_Currently_Allocated,
+          Audit_Log
+        FROM ImpactFees_Builder_Allocations B
+        LEFT OUTER JOIN CurrentAllotment C ON B.Id = C.Builder_Id       
+        WHERE B.Agreement_Number = @Agreement_Number
+";
+
+      if (Builder_Id > -1)
+      {
+        query += "AND Id=@Builder_Id;";
+        dp.Add("@Builder_Id", Builder_Id);
+      }
+      return Constants.Get_Data<BuilderAllocation>(query, dp);
     }
 
   }
