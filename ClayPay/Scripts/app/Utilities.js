@@ -23,6 +23,9 @@ var Utilities;
     }
     Utilities.Show_Flex = Show_Flex;
     function Error_Show(e) {
+        if (typeof e == "string") {
+            e = document.getElementById(e);
+        }
         Show(e);
         window.setTimeout(function (j) {
             Hide(e);

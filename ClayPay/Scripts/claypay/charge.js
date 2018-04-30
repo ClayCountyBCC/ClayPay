@@ -10,4 +10,4 @@ var clayPay;
     }());
     clayPay.Charge = Charge;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=charge.js.map
+//# sourceMappingURL=Charge.js.map

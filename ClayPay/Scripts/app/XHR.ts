@@ -129,4 +129,62 @@ module XHR
     return SendCommand('DELETE', url, headers, data);
   }
 
+  export function GetArray<T>(url: string, queryString: string = ""): Promise<Array<T>>
+  {
+    var x = XHR.Get(url + queryString);
+    return new Promise<Array<T>>(function (resolve, reject)
+    {
+      x.then(function (response)
+      {
+        let ar: Array<T> = JSON.parse(response.Text);
+        resolve(ar);
+      }).catch(function ()
+      {
+        console.log("error in Get " + url);
+        reject(null);
+      });
+    });
+  }
+
+  export function GetObject<T>(url: string, queryString: string = ""): Promise<T>
+  {
+    var x = XHR.Get(url + queryString);
+    return new Promise<T>(function (resolve, reject)
+    {
+      x.then(function (response)
+      {
+        let ar: T = JSON.parse(response.Text);
+        resolve(ar);
+      }).catch(function ()
+      {
+        console.log("error in Get " + url);
+        reject(null);
+      });
+    });
+  }
+
+  export function SaveObject<T>(url: string, object: T): Promise<Array<string>>
+  {
+    var x = XHR.Post(url, JSON.stringify(object));
+    return new Promise<Array<string>>(function (resolve, reject)
+    {
+      x.then(function (response)
+      {
+        if (response.Text.length === 0)
+        {
+          resolve([]);
+        }
+        else
+        {
+          let ar: Array<string> = JSON.parse(response.Text);
+          resolve(ar);
+        }
+      }).catch(function (e)
+      {
+        console.log('save object error ' + url + ' ' + e);
+        reject(null);
+      });
+    });
+  }
+
 }

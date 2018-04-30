@@ -28,8 +28,14 @@ namespace Utilities
     e.classList.remove("hide");
   }
 
-  export function Error_Show(e: HTMLElement)
+  export function Error_Show(e: string):void
+  export function Error_Show(e: HTMLElement): void
+  export function Error_Show(e: any):void
   {
+    if (typeof e == "string")
+    {
+      e = document.getElementById(e);
+    }
     Show(e);
     window.setTimeout(function (j)
     {

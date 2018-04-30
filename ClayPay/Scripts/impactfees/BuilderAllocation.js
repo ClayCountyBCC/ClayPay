@@ -26,6 +26,7 @@ var ImpactFees;
             ImpactFees.CombinedAllocation.GetAll(agreementNumber, -1, "").then(function (builders) {
                 var selectBuilder = document.getElementById("existingBuilders");
                 Utilities.Clear_Element(selectBuilder);
+                builders = builders.filter(function (b) { return b.Builder_Name.trim().length > 0; });
                 if (builders.length > 0) {
                     Utilities.Show(container);
                     Utilities.Show(agreementSelectedDeveloperAmount);
@@ -38,7 +39,7 @@ var ImpactFees;
                     var distinctBuilder = [];
                     for (var _i = 0, builders_1 = builders; _i < builders_1.length; _i++) {
                         var b = builders_1[_i];
-                        if (distinctBuilder.indexOf(b.Builder_Id) === -1) {
+                        if (distinctBuilder.indexOf(b.Builder_Id) === -1 && b.Builder_Name.trim() !== "") {
                             distinctBuilder.push(b.Builder_Id);
                             selectBuilder.add(Utilities.Create_Option(b.Builder_Id.toString(), b.Builder_Name));
                         }
@@ -61,14 +62,9 @@ var ImpactFees;
             parent.classList.add("is-loading");
             var builderId = parseInt(e.options[e.selectedIndex].value);
             ImpactFees.CombinedAllocation.GetAll("", builderId, "").then(function (builders) {
-                console.log("builders", builders);
                 if (builders.length > 0) {
                     var builder = builders[0];
-                    console.log('builder', builder);
                     BuilderAllocation.LoadBuilder(builder.Builder_Name, builder.Builder_Allocation_Amount.toString(), builder.Builder_Audit_Log, builder.Builder_Amount_Currently_Allocated_Formatted);
-                }
-                else {
-                    console.log('wrong length');
                 }
                 parent.classList.remove("is-loading");
             }).catch(function (e) {
@@ -135,7 +131,7 @@ var ImpactFees;
             b.Builder_Name = BuilderName;
             b.Allocation_Amount = Amount;
             b.Id = builderId;
-            ImpactFees.SaveObject("./API/ImpactFees/SaveBuilderAllocation", b).then(function (a) {
+            XHR.SaveObject("./API/ImpactFees/SaveBuilderAllocation", b).then(function (a) {
                 console.log('response', a);
                 if (a.length > 0) {
                     Utilities.Show(builderAllocationErrorContainer);

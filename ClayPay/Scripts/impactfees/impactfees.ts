@@ -49,7 +49,7 @@ namespace ImpactFees
     let added = [];
     let developer = <HTMLSelectElement>document.getElementById("developerAgreementAdd");
     let builder = <HTMLSelectElement>document.getElementById("builderAllocationAgreementAdd");
-    let permit = <HTMLSelectElement>document.getElementById("permitAllocationAgreementAdd");
+    let permit = <HTMLSelectElement>document.getElementById("permitSelectAgreement");
     for (let a of agreements)
     {
       if (added.indexOf(a.Agreement_Number) === -1)
@@ -60,54 +60,17 @@ namespace ImpactFees
         if (a.Agreement_Amount > 0)
         { // we don't need to make them selectable if there is no money allocated to this developer.
           builder.add(Utilities.Create_Option(a.Agreement_Number, label));
-          permit.add(Utilities.Create_Option(a.Agreement_Number, label));
+          if (a.Builder_Allocation_Amount > 0) // same for the permit and the builder.
+          {
+            permit.add(Utilities.Create_Option(a.Agreement_Number, label));
+          }
         }
-
       }
 
     }
   }
 
-  export function GetArray<T>(url: string, queryString: string = ""): Promise<Array<T>>
-  {
-    var x = XHR.Get(url + queryString);
-    return new Promise<Array<T>>(function (resolve, reject)
-    {
-      x.then(function (response)
-      {
-        let ar: Array<T> = JSON.parse(response.Text);
-        resolve(ar);
-      }).catch(function ()
-      {
-        console.log("error in Get " + url);
-        reject(null);
-      });
-    });
-  }
 
-  export function SaveObject<T>(url: string, object: T):Promise<Array<string>>
-  {
-    var x = XHR.Post(url, JSON.stringify(object));
-    return new Promise<Array<string>>(function (resolve, reject)
-    {
-      x.then(function (response)
-      {
-        if (response.Text.length === 0)
-        {
-          resolve([]);
-        }
-        else
-        {
-          let ar: Array<string> = JSON.parse(response.Text);
-          resolve(ar);
-        }
-      }).catch(function (e)
-      {
-        console.log('save object error ' + url + ' ' + e);
-        reject(null);
-      });
-    });
-  }
 
 
 }

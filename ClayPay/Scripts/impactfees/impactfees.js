@@ -32,7 +32,7 @@ var ImpactFees;
         var added = [];
         var developer = document.getElementById("developerAgreementAdd");
         var builder = document.getElementById("builderAllocationAgreementAdd");
-        var permit = document.getElementById("permitAllocationAgreementAdd");
+        var permit = document.getElementById("permitSelectAgreement");
         for (var _i = 0, agreements_1 = agreements; _i < agreements_1.length; _i++) {
             var a = agreements_1[_i];
             if (added.indexOf(a.Agreement_Number) === -1) {
@@ -41,42 +41,12 @@ var ImpactFees;
                 developer.add(Utilities.Create_Option(a.Agreement_Number, label));
                 if (a.Agreement_Amount > 0) {
                     builder.add(Utilities.Create_Option(a.Agreement_Number, label));
-                    permit.add(Utilities.Create_Option(a.Agreement_Number, label));
+                    if (a.Builder_Allocation_Amount > 0) {
+                        permit.add(Utilities.Create_Option(a.Agreement_Number, label));
+                    }
                 }
             }
         }
     }
-    function GetArray(url, queryString) {
-        if (queryString === void 0) { queryString = ""; }
-        var x = XHR.Get(url + queryString);
-        return new Promise(function (resolve, reject) {
-            x.then(function (response) {
-                var ar = JSON.parse(response.Text);
-                resolve(ar);
-            }).catch(function () {
-                console.log("error in Get " + url);
-                reject(null);
-            });
-        });
-    }
-    ImpactFees.GetArray = GetArray;
-    function SaveObject(url, object) {
-        var x = XHR.Post(url, JSON.stringify(object));
-        return new Promise(function (resolve, reject) {
-            x.then(function (response) {
-                if (response.Text.length === 0) {
-                    resolve([]);
-                }
-                else {
-                    var ar = JSON.parse(response.Text);
-                    resolve(ar);
-                }
-            }).catch(function (e) {
-                console.log('save object error ' + url + ' ' + e);
-                reject(null);
-            });
-        });
-    }
-    ImpactFees.SaveObject = SaveObject;
 })(ImpactFees || (ImpactFees = {}));
-//# sourceMappingURL=ImpactFees.js.map
+//# sourceMappingURL=impactfees.js.map

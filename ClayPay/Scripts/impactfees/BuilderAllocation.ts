@@ -53,6 +53,7 @@ namespace ImpactFees
           // let's load the dropdown
           let selectBuilder = <HTMLSelectElement>document.getElementById("existingBuilders");
           Utilities.Clear_Element(selectBuilder);
+          builders = builders.filter(function (b) { return b.Builder_Name.trim().length > 0;})
           if (builders.length > 0)
           {
             Utilities.Show(container);
@@ -67,7 +68,7 @@ namespace ImpactFees
             let distinctBuilder = [];
             for (let b of builders)
             {
-              if (distinctBuilder.indexOf(b.Builder_Id) === -1)
+              if (distinctBuilder.indexOf(b.Builder_Id) === -1 && b.Builder_Name.trim() !== "")
               {
                 distinctBuilder.push(b.Builder_Id);
                 selectBuilder.add(Utilities.Create_Option(b.Builder_Id.toString(), b.Builder_Name));
@@ -101,16 +102,10 @@ namespace ImpactFees
       CombinedAllocation.GetAll("", builderId, "").then(
         function (builders)
         {
-          console.log("builders", builders);
           if (builders.length > 0)
           {
             let builder = builders[0];
-            console.log('builder', builder);
             BuilderAllocation.LoadBuilder(builder.Builder_Name, builder.Builder_Allocation_Amount.toString(), builder.Builder_Audit_Log, builder.Builder_Amount_Currently_Allocated_Formatted);
-          }
-          else
-          {
-            console.log('wrong length');
           }
 
           parent.classList.remove("is-loading");
@@ -197,7 +192,7 @@ namespace ImpactFees
       b.Builder_Name = BuilderName;
       b.Allocation_Amount = Amount;
       b.Id = builderId;
-      SaveObject<BuilderAllocation>("./API/ImpactFees/SaveBuilderAllocation", b).then(
+      XHR.SaveObject<BuilderAllocation>("./API/ImpactFees/SaveBuilderAllocation", b).then(
         function (a)
         {
           console.log('response', a);

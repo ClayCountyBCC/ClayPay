@@ -17,7 +17,7 @@ var ImpactFees;
             if (qs.length > 0) {
                 qs = "?" + qs.substr(1);
             }
-            return ImpactFees.GetArray("./API/ImpactFees/GetAgreements", qs);
+            return XHR.GetArray("./API/ImpactFees/GetAgreements", qs);
         };
         return CombinedAllocation;
     }());

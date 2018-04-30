@@ -57,7 +57,7 @@ var ImpactFees;
                 var d = new DeveloperAgreement();
                 d.Agreement_Amount = Amount;
                 d.Agreement_Number = agreementNumber;
-                ImpactFees.SaveObject("./API/ImpactFees/SaveDeveloperAgreement", d).then(function (a) {
+                XHR.SaveObject("./API/ImpactFees/SaveDeveloperAgreement", d).then(function (a) {
                     console.log('response', a);
                     if (a.length > 0) {
                         Utilities.Show(developerAgreementErrorContainer);

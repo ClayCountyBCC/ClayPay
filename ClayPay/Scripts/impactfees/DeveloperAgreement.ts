@@ -101,7 +101,7 @@ namespace ImpactFees
         let d = new DeveloperAgreement();
         d.Agreement_Amount = Amount;
         d.Agreement_Number = agreementNumber;
-        SaveObject<DeveloperAgreement>("./API/ImpactFees/SaveDeveloperAgreement", d).then(function (a)
+        XHR.SaveObject<DeveloperAgreement>("./API/ImpactFees/SaveDeveloperAgreement", d).then(function (a)
         {
           console.log('response', a);
           if (a.length > 0)

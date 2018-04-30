@@ -70,7 +70,7 @@ namespace ImpactFees
       {
         qs = "?" + qs.substr(1); // no matter which arguments we used, we'll always remove the leading & and add a ?
       }
-      return GetArray<CombinedAllocation>("./API/ImpactFees/GetAgreements", qs);
+      return XHR.GetArray<CombinedAllocation>("./API/ImpactFees/GetAgreements", qs);
     }
 
   }

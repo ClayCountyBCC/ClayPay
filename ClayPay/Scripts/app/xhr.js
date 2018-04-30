@@ -91,5 +91,51 @@ var XHR;
         return SendCommand('DELETE', url, headers, data);
     }
     XHR.Delete = Delete;
+    function GetArray(url, queryString) {
+        if (queryString === void 0) { queryString = ""; }
+        var x = XHR.Get(url + queryString);
+        return new Promise(function (resolve, reject) {
+            x.then(function (response) {
+                var ar = JSON.parse(response.Text);
+                resolve(ar);
+            }).catch(function () {
+                console.log("error in Get " + url);
+                reject(null);
+            });
+        });
+    }
+    XHR.GetArray = GetArray;
+    function GetObject(url, queryString) {
+        if (queryString === void 0) { queryString = ""; }
+        var x = XHR.Get(url + queryString);
+        return new Promise(function (resolve, reject) {
+            x.then(function (response) {
+                var ar = JSON.parse(response.Text);
+                resolve(ar);
+            }).catch(function () {
+                console.log("error in Get " + url);
+                reject(null);
+            });
+        });
+    }
+    XHR.GetObject = GetObject;
+    function SaveObject(url, object) {
+        var x = XHR.Post(url, JSON.stringify(object));
+        return new Promise(function (resolve, reject) {
+            x.then(function (response) {
+                if (response.Text.length === 0) {
+                    resolve([]);
+                }
+                else {
+                    var ar = JSON.parse(response.Text);
+                    resolve(ar);
+                }
+            }).catch(function (e) {
+                console.log('save object error ' + url + ' ' + e);
+                reject(null);
+            });
+        });
+    }
+    XHR.SaveObject = SaveObject;
 })(XHR || (XHR = {}));
-//# sourceMappingURL=xhr.js.map
+//# sourceMappingURL=XHR.js.map

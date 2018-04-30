@@ -63,5 +63,34 @@ namespace ClayPay.Controllers.ImpactFees
       }
     }
 
+    [HttpPost]
+    [Route("SavePermitAllocation")]
+    public IHttpActionResult SavePermitAllocation(PermitAllocation pa)
+    {
+
+      var errors = pa.Validate();
+      if (errors.Count() > 0)
+      {
+        return Ok(errors);
+      }
+      else
+      {
+        var Username = User.Identity.Name.Replace(@"CLAYBCC\", "").ToUpper();
+        if (!pa.Update(Username))
+        {
+          errors.Add("An error occurred while saving this permit's allocation, please try again.  If the error persists, please contact MIS.");
+          return Ok(errors);
+        }
+        return Ok();
+      }
+    }
+
+    [HttpGet]
+    [Route("GetPermit")]
+    public IHttpActionResult GetPermit(string Permit_Number, string Agreement_Number = "")
+    {
+      return Ok(PermitImpactFee.Get(Permit_Number));
+    }
+
   }
 }
