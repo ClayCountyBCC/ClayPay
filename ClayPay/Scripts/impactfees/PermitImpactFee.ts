@@ -11,6 +11,7 @@ namespace ImpactFees
     Contractor_Name: string;
     Cashier_Id: string;
     Error_Text: string;
+    Amount_Allocated: number;
   }
   export class PermitImpactFee implements IPermitImpactFee
   {
@@ -21,7 +22,7 @@ namespace ImpactFees
     public Contractor_Name: string;
     public Cashier_Id: string;
     public Error_Text: string;
-
+    public Amount_Allocated: number;
     constructor()
     {
 

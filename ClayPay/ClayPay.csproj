@@ -118,11 +118,11 @@
     <Content Include="Content\Main.min.css">
       <DependentUpon>Main.css</DependentUpon>
     </Content>
-    <Content Include="Content\Utliities.css">
-      <DependentUpon>Utliities.scss</DependentUpon>
+    <Content Include="Content\Utilities.css">
+      <DependentUpon>Utilities.scss</DependentUpon>
     </Content>
-    <Content Include="Content\Utliities.min.css">
-      <DependentUpon>Utliities.css</DependentUpon>
+    <Content Include="Content\Utilities.min.css">
+      <DependentUpon>Utilities.css</DependentUpon>
     </Content>
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -195,7 +195,7 @@
     <Content Include="ConnectionStrings.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\Utliities.scss" />
+    <Content Include="Content\Utilities.scss" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile1.pubxml" />
     <None Include="Scripts\jquery-1.9.1.intellisense.js" />

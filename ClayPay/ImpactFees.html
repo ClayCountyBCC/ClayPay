@@ -7,7 +7,7 @@
   <title>Clay County Payment Application - Impact Fees</title>
   <link href="Content/bulma.css" rel="stylesheet" />
   <link href="Content/Main.min.css" rel="stylesheet" />
-  <link href="Content/Utliities.css" rel="stylesheet" />
+  <link href="Content/Utilities.min.css" rel="stylesheet" />
 </head>
 <body>
   <nav class="container navbar has-background-light"
@@ -377,7 +377,9 @@
             </div>
           </div>
           <div class="column field">
-            <label class="label">Road Impact Fee</label>
+            <div class="field">
+              <label class="label">Road Impact Fee</label>
+            </div>
             <div class="control">
               <input type="text"
                      class="input"
@@ -586,6 +588,14 @@
                       tabindex="5"
                       class="button is-primary">
                 Save Permit Allocation
+              </button>              
+            </div>
+            <div class="control">
+              <button onclick="ImpactFees.PermitAllocation.Reset(); return false;"
+                      type="button"
+                      tabindex="6"
+                      class="button is-warning">
+                Clear Permit Data
               </button>
             </div>
           </div>
@@ -598,7 +608,31 @@
 
   <section id="existingAllocations"
            class="show">
-    Existing Allocations will show here.
+    <section class="hero is-primary is-bold hero-buffer">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title">Existing Allocations</h1>
+          <h2 class="subtitle">
+            View the existing allocations by Developer, Builder, or Permit.
+          </h2>
+        </div>
+      </div>
+    </section>
+
+    <div class="container">
+      <nav style="padding: .5em;"
+           class="breadcrumb has-background-white"
+           aria-label="breadcrumbs">
+        <ul id="breadcrumbs"
+            aria-label="breadcrumbs">
+
+        </ul>
+      </nav>
+      <div id="existingAllocationsContainer">
+
+      </div>
+    </div>
+
   </section>
   <script src="Scripts/app/es6-promise.min.js"></script>
   <script src="Scripts/app/XHR.js"></script>

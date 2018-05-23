@@ -19,7 +19,6 @@ namespace ImpactFees
 
     constructor()
     {
-
     }
 
     public static LoadBuilders(e: HTMLSelectElement, selectedBuilder: number = -1):void
@@ -65,12 +64,30 @@ namespace ImpactFees
               }
             }
           }
+          if (selectedBuilder !== -1)
+          {
+            PermitAllocation.BuilderSelected(selectBuilder);
+          }
           parent.classList.remove("is-loading");
         }).catch(function (e)
         {
           parent.classList.remove("is-loading");
           // some kind of error occurred.
         });
+    }
+
+    public static Reset(): void
+    {
+      // this function will unselect all dropdowns and clear every text box
+      (<HTMLFormElement>document.getElementById("formPermitAllocations")).reset();
+      (<HTMLSelectElement>document.getElementById("permitSelectAgreement")).selectedIndex = 0;
+      (<HTMLSelectElement>document.getElementById("permitSelectBuilder")).selectedIndex = 0;
+      Utilities.Hide(document.getElementById("permitAllocationError"));
+      Utilities.Hide(document.getElementById("permitBuilderContainer"));
+      Utilities.Hide(document.getElementById("permitBuilderSelected"));
+      Utilities.Hide(document.getElementById("permitInfo"));
+      Utilities.Hide(document.getElementById("permitErrorContainer"));
+      Utilities.Hide(document.getElementById("permitSelectDeveloper"));
     }
 
     public static BuilderSelected(e: HTMLSelectElement):void
@@ -128,7 +145,10 @@ namespace ImpactFees
       let permitInfo = document.getElementById("permitInfo");
       Utilities.Hide(permitErrorContainer);
       Utilities.Hide(permitInfo);
-      let permitNumber = (<HTMLInputElement>document.getElementById("permitNumber")).value;
+      let permitInput = <HTMLInputElement>document.getElementById("permitNumber");
+      let permitNumber = permitInput.value;
+      PermitAllocation.Reset();
+      permitInput.value = permitNumber;
       if (permitNumber.length !== 8)
       {
         // show error
@@ -145,8 +165,6 @@ namespace ImpactFees
       PermitImpactFee.Get(permitNumber).then(
         function (pif)
         {
-          console.log('permit returned', pif);
-          
           let ImpactFee = <HTMLInputElement>document.getElementById("permitRoadImpactFee");
           let ContractorNumber = <HTMLInputElement>document.getElementById("permitContractorNumber");
           let ContractorName = <HTMLInputElement>document.getElementById("permitContractorName");
@@ -170,7 +188,6 @@ namespace ImpactFees
           CombinedAllocation.GetAll("", -1, permitNumber).then(
             function (comb)
             {
-              console.log('comb returned', comb);
               let selectDeveloperContainer = document.getElementById("permitSelectDeveloper");
               Utilities.Show(selectDeveloperContainer);
               let selectAgreement = <HTMLSelectElement>document.getElementById("permitSelectAgreement");
@@ -214,16 +231,6 @@ namespace ImpactFees
         {
 
         });
-
-    }
-
-    
-
-    public Load(): void
-    {
-      // this function loads the current object into the HTML form 
-
-
 
     }
 

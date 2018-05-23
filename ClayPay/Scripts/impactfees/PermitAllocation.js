@@ -37,10 +37,24 @@ var ImpactFees;
                         }
                     }
                 }
+                if (selectedBuilder !== -1) {
+                    PermitAllocation.BuilderSelected(selectBuilder);
+                }
                 parent.classList.remove("is-loading");
             }).catch(function (e) {
                 parent.classList.remove("is-loading");
             });
+        };
+        PermitAllocation.Reset = function () {
+            document.getElementById("formPermitAllocations").reset();
+            document.getElementById("permitSelectAgreement").selectedIndex = 0;
+            document.getElementById("permitSelectBuilder").selectedIndex = 0;
+            Utilities.Hide(document.getElementById("permitAllocationError"));
+            Utilities.Hide(document.getElementById("permitBuilderContainer"));
+            Utilities.Hide(document.getElementById("permitBuilderSelected"));
+            Utilities.Hide(document.getElementById("permitInfo"));
+            Utilities.Hide(document.getElementById("permitErrorContainer"));
+            Utilities.Hide(document.getElementById("permitSelectDeveloper"));
         };
         PermitAllocation.BuilderSelected = function (e) {
             var parent = e.parentElement;
@@ -79,7 +93,10 @@ var ImpactFees;
             var permitInfo = document.getElementById("permitInfo");
             Utilities.Hide(permitErrorContainer);
             Utilities.Hide(permitInfo);
-            var permitNumber = document.getElementById("permitNumber").value;
+            var permitInput = document.getElementById("permitNumber");
+            var permitNumber = permitInput.value;
+            PermitAllocation.Reset();
+            permitInput.value = permitNumber;
             if (permitNumber.length !== 8) {
                 var permitNumberLengthError = document.getElementById("permitNumberLengthError");
                 Utilities.Error_Show(permitNumberLengthError);
@@ -91,7 +108,6 @@ var ImpactFees;
                 return;
             }
             ImpactFees.PermitImpactFee.Get(permitNumber).then(function (pif) {
-                console.log('permit returned', pif);
                 var ImpactFee = document.getElementById("permitRoadImpactFee");
                 var ContractorNumber = document.getElementById("permitContractorNumber");
                 var ContractorName = document.getElementById("permitContractorName");
@@ -108,7 +124,6 @@ var ImpactFees;
                     return;
                 }
                 ImpactFees.CombinedAllocation.GetAll("", -1, permitNumber).then(function (comb) {
-                    console.log('comb returned', comb);
                     var selectDeveloperContainer = document.getElementById("permitSelectDeveloper");
                     Utilities.Show(selectDeveloperContainer);
                     var selectAgreement = document.getElementById("permitSelectAgreement");
@@ -133,8 +148,6 @@ var ImpactFees;
                 });
             }, function (e) {
             });
-        };
-        PermitAllocation.prototype.Load = function () {
         };
         PermitAllocation.SavePermitAllocation = function () {
             var permitNumber = document.getElementById("permitNumber");

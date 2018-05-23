@@ -138,7 +138,7 @@ var XHR;
     }
     XHR.SaveObject = SaveObject;
 })(XHR || (XHR = {}));
-//# sourceMappingURL=xhr.js.map
+//# sourceMappingURL=XHR.js.map
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
@@ -890,7 +890,7 @@ var clayPay;
     }());
     clayPay.CCData = CCData;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ccdata.js.map
+//# sourceMappingURL=CCData.js.map
 var clayPay;
 (function (clayPay) {
     var Charge = (function () {
@@ -903,4 +903,4 @@ var clayPay;
     }());
     clayPay.Charge = Charge;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=charge.js.map
+//# sourceMappingURL=Charge.js.map

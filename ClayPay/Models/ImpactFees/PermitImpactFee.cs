@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Dapper;
+using System.Data.SqlClient;
+using System.Data;
 
 namespace ClayPay.Models.ImpactFees
 {
   public class PermitImpactFee
   {
-    public string Permit_Number { get; set; }
+    public string Permit_Number { get; set; } = "";
     private DateTime? Issue_Date { get; set; }
     private DateTime? Void_Date { get; set; }
     public decimal? ImpactFee_Amount { get; set; }
@@ -21,7 +23,6 @@ namespace ClayPay.Models.ImpactFees
           return ImpactFee_Amount.Value.ToString("C2");
         }
         return "Not Found";
-        
       }
     }
     public string Contractor_Id { get; set; }
@@ -30,6 +31,7 @@ namespace ClayPay.Models.ImpactFees
     private decimal? Y { get; set; }
     public string Cashier_Id { get; set; } = "";
     public string Error_Text { get; set; } = "";
+    public decimal? Amount_Allocated { get; set; }
 
     public PermitImpactFee()
     {
@@ -38,7 +40,35 @@ namespace ClayPay.Models.ImpactFees
 
     private bool Validate_Permit_Agreement_Boundary(string Agreement_Number)
     {
-      return true;
+      if (Agreement_Number.Length == 0) return true;
+      // 2881 is the SRID for our local state plane projection
+      var dp = new DynamicParameters();
+      dp.Add("@Agreement_Number", "TIMPACT-" + Agreement_Number);
+      string query = @"
+        DECLARE @Point geometry = geometry::STPointFromText('POINT (' + 
+          CONVERT(VARCHAR(20), @X) + ' ' + 
+          CONVERT(VARCHAR(20), @Y) + ')', 2881);
+
+        SELECT 
+          SHAPE.STIntersects(@Point) Inside
+        FROM IMS_APPLICATIONS
+        WHERE 
+          Appl_Number=@Agreement_Number";
+      try
+      {
+        using (IDbConnection db =
+          new SqlConnection(
+            Constants.Get_ConnStr("GIS")))
+        {
+          int? i = (int?)db.ExecuteScalar(query, dp);
+          return (i.HasValue && i.Value == 1);
+        }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, query);
+        return false;
+      }
     }
 
     public static PermitImpactFee Get(string Permit_Number, string Agreement_Number = "")
@@ -51,16 +81,18 @@ namespace ClayPay.Models.ImpactFees
           M.IssueDate Issue_Date,
           M.VoidDate Void_Date,
           B.ContractorId Contractor_Id,
-          ISNULL(C.CompanyName, '') Contractor_Name,
+          ISNULL(LTRIM(RTRIM(C.CompanyName)), '') Contractor_Name,
           B.X,
           B.Y,
           CI.Total ImpactFee_Amount,
-          CI.CashierId Cashier_Id
+          LTRIM(RTRIM(CI.CashierId)) Cashier_Id,
+          PA.Amount_Allocated
         FROM bpMASTER_PERMIT M
         INNER JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
         LEFT OUTER JOIN clContractor C ON B.ContractorId = C.ContractorCd
         LEFT OUTER JOIN ccCashierItem CI ON M.PermitNo = CI.AssocKey AND CI.CatCode IN ('IFRD2', 'IFRD3')
         LEFT OUTER JOIN ccCashier CC ON CI.CashierId = CC.CashierId AND CC.IsVoided = 0
+        LEFT OUTER JOIN ImpactFees_Permit_Allocations PA ON M.PermitNo = PA.Permit_Number
         WHERE M.PermitNo=@Permit_Number;";
       var permits = Constants.Get_Data<PermitImpactFee>(query, dp);
       // if we get multiple permits back for one permit number, we've most likely got multiple impact fees on the permit.
@@ -82,6 +114,13 @@ namespace ClayPay.Models.ImpactFees
 
     private void Validate(string Agreement_Number)
     {
+      if(Cashier_Id.Length > 0)
+      {
+        if (!Amount_Allocated.HasValue)
+        {
+          Error_Text = "This fee has already been paid, so it is not eligible for the impact fee credit process.";
+        }
+      }
       if (!Issue_Date.HasValue)
       {
         Error_Text = "This permit has not yet been issued.";

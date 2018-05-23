@@ -9,8 +9,8 @@ namespace ClayPay.Models.ImpactFees
   public class PermitAllocation
   {
     public int Builder_Id { get; set; } = -1;
-    public string Permit_Number { get; set; }
-    public decimal Amount_Allocated { get; set; }
+    public string Permit_Number { get; set; } = "";
+    public decimal Amount_Allocated { get; set; } = -1;
     public string Amount_Allocated_Formatted
     {
       get
@@ -27,7 +27,7 @@ namespace ClayPay.Models.ImpactFees
 
       }
     }
-    public string Audit_Log { get; set; }
+    public string Audit_Log { get; set; } = "";
 
     public PermitAllocation()
     {
@@ -48,7 +48,6 @@ namespace ClayPay.Models.ImpactFees
       dp.Add("@Permit_Number", Permit_Number);
       string query = @"
         SELECT
-          Agreement_Number,
           Builder_Id,
           Permit_Number,
           Amount_Allocated,
@@ -57,21 +56,30 @@ namespace ClayPay.Models.ImpactFees
         WHERE
           Permit_Number=@Permit_Number;";
       var tmp = Constants.Get_Data<PermitAllocation>(query, dp);
-      if (tmp.Count() == 1)
-      {
-        return tmp.First();
-      }
-      else
-      {
-        return null;
-      }
+      if (tmp == null) return null; // an error occurred
+      if (tmp.Count() == 0) return new PermitAllocation();
+      return tmp.First();
     }
 
     public List<string> Validate()
     {
-      Permit_Number = Permit_Number.Trim();
-
       List<string> errors = new List<string>();
+      Permit_Number = Permit_Number.Trim();
+      var current = PermitAllocation.Get(Permit_Number);
+      var pif = PermitImpactFee.Get(Permit_Number);
+      if(pif.Error_Text.Length > 0)
+      {
+        errors.Add(pif.Error_Text);        
+      }
+      if(current.Permit_Number.Length == 0)
+      {
+        // the checks we perform in this block are for
+        // new credits only
+        if (pif.Cashier_Id.Length > 0)
+        {
+          errors.Add("This fee has already been paid, so it is not eligible for the impact fee credit process.");
+        }
+      }      
       if(Builder_Id < 0)
       {
         errors.Add("The Builder Id provided was invalid.");
@@ -135,6 +143,12 @@ namespace ClayPay.Models.ImpactFees
 
         }
       }
+      else // this is a new permit number
+      {
+        
+        Audit_Log = Constants.Create_Audit_Log(Username, "Record Created");
+        // will also need to apply the credit.
+      }
       string query = @"
         MERGE ImpactFees_Permit_Allocations WITH (HOLDLOCK) PA
         USING (SELECT @Permit_Number, @Builder_Id, @Amount_Allocated, @Audit_Log) AS P 
@@ -152,6 +166,79 @@ namespace ClayPay.Models.ImpactFees
             (@Permit_Number, @Builder_Id, @Amount_Allocated, @Audit_Log);";
       return Constants.Save_Data<PermitAllocation>(query, this);
     }
+
+    public bool ApplyCredit()
+    {
+      var dbArgs = new Dapper.DynamicParameters();
+      //dbArgs.Add("@cId", dbType: DbType.String, size: 9, direction: ParameterDirection.Output);
+      //dbArgs.Add("@otId", dbType: DbType.Int64, direction: ParameterDirection.Output);
+      //dbArgs.Add("@PayerName", ccd.FirstName + " " + ccd.LastName);
+      //dbArgs.Add("@Total", ccd.Total);
+      //dbArgs.Add("@TransId", this.UniqueId);
+      //dbArgs.Add("@ItemIds", ccd.ItemIds);
+      //DECLARE @cId VARCHAR(9) = NULL;
+      //DECLARE @otId int = NULL;
+      string query = @"
+        DECLARE @now DATETIME = GETDATE();
+        
+        BEGIN TRANSACTION;
+
+        BEGIN TRY
+          EXEC dbo.prc_upd_ccNextCashierId @cId OUTPUT;
+          
+          EXEC dbo.prc_ins_ccCashier 
+            @OTId = @otId OUTPUT, 
+            @CashierId = @cId, 
+            @LstUpdt = NULL, 
+            @Name = @PayerName,
+            @TransDt = @now;
+
+          EXEC dbo.prc_upd_ccCashierX
+            @OTId = @otId,
+            @Name = @PayerName,
+            @CoName = '',
+            @Phone = '',
+            @Addr1 = '',
+            @Addr2 = '',
+            @NTUser='claypay';
+
+          EXEC dbo.prc_upd_ccCashierPmt 
+            @PayId = 0,
+            @OTId = @otId, 
+            @PmtType ='IFCR',
+            @AmtApplied = @Total,
+            @AmtTendered = @Total, 
+            @PmtInfo = @PayerName,
+            @CkNo = @TransId;
+
+          UPDATE ccCashierItem 
+            SET OTId = @otId, CashierId = @cId
+            WHERE itemId IN @ItemIds
+      
+        END TRY
+        BEGIN CATCH
+          IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        END CATCH;
+        
+        IF @@TRANCOUNT > 0
+          COMMIT TRANSACTION;";
+      try
+      {
+        var i = Constants.Exec_Query(query, dbArgs);
+        //CashierId = dbArgs.Get<string>("@cId");
+        //OTId = dbArgs.Get<Int64>("@otId");
+        return (i != -1);
+      }
+      catch (Exception ex)
+      {
+        Constants.Log(ex, query);
+        return false;
+      }
+    }
+
+
+
 
   }
 }
