@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Results;
 using ClayPay.Models.Balancing;
 
 namespace ClayPay.Controllers
@@ -37,7 +38,7 @@ namespace ClayPay.Controllers
       List<Account> DjournalEntries =  Account.GetGLAccountTotals(DateToBalance);
       if (DjournalEntries == null)
       {
-        return InternalServerError();
+        return BadRequest("Error returning DJournal entries. Please contact the help desk if this issue persists." );
       }
       else
       {
@@ -50,7 +51,7 @@ namespace ClayPay.Controllers
       List<Payment> paymentTypeTotals = Payment.Process(DateToBalance);
       if (paymentTypeTotals == null)
       {
-        return InternalServerError();
+        return BadRequest("Error processing payment data. Please contact the help desk if this issue persists.");
       }
       else
       {
@@ -63,7 +64,7 @@ namespace ClayPay.Controllers
       List<Payment> GUTotals = Payment.GetGUTotals(DateToBalance);
       if (GUTotals == null)
       {
-        return InternalServerError();
+        return BadRequest("Error returning GU totals. Please contact the help desk if this issue persists.");
       }
       else
       {
@@ -78,7 +79,7 @@ namespace ClayPay.Controllers
       List<Payment> Payments = Payment.GetAllCashierIdTotals(DateToBalance);
       if (Payments == null)
       {
-        return InternalServerError();
+        return BadRequest("Error returning payments. Please contact the help desk if this issue persists.");
       }
       else
       {

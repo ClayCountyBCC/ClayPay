@@ -19,18 +19,21 @@ namespace ClayPay.Models.Balancing
     public string ProjectAccount { get; set; } = "";
     public string Total { get; set; }
     public string CashAccount { get; set; }
-    
+
     /*
      * This model only serves as a way to get the lower half of the DJournal output
      * The data is pre-formatted and is ready for display on the client
+     * 
+     * The upper half is done using Payments.Process(dateToBalance)
+     * 
      */
     public Account()
     {
-      
+
     }
 
 
-     public static List<Account> GetGLAccountTotals(DateTime dateToBalance)
+    public static List<Account> GetGLAccountTotals(DateTime dateToBalance)
     {
       var dbArgs = new DynamicParameters();
 
@@ -57,8 +60,9 @@ namespace ClayPay.Models.Balancing
       try
       {
         var a = Constants.Get_Data<Account>(sql, dbArgs);
-        
-      }catch(Exception ex)
+
+      }
+      catch (Exception ex)
       {
         Constants.Log(ex, sql);
         return new List<Account>();
