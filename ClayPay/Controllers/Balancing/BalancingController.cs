@@ -58,11 +58,12 @@ namespace ClayPay.Controllers
 
     [HttpPost]
     [Route("Save")]
-    public IHttpActionResult Save(DateTime DateToBalance)
+    public IHttpActionResult Save(DateTime DateToFinalize)
     {
       try
-      {
-        var dj = new DJournal(DateToBalance, true,User.Identity.Name);
+      { 
+        var dj = new DJournal(DateToFinalize, (DateToFinalize.Date < DateTime.Now.Date ? true : false), User.Identity.Name);
+        dj.Error.Add("Cannot finalize payments made on or after today. Please select a previous date.");
         return Ok(dj);
       }
       catch (Exception ex)
