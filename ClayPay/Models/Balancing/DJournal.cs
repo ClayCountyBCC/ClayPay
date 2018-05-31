@@ -25,7 +25,6 @@ namespace ClayPay.Models.Balancing
       this.GetLog(dateToProcess);
       if (finalize)
       {
-
         if (this.Log != null)
         {
           if (DJournalLog.Create(dateToProcess, NTUser) == 1)
@@ -37,8 +36,6 @@ namespace ClayPay.Models.Balancing
             this.Error.Add($"There was an issue saving the DJournal log for {dateToProcess.ToShortDateString()}.");
           }
         }
-
-
       }
     }
 

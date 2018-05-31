@@ -40,7 +40,6 @@ namespace ClayPay.Controllers
 
     [HttpGet]
     [Route("Get")]
-
     public IHttpActionResult Get(DateTime DateToBalance)
     {
       try
