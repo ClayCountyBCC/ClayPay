@@ -15,46 +15,37 @@ namespace ClayPay.Models.Balancing
     public List<CashierTotal> GUTotals { get; set; }
     public List<Account> GLAccountTotals { get; set; }
     public DJournalLog Log { get; set; }
-    public string Error { get; set; }
+    public List<string> Error { get; set; }
 
-    public DJournal(DateTime dateToProcess, bool finalize, string NTUser)
+    public DJournal(DateTime dateToProcess, bool finalize = false, string NTUser = "")
     {
       this.ProcessedPaymentTotals = CashierTotal.ProcessPaymentTypeTotals(dateToProcess);
       this.GUTotals = CashierTotal.GetGUTotals(dateToProcess);
       this.GLAccountTotals = Account.GetGLAccountTotals(dateToProcess);
-      this.CheckForLog(dateToProcess);
+      this.GetLog(dateToProcess);
       if (finalize)
       {
-        if (this.Error.Length > 0)
+        if (this.Log != null && DJournalLog.Create(dateToProcess, NTUser) == 1)
         {
-          this.Log = new DJournalLog();
+          this.Log = DJournalLog.Get(dateToProcess);
         }
         else
         {
-          if (this.Log.IsCreated == false)
-          {
-            this.Log = DJournalLog.Create(dateToProcess, NTUser);
-          }
+          this.Error.Add($"There was an issue saving the DJournal log for {dateToProcess.ToShortDateString()}.");
         }
-      }      
+      }
     }
 
 
-    public void CheckForLog(DateTime dateToProcess)
+    public void GetLog(DateTime dateToProcess)
     {
-      var log = DJournalLog.Get(dateToProcess);
+      this.Log = DJournalLog.Get(dateToProcess);
 
-      if(log == null)
+      if (this.Log == null)
       {
-        this.Error = $"There was an error validating the DJournalLog for {dateToProcess.ToShortDateString()}.";
-        this.Log = null;
+        this.Error.Add($"There was an error validating the DJournalLog for {dateToProcess.ToShortDateString()}.");
       }
-      else
-      {
-        this.Log = log;
-      }
-
     }
-   
+
   }
 }

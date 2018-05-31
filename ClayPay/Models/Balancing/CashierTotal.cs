@@ -74,7 +74,7 @@ namespace ClayPay.Models.Balancing
               SUM(total) AmtApplied,
               'AA' CdType
             FROM cccashieritem
-            WHERE CashierId IN (select cashierid from CashierIdsToBalance)
+            INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
 
           UNION
 
@@ -84,7 +84,7 @@ namespace ClayPay.Models.Balancing
              SELECT PmtType, AmtApplied
              FROM  ccCashierPayment CP
              LEFT OUTER join ccCashier C ON C.OTId = CP.OTid
-             WHERE CashierId IN (SELECT CashierId FROM CashierIdsToBalance)
+             INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
            ) AS TempAllPayments
            RIGHT OUTER JOIN ccLookUp L ON LEFT(TempAllPayments.PmtType,5) = LEFT(L.CODE,5)
            WHERE L.CdType IN ('SPECIALPT','PMTTYPE')
@@ -99,8 +99,8 @@ namespace ClayPay.Models.Balancing
               (SUM(AMTAPPLIED) - SUM(AMTTENDERED)) * (-1),
               'ZB'CdType
             FROM ccCashierPayment CP
-            inner join ccCashier C ON C.OTId = CP.OTid
-            WHERE CashierId IN (SELECT CashierId FROM CashierIdsToBalance)
+            INNER JOIN ccCashier C ON C.OTId = CP.OTid
+            INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
               AND PmtType IN ('CK', 'CA')
          
             UNION   
@@ -112,8 +112,8 @@ namespace ClayPay.Models.Balancing
               SUM(AmtApplied),
               'ZC' CdType
             FROM ccCashierPayment CP
-            inner join ccCashier C ON C.OTId = CP.OTid
-            WHERE CashierId IN (SELECT CashierId FROM CashierIdsToBalance)  
+            INNER JOIN ccCashier C ON C.OTId = CP.OTid
+            INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
               AND PmtType IN ('CK', 'CA')
          
             UNION   
@@ -126,7 +126,7 @@ namespace ClayPay.Models.Balancing
               'ZD' CdType
             FROM ccCashierPayment CP
             INNER JOIN ccCashier C ON CP.OTid = C.OTid
-            WHERE CashierId IN (SELECT CashierId FROM CashierIdsToBalance)
+            INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
 
         ) AS TMP
         ORDER BY CdType, SortKey; --THIS ALLOWS FOR THE DATA TO BE IN THE SAME ORDER AS IT IS CURRENTLY

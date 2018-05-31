@@ -16,14 +16,14 @@ namespace ClayPay.Models.Balancing
       {
         return DJournalDate != DateTime.MinValue.Date;
       }
-    };
+    }
 
     public DJournalLog()
     {
 
     }
 
-    public static DJournalLog Create(DateTime dateToFinalize, String username)
+    public static int Create(DateTime dateToFinalize, String username)
     {
       var param = new DynamicParameters();
       param.Add("@DateToFinalize", dateToFinalize);
@@ -38,14 +38,12 @@ namespace ClayPay.Models.Balancing
         ";
       try
       {
-
-        return Constants.Get_Data<DJournalLog>(sql, param).First() ;
-
+        return Constants.Exec_Query(sql, param);
       }
       catch(Exception ex)
       {
         Constants.Log(ex, sql);
-        return null;
+        return -1;
       }
     }
 
@@ -60,7 +58,6 @@ namespace ClayPay.Models.Balancing
               djournal_date, 
               created_on, 
               created_by,
-              1 IsCreated
             FROM ccDJournalTransactionLog
             WHERE CAST(djournal_date AS DATE) = CAST(@DateToGet AS DATE)
         ";
