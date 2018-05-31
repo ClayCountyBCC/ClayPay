@@ -11,13 +11,14 @@ namespace ClayPay.Models.Balancing
     public DateTime DJournalDate { get; set; } = DateTime.MinValue.Date;
     public DateTime FinalizedOn { get; set; } = DateTime.MinValue;
     public string CreatedBy { get; set; } = "";
+    public bool IsCreated { get; } = false;
 
     public DJournalLog()
     {
 
     }
 
-    public static DJournalLog CreateDJournalLogEntry(DateTime dateToFinalize, String username)
+    public static DJournalLog Create(DateTime dateToFinalize, String username)
     {
       var param = new DynamicParameters();
       param.Add("@DateToFinalize", dateToFinalize);
@@ -39,33 +40,43 @@ namespace ClayPay.Models.Balancing
       catch(Exception ex)
       {
         Constants.Log(ex, sql);
-        return new DJournalLog();
+        return null;
       }
     }
 
-    public static DJournalLog GetDJournalLog(DateTime LogDate)
+    public static DJournalLog Get(DateTime LogDate)
     {
       var param = new DynamicParameters();
       param.Add("@DateToGet", LogDate);
       var sql = $@"
             USE WATSC;
+
             SELECT 
               djournal_date, 
               created_on, 
-              created_by
+              created_by,
+              1 IsCreated
             FROM ccDJournalTransactionLog
             WHERE CAST(djournal_date AS DATE) = CAST(@DateToGet AS DATE)
         ";
       try
       {
 
-        return Constants.Get_Data<DJournalLog>(sql, param).First();
+        var log = Constants.Get_Data<DJournalLog>(sql, param).First();
+        if (log.IsCreated == true)
+        { 
+        return log;
+        }
+        else
+        {
+          return new DJournalLog();
+        }
 
       }
       catch (Exception ex)
       {
         Constants.Log(ex, sql);
-        return new DJournalLog();
+        return null;
       }
     }
 
