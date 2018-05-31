@@ -25,17 +25,26 @@ namespace ClayPay.Models.Balancing
       this.GetLog(dateToProcess);
       if (finalize)
       {
-        if (this.Log != null && DJournalLog.Create(dateToProcess, NTUser) == 1)
+        if (dateToProcess.Date < DateTime.Now.Date)
         {
-          this.Log = DJournalLog.Get(dateToProcess);
+          if (this.Log != null)
+          {
+            if (DJournalLog.Create(dateToProcess, NTUser) == 1)
+            {
+              this.Log = DJournalLog.Get(dateToProcess);
+            }
+            else
+            {
+              this.Error.Add($"There was an issue saving the DJournal log for {dateToProcess.ToShortDateString()}.");
+            }
+          }
         }
         else
         {
-          this.Error.Add($"There was an issue saving the DJournal log for {dateToProcess.ToShortDateString()}.");
+          this.Error.Add("You can only finalize payments made before today that have not already been finalized.");
         }
       }
     }
-
 
     public void GetLog(DateTime dateToProcess)
     {

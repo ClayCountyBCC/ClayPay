@@ -11,7 +11,7 @@ using ClayPay.Models;
 
 namespace ClayPay.Controllers
 {    
-  [RoutePrefix("API/DJournal")]
+  [RoutePrefix("API/Balancing")]
   public class BalancingController : ApiController
   {
     /**************************************************************************************************************
@@ -39,7 +39,7 @@ namespace ClayPay.Controllers
 
 
     [HttpGet]
-    [Route("GetDJournal")]
+    [Route("Get")]
 
     public IHttpActionResult Get(DateTime DateToBalance)
     {
@@ -57,7 +57,7 @@ namespace ClayPay.Controllers
 
 
     [HttpPost]
-    [Route("CreateDJournalLog")]
+    [Route("Save")]
     public IHttpActionResult Save(DateTime DateToBalance)
     {
       try

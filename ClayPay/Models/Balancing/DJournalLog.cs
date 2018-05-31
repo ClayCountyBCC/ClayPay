@@ -35,9 +35,10 @@ namespace ClayPay.Models.Balancing
           VALUES
           (@DateToBalance, @username )
 
+
         ";
       try
-      {
+      { 
         return Constants.Exec_Query(sql, param);
       }
       catch(Exception ex)
@@ -63,17 +64,7 @@ namespace ClayPay.Models.Balancing
         ";
       try
       {
-
-        var log = Constants.Get_Data<DJournalLog>(sql, param).First();
-        if (log.IsCreated == true)
-        { 
-        return log;
-        }
-        else
-        {
-          return new DJournalLog();
-        }
-
+        return Constants.Get_Data<DJournalLog>(sql, param).FirstOrDefault();
       }
       catch (Exception ex)
       {
