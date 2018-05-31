@@ -11,7 +11,12 @@ namespace ClayPay.Models.Balancing
     public DateTime DJournalDate { get; set; } = DateTime.MinValue.Date;
     public DateTime FinalizedOn { get; set; } = DateTime.MinValue;
     public string CreatedBy { get; set; } = "";
-    public bool IsCreated { get; } = false;
+    public bool IsCreated { 
+      get
+      {
+        return DJournalDate != DateTime.MinValue.Date;
+      }
+    };
 
     public DJournalLog()
     {
