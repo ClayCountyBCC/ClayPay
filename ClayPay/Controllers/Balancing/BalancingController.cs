@@ -33,50 +33,25 @@ namespace ClayPay.Controllers
     // display Account.GetAccountTotals
 
 
-    public IHttpActionResult GetDJournal(DateTime DateToBalance)
+    public IHttpActionResult GetDJournal(DateTime DateToBalance, bool finalize)
     {
-      List<Account> DjournalEntries =  Account.GetGLAccountTotals(DateToBalance);
-      if (DjournalEntries == null)
+      // TODO: Link getting djournal to UserAccess when it is applied
+      var newDjournal = new DJournal(DateToBalance, finalize, User.Identity.Name);
+      if (newDjournal == null)
       {
-        return BadRequest("Error returning DJournal entries. Please contact the help desk if this issue persists." );
+        return BadRequest("Error returning DJournal. Please contact the help desk if this issue persists." );
       }
       else
       {
-        return Ok(DjournalEntries);
-      }
-    }
-
-    public IHttpActionResult Process(DateTime DateToBalance)
-    {
-      List<Payment> paymentTypeTotals = Payment.Process(DateToBalance);
-      if (paymentTypeTotals == null)
-      {
-        return BadRequest("Error processing payment data. Please contact the help desk if this issue persists.");
-      }
-      else
-      {
-        return Ok(paymentTypeTotals);
-      }
-    }
-
-    public IHttpActionResult GetGUTotals(DateTime DateToBalance)
-    {
-      List<Payment> GUTotals = Payment.GetGUTotals(DateToBalance);
-      if (GUTotals == null)
-      {
-        return BadRequest("Error returning GU totals. Please contact the help desk if this issue persists.");
-      }
-      else
-      {
-        return Ok(GUTotals);
+        return Ok(newDjournal);
       }
     }
 
     // Return All Payments made on DateToBalance
     // Use client side to filter if needed.
-    public IHttpActionResult GetAllPayments(DateTime DateToBalance)
+    public IHttpActionResult GetAllPayments(DateTime DateToBalance, string paymentType = "")
     {
-      List<Payment> Payments = Payment.GetAllCashierIdTotals(DateToBalance);
+      List<CashierTotal> Payments = Payment.GetPayments(DateToBalance, paymentType);
       if (Payments == null)
       {
         return BadRequest("Error returning payments. Please contact the help desk if this issue persists.");
@@ -86,5 +61,34 @@ namespace ClayPay.Controllers
         return Ok(Payments);
       }
     }
+
+
+    //public IHttpActionResult Process(DateTime DateToBalance)
+    //{
+    //  List<CashierTotal> paymentTypeTotals = CashierTotal.Process(DateToBalance);
+    //  if (paymentTypeTotals == null)
+    //  {
+    //    return BadRequest("Error processing payment data. Please contact the help desk if this issue persists.");
+    //  }
+    //  else
+    //  {
+    //    return Ok(paymentTypeTotals);
+    //  }
+    //}
+
+    //public IHttpActionResult GetGUTotals(DateTime DateToBalance)
+    //{
+    //  List<CashierTotal> GUTotals = CashierTotal.GetGUTotals(DateToBalance);
+    //  if (GUTotals == null)
+    //  {
+    //    return BadRequest("Error returning GU totals. Please contact the help desk if this issue persists.");
+    //  }
+    //  else
+    //  {
+    //    return Ok(GUTotals);
+    //  }
+    //}
+
+
   }
 }
