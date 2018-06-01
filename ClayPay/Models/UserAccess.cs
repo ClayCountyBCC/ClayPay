@@ -8,23 +8,19 @@ namespace ClayPay.Models
 {
   public class UserAccess
   {
-    //private const string event_admin_group = "gClayPayCashier"; // We may make this an argument if we end up using this code elsewhere.
-    //private const string event_edit_group = "";
-    private const string mis_access_group = "gICT";
+    private const string event_djournal_group = "gClayDjournal"; // We may make this an argument if we end up using this code elsewhere.
+    private const string event_impactfee_group = "gEventImpactFee"; // We may make this an argument if we end up using this code elsewhere.
+    private const string event_admin_group = "gClayDjournal"; // We may make this an argument if we end up using this code elsewhere.
+
+    private const string mis_access_group = "gMIS_Deveoloper_Group";
 
     public bool authenticated { get; set; } = false;
     public string user_name { get; set; }
     public int employee_id { get; set; } = 0;
     public string display_name { get; set; } = "";
-
-    public enum access_type : int
-    {
-
-      admin_access = 1, // Admin User: can add new events
-      edit_access = 2   // edit User: can only update data for an event
-
-    }
-    public access_type current_access { get; set; } = access_type.edit_access; // default to public access.
+    public bool in_event_djournal_group = false;
+    public bool in_event_impactfee_group = false;
+    public bool in_event_admin_group = false;
 
     public UserAccess(string name)
     {
@@ -72,14 +68,27 @@ namespace ClayPay.Models
           }
           var groups = (from g in up.GetAuthorizationGroups()
                         select g.Name).ToList();
-          if (groups.Contains(event_admin_group) || groups.Contains(mis_access_group))
+
+          if(groups.Contains(mis_access_group)) 
           {
-            current_access = access_type.admin_access;
+            in_event_djournal_group = true;
+            in_event_impactfee_group = true;
+            in_event_admin_group = true;
           }
           else
           {
-            current_access = access_type.edit_access;
+            in_event_djournal_group = groups.Contains(event_djournal_group);
+            in_event_impactfee_group = groups.Contains(event_impactfee_group);
+            in_event_admin_group = groups.Contains(event_admin_group);
           }
+          //if (groups.Contains(event_admin_group) || groups.Contains(mis_access_group))
+          //{
+          //  current_access = access_type.admin_access;
+          //}
+          //else
+          //{
+          //  current_access = access_type.edit_access;
+          //}
 
         }
       }
