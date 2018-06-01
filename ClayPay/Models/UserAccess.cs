@@ -72,22 +72,14 @@ namespace ClayPay.Models
           {
             in_event_djournal_group = true;
             in_event_impactfee_group = true;
-            in_event_admin_group = true;
+            //in_event_admin_group = true;
           }
           else
           {
             in_event_djournal_group = groups.Contains(event_djournal_group);
             in_event_impactfee_group = groups.Contains(event_impactfee_group);
-            in_event_admin_group = groups.Contains(event_admin_group);
+            //in_event_admin_group = groups.Contains(event_admin_group);
           }
-          //if (groups.Contains(event_admin_group) || groups.Contains(mis_access_group))
-          //{
-          //  current_access = access_type.admin_access;
-          //}
-          //else
-          //{
-          //  current_access = access_type.edit_access;
-          //}
 
         }
       }
@@ -133,7 +125,8 @@ namespace ClayPay.Models
             break;
           default:
             ParseGroup(mis_access_group, ref d);
-            ParseGroup(event_admin_group, ref d);
+            ParseGroup(event_djournal_group, ref d);
+            ParseGroup(event_impactfee_group, ref d);
 
             d[""] = new UserAccess("");
             break;
