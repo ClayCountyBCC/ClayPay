@@ -70,9 +70,24 @@ namespace ClayPay.Controllers
     public IHttpActionResult Save(DateTime DateToFinalize)
     {
       try
-      { 
-        var dj = new DJournal(DateToFinalize, DateToFinalize.Date < DateTime.Now.Date, User.Identity.Name);
-        dj.Error.Add("Cannot finalize payments made on or after today. Please select a previous date.");
+      {
+        var finalize = DateToFinalize.Date < DateTime.Now.Date;
+        var ua = UserAccess.GetUserAccess(User.Identity.Name);
+
+        finalize = ua.in_event_djournal_group;
+        var dj = new DJournal(DateToFinalize, finalize, User.Identity.Name);
+
+        if(ua.in_event_djournal_group == false)
+        {
+          dj.Error.Add("DJournal was not finalized. User does not have the correct level of access.");
+
+        }
+
+        if (DateToFinalize.Date < DateTime.Now.Date)
+        {
+          dj.Error.Add("Cannot finalize payments made on or after today. Please select a previous date.");
+
+        }
         return Ok(dj);
       }
       catch (Exception ex)
