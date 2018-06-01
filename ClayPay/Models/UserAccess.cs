@@ -10,7 +10,6 @@ namespace ClayPay.Models
   {
     private const string event_djournal_group = "gClayDjournal"; // We may make this an argument if we end up using this code elsewhere.
     private const string event_impactfee_group = "gEventImpactFee"; // We may make this an argument if we end up using this code elsewhere.
-    private const string event_admin_group = "gClayDjournal"; // We may make this an argument if we end up using this code elsewhere.
 
     private const string mis_access_group = "gMIS_Deveoloper_Group";
 
