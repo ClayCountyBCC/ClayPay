@@ -8,7 +8,11 @@
     "inputFile": "bower_components/bulma/bulma.sass"
   },
   {
-    "outputFile": "Content/Utliities.css",
-    "inputFile": "Content/Utliities.scss"
+    "outputFile": "Content/Utilities.css",
+    "inputFile": "Content/Utilities.scss"
+  },
+  {
+    "outputFile": "Scripts/app/Utilities.es5.js",
+    "inputFile": "Scripts/app/Utilities.js"
   }
 ]
