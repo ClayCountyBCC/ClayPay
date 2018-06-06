@@ -235,6 +235,14 @@
     <Content Include="Scripts\claypay\bundle.min.js">
       <DependentUpon>bundle.js</DependentUpon>
     </Content>
+    <Content Include="Scripts\default-bundle.js" />
+    <Content Include="Scripts\default-bundle.min.js">
+      <DependentUpon>default-bundle.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\impactfees\impactfees-bundle.js" />
+    <Content Include="Scripts\impactfees\impactfees-bundle.min.js">
+      <DependentUpon>impactfees-bundle.js</DependentUpon>
+    </Content>
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -243,12 +251,13 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\Building\MainController.cs" />
-    <Compile Include="Controllers\ImpactFees\AgreementsController.cs" />
-    <Compile Include="Controllers\AppTypesController.cs" />
-    <Compile Include="Controllers\FeeController.cs" />
-    <Compile Include="Controllers\PayController.cs" />
-    <Compile Include="Controllers\QueryController.cs" />
+    <Compile Include="Controllers\API\ImpactFees\AgreementsController.cs" />
+    <Compile Include="Controllers\API\Payments\AppTypesController.cs" />
+    <Compile Include="Controllers\API\Payments\FeeController.cs" />
+    <Compile Include="Controllers\API\Payments\PayController.cs" />
+    <Compile Include="Controllers\API\Payments\QueryController.cs" />
+    <Compile Include="Controllers\MVC\ImpactFees\ImpactFeesController.cs" />
+    <Compile Include="Controllers\MVC\Payments\PaymentsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -279,9 +288,8 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\web.config" />
-    <Content Include="Views\Main\View.cshtml" />
-    <Content Include="Views\Main\Index.cshtml" />
     <Content Include="Scripts\tsconfig.json" />
+    <Content Include="Views\Payments\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -291,8 +299,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Controllers\API\Balancing\" />
+    <Folder Include="Controllers\MVC\Balancing\" />
     <Folder Include="Models\Balancing\" />
     <Folder Include="Scripts\app\typings\" />
+    <Folder Include="Views\ImpactFees\" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\app\Utilities.ts" />

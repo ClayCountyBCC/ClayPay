@@ -10,5 +10,9 @@
   {
     "outputFile": "Content/Utilities.css",
     "inputFile": "Content/Utilities.scss"
+  },
+  {
+    "outputFile": "Scripts/app/Utilities.es5.js",
+    "inputFile": "Scripts/app/Utilities.js"
   }
 ]

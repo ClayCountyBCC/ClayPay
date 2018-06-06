@@ -4,11 +4,11 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace ClayPay.Controllers.Building
+namespace ClayPay.Controllers.MVC.Payments
 {
-    public class MainController : Controller
+    public class PaymentsController : Controller
     {
-        // GET: Main
+        // GET: Payments
         public ActionResult Index()
         {
             return View();

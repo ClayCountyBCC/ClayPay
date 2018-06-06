@@ -8,7 +8,25 @@
       "Scripts/claypay/ui.js",
       "Scripts/claypay/ccdata.js",
       "Scripts/claypay/charge.js"
-
+    ]
+  },
+  {
+    "outputFileName": "Scripts/default-bundle.js",
+    "inputFiles": [
+      "Scripts/app/Utilities.js",
+      "bower_components/fetch/fetch.js",
+      "bower_components/promise-polyfill/dist/polyfill.min.js"
+    ]
+  },
+  {
+    "outputFileName": "Scripts/impactfees/impactfees-bundle.js",
+    "inputFiles": [
+      "Scripts/impactfees/PermitImpactFee.js",
+      "Scripts/impactfees/PermitAllocation.js",
+      "Scripts/impactfees/impactfees.js",
+      "Scripts/impactfees/DeveloperAgreement.js",
+      "Scripts/impactfees/CombinedAllocation.js",
+      "Scripts/impactfees/BuilderAllocation.js"
     ]
   }
 ]

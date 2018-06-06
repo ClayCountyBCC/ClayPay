@@ -1,15 +1,57 @@
 ﻿<!DOCTYPE html>
-<html>
+<html class="has-background-light">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=11">
+  <title>Clay County Payment Application</title>
+  <link href="~/Content/bulma.css" rel="stylesheet" />
+  <link href="~/Content/Utilities.min.css" rel="stylesheet" />
+  <script src="~/Scripts/default-bundle.min.js"></script>
 </head>
 <body>
-  test
-        @RenderBody()
+  <nav class="container navbar has-background-light"
+       role="navigation"
+       aria-label="main navigation">
+    <div class="navbar-brand">
+      <a href="/"
+         class="navbar-item has-text-weight-bold">
+        Clay County Payment Center
+      </a>
+    </div>
+    <div class="navbar-item has-dropdown is-hoverable">
+      <a class="navbar-link">
+        Impact Fee Agreements
+      </a>
+      <div id="ifDropdown"
+           class="navbar-dropdown">
+        <a id="nav-existingAllocations"
+           onclick="ImpactFees.Menu('existingAllocations')"
+           class="navbar-item">
+          View Existing Agreements and Allocations
+        </a>
+        <a onclick="ImpactFees.Menu('permitAllocations')"
+           id="nav-permitAllocations"
+           class="navbar-item">
+          Apply Allocation to Permit
+        </a>
+        <a onclick="ImpactFees.Menu('builderAllocations')"
+           id="nav-builderAllocations"
+           class="navbar-item">
+          Add a New Builder Allocation
+        </a>
+        <a onclick="ImpactFees.Menu('developerAgreement')"
+           id="nav-developerAgreement"
+           class="navbar-item">
+          Add a New Developer Agreement
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  @RenderBody()
 
 
-  
+
 </body>
 </html>
