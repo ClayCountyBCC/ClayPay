@@ -1,5 +1,4 @@
-﻿/// <reference path="typings/es6-promise/es6-promise.d.ts" />
-
+﻿
 /*  This code was written by macromaniac
  *  Originally pulled from: https://gist.github.com/macromaniac/e62ed27781842b6c8611 on 7/14/2016
  *  and from https://gist.github.com/takanori-ugai/8262008944769419e614

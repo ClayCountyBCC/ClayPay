@@ -1,31 +1,43 @@
+/// <reference path="../app/xhr.ts" />
 var ImpactFees;
+/// <reference path="../app/xhr.ts" />
 (function (ImpactFees) {
-    var DeveloperAgreement = (function () {
-        function DeveloperAgreement() {
+    class DeveloperAgreement {
+        constructor() {
             this.Developer_Name = "";
             this.Amount_Currently_Allocated = 0;
             this.Audit_Log = "";
         }
-        DeveloperAgreement.Load = function (e) {
-            var parent = e.parentElement;
+        //public static GetAll(agreementNumber: string = ""): Promise<Array<DeveloperAgreement>>
+        //{
+        //  let agreement: string = "";
+        //  if (agreementNumber.length > 0)
+        //  {
+        //    agreement = "?agreementNumber=" + agreementNumber;
+        //  }
+        //  return GetArray<DeveloperAgreement>("./API/ImpactFees/GetDeveloperAgreements", agreement);
+        //}
+        static Load(e) {
+            let parent = e.parentElement;
             parent.classList.add("is-loading");
-            var id = e.id.replace("Add", "");
-            var container = document.getElementById(id + "Selected");
+            let id = e.id.replace("Add", "");
+            let container = document.getElementById(id + "Selected");
             Utilities.Hide(container);
             if (e.selectedIndex === 0) {
                 parent.classList.remove("is-loading");
-                return;
+                return; // no agreement selected.
             }
-            var agreementNumber = e.options[e.selectedIndex].value;
+            let agreementNumber = e.options[e.selectedIndex].value;
             ImpactFees.CombinedAllocation.GetAll(agreementNumber, -1, "").then(function (agreements) {
                 if (agreements.length > 0) {
-                    var da = agreements[0];
-                    var Amount = document.getElementById("developerAgreementAmount");
+                    let da = agreements[0];
+                    // Load this object's data into the html form.
+                    let Amount = document.getElementById("developerAgreementAmount");
                     Amount.classList.remove("is-danger");
-                    var AllocatedAmount = document.getElementById("developerCurrentlyAllocated");
-                    var AuditLog = document.getElementById("developerAgreementAuditLog");
-                    var existingAgreement = document.getElementById("existingDeveloperAgreement");
-                    var existingAmountAllocated = document.getElementById("existingAgreementAmountAllocated");
+                    let AllocatedAmount = document.getElementById("developerCurrentlyAllocated");
+                    let AuditLog = document.getElementById("developerAgreementAuditLog");
+                    let existingAgreement = document.getElementById("existingDeveloperAgreement");
+                    let existingAmountAllocated = document.getElementById("existingAgreementAmountAllocated");
                     Amount.value = da.Agreement_Amount.toString();
                     AllocatedAmount.value = da.Developer_Amount_Currently_Allocated_Formatted;
                     AuditLog.value = da.Developer_Audit_Log;
@@ -42,19 +54,20 @@ var ImpactFees;
                 }
             }).catch(function (e) {
                 parent.classList.remove("is-loading");
+                // some kind of error occurred.
             });
-        };
-        DeveloperAgreement.SaveAgreement = function () {
-            var developerAgreementError = document.getElementById("developerAgreementErrorList");
-            var developerAgreementErrorContainer = document.getElementById("developerAgreementError");
+        }
+        static SaveAgreement() {
+            let developerAgreementError = document.getElementById("developerAgreementErrorList");
+            let developerAgreementErrorContainer = document.getElementById("developerAgreementError");
             Utilities.Hide(developerAgreementErrorContainer);
-            var agreementSelect = document.getElementById("developerAgreementAdd");
-            var agreementNumber = agreementSelect.options[agreementSelect.selectedIndex].value;
-            var AmountElement = document.getElementById("developerAgreementAmount");
+            let agreementSelect = document.getElementById("developerAgreementAdd");
+            let agreementNumber = agreementSelect.options[agreementSelect.selectedIndex].value;
+            let AmountElement = document.getElementById("developerAgreementAmount");
             AmountElement.classList.remove("is-danger");
-            var Amount = parseFloat(AmountElement.value);
-            if (!isNaN(Amount) && Amount >= 0) {
-                var d = new DeveloperAgreement();
+            let Amount = parseFloat(AmountElement.value);
+            if (!isNaN(Amount) && Amount >= 0) { // cursory validation, main validation will be the backend.
+                let d = new DeveloperAgreement();
                 d.Agreement_Amount = Amount;
                 d.Agreement_Number = agreementNumber;
                 XHR.SaveObject("./API/ImpactFees/SaveDeveloperAgreement", d).then(function (a) {
@@ -67,19 +80,20 @@ var ImpactFees;
                         DeveloperAgreement.Load(agreementSelect);
                     }
                 }).catch(function (e) {
+                    // figure out what we want to do with the errors.
                     Utilities.Show(developerAgreementErrorContainer);
                     developerAgreementError.value = e;
                 });
             }
             else {
+                // show error messages
                 AmountElement.focus();
                 AmountElement.classList.add("is-danger");
-                var errorElement = document.getElementById("developerAgreementAmountError");
+                let errorElement = document.getElementById("developerAgreementAmountError");
                 Utilities.Error_Show(errorElement);
             }
-        };
-        return DeveloperAgreement;
-    }());
+        }
+    }
     ImpactFees.DeveloperAgreement = DeveloperAgreement;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=DeveloperAgreement.js.map

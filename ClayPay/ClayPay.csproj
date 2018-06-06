@@ -36,7 +36,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptTarget>ES2015</TypeScriptTarget>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
@@ -49,8 +49,7 @@
     <TypeScriptSourceMap>True</TypeScriptSourceMap>
     <TypeScriptMapRoot>
     </TypeScriptMapRoot>
-    <TypeScriptSourceRoot>
-    </TypeScriptSourceRoot>
+    <TypeScriptSourceRoot>C:\Users\mccartneyd\Documents\Visual Studio 2017\Projects\ClayPay\ClayPay\Scripts</TypeScriptSourceRoot>
     <LangVersion>7</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -69,6 +68,9 @@
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -87,11 +89,30 @@
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.6\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Http, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.6\lib\net45\System.Web.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Http.WebHost, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.6\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.6\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.6\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.6\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.6\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.6\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
@@ -102,6 +123,15 @@
   <ItemGroup>
     <Content Include=".gitattributes" />
     <Content Include="bower_components\bulma\css\bulma.css" />
+    <Content Include="bower_components\fetch\fetch.js" />
+    <Content Include="bower_components\promise-polyfill\dist\polyfill.js" />
+    <Content Include="bower_components\promise-polyfill\dist\polyfill.min.js" />
+    <Content Include="bower_components\promise-polyfill\dist\promise.js" />
+    <Content Include="bower_components\promise-polyfill\dist\promise.min.js" />
+    <Content Include="bower_components\promise-polyfill\karma.conf.js" />
+    <Content Include="bower_components\promise-polyfill\rollup.umd.config.js" />
+    <Content Include="bower_components\promise-polyfill\src\index.js" />
+    <Content Include="bower_components\promise-polyfill\src\polyfill.js" />
     <Content Include="Content\accepted.png" />
     <Content Include="Content\bulma.css" />
     <Content Include="Content\bulma.min.css">
@@ -114,6 +144,7 @@
     <Content Include="Content\Main.min.css">
       <DependentUpon>Main.css</DependentUpon>
     </Content>
+    <Content Include="Content\Site.css" />
     <Content Include="Content\Utilities.css">
       <DependentUpon>Utilities.scss</DependentUpon>
     </Content>
@@ -178,6 +209,15 @@
     <Content Include="bower_components\bulma\sass\utilities\initial-variables.sass" />
     <Content Include="bower_components\bulma\sass\utilities\mixins.sass" />
     <Content Include="bower_components\bulma\sass\utilities\_all.sass" />
+    <Content Include="bower_components\fetch\.bower.json" />
+    <Content Include="bower_components\fetch\bower.json" />
+    <Content Include="bower_components\fetch\LICENSE" />
+    <Content Include="bower_components\promise-polyfill\.bower.json" />
+    <Content Include="bower_components\promise-polyfill\bower.json" />
+    <Content Include="bower_components\promise-polyfill\CHANGELOG.md" />
+    <Content Include="bower_components\promise-polyfill\LICENSE" />
+    <Content Include="bower_components\promise-polyfill\package.json" />
+    <Content Include="bower_components\promise-polyfill\README.md" />
     <None Include="compilerconfig.json" />
     <None Include="compilerconfig.json.defaults">
       <DependentUpon>compilerconfig.json</DependentUpon>
@@ -185,12 +225,12 @@
     <Content Include="ImpactFees.html" />
     <Content Include="ConnectionStrings.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="Content\Utilities.scss" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile1.pubxml" />
     <Content Include="index.html" />
-    <Content Include="Scripts\app\es6-promise.min.js" />
     <Content Include="Scripts\claypay\bundle.js" />
     <Content Include="Scripts\claypay\bundle.min.js">
       <DependentUpon>bundle.js</DependentUpon>
@@ -200,7 +240,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\Building\MainController.cs" />
     <Compile Include="Controllers\ImpactFees\AgreementsController.cs" />
     <Compile Include="Controllers\AppTypesController.cs" />
     <Compile Include="Controllers\FeeController.cs" />
@@ -232,6 +275,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\web.config" />
+    <Content Include="Views\Main\View.cshtml" />
+    <Content Include="Views\Main\Index.cshtml" />
+    <Content Include="Scripts\tsconfig.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -242,6 +292,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Models\Balancing\" />
+    <Folder Include="Scripts\app\typings\" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\app\Utilities.ts" />
@@ -250,7 +301,6 @@
     <TypeScriptCompile Include="Scripts\claypay\CCData.ts" />
     <TypeScriptCompile Include="Scripts\claypay\Charge.ts" />
     <TypeScriptCompile Include="Scripts\claypay\transport.ts" />
-    <None Include="Scripts\app\typings\es6-promise\es6-promise.d.ts" />
     <TypeScriptCompile Include="Scripts\claypay\UI.ts" />
     <TypeScriptCompile Include="Scripts\app\XHR.ts" />
     <TypeScriptCompile Include="Scripts\impactfees\BuilderAllocation.ts" />

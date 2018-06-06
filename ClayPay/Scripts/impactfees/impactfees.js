@@ -1,4 +1,8 @@
+/// <reference path="../app/utilities.ts" />
+/// <reference path="../app/xhr.ts" />
 var ImpactFees;
+/// <reference path="../app/utilities.ts" />
+/// <reference path="../app/xhr.ts" />
 (function (ImpactFees) {
     ImpactFees.CombinedAllocations = [];
     function Start() {
@@ -6,10 +10,10 @@ var ImpactFees;
     }
     ImpactFees.Start = Start;
     function Menu(id) {
-        var sections = document.querySelectorAll("body > section");
+        let sections = document.querySelectorAll("body > section");
         if (sections.length > 0) {
-            for (var i = 0; i < sections.length; i++) {
-                var item = sections.item(i);
+            for (let i = 0; i < sections.length; i++) {
+                let item = sections.item(i);
                 if (sections.item(i).id === id) {
                     item.classList.remove("hide");
                     item.classList.add("show");
@@ -30,19 +34,19 @@ var ImpactFees;
         });
     }
     function PopulateAgreementDropdowns(agreements) {
-        var added = [];
-        var developer = document.getElementById("developerAgreementAdd");
-        var builder = document.getElementById("builderAllocationAgreementAdd");
-        var permit = document.getElementById("permitSelectAgreement");
-        for (var _i = 0, agreements_1 = agreements; _i < agreements_1.length; _i++) {
-            var a = agreements_1[_i];
+        let added = [];
+        let developer = document.getElementById("developerAgreementAdd");
+        let builder = document.getElementById("builderAllocationAgreementAdd");
+        let permit = document.getElementById("permitSelectAgreement");
+        for (let a of agreements) {
             if (added.indexOf(a.Agreement_Number) === -1) {
                 added.push(a.Agreement_Number);
-                var label = a.Agreement_Number + ' - ' + a.Developer_Name;
+                let label = a.Agreement_Number + ' - ' + a.Developer_Name;
                 developer.add(Utilities.Create_Option(a.Agreement_Number, label));
-                if (a.Agreement_Amount > 0) {
+                if (a.Agreement_Amount > 0) { // we don't need to make them selectable if there is no money allocated to this developer.
                     builder.add(Utilities.Create_Option(a.Agreement_Number, label));
-                    if (a.Builder_Allocation_Amount > 0) {
+                    if (a.Builder_Allocation_Amount > 0) // same for the permit and the builder.
+                     {
                         permit.add(Utilities.Create_Option(a.Agreement_Number, label));
                     }
                 }
@@ -50,19 +54,17 @@ var ImpactFees;
         }
     }
     function PopulateExistingAllocations(df) {
-        var container = document.getElementById("existingAllocationsContainer");
+        let container = document.getElementById("existingAllocationsContainer");
         Utilities.Clear_Element(container);
         Utilities.Show(container);
         container.appendChild(df);
     }
-    function BuildBreadCrumbs(Agreement_Number, Builder_Name) {
-        if (Agreement_Number === void 0) { Agreement_Number = ""; }
-        if (Builder_Name === void 0) { Builder_Name = ""; }
-        var bc = document.getElementById("breadcrumbs");
+    function BuildBreadCrumbs(Agreement_Number = "", Builder_Name = "") {
+        let bc = document.getElementById("breadcrumbs");
         Utilities.Clear_Element(bc);
-        var baseLI = document.createElement("li");
+        let baseLI = document.createElement("li");
         bc.appendChild(baseLI);
-        var baseA = document.createElement("a");
+        let baseA = document.createElement("a");
         baseA.href = "#";
         baseA.appendChild(document.createTextNode("Agreements"));
         baseA.onclick = function () {
@@ -74,8 +76,8 @@ var ImpactFees;
             baseLI.classList.add("is-active");
         }
         else {
-            var agreementLI = document.createElement("li");
-            var agreementA = document.createElement("a");
+            let agreementLI = document.createElement("li");
+            let agreementA = document.createElement("a");
             agreementA.href = "#";
             agreementA.appendChild(document.createTextNode(Agreement_Number));
             agreementA.onclick = function () {
@@ -85,9 +87,9 @@ var ImpactFees;
             agreementLI.appendChild(agreementA);
             bc.appendChild(agreementLI);
             if (Builder_Name.length > 0) {
-                var builderLI = document.createElement("li");
+                let builderLI = document.createElement("li");
                 builderLI.classList.add("is-active");
-                var builderA = document.createElement("a");
+                let builderA = document.createElement("a");
                 builderA.appendChild(document.createTextNode(Builder_Name));
                 builderA.onclick = function () {
                     console.log("test");
@@ -103,16 +105,15 @@ var ImpactFees;
     }
     function BuildDeveloperTable() {
         BuildBreadCrumbs();
-        var df = new DocumentFragment();
-        var t = document.createElement("table");
+        let df = new DocumentFragment();
+        let t = document.createElement("table");
         t.classList.add("table");
         t.width = "100%";
-        var tHead = document.createElement("thead");
+        let tHead = document.createElement("thead");
         tHead.appendChild(DeveloperHeaderRow());
-        var tBody = document.createElement("tbody");
-        var distinct = [];
-        for (var _i = 0, CombinedAllocations_1 = ImpactFees.CombinedAllocations; _i < CombinedAllocations_1.length; _i++) {
-            var ca = CombinedAllocations_1[_i];
+        let tBody = document.createElement("tbody");
+        let distinct = [];
+        for (let ca of ImpactFees.CombinedAllocations) {
             if (distinct.indexOf(ca.Agreement_Number) === -1) {
                 distinct.push(ca.Agreement_Number);
                 tBody.appendChild(BuildRow(ca.Agreement_Number, "", ca.Agreement_Number, ca.Developer_Name, ca.Agreement_Amount_Formatted, ca.Developer_Amount_Currently_Allocated_Formatted));
@@ -139,16 +140,15 @@ var ImpactFees;
     ImpactFees.View = View;
     function BuildBuilderTable(Agreement_Number) {
         BuildBreadCrumbs(Agreement_Number);
-        var df = new DocumentFragment();
-        var t = document.createElement("table");
+        let df = new DocumentFragment();
+        let t = document.createElement("table");
         t.classList.add("table");
         t.width = "100%";
-        var tHead = document.createElement("thead");
+        let tHead = document.createElement("thead");
         tHead.appendChild(BuilderHeaderRow());
-        var tBody = document.createElement("tbody");
-        var distinct = [];
-        for (var _i = 0, CombinedAllocations_2 = ImpactFees.CombinedAllocations; _i < CombinedAllocations_2.length; _i++) {
-            var ca = CombinedAllocations_2[_i];
+        let tBody = document.createElement("tbody");
+        let distinct = [];
+        for (let ca of ImpactFees.CombinedAllocations) {
             if (ca.Agreement_Number === Agreement_Number && distinct.indexOf(ca.Builder_Name) === -1) {
                 distinct.push(ca.Builder_Name);
                 tBody.appendChild(BuildRow(ca.Agreement_Number, ca.Builder_Name, ca.Builder_Name, ca.Builder_Allocation_Amount_Formatted, ca.Builder_Amount_Currently_Allocated_Formatted));
@@ -161,15 +161,14 @@ var ImpactFees;
     }
     function BuildPermitTable(Agreement_Number, Builder_Name) {
         BuildBreadCrumbs(Agreement_Number, Builder_Name);
-        var df = new DocumentFragment();
-        var t = document.createElement("table");
+        let df = new DocumentFragment();
+        let t = document.createElement("table");
         t.classList.add("table");
         t.width = "100%";
-        var tHead = document.createElement("thead");
+        let tHead = document.createElement("thead");
         tHead.appendChild(PermitHeaderRow());
-        var tBody = document.createElement("tbody");
-        for (var _i = 0, CombinedAllocations_3 = ImpactFees.CombinedAllocations; _i < CombinedAllocations_3.length; _i++) {
-            var ca = CombinedAllocations_3[_i];
+        let tBody = document.createElement("tbody");
+        for (let ca of ImpactFees.CombinedAllocations) {
             if (ca.Agreement_Number === Agreement_Number && ca.Builder_Name === Builder_Name) {
                 tBody.appendChild(BuildRow(ca.Agreement_Number, "", ca.Permit_Number, ca.Permit_Amount_Allocated.toLocaleString('en-US', { style: 'currency', currency: 'USD' })));
             }
@@ -180,18 +179,18 @@ var ImpactFees;
         return df;
     }
     function DeveloperHeaderRow() {
-        var tr = document.createElement("tr");
+        let tr = document.createElement("tr");
         tr.classList.add("tr");
-        var an = document.createElement("th");
+        let an = document.createElement("th");
         an.appendChild(document.createTextNode("Agreement Number"));
         an.width = "25%";
-        var dn = document.createElement("th");
+        let dn = document.createElement("th");
         dn.appendChild(document.createTextNode("Developer Name"));
         dn.width = "25%";
-        var aa = document.createElement("th");
+        let aa = document.createElement("th");
         aa.appendChild(document.createTextNode("Agreement Amount"));
         aa.width = "25%";
-        var ca = document.createElement("th");
+        let ca = document.createElement("th");
         ca.appendChild(document.createTextNode("Currently Allocated"));
         ca.width = "25%";
         tr.appendChild(an);
@@ -201,15 +200,15 @@ var ImpactFees;
         return tr;
     }
     function BuilderHeaderRow() {
-        var tr = document.createElement("tr");
+        let tr = document.createElement("tr");
         tr.classList.add("tr");
-        var bn = document.createElement("th");
+        let bn = document.createElement("th");
         bn.appendChild(document.createTextNode("Builder Name"));
         bn.width = "33%";
-        var aa = document.createElement("th");
+        let aa = document.createElement("th");
         aa.appendChild(document.createTextNode("Amount Allocated"));
         aa.width = "33%";
-        var ca = document.createElement("th");
+        let ca = document.createElement("th");
         ca.appendChild(document.createTextNode("Currently Allocated"));
         ca.width = "33%";
         tr.appendChild(bn);
@@ -218,36 +217,42 @@ var ImpactFees;
         return tr;
     }
     function PermitHeaderRow() {
-        var tr = document.createElement("tr");
+        let tr = document.createElement("tr");
         tr.classList.add("tr");
-        var bn = document.createElement("th");
+        let bn = document.createElement("th");
         bn.appendChild(document.createTextNode("Permit Name"));
         bn.width = "50%";
-        var aa = document.createElement("th");
+        let aa = document.createElement("th");
         aa.appendChild(document.createTextNode("Amount Allocated"));
         aa.width = "50%";
         tr.appendChild(bn);
         tr.appendChild(aa);
         return tr;
     }
-    function BuildRow(key1, key2) {
-        var values = [];
-        for (var _i = 2; _i < arguments.length; _i++) {
-            values[_i - 2] = arguments[_i];
-        }
-        var tr = document.createElement("tr");
+    function BuildRow(key1, key2, ...values) {
+        let tr = document.createElement("tr");
         tr.classList.add("tr");
         tr.onclick = function () {
             View(key1, key2);
         };
-        for (var _a = 0, values_1 = values; _a < values_1.length; _a++) {
-            var v = values_1[_a];
-            var td = document.createElement("td");
+        for (let v of values) {
+            let td = document.createElement("td");
             td.classList.add("td");
             td.appendChild(document.createTextNode(v));
             tr.appendChild(td);
         }
         return tr;
     }
+    //function BuildBigRow(id: string, colSpan: number): HTMLTableRowElement
+    //{
+    //  let tr = document.createElement("tr");
+    //  tr.classList.add("tr");
+    //  tr.id = id;
+    //  Utilities.Hide(tr);
+    //  let td = document.createElement("td");
+    //  td.colSpan = colSpan;
+    //  tr.appendChild(td);
+    //  return tr;
+    //}
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=impactfees.js.map

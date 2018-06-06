@@ -58,9 +58,8 @@ var Utilities;
         }
     }
     Utilities.Clear_Element = Clear_Element;
-    function Create_Option(value, label, selected) {
-        if (selected === void 0) { selected = false; }
-        var o = document.createElement("option");
+    function Create_Option(value, label, selected = false) {
+        let o = document.createElement("option");
         o.value = value;
         o.text = label;
         o.selected = selected;

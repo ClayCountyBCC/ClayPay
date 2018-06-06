@@ -1,10 +1,12 @@
+/// <reference path="../app/xhr.ts" />
 var ImpactFees;
+/// <reference path="../app/xhr.ts" />
 (function (ImpactFees) {
-    var CombinedAllocation = (function () {
-        function CombinedAllocation() {
+    class CombinedAllocation {
+        constructor() {
         }
-        CombinedAllocation.GetAll = function (agreementNumber, builderId, permitNumber) {
-            var qs = "";
+        static GetAll(agreementNumber, builderId, permitNumber) {
+            let qs = "";
             if (agreementNumber.length > 0) {
                 qs = "&agreementNumber=" + agreementNumber;
             }
@@ -15,12 +17,11 @@ var ImpactFees;
                 qs = "&permitNumber=" + permitNumber;
             }
             if (qs.length > 0) {
-                qs = "?" + qs.substr(1);
+                qs = "?" + qs.substr(1); // no matter which arguments we used, we'll always remove the leading & and add a ?
             }
             return XHR.GetArray("./API/ImpactFees/GetAgreements", qs);
-        };
-        return CombinedAllocation;
-    }());
+        }
+    }
     ImpactFees.CombinedAllocation = CombinedAllocation;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=CombinedAllocation.js.map

@@ -1,18 +1,18 @@
+/// <reference path="../app/xhr.ts" />
 var ImpactFees;
+/// <reference path="../app/xhr.ts" />
 (function (ImpactFees) {
-    var PermitImpactFee = (function () {
-        function PermitImpactFee() {
+    class PermitImpactFee {
+        constructor() {
         }
-        PermitImpactFee.Get = function (Permit_Number, Agreement_Number) {
-            if (Agreement_Number === void 0) { Agreement_Number = ""; }
-            var qs = "?permit_number=" + Permit_Number.trim();
+        static Get(Permit_Number, Agreement_Number = "") {
+            let qs = "?permit_number=" + Permit_Number.trim();
             if (Agreement_Number.length > 0) {
                 qs += "&agreement_number=" + Agreement_Number;
             }
             return XHR.GetObject("./API/ImpactFees/GetPermit", qs);
-        };
-        return PermitImpactFee;
-    }());
+        }
+    }
     ImpactFees.PermitImpactFee = PermitImpactFee;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=PermitImpactFee.js.map

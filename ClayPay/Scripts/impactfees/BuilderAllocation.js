@@ -1,18 +1,20 @@
+/// <reference path="../app/xhr.ts" />
 var ImpactFees;
+/// <reference path="../app/xhr.ts" />
 (function (ImpactFees) {
-    var BuilderAllocation = (function () {
-        function BuilderAllocation() {
+    class BuilderAllocation {
+        constructor() {
             this.Amount_Currently_Allocated = 0;
             this.Audit_Log = "";
         }
-        BuilderAllocation.LoadBuilders = function (e) {
-            var parent = e.parentElement;
+        static LoadBuilders(e) {
+            let parent = e.parentElement;
             parent.classList.add("is-loading");
-            var id = e.id.replace("Add", "");
-            var container = document.getElementById(id + "Selected");
-            var agreementSelectedDeveloperAmount = document.getElementById("builderDeveloperSelectedAmount");
-            var agreementSelectedDeveloperCurrentlyAllocated = document.getElementById("builderDeveloperSelectedCurrentlyAllocated");
-            var builderSelectedContainer = document.getElementById("builderSelected");
+            let id = e.id.replace("Add", "");
+            let container = document.getElementById(id + "Selected");
+            let agreementSelectedDeveloperAmount = document.getElementById("builderDeveloperSelectedAmount");
+            let agreementSelectedDeveloperCurrentlyAllocated = document.getElementById("builderDeveloperSelectedCurrentlyAllocated");
+            let builderSelectedContainer = document.getElementById("builderSelected");
             BuilderAllocation.LoadBuilder("", "", "", "$0.00");
             Utilities.Hide(builderSelectedContainer);
             Utilities.Hide(container);
@@ -20,25 +22,25 @@ var ImpactFees;
             Utilities.Hide(agreementSelectedDeveloperCurrentlyAllocated);
             if (e.selectedIndex === 0) {
                 parent.classList.remove("is-loading");
-                return;
+                return; // no agreement selected.
             }
-            var agreementNumber = e.options[e.selectedIndex].value;
+            let agreementNumber = e.options[e.selectedIndex].value;
             ImpactFees.CombinedAllocation.GetAll(agreementNumber, -1, "").then(function (builders) {
-                var selectBuilder = document.getElementById("existingBuilders");
+                // let's load the dropdown
+                let selectBuilder = document.getElementById("existingBuilders");
                 Utilities.Clear_Element(selectBuilder);
                 builders = builders.filter(function (b) { return b.Builder_Name.trim().length > 0; });
                 if (builders.length > 0) {
                     Utilities.Show(container);
                     Utilities.Show(agreementSelectedDeveloperAmount);
                     Utilities.Show(agreementSelectedDeveloperCurrentlyAllocated);
-                    var DeveloperAmount = document.getElementById("buildersDeveloperAgreementAmount");
-                    var DeveloperAllocated = document.getElementById("buildersDeveloperCurrentlyAllocated");
+                    let DeveloperAmount = document.getElementById("buildersDeveloperAgreementAmount");
+                    let DeveloperAllocated = document.getElementById("buildersDeveloperCurrentlyAllocated");
                     DeveloperAmount.value = builders[0].Agreement_Amount_Formatted;
                     DeveloperAllocated.value = builders[0].Developer_Amount_Currently_Allocated_Formatted;
                     selectBuilder.add(Utilities.Create_Option("", "Select Builder or Add New", true));
-                    var distinctBuilder = [];
-                    for (var _i = 0, builders_1 = builders; _i < builders_1.length; _i++) {
-                        var b = builders_1[_i];
+                    let distinctBuilder = [];
+                    for (let b of builders) {
                         if (distinctBuilder.indexOf(b.Builder_Id) === -1 && b.Builder_Name.trim() !== "") {
                             distinctBuilder.push(b.Builder_Id);
                             selectBuilder.add(Utilities.Create_Option(b.Builder_Id.toString(), b.Builder_Name));
@@ -46,24 +48,27 @@ var ImpactFees;
                     }
                 }
                 else {
+                    // if there are no builders for this agreement already setup
+                    // let's just show the add builder inputs.
                     BuilderAllocation.LoadBuilder("", "", "", "$0.00");
                 }
                 parent.classList.remove("is-loading");
             }).catch(function (e) {
                 parent.classList.remove("is-loading");
+                // some kind of error occurred.
             });
-        };
-        BuilderAllocation.LoadSpecificBuilder = function (e) {
+        }
+        static LoadSpecificBuilder(e) {
             if (e.selectedIndex === 0) {
                 BuilderAllocation.LoadBuilder("", "", "", "$0.00");
                 return;
             }
-            var parent = e.parentElement;
+            let parent = e.parentElement;
             parent.classList.add("is-loading");
-            var builderId = parseInt(e.options[e.selectedIndex].value);
+            let builderId = parseInt(e.options[e.selectedIndex].value);
             ImpactFees.CombinedAllocation.GetAll("", builderId, "").then(function (builders) {
                 if (builders.length > 0) {
-                    var builder = builders[0];
+                    let builder = builders[0];
                     BuilderAllocation.LoadBuilder(builder.Builder_Name, builder.Builder_Allocation_Amount.toString(), builder.Builder_Audit_Log, builder.Builder_Amount_Currently_Allocated_Formatted);
                 }
                 parent.classList.remove("is-loading");
@@ -71,14 +76,15 @@ var ImpactFees;
                 parent.classList.remove("is-loading");
                 console.log('Load Specific builder error happened', e);
             });
-        };
-        BuilderAllocation.LoadBuilder = function (BuilderName, BuilderAmount, AuditLog, AlreadyAllocated) {
-            var Name = document.getElementById("builderAllocationName");
-            var Amount = document.getElementById("builderAllocationAmount");
-            var Log = document.getElementById("builderAllocationAuditLog");
-            var Allocated = document.getElementById("buildersAmountAllocatedToPermits");
-            var container = document.getElementById("builderSelected");
-            var existingContainer = document.getElementById("existingBuilderAllocation");
+        }
+        static LoadBuilder(BuilderName, BuilderAmount, AuditLog, AlreadyAllocated) {
+            // hide Add New Builder button unless select index = 0
+            let Name = document.getElementById("builderAllocationName");
+            let Amount = document.getElementById("builderAllocationAmount");
+            let Log = document.getElementById("builderAllocationAuditLog");
+            let Allocated = document.getElementById("buildersAmountAllocatedToPermits");
+            let container = document.getElementById("builderSelected");
+            let existingContainer = document.getElementById("existingBuilderAllocation");
             Utilities.Hide(existingContainer);
             Utilities.Show(container);
             Name.value = BuilderName;
@@ -88,45 +94,49 @@ var ImpactFees;
             if (AuditLog.length > 0) {
                 Utilities.Show(existingContainer);
             }
-        };
-        BuilderAllocation.AddNewBuilder = function () {
-            var builderSelect = document.getElementById("existingBuilders");
+            // load the values into the form and show it
+        }
+        static AddNewBuilder() {
+            // clear out the form and show it
+            let builderSelect = document.getElementById("existingBuilders");
             if (builderSelect.options.length > 0)
                 builderSelect.selectedIndex = 0;
             BuilderAllocation.LoadBuilder("", "", "", "$0.00");
-        };
-        BuilderAllocation.SaveAllocation = function () {
-            var builderAllocationErrorContainer = document.getElementById("builderAllocationError");
-            var builderAllocationError = document.getElementById("builderAllocationErrorList");
+        }
+        static SaveAllocation() {
+            //builderAllocationErrorList
+            let builderAllocationErrorContainer = document.getElementById("builderAllocationError");
+            let builderAllocationError = document.getElementById("builderAllocationErrorList");
             Utilities.Hide(builderAllocationErrorContainer);
-            var agreementSelect = document.getElementById("builderAllocationAgreementAdd");
-            var agreementNumber = agreementSelect.options[agreementSelect.selectedIndex].value;
-            var builderSelect = document.getElementById("existingBuilders");
-            var builderId = null;
+            let agreementSelect = document.getElementById("builderAllocationAgreementAdd");
+            let agreementNumber = agreementSelect.options[agreementSelect.selectedIndex].value;
+            let builderSelect = document.getElementById("existingBuilders");
+            let builderId = null;
             if (builderSelect.options.length > 0 && builderSelect.selectedIndex > 0) {
                 builderId = builderSelect.options[builderSelect.selectedIndex].value;
             }
-            var NameElement = document.getElementById("builderAllocationName");
-            var AmountElement = document.getElementById("builderAllocationAmount");
+            let NameElement = document.getElementById("builderAllocationName");
+            let AmountElement = document.getElementById("builderAllocationAmount");
             AmountElement.classList.remove("is-danger");
             NameElement.classList.remove("is-danger");
-            var Amount = parseFloat(AmountElement.value);
-            var BuilderName = NameElement.value.trim().toUpperCase();
+            let Amount = parseFloat(AmountElement.value);
+            let BuilderName = NameElement.value.trim().toUpperCase();
             if (BuilderName.length < 3) {
                 NameElement.focus();
                 NameElement.classList.add("is-danger");
-                var NameErrorElement = document.getElementById("builderAllocationNameError");
+                let NameErrorElement = document.getElementById("builderAllocationNameError");
                 Utilities.Error_Show(NameErrorElement);
                 return;
             }
             if (isNaN(Amount) || Amount < 0) {
+                // show error messages
                 AmountElement.focus();
                 AmountElement.classList.add("is-danger");
-                var errorElement = document.getElementById("builderAllocationAmountError");
+                let errorElement = document.getElementById("builderAllocationAmountError");
                 Utilities.Error_Show(errorElement);
                 return;
             }
-            var b = new BuilderAllocation();
+            let b = new BuilderAllocation();
             b.Agreement_Number = agreementNumber;
             b.Builder_Name = BuilderName;
             b.Allocation_Amount = Amount;
@@ -141,12 +151,12 @@ var ImpactFees;
                     BuilderAllocation.LoadBuilders(agreementSelect);
                 }
             }).catch(function (e) {
+                // figure out what we want to do with the errors.
                 Utilities.Show(builderAllocationErrorContainer);
                 builderAllocationError.value = e;
             });
-        };
-        return BuilderAllocation;
-    }());
+        }
+    }
     ImpactFees.BuilderAllocation = BuilderAllocation;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=BuilderAllocation.js.map

@@ -364,7 +364,7 @@
                    class="help is-danger hide">Permit numbers must be 8 digits.</p>
                 <p id="permitNumberNumericError"
                    class="help is-danger hide">
-                 Permit number must be numeric.
+                  Permit number must be numeric.
                 </p>
               </div>
               <div class="control">
@@ -588,7 +588,7 @@
                       tabindex="5"
                       class="button is-primary">
                 Save Permit Allocation
-              </button>              
+              </button>
             </div>
             <div class="control">
               <button onclick="ImpactFees.PermitAllocation.Reset(); return false;"
@@ -624,9 +624,7 @@
            class="breadcrumb has-background-white"
            aria-label="breadcrumbs">
         <ul id="breadcrumbs"
-            aria-label="breadcrumbs">
-
-        </ul>
+            aria-label="breadcrumbs"></ul>
       </nav>
       <div id="existingAllocationsContainer">
 
@@ -634,7 +632,9 @@
     </div>
 
   </section>
-  <script src="Scripts/app/es6-promise.min.js"></script>
+  <script src="bower_components/promise-polyfill/dist/polyfill.min.js"></script>
+  <script src="bower_components/fetch/fetch.js"></script>
+  <!--<script src="Scripts/app/es6-promise.min.js"></script>-->
   <script src="Scripts/app/XHR.js"></script>
   <script src="Scripts/app/Utilities.js"></script>
   <script src="Scripts/impactfees/PermitAllocation.js"></script>

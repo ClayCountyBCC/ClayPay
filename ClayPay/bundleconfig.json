@@ -3,7 +3,6 @@
     "outputFileName": "Scripts/claypay/bundle.js",
     "inputFiles": [
       "Scripts/app/xhr.js",
-      "Scripts/app/es6-promise.min.js",
       "Scripts/claypay/claypay.js",
       "Scripts/claypay/transport.js",
       "Scripts/claypay/ui.js",
