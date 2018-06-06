@@ -1,4 +1,9 @@
-﻿nav ul {
+﻿.hero-buffer
+{
+  margin-bottom: 1em;
+}
+
+nav ul {
   cursor: pointer;
 }
 
@@ -121,10 +126,10 @@
 }
 // Credit card stuff
 /* Padding - just for asthetics on Bootsnipp.com */
-body
+/*body
 {
   margin-top: 20px;
-}
+}*/
 
 /* CSS for Credit Card Payment form */
 .credit-card-box .panel-title

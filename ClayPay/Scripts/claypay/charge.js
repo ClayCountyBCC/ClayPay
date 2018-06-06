@@ -1,13 +1,12 @@
 var clayPay;
 (function (clayPay) {
-    var Charge = (function () {
-        function Charge() {
+    class Charge {
+        constructor() {
             this.ItemId = 0;
             this.Description = "";
             this.TimeStampDisplay = "";
         }
-        return Charge;
-    }());
+    }
     clayPay.Charge = Charge;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=charge.js.map
+//# sourceMappingURL=Charge.js.map
