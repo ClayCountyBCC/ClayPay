@@ -7,6 +7,8 @@ using System.Web.Http;
 using System.Net;
 using System.IO;
 using System.Data;
+using Dapper;
+using ClayPay.Models.Claypay;
 
 namespace ClayPay.Models
 {
@@ -275,7 +277,8 @@ namespace ClayPay.Models
       return sb.ToString();
     }
 
-    public bool Save(CCData ccd, string ipAddress)
+    // TODO: need to use this for saving all types of payments, not just cc payments
+    public bool Save(string ipAddress, CCData ccd = null, ManualPayment mp = null ) 
     {
       var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add("@cId", dbType: DbType.String, size: 9, direction: ParameterDirection.Output);
@@ -283,7 +286,7 @@ namespace ClayPay.Models
       dbArgs.Add("@PayerName", ccd.FirstName + " " + ccd.LastName);
       dbArgs.Add("@Total", ccd.Total);
       dbArgs.Add("@TransId", this.UniqueId);
-      dbArgs.Add("@ItemIds", ccd.ItemIds);
+      //dbArgs.Add("@ItemIds", ccd.ItemIds);
       //DECLARE @cId VARCHAR(9) = NULL;
       //DECLARE @otId int = NULL;
       string query = @"
@@ -429,7 +432,7 @@ namespace ClayPay.Models
             END AS Clrsht
           FROM ccCashierItem CCI
           INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
-          WHERE CCI.OTId = @otId
+          WHERE CCI.OTId = 0
           AND CCI.Assoc='IF'
           ) AS C ON H.Clrsht=C.Clrsht AND H.HldCd = C.HldCd
           WHERE C.HldCd <> '' AND C.Clrsht <> '';
@@ -525,6 +528,296 @@ namespace ClayPay.Models
         Constants.Log(ex, query);
         return false;
       }
+    }
+
+    public string Save_GetNextCashierId_Query()
+    {
+      //var param = new DynamicParameters();
+      //param.Add("@YR", DateTime.Now.Year.ToString("yy"));
+
+
+      // I don't know if the year is supposed to be the fiscal year.
+      // the code in  prc_upd_ccNextCashierId sets FY = the @Yr var
+      // code for @Yr checks the current year against the FY field and if it is not equal,
+      // it updates the FY and next avail fieldfield
+      var sql = @"
+
+      SELECT RTRIM(CAST(FY AS CHAR(2))) + '-' +  
+        REPLICATE('0', 6-LEN(LTRIM(CAST(NextAvail AS VARCHAR(6)))))  + 
+        CAST(NextAvail AS VARCHAR(6)) CashierId 
+      INTO #Next_Id
+      FROM ccNextAvail 
+      WHERE NAKey = 'Cashier'
+       
+      UPDATE ccNextAvail
+      SET
+        NextAvail = CASE WHEN FY != @YR THEN 1 ELSE NextAvail + 1 END,
+        FY = CASE WHEN FY != @YR THEN @YR ELSE FY END
+      WHERE NAKey = 'Cashier'
+
+      SELECT CashierId FROM #Next_Id
+      DROP TABLE #Next_Id
+      ";
+
+      return sql;
+    }
+
+    public string Save_InsertNewCashierRow_Query(string cashierId, string name, string NTUser, int stationId)
+    {
+      //var param = new DynamicParameters();
+      //param.Add("@CashierId", cashierId);
+      //param.Add("@name", name);
+      //param.Add("@NTUser", NTUser);
+      //param.Add("@StationId", stationId);
+      return @"
+      DECLARE OTid INT;
+
+      INSERT INTO ccCashier
+        (Name, CashierId, LstUpdt, OperId, TransDt, StationId)
+      VALUES     
+        (@Name, @CashierId, @NTUser, @OperId, GETDATE(), @StationId)
+      set @OTId = @@IDENTITY
+      ";
+
+    }
+
+    public string Save_UpdateCashierRow_Query(int OTid, string phone, string address1, string address2, string name, string NTUser, int stationId)
+    {
+      //var param = new DynamicParameters();
+      //param.Add("@OTid", OTid);
+      //param.Add("@name", name);
+      //param.Add("@phone", phone);
+      //param.Add("@address1", address1);
+      //param.Add("@address2", address2);
+      //param.Add("@NTUser", NTUser);
+      //param.Add("@StationId", stationId);
+      return @"
+
+      UPDATE ccCashier
+      SET Name =@Name, CoName =@CoName, Phone =@Phone, Addr1 =@Addr1, Addr2 =@Addr2, 
+                  NTUser =@NTUser, StationId =@StationId, TimeStamp =GETDATE()
+      WHERE   (OTId = @OTId)
+      ";
+
+    }
+
+    public string Save_UpdateCashierItemRows_Query(List<int> itemIds)
+    {
+      //var param = new DynamicParameters();
+      //param.Add("@OTid", OTId);
+      //param.Add("@ItemIds", itemIds);
+      return @"
+      UPDATE ccCashierItem 
+      SET OTId = @otId, CashierId = @cId
+      WHERE itemId IN @ItemIds
+      ";
+
+    }
+
+    public string Save_AddGURows_Query(int OTid)
+    {
+      //var param = new DynamicParameters();
+      //param.Add("@OTid", OTId);
+      return @"
+        INSERT INTO ccGU (OTId, CashierId, ItemId, PayID, CatCode, TransDt)
+        SELECT DISTINCT CCI.OTId, CCI.CashierId, CCI.ItemId, NULL, CCI.CatCode, GETDATE()
+        FROM ccCashierItem CCI
+        INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
+        WHERE CCI.OTId = @OTId
+
+      ";
+    }
+
+    public string Save_AddGUIItemRows_Query(int OTid)
+    {
+      //var param = new DynamicParameters();
+      //param.Add("@OTid", OTId);
+      return @"
+          INSERT INTO ccGUItem (GUID, Account, Amount, Type)
+          SELECT 
+            GU.GUId,
+            GL.Fund + '*' + GL.Account + '**' AS Account,
+          FORMAT(
+          CASE GL.[Percent] 
+            WHEN 0.05 THEN
+              CASE WHEN CAST(ROUND((Total * 99.9) / 100, 2) + (ROUND((Total * 0.05) / 100, 2)*2) AS MONEY) > CCI.Total THEN
+                CASE WHEN Fund <> '001' THEN 
+                  ROUND((Total * GL.[Percent]) / 100, 2) - .01
+                ELSE 
+                  ROUND((Total * GL.[Percent]) / 100, 2) 
+                END
+              ELSE
+                ROUND((Total * GL.[Percent]) / 100, 2) 
+              END
+            WHEN 50 THEN
+              CASE WHEN (ROUND((Total * GL.[Percent]) / 100, 2)*2) <> CCI.Total THEN
+                CASE WHEN GL.Account = '322100' THEN
+                    ROUND((Total * GL.[Percent]) / 100, 2) + (CCI.Total -  (ROUND((Total * GL.[Percent]) / 100, 2)*2))
+                ELSE
+                  ROUND((Total * GL.[Percent]) / 100, 2) 
+                END
+              ELSE
+                ROUND((Total * GL.[Percent]) / 100, 2) 
+              END
+            ELSE
+              ROUND(Total / (100 / GL.[Percent]), 2) 
+            END
+          , 'N2') AS Amount,
+            GL.Type
+          FROM ccCashierItem CCI
+          INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
+          INNER JOIN ccGU GU ON CCI.OTId = GU.OTId AND CCI.ItemId = GU.ItemId
+          WHERE CCI.OTId = @OTId
+          ORDER BY CCI.ItemId, GL.Type
+
+      ";
+
+    }
+
+    public string Finalize_UpdateClearanceSheetHolds_Query(string cashierId, string username)
+    {
+      return @"
+      -- Handle Clearance Sheet Holds
+      UPDATE H
+        SET HldDate = GETDATE(), 
+          HldIntl ='claypay', 
+          HldInput =@cId
+      FROM bpHold H
+      INNER JOIN (
+      SELECT DISTINCT 
+        CASE CCI.Assoc
+          WHEN 'IF' THEN '1IMP'
+        ELSE 
+          CASE WHEN CCI.HoldId IS NULL OR CCI.HoldID = 0 THEN
+            CASE CCI.CatCode
+              WHEN 'REV' THEN '1REV'
+              WHEN 'REVF' THEN '0REV'
+              WHEN 'CLA' THEN '1SWF'
+            ELSE ''
+              END
+          ELSE
+            ''
+          END
+        END AS HldCd,
+        CASE WHEN CCI.Assoc = 'IF' THEN ''
+        ELSE CCI.AssocKey
+        END AS PermitNo,
+        CASE WHEN CCI.Assoc = 'IF' THEN CCI.AssocKey
+        ELSE ''
+        END AS Clrsht
+      FROM ccCashierItem CCI
+      INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
+      WHERE CCI.OTId = 0
+      AND CCI.Assoc='IF'
+      ) AS C ON H.Clrsht=C.Clrsht AND H.HldCd = C.HldCd
+      WHERE C.HldCd <> '' AND C.Clrsht <> '';
+
+      UPDATE H
+        SET HldDate = GETDATE(), 
+          HldIntl ='claypay', 
+          HldInput =@cId
+      FROM bpHold H
+      INNER JOIN (
+      SELECT DISTINCT 
+        CASE CCI.Assoc
+          WHEN 'IF' THEN '1IMP'
+        ELSE 
+          CASE WHEN CCI.HoldId IS NULL OR CCI.HoldID = 0 THEN
+            CASE CCI.CatCode
+              WHEN 'REV' THEN '1REV'
+              WHEN 'REVF' THEN '0REV'
+              WHEN 'CLA' THEN '1SWF'
+            ELSE ''
+              END
+          ELSE
+            ''
+          END
+        END AS HldCd,
+        CASE WHEN CCI.Assoc = 'IF' THEN ''
+        ELSE CCI.AssocKey
+        END AS PermitNo,
+        CASE WHEN CCI.Assoc = 'IF' THEN CCI.AssocKey
+        ELSE ''
+        END AS Clrsht
+      FROM ccCashierItem CCI
+      INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
+      WHERE CCI.OTId = @otId
+      AND CCI.Assoc='IF'
+      ) AS C ON H.PermitNo=C.PermitNo AND H.HldCd = C.HldCd
+      WHERE C.HldCd <> '' AND C.PermitNo <> '';
+      ";
+
+    }
+
+    public string Finalize_HandleHolds_Query()
+    {
+      return @"
+      --Handle HoldIds
+        USE WATSC;
+        WITH HoldIds (HoldId) AS (
+          SELECT HoldId FROM ccCashierItem
+          WHERE HoldId > 0
+            AND OTid = @OTid)
+        UPDATE H
+         SET HldDate = GETDATE(), 
+             HldIntl = 'claypay', 
+             HldInput = @cId
+         FROM bpHold H
+         INNER JOIN HoldIds HI ON H";
+
+       
+    }
+
+    public string Finalize_IssueAssociatedPermits_Query()
+    {
+      return @"
+        
+
+      --Issue Associated Permits
+          UPDATE bpASSOC_PERMIT
+          SET IssueDate = GETDATE()
+          WHERE IssueDate IS NULL AND
+            PermitNo IN
+            (SELECT DISTINCT AssocKey
+              FROM ccCashierItem
+              WHERE OTId = @otId AND
+              Assoc NOT IN('AP', 'CL') AND
+              LEFT(AssocKey, 1) NOT IN('1', '7') AND
+              (SELECT ISNULL(SUM(Total), 0) AS Total
+                FROM ccCashierItem
+                WHERE AssocKey IN(SELECT DISTINCT AssocKey
+                                  FROM ccCashierItem
+                                  WHERE OTId = @otId) AND
+                CashierId IS NULL AND Total > 0) = 0);
+                ";
+    }
+
+    public string Finalize_UpdateContractorPayments_Query()
+    {
+      return @"         
+          -- Update Contractor Payments
+          DECLARE @ExpDt VARCHAR(20) = (SELECT TOP 1 Description
+          FROM clCategory_Codes WHERE Code = 'dt' AND Type_Code = '9');";
+
+
+    }
+
+    public string Finalize_UpdateContractor_Query(){
+      return @"          UPDATE clContractor
+          SET IssueDt=GETDATE(), ExpDt=@ExpDt, BlkCrdExpDt=@ExpDt
+          WHERE ContractorCd NOT LIKE 'AP%' AND 
+            ContractorCd IN 
+            (SELECT DISTINCT AssocKey 
+              FROM ccCashierItem 
+              WHERE OTId=@otId AND
+                Assoc='CL' AND
+                CatCode IN ('CLLTF', 'CLFE', 'CIAC', 'LFE') AND
+              (SELECT ISNULL(SUM(Total), 0) AS Total 
+                FROM ccCashierItem
+                WHERE AssocKey IN (SELECT DISTINCT AssocKey 
+                                  FROM ccCashierItem 
+                                  WHERE OTId=@OTId) AND
+                CashierId IS NULL AND Total > 0) = 0);";
     }
 
   }
