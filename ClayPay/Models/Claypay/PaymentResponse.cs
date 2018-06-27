@@ -15,22 +15,21 @@ namespace ClayPay.Models
   public class PaymentResponse
   {
     public string UniqueId { get; set; }
-    public DateTime TimeStamp { get; set; }
-    public string CashierId { get; set; }
-    public long OTId { get; set; }
+    public decimal Amount { get; set; }
+    public Constants.PaymentTypes PaymentType { get; set; }
+    public string ErrorText { get; set; } = ""; //
+    public string ConvFee { get; set; } // function GetConvenienceFee();
+    public bool UseProduction { get; set; } //
+    public DateTime TimeStamp { get; set; } //
+    public string CashierId { get; set; } //
+    public long OTId { get; set; } //
     public string TimeStamp_Display
     {
       get
       {
         return TimeStamp.ToShortDateString();
       }
-    }
-    public decimal Amount { get; set; }
-    public Constants.PaymentTypes PaymentType { get; set; }
-    public string ErrorText { get; set; } = "";
-    public string ConvFee { get; set; }
-    public bool UseProduction { get; set; }
-
+    } //
     public PaymentResponse(decimal Amount,
      Constants.PaymentTypes PaymentType,
      bool UseProduction)
@@ -67,7 +66,6 @@ namespace ClayPay.Models
         var pr = new PaymentResponse(ccd.Total, Constants.PaymentTypes.Building, Constants.UseProduction());
         if (pr.Post(ccd, ipAddress))
         {
-
           return pr;
         }
         else
@@ -278,7 +276,7 @@ namespace ClayPay.Models
     }
 
     // TODO: need to use this for saving all types of payments, not just cc payments
-    public bool Save(string ipAddress, CCData ccd = null, ManualPayment mp = null ) 
+    public bool Save(string ipAddress, CCData ccd = null, Payment mp = null ) 
     {
       var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add("@cId", dbType: DbType.String, size: 9, direction: ParameterDirection.Output);
@@ -541,6 +539,7 @@ namespace ClayPay.Models
       // code for @Yr checks the current year against the FY field and if it is not equal,
       // it updates the FY and next avail fieldfield
       var sql = @"
+      DECLARE @YR VARCHAR(2) = RIGHT(CAST(DATEPART(YEAR,GETDATE()) AS VARCHAR), 2)
 
       SELECT RTRIM(CAST(FY AS CHAR(2))) + '-' +  
         REPLICATE('0', 6-LEN(LTRIM(CAST(NextAvail AS VARCHAR(6)))))  + 

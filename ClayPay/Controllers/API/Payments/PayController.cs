@@ -14,103 +14,19 @@ namespace ClayPay.Controllers
   public class PayController : ApiController
   {
     // PUT: api/Pay
-    public IHttpActionResult Put(CCData ccd, List<ManualPayment> manualPayments)
+    public IHttpActionResult Put(NewTransaction thisTransaction)
     {
+      var ip = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+
       try
       {
-        var ip = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
-        List<string> e = new List<string>();
-        var charges = Charge.Get(ccd.ItemIds);
-        if (ccd != null)
-        { 
-          e = ccd.ValidateCCData(ccd);
-        }
-
-        if (e.Count() == 0)
-        {
-          e = (NewTransaction.ValidatePayments(ip, charges, ccd, manualPayments));
-
-          //var numberOfLockedItems = (ActiveTransactions.ChargeItemsLocked(ccd.ItemIds));
-
-          //if (numberOfLockedItems == 0)
-          //{
-          //  e.Add("A transaction is already in process for one or more of these charges.  Please wait a few moments and try again.");
-          //}
-          //if (numberOfLockedItems != 0 && ( numberOfLockedItems != ccd.ItemIds.Count() || numberOfLockedItems == -1))
-          //{
-          //  e.Add("There was an issue starting the transaction.  Please wait a few moments and try again.");
-          //}
-          // this is the last thing we'll validate.  If this doesn't fail then we'll be able
-          // to start sending data.
-          //if (e.Count == 0)
-          //{
-          //  if (!ActiveTransactions.Start(ccd.ItemIds))
-          //  {
-          //    e.Add("A transaction is already in process for one or more of these charges.  Please wait a few moments and try again.");
-          //  }
-          //}
-        }
-
-
-        if (e.Count > 0)
-        {
-          var message = String.Join("\n", e.ToArray());
-          return CreateError(message, HttpStatusCode.BadRequest);
-        }
-
-        var pr = PaymentResponse.PostPayment(ccd, ip);
-        if(pr == null)
-        {
-          Constants.Log("Error occurred in payment process", "pr did not complete", "", "");
-          ccd.UnlockIds();
-          return InternalServerError();
-        }
-
-        if (pr.ErrorText.Length > 0)
-        {
-          ccd.UnlockIds();
-          return CreateError(pr.ErrorText, HttpStatusCode.BadRequest);
-        }
-        else
-        {
-          if (pr.Save(ip, ccd))
-          {
-            pr.Finalize();
-            ccd.UnlockIds();
-            if (Constants.UseProduction())
-            {
-              Constants.SaveEmail("OnlinePermits@claycountygov.com",
-                $"Payment made - Receipt # {pr.CashierId}, Transaction # {pr.UniqueId} ",
-                CreateEmailBody(ccd, pr.CashierId));
-            }
-            else
-            {
-              Constants.SaveEmail("daniel.mccartney@claycountygov.com",
-                $"TEST Payment made - Receipt # {pr.CashierId}, Transaction # {pr.UniqueId} -- TEST SERVER",
-                CreateEmailBody(ccd, pr.CashierId));
-            }
-            return Ok(pr);
-          }
-          else
-          {
-            // If we hit this, we're going to have a real problem.
-            var items = String.Join(",", ccd.ItemIds);
-            Constants.Log("Error attempting to save transaction.",
-              items,
-              pr.UniqueId,
-              ccd.EmailAddress);
-            return InternalServerError();
-          }
-        }
-
+        return Ok(NewTransaction.Process(thisTransaction, ip));
       }
       catch(Exception ex)
       {
-        Constants.Log(ex);
-        ccd.UnlockIds();
-        return InternalServerError();
+        Constants.Log(ex, "Error in PayController.Put.");
+        return Ok("Error in processing this transaction");
       }
-
     }
 
     private string CreateEmailBody(CCData ccd, string cashierId)

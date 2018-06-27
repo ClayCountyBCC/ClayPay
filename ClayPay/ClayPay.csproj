@@ -280,7 +280,7 @@
     <Compile Include="Models\Balancing\Payment.cs" />
     <Compile Include="Models\Claypay\ActiveTransactions.cs" />
     <Compile Include="Models\Claypay\AppType.cs" />
-    <Compile Include="Models\Claypay\ManualPayment.cs" />
+    <Compile Include="Models\Claypay\Payment.cs" />
     <Compile Include="Models\Claypay\CCData.cs" />
     <Compile Include="Models\Claypay\CCPayment.cs" />
     <Compile Include="Models\Claypay\Charge.cs" />
