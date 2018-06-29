@@ -17,6 +17,7 @@ namespace ClayPay.Models
     public string ZipCode { get; set; }
     public decimal Total { get; set; }
     public string EmailAddress { get; set; }
+    public string IPAddress { get; set; }
     //public List<int> ItemIds { get; set; } = new List<int>();
 
     public readonly static string[] CardTypes = { "MASTERCARD", "VISA", "DISCOVER", "AMEX" };

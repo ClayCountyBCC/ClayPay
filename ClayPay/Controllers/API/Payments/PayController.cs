@@ -17,16 +17,9 @@ namespace ClayPay.Controllers
     public IHttpActionResult Put(NewTransaction thisTransaction)
     {
       var ip = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+      thisTransaction.ProcessTransaction(ip, new UserAccess(User.Identity.Name));
 
-      try
-      {
-        return Ok(NewTransaction.Process(thisTransaction, ip));
-      }
-      catch(Exception ex)
-      {
-        Constants.Log(ex, "Error in PayController.Put.");
-        return Ok("Error in processing this transaction");
-      }
+      return Ok(thisTransaction);
     }
 
     private string CreateEmailBody(CCData ccd, string cashierId)

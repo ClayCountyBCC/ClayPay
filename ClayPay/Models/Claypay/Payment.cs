@@ -7,7 +7,7 @@ namespace ClayPay.Models.Claypay
 {
   public class Payment
   {
-
+    
     public string PaymentType { get; set; }
     public decimal Amount { get; set; }
     public long CheckNumber { get; set; }
@@ -16,13 +16,9 @@ namespace ClayPay.Models.Claypay
     //public string Info { get; set; }
 
 
-    public Payment(decimal amount, string paymentType, long checkNumber = -1, string transactionId = "")
+    public Payment()
     {
-      this.PaymentType = paymentType;
-      this.Amount = amount;
-      this.CheckNumber = checkNumber;
-      this.TransactionId = transactionId;
-
+      
     }
   }
 }

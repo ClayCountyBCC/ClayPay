@@ -66,6 +66,7 @@ namespace ClayPay.Models
         var pr = new PaymentResponse(ccd.Total, Constants.PaymentTypes.Building, Constants.UseProduction());
         if (pr.Post(ccd, ipAddress))
         {
+
           return pr;
         }
         else
@@ -276,7 +277,7 @@ namespace ClayPay.Models
     }
 
     // TODO: need to use this for saving all types of payments, not just cc payments
-    public bool Save(string ipAddress, CCData ccd = null, Payment mp = null ) 
+    //public bool Save(string ipAddress, CCData ccd = null, Payment mp = null ) 
     {
       var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add("@cId", dbType: DbType.String, size: 9, direction: ParameterDirection.Output);
