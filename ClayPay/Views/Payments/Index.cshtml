@@ -1,505 +1,460 @@
-﻿
+﻿@model ClayPay.Models.UserAccess
+
 @{
   Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section id="builderAllocations"
-         class="hide">
-
-  <section class="hero is-info is-bold hero-buffer">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title">Builder Allocations</h1>
-        <h2 class="subtitle">
-          Use this menu to add or make changes to existing builder allocations.
-        </h2>
-      </div>
-    </div>
+<div style="margin-top: 1em;"
+     id="views"
+     class="container">
+  <section class="show"
+           id="Home">
+    <p>Let's explain the different sections with a bit more detail here.</p>
   </section>
 
-  <div class="container">
+  <section class="hide"
+           id="permitFees">
 
-    <form id="formBuilderAllocations">
-
-      <div class="columns">
-        <div class="field column">
-          <label class="label">Developer Agreement</label>
-          <div class="control">
-            <div class="select">
-              <select onchange="ImpactFees.BuilderAllocation.LoadBuilders(this);"
-                      tabindex="1"
-                      id="builderAllocationAgreementAdd">
-                <option>Select Agreement</option>
-              </select>
-            </div>
-            <p class="help">Selecting a Developer Agreement will load the data for that specific agreement.</p>
-          </div>
-        </div>
-
-        <div id="builderDeveloperSelectedAmount"
-             class="column field hide">
-          <label class="label">Agreement Amount</label>
-          <div class="control">
-            <input id="buildersDeveloperAgreementAmount"
-                   class="input"
-                   type="text"
-                   readonly />
-          </div>
-        </div>
-
-        <div id="builderDeveloperSelectedCurrentlyAllocated"
-             class="column field hide">
-          <label class="label">Currently Allocated to Builders</label>
-          <div class="control">
-            <input id="buildersDeveloperCurrentlyAllocated"
-                   class="input"
-                   type="text"
-                   readonly />
-          </div>
-        </div>
-
+    <div class="field is-horizontal">
+      <div class="field-label is-normal">
+        <label class="label">Permit Number</label>
       </div>
-
-      <div id="builderAllocationAgreementSelected"
-           class="field hide">
-        <div class="field">
-          <label class="label">Existing Builders</label>
-          <div class="control is-grouped">
-            <div class="select">
-              <select onchange="ImpactFees.BuilderAllocation.LoadSpecificBuilder(this);"
-                      tabindex="2"
-                      id="existingBuilders"></select>
-            </div>
-            <button onclick="ImpactFees.BuilderAllocation.AddNewBuilder(); return false;"
-                    tabindex="3"
-                    id="addNewBuilder"
+      <div class="field-body">
+        <div class="field is-grouped">
+          <div class="control">
+            <input id="permitSearch"
+                   class="input"
+                   type="number"
+                   maxlength="8"
+                   value="11701545"
+                   placeholder="18000001" />
+          </div>
+          <div class="control">
+            <button id="permitSearchButton"
                     type="button"
                     class="button is-primary">
-              Add New Builder
+              Search
             </button>
           </div>
         </div>
       </div>
-      <div class="field hide"
-           id="builderSelected">
+    </div>
+    <div class="field is-horizontal">
+      <div class="field-label is-normal">
+        <label class="label is-hidden">Error text</label>
+      </div>
+      <div class="field-body">
         <div class="field">
-          <label class="label">Builder Name</label>
           <div class="control">
-            <input id="builderAllocationName"
-                   tabindex="4"
-                   class="input"
-                   type="text"
-                   placeholder="XYZ Builders" />
-            <p id="builderAllocationNameError"
+            <p id="permitSearchError"
                class="help is-danger hide">
-              The Builder name is invalid, it should be atleast 3 characters long.
             </p>
           </div>
         </div>
+      </div>
+    </div>
 
-        <div class="columns">
-          <div class="field column">
-            <label class="label">Amount Allocated to Builder</label>
-            <div class="control">
-              <input id="builderAllocationAmount"
-                     tabindex="5"
-                     class="input"
-                     type="number"
-                     placeholder="0" />
-              <p style="display: none;"
-                 id="builderAllocationAmountError"
-                 class="help is-danger">
-                The amount entered is invalid.  Please enter numbers only.
-              </p>
-            </div>
-          </div>
-          <div class="field column">
-            <label class="label">Amount Allocated to Permits</label>
-            <div class="control">
-              <input id="buildersAmountAllocatedToPermits"
-                     class="input"
-                     type="text"
-                     value="$0.00"
-                     readonly />
-            </div>
-          </div>
-        </div>
+  </section>
 
+  <section class="hide"
+           id="contractorFees">
 
-        <div id="existingBuilderAllocation"
-             class="field hide">
-
-          <div class="field">
-            <label class="label">Audit Log</label>
-            <div class="control">
-              <textarea id="builderAllocationAuditLog"
-                        class="textarea"
-                        type="text"
-                        readonly>
-              </textarea>
-            </div>
-          </div>
-        </div>
-
-        <div id="builderAllocationError"
-             class="field hide">
-          <div class="field">
-            <label class="label">Errors</label>
-            <div class="control">
-              <textarea id="builderAllocationErrorList"
-                        class="textarea"
-                        type="text"
-                        rows="4"
-                        readonly>
-                </textarea>
-            </div>
-          </div>
-        </div>
-
+    <div class="field is-horizontal">
+      <div class="field-label is-normal">
+        <label class="label">Contractor Id</label>
+      </div>
+      <div class="field-body">
         <div class="field is-grouped">
-          <div class="control">
-            <button onclick="ImpactFees.BuilderAllocation.SaveAllocation(); return false;"
-                    tabindex="6"
+          <div class="control is-grouped">
+            <input id="contractorSearch"
+                   class="input"
+                   type="text"
+                   placeholder="Contractor Id" />
+          </div>
+          <div class="control is-grouped">
+            <button id="contractorSearchButton"
                     type="button"
                     class="button is-primary">
-              Save Builder Allocation
+              Search
             </button>
           </div>
         </div>
-
-      </div>
-
-    </form>
-  </div>
-</section>
-
-<section id="permitAllocations"
-         class="hide">
-
-  <section class="hero is-primary is-bold hero-buffer">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title">Permit Allocations</h1>
-        <h2 class="subtitle">
-          Use this menu to add or make changes to existing permit allocations.
-        </h2>
       </div>
     </div>
+    <div class="field is-horizontal">
+      <div class="field-label is-normal">
+        <label class="label is-hidden">Error text</label>
+      </div>
+      <div class="field-body">
+        <div class="field">
+          <div class="control">
+            <p id="contractorSearchError"
+               class="help is-danger hide">
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </section>
 
-  <div class="container">
-    <form id="formPermitAllocations">
+  <section class="hide"
+           id="applicationFees">
+
+    <div class="field is-horizontal">
+      <div class="field-label is-normal">
+        <label class="label">Application Type</label>
+      </div>
+      <div class="field-body">
+        <div class="field">
+          <div class="control is-grouped">
+            <div class="select">
+              <select id="applicationSearchType"></select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field is-horizontal">
+      <div class="field-label is-normal">
+        <label class="label">Application Number</label>
+      </div>
+      <div class="field-body">
+        <div class="field is-grouped">
+          <div class="control is-grouped">
+            <input id="applicationSearch"
+                   class="input"
+                   type="number"
+                   maxlength="10"
+                   placeholder="2018000000" />
+          </div>
+          <div class="control is-grouped">
+            <button id="applicationSearchButton"
+                    type="button"
+                    class="button is-primary">
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="field is-horizontal">
+      <div class="field-label is-normal">
+        <label class="label is-hidden">Error text</label>
+      </div>
+      <div class="field-body">
+        <div class="field">
+          <div class="control">
+            <p id="applicationSearchError"
+               class="help is-danger hide">
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </section>
+
+  <section style="margin-top: 1em;"
+           class="hide"
+           id="searchResults">
+    <div class="level">
+      <div class="level-item has-text-centered">
+        <div>
+          <p id="ChargesKey"
+             class="title">
+          </p>
+        </div>
+      </div>
+      <div class="level-item has-text-centered">
+        <div>
+          <p id="ChargesDetail"
+             class="title">
+          </p>
+        </div>
+      </div>
+    </div>
+    <hr />
+    <table class="table is-fullwidth">
+      <thead>
+        <tr>
+          <th width="50%">Description</th>
+          <th width="20%">Date</th>
+          <th width="20%">Amount</th>
+          <th width="10%"></th>
+        </tr>
+      </thead>
+      <tbody id="Charges">
+
+      </tbody>
+    </table>
+
+  </section>
+
+  <section class="hide"
+           id="cart">
+    <div id="emptyCart"
+         class="level show">
+      <div class="level-item">
+        No charges have been added to the cart.
+      </div>
+    </div>
+    <table id="fullCart"
+           class="table is-fullwidth hide">
+      <thead>
+        <tr>
+          <th class="20%">Key</th>
+          <th width="40%">Description</th>
+          <th width="15%">Date</th>
+          <th width="15%">Amount</th>
+          <th width="10%"></th>
+        </tr>
+      </thead>
+      <tbody id="CartCharges"></tbody>
+    </table>
+
+    <div id="payerInformation">
+      <div style="margin-bottom: 0;"
+           class="columns">
+        <div class="field column">
+          <label class="label">Your First Name</label>
+          <div class="control">
+            <input id="payerFirstName"
+                   class="input"
+                   type="text"
+                   maxlength="50"
+                   required
+                   placeholder="Firstname" />
+          </div>
+        </div>
+
+        <div class="field column">
+          <label class="label">Last Name</label>
+          <div class="control">
+            <input id="payerLastName"
+                   class="input"
+                   type="text"
+                   maxlength="50"
+                   required
+                   placeholder="Lastname" />
+          </div>
+        </div>
+
+      </div>
+
+      <div style="margin-bottom: 0;"
+           class="columns">
+        <div class="field column">
+          <label class="label">Phone #</label>
+          <div class="control">
+            <input id="payerPhone"
+                   class="input"
+                   type="tel"
+                   maxlength="12"
+                   placeholder="" />
+          </div>
+        </div>
+
+        <div class="field column">
+          <label class="label">Email Address</label>
+          <div class="control">
+            <input id="payerPhone"
+                   class="input"
+                   type="email"
+                   maxlength="12"
+                   placeholder="email@example.com" />
+          </div>
+        </div>
+
+      </div>
+
+      <div class="field">
+        <label class="label">Company Name</label>
+        <div class="control">
+          <input id="payerCompany"
+                 class="input"
+                 type="text"
+                 maxlength="50"
+                 placeholder="Company Name" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Street Address</label>
+        <div class="control">
+          <input id="payerStreetAddress"
+                 class="input"
+                 type="text"
+                 required
+                 maxlength="50"
+                 placeholder="Address" />
+        </div>
+      </div>
 
       <div class="columns">
-        <div class="column field">
-          <div class="field">
-            <label class="label">Permit Number</label>
-          </div>
-          <div class="field is-grouped">
-            <div class="control">
-              <input id="permitNumber"
-                     class="input"
-                     type="number"
-                     maxlength="8"
-                     tabindex="1"
-                     placeholder="11800000" />
-              <p class="help">Charges with a Cat Code of IFRD2 or IFRD3 will be shown.</p>
-              <p id="permitNumberLengthError"
-                 class="help is-danger hide">Permit numbers must be 8 digits.</p>
-              <p id="permitNumberNumericError"
-                 class="help is-danger hide">
-                Permit number must be numeric.
-              </p>
-            </div>
-            <div class="control">
-              <button onclick="ImpactFees.PermitAllocation.SearchPermit(); return false;"
-                      type="button"
-                      class="button is-primary">
-                Search
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="column field">
-          <div class="field">
-            <label class="label">Road Impact Fee</label>
-          </div>
+        <div class="field column is-three-fifths">
+          <label class="label">City</label>
           <div class="control">
-            <input type="text"
+            <input id="payerCity"
                    class="input"
-                   value="$0.00"
-                   readonly
-                   id="permitRoadImpactFee" />
+                   type="text"
+                   required
+                   maxlength="50"
+                   placeholder="City" />
           </div>
         </div>
-        <div class="column"></div>
 
-      </div>
-      <div id="permitInfo"
-           class="hide">
-        <div class="columns">
-          <div class="column field">
-            <label class="label">Contractor #</label>
-            <div class="control">
-              <input id="permitContractorNumber"
-                     class="input"
-                     type="text"
-                     readonly />
-            </div>
-          </div>
-
-          <div class="column field">
-            <label class="label">Contractor Name</label>
-            <div class="control">
-              <input id="permitContractorName"
-                     class="input"
-                     type="text"
-                     readonly />
-            </div>
-          </div>
-          <div class="column field">
-            <label class="label">Cashier Id</label>
-            <div class="control">
-              <input id="permitCashierId"
-                     class="input"
-                     type="text"
-                     readonly />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="permitErrorContainer"
-           class="hide">
-        <div class="field">
-          <label class="label">Permit Error - Unable to procede</label>
+        <div class="field column is-one-fifth">
+          <label class="label">State</label>
           <div class="control">
-            <textarea id="permitErrorText"
-                      class="textarea"
-                      type="text"
-                      readonly>
-              </textarea>
+            <div class="select">
+              <select id="payerState"></select>
+            </div>
           </div>
         </div>
+
+        <div class="field column is-one-fifth">
+          <label class="label">Zip</label>
+          <div class="control">
+            <input id="payerZip"
+                   class="input"
+                   type="text"
+                   required
+                   maxlength="5"
+                   placeholder="Zip" />
+          </div>
+        </div>
+
       </div>
 
-      <div id="permitSelectDeveloper"
-           class="hide">
-        <div class="columns">
-          <div class="field column">
-            <label class="label">Developer Agreement</label>
-            <div class="control">
-              <div class="select">
-                <select onchange="ImpactFees.PermitAllocation.LoadBuilders(this);"
-                        tabindex="2"
-                        id="permitSelectAgreement">
-                  <option>Select Agreement</option>
-                </select>
+    </div>
+    
+
+    <div style="margin-top: 1em; margin-bottom: 1em;"
+         class="columns">
+      <div class="column is-one-fifth">
+        <div class="menu">
+          <p class="menu-label">
+            Method of Payment
+          </p>
+
+          <ul class="menu-list">
+            <li>
+              <div class="level">
+                <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
+                      class="level-item">
+                  <span class="icon is-medium">
+                    <i class="fas fa-credit-card"></i>
+                  </span>
+                  Credit Card
+                </span>
+                <a id="creditcardPaymentTotal"
+                   style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
+                   class="has-text-link level-item">
+                  Add
+                </a>
               </div>
-            </div>
-          </div>
-
-          <div class="column field">
-            <label class="label">Agreement Amount</label>
-            <div class="control">
-              <input id="permitDeveloperAmount"
-                     class="input"
-                     type="text"
-                     placeholder="$0.00"
-                     readonly />
-            </div>
-          </div>
-
-          <div class="column field">
-            <label class="label">Currently Allocated to Builders</label>
-            <div class="control">
-              <input id="permitDeveloperCurrentlyAllocated"
-                     class="input"
-                     type="text"
-                     placeholder="$0.00"
-                     readonly />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="permitBuilderContainer"
-           class="hide">
-        <div class="columns">
-          <div class="field column">
-            <label class="label">Builder</label>
-            <div class="control">
-              <div class="select">
-                <select onchange="ImpactFees.PermitAllocation.BuilderSelected(this);"
-                        tabindex="3"
-                        id="permitSelectBuilder"></select>
+            </li>
+            <li>
+              <div class="level">
+                <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
+                      class="level-item">
+                  <span class="icon is-medium">
+                    <i class="fas fa-money-check"></i>
+                  </span>
+                  Check
+                </span>
+                <a id="checkPaymentTotal"
+                   style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
+                   class="has-text-link level-item">
+                  Add
+                </a>
               </div>
-            </div>
-          </div>
-          <div class="column field">
-            <label class="label">Currently Allocated to this Builder</label>
-            <div class="control">
-              <input id="permitBuilderAmount"
-                     class="input"
-                     type="text"
-                     placeholder="$0.00"
-                     readonly />
-            </div>
-          </div>
-          <div class="column field">
-            <label class="label">Amount allocated to Permits</label>
-            <div class="control">
-              <input id="permitBuilderCurrentlyAllocated"
-                     class="input"
-                     type="text"
-                     placeholder="$0.00"
-                     readonly />
-            </div>
-          </div>
+            </li>
+            <li>
+              <div class="level">
+                <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
+                      class="level-item">
+                  <span class="icon is-medium">
+                    <i class="fas fa-money-bill-alt"></i>
+                  </span>
+                  Cash
+                </span>
+                <a id="cashPaymentTotal"
+                   style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
+                   class="has-text-link level-item">
+                  Add
+                </a>
+              </div>
+            </li>
+          </ul>
+
+          <p class="menu-label">
+            Total Amount Paid
+          </p>
+          <ul class="menu-list">
+            <li class="level">
+              <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%;"
+                    id="cartTotalAmountPaid"
+                    class="level-item">
+                $0.00
+              </span>
+            </li>
+          </ul>
+
+          <p class="menu-label">
+            Total Amount Due
+          </p>
+          <ul class="menu-list">
+            <li class="level">
+              <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%;"
+                    id="cartTotalAmountDue"
+                    class="level-item">
+              </span>
+            </li>
+            <li class="level">
+              <button class="level-item button is-success">
+                Pay Now
+              </button>
+            </li>
+          </ul>
+
         </div>
       </div>
-
-
-      <div id="permitBuilderSelected"
-           class="field hide">
-
-        <div class="columns">
-
-          <div class="column field">
-            <label class="label">Credit Amount</label>
-            <div class="control">
-              <input id="permitCreditAmount"
-                     tabindex="4"
-                     class="input"
-                     type="number"
-                     placeholder="0" />
-              <p style="display: none;"
-                 id="permitCreditAmountError"
-                 class="help is-danger">
-                The amount entered is invalid.  Please enter numbers only, and it must be greater than or equal to zero.
-              </p>
-            </div>
-          </div>
-
-          <div id="existingAgreementAmountAllocated"
-               class="column field">
-            <label class="label">Builder Allocation Remaining</label>
-            <div class="control">
-              <input id="permitBuilderAllocationRemaining"
-                     class="input"
-                     type="text"
-                     readonly />
-            </div>
-          </div>
-          <div class="column"></div>
-
-        </div>
-
-        <div id="existingPermitAllocation"
-             class="field hide">
-
-          <div class="field">
-            <label class="label">Audit Log</label>
-            <div class="control">
-              <textarea id="permitAllocationAuditLog"
-                        class="textarea"
-                        type="text"
-                        readonly>
-              </textarea>
-            </div>
-          </div>
-
-        </div>
-
-        <div id="permitAllocationError"
-             class="field hide">
-          <div class="field">
-            <label class="label">Errors</label>
-            <div class="control">
-              <textarea id="permitAllocationErrorList"
-                        class="textarea"
-                        type="text"
-                        rows="4"
-                        readonly>
-                </textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="field is-grouped">
-          <div class="control">
-            <button onclick="ImpactFees.PermitAllocation.SavePermitAllocation(); return false;"
-                    type="button"
-                    tabindex="5"
-                    class="button is-primary">
-              Save Permit Allocation
-            </button>
-          </div>
-          <div class="control">
-            <button onclick="ImpactFees.PermitAllocation.Reset(); return false;"
-                    type="button"
-                    tabindex="6"
-                    class="button is-warning">
-              Clear Permit Data
-            </button>
-          </div>
-        </div>
-
-      </div>
-
-    </form>
-  </div>
-</section>
-
-<section id="existingAllocations"
-         class="show">
-  <section class="hero is-primary is-bold hero-buffer">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title">Existing Allocations</h1>
-        <h2 class="subtitle">
-          View the existing allocations by Developer, Builder, or Permit.
-        </h2>
+      <div class="column is-four-fifths"
+           id="paymentInformation">
+        <section class="hide"
+                 id="creditCardPaymentType">
+          credit card payment
+        </section>
+        <section class="hide"
+                 id="checkPaymentType">
+          check
+        </section>
+        <section class="hide"
+                 id="cashPaymentType">
+          cash
+        </section>
       </div>
     </div>
+
+
   </section>
-
-  <div class="container">
-    <nav style="padding: .5em;"
-         class="breadcrumb has-background-white"
-         aria-label="breadcrumbs">
-      <ul id="breadcrumbs"
-          aria-label="breadcrumbs"></ul>
-    </nav>
-    <div id="existingAllocationsContainer">
-
-    </div>
-  </div>
-
-</section>
+</div>
 
 <script src="bower_components/promise-polyfill/dist/polyfill.min.js"></script>
-<script src="bower_components/fetch/fetch.js"></script>
-<!--<script src="Scripts/app/es6-promise.min.js"></script>-->
-<script src="Scripts/app/XHR.js"></script>
-<script src="Scripts/app/Utilities.js"></script>
-<script src="Scripts/impactfees/PermitAllocation.js"></script>
-<script src="Scripts/impactfees/DeveloperAgreement.js"></script>
-<script src="Scripts/impactfees/BuilderAllocation.js"></script>
-<script src="Scripts/impactfees/CombinedAllocation.js"></script>
-<script src="Scripts/impactfees/PermitImpactFee.js"></script>
-<script src="Scripts/impactfees/ImpactFees.js"></script>
+<script src="~/bower_components/fetch/fetch.js"></script>
+<script src="~/Scripts/app/Utilities.js"></script>
+<script src="~/Scripts/claypay/UI.js"></script>
+<script src="~/Scripts/claypay/Charge.js"></script>
+<script src="~/Scripts/claypay/AppTypes.js"></script>
+<script src="~/Scripts/claypay/claypay.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function (event)
-    {
-      ImpactFees.Start();
-    });
-    document.getElementById("permitNumber").addEventListener("keyup",
-      function (event)
-      {
-        event.preventDefault();
-        if (event.keyCode === 13)
-        {
-          ImpactFees.PermitAllocation.SearchPermit();
-        }
-      });
+  document.addEventListener("DOMContentLoaded", function (event)
+  {
+    clayPay.start();
+  });
 </script>
+

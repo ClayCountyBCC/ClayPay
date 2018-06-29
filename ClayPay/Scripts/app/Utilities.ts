@@ -3,6 +3,7 @@ namespace Utilities
 {
   export function Hide(e: string)
   export function Hide(e: HTMLElement)
+  export function Hide(e: Element)
   export function Hide(e: any)
   {
     if (typeof e == "string")
@@ -17,6 +18,7 @@ namespace Utilities
 
   export function Show(e: string)
   export function Show(e: HTMLElement)
+  export function Show(e: Element)
   export function Show(e: any)
   {
     if (typeof e == "string")
@@ -31,6 +33,7 @@ namespace Utilities
 
   export function Show_Inline(e: string)
   export function Show_Inline(e: HTMLElement)
+  export function Show_Inline(e: Element)
   export function Show_Inline(e: any)
   {
     if (typeof e == "string")
@@ -45,6 +48,7 @@ namespace Utilities
 
   export function Show_Flex(e: string)
   export function Show_Flex(e: HTMLElement)
+  export function Show_Flex(e: Element)
   export function Show_Flex(e: any)
   {
     if (typeof e == "string")
@@ -57,13 +61,19 @@ namespace Utilities
     e.classList.remove("show");
   }
 
-  export function Error_Show(e: string):void
-  export function Error_Show(e: HTMLElement): void
-  export function Error_Show(e: any):void
+  export function Error_Show(e: string, errorText?: string): void
+  export function Error_Show(e: HTMLElement, errorText?: string ): void
+  export function Error_Show(e: Element, errorText?: string): void
+  export function Error_Show(e: any, errorText?: string): void
   {
     if (typeof e == "string")
     {
       e = document.getElementById(e);
+    }
+    if (errorText)
+    {
+      Clear_Element(e);
+      (<HTMLElement>e).appendChild(document.createTextNode(errorText));
     }
     Show(e);
     window.setTimeout(function (j)
@@ -88,6 +98,88 @@ namespace Utilities
     o.text = label;
     o.selected = selected;
     return o;
+  }
+
+  export function Show_Menu(elementId: string)
+  {
+    //let element = e.srcElement;
+    // we expect the element's id to be in a "nav-XXX" name format, where 
+    // XXX is the element we want to show 
+    let id = elementId.replace("nav-", "");
+    let menuItems = <NodeListOf<HTMLElement>>document.querySelectorAll("#menuTabs > li > a");
+    if (menuItems.length > 0)
+    {
+      for (let i = 0; i < menuItems.length; i++)
+      {
+        let item = menuItems.item(i);
+        if (item.id === elementId)
+        {
+          item.parentElement.classList.add("is-active");
+        }
+        else
+        {
+          item.parentElement.classList.remove("is-active");
+        }
+      }
+    }
+    let sections = <NodeListOf<HTMLElement>>document.querySelectorAll("#views > section");
+    if (sections.length > 0)
+    {
+      for (let i = 0; i < sections.length; i++)
+      {
+        let item = sections.item(i);
+        if (sections.item(i).id === id)
+        {
+          Show(item);
+        }
+        else
+        {
+          Hide(item);
+        }
+      }
+    }
+  }
+
+  export function Get<T>(url: string): Promise<T>
+  {
+    return fetch(url,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Upgrade-Insecure-Requests": "1"
+        },
+        credentials: "include"
+      }
+    )
+      .then(response =>
+      {
+        if (!response.ok)
+        {
+          throw new Error(response.statusText)
+        }
+        return response.json();
+      });
+  }
+
+  export function Post<T>(url: string, data: T): Promise<Array<string>>
+  {
+    return fetch(url, {
+      method: "POST",
+      body: JSON.stringify(data),
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json"
+      }, 
+      credentials: "include"
+    }).then(response =>
+    {
+      if (!response.ok)
+      {
+        throw new Error(response.statusText)
+      }
+      return response.json();
+    })
   }
 
 

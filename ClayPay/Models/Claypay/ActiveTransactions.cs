@@ -25,7 +25,6 @@ namespace ClayPay.Models
     public static bool Start(List<int> items)
     {
       List<int> added = new List<int>(); // this will be used in case we need to roll back.
-      var itemIds = String.Join(",", items);
       foreach (int i in items)
       {
         if (!cd.TryAdd(i, i))

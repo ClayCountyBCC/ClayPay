@@ -6,12 +6,14 @@ using System.Web.Mvc;
 
 namespace ClayPay.Controllers.MVC.Payments
 {
-    public class PaymentsController : Controller
+  public class PaymentsController : Controller
+  {
+    // GET: Payments
+    public ActionResult Index()
     {
-        // GET: Payments
-        public ActionResult Index()
-        {
-            return View();
-        }
+      var ua = Models.UserAccess.GetUserAccess(User.Identity.Name);
+      ViewBag.Page = "payments";
+      return View(ua);
     }
+  }
 }

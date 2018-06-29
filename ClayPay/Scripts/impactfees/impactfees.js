@@ -1,31 +1,12 @@
 /// <reference path="../app/utilities.ts" />
-/// <reference path="../app/xhr.ts" />
 var ImpactFees;
 /// <reference path="../app/utilities.ts" />
-/// <reference path="../app/xhr.ts" />
 (function (ImpactFees) {
     ImpactFees.CombinedAllocations = [];
     function Start() {
         LoadAgreements();
     }
     ImpactFees.Start = Start;
-    function Menu(id) {
-        let sections = document.querySelectorAll("body > section");
-        if (sections.length > 0) {
-            for (let i = 0; i < sections.length; i++) {
-                let item = sections.item(i);
-                if (sections.item(i).id === id) {
-                    item.classList.remove("hide");
-                    item.classList.add("show");
-                }
-                else {
-                    item.classList.remove("show");
-                    item.classList.add("hide");
-                }
-            }
-        }
-    }
-    ImpactFees.Menu = Menu;
     function LoadAgreements() {
         ImpactFees.CombinedAllocation.GetAll("", -1, "").then(function (a) {
             ImpactFees.CombinedAllocations = a;

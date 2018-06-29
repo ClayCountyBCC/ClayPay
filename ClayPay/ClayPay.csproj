@@ -133,6 +133,12 @@
   <ItemGroup>
     <Content Include=".gitattributes" />
     <Content Include="bower_components\bulma\css\bulma.css" />
+    <Content Include="bower_components\bulma\myBulma.css">
+      <DependentUpon>myBulma.sass</DependentUpon>
+    </Content>
+    <Content Include="bower_components\bulma\myBulma.min.css">
+      <DependentUpon>myBulma.css</DependentUpon>
+    </Content>
     <Content Include="bower_components\fetch\fetch.js" />
     <Content Include="bower_components\promise-polyfill\dist\polyfill.js" />
     <Content Include="bower_components\promise-polyfill\dist\polyfill.min.js" />
@@ -148,11 +154,19 @@
       <DependentUpon>bulma.css</DependentUpon>
     </Content>
     <Content Include="Content\cclogos.jpg" />
+    <Content Include="Content\Fontawesome\css\fontawesome-all.css" />
+    <Content Include="Content\Fontawesome\css\fontawesome-all.min.css" />
+    <Content Include="Content\Fontawesome\webfonts\fa-regular-400.svg" />
+    <Content Include="Content\Fontawesome\webfonts\fa-solid-900.svg" />
     <Content Include="Content\Main.css">
       <DependentUpon>Main.scss</DependentUpon>
     </Content>
     <Content Include="Content\Main.min.css">
       <DependentUpon>Main.css</DependentUpon>
+    </Content>
+    <Content Include="Content\myBulma.css" />
+    <Content Include="Content\myBulma.min.css">
+      <DependentUpon>myBulma.css</DependentUpon>
     </Content>
     <Content Include="Content\Site.css" />
     <Content Include="Content\Utilities.css">
@@ -168,7 +182,7 @@
     <Content Include="bower_components\bulma\.bower.json" />
     <Content Include="bower_components\bulma\BACKERS.md" />
     <Content Include="bower_components\bulma\bower.json" />
-    <Content Include="bower_components\bulma\bulma.sass" />
+    <None Include="bower_components\bulma\bulma.sass" />
     <Content Include="bower_components\bulma\CHANGELOG.md" />
     <Content Include="bower_components\bulma\css\bulma.css.map" />
     <Content Include="bower_components\bulma\LICENSE" />
@@ -228,6 +242,7 @@
     <Content Include="bower_components\promise-polyfill\LICENSE" />
     <Content Include="bower_components\promise-polyfill\package.json" />
     <Content Include="bower_components\promise-polyfill\README.md" />
+    <None Include="bower_components\bulma\myBulma.sass" />
     <None Include="compilerconfig.json" />
     <None Include="compilerconfig.json.defaults">
       <DependentUpon>compilerconfig.json</DependentUpon>
@@ -238,16 +253,20 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Content\Utilities.scss" />
+    <Content Include="Content\Fontawesome\webfonts\fa-regular-400.eot" />
+    <Content Include="Content\Fontawesome\webfonts\fa-regular-400.ttf" />
+    <Content Include="Content\Fontawesome\webfonts\fa-regular-400.woff" />
+    <Content Include="Content\Fontawesome\webfonts\fa-regular-400.woff2" />
+    <Content Include="Content\Fontawesome\webfonts\fa-solid-900.eot" />
+    <Content Include="Content\Fontawesome\webfonts\fa-solid-900.ttf" />
+    <Content Include="Content\Fontawesome\webfonts\fa-solid-900.woff" />
+    <Content Include="Content\Fontawesome\webfonts\fa-solid-900.woff2" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile1.pubxml" />
     <Content Include="index.html" />
     <Content Include="Scripts\claypay\bundle.js" />
     <Content Include="Scripts\claypay\bundle.min.js">
       <DependentUpon>bundle.js</DependentUpon>
-    </Content>
-    <Content Include="Scripts\default-bundle.js" />
-    <Content Include="Scripts\default-bundle.min.js">
-      <DependentUpon>default-bundle.js</DependentUpon>
     </Content>
     <Content Include="Scripts\impactfees\impactfees-bundle.js" />
     <Content Include="Scripts\impactfees\impactfees-bundle.min.js">
@@ -268,6 +287,7 @@
     <Compile Include="Controllers\API\Payments\FeeController.cs" />
     <Compile Include="Controllers\API\Payments\PayController.cs" />
     <Compile Include="Controllers\API\Payments\QueryController.cs" />
+    <Compile Include="Controllers\MVC\Balancing\BalancingController.cs" />
     <Compile Include="Controllers\MVC\ImpactFees\ImpactFeesController.cs" />
     <Compile Include="Controllers\MVC\Payments\PaymentsController.cs" />
     <Compile Include="Global.asax.cs">
@@ -308,6 +328,8 @@
     <Content Include="Views\web.config" />
     <Content Include="Scripts\tsconfig.json" />
     <Content Include="Views\Payments\Index.cshtml" />
+    <Content Include="Views\ImpactFees\Index.cshtml" />
+    <Content Include="Views\Balancing\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -317,9 +339,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Controllers\MVC\Balancing\" />
     <Folder Include="Scripts\app\typings\" />
-    <Folder Include="Views\ImpactFees\" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\app\Utilities.ts" />

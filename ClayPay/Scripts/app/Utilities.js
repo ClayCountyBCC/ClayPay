@@ -40,9 +40,13 @@ var Utilities;
         e.classList.remove("show");
     }
     Utilities.Show_Flex = Show_Flex;
-    function Error_Show(e) {
+    function Error_Show(e, errorText) {
         if (typeof e == "string") {
             e = document.getElementById(e);
+        }
+        if (errorText) {
+            Clear_Element(e);
+            e.appendChild(document.createTextNode(errorText));
         }
         Show(e);
         window.setTimeout(function (j) {
@@ -66,5 +70,70 @@ var Utilities;
         return o;
     }
     Utilities.Create_Option = Create_Option;
+    function Show_Menu(elementId) {
+        //let element = e.srcElement;
+        // we expect the element's id to be in a "nav-XXX" name format, where 
+        // XXX is the element we want to show 
+        let id = elementId.replace("nav-", "");
+        let menuItems = document.querySelectorAll("#menuTabs > li > a");
+        if (menuItems.length > 0) {
+            for (let i = 0; i < menuItems.length; i++) {
+                let item = menuItems.item(i);
+                if (item.id === elementId) {
+                    item.parentElement.classList.add("is-active");
+                }
+                else {
+                    item.parentElement.classList.remove("is-active");
+                }
+            }
+        }
+        let sections = document.querySelectorAll("#views > section");
+        if (sections.length > 0) {
+            for (let i = 0; i < sections.length; i++) {
+                let item = sections.item(i);
+                if (sections.item(i).id === id) {
+                    Show(item);
+                }
+                else {
+                    Hide(item);
+                }
+            }
+        }
+    }
+    Utilities.Show_Menu = Show_Menu;
+    function Get(url) {
+        return fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Upgrade-Insecure-Requests": "1"
+            },
+            credentials: "include"
+        })
+            .then(response => {
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+            return response.json();
+        });
+    }
+    Utilities.Get = Get;
+    function Post(url, data) {
+        return fetch(url, {
+            method: "POST",
+            body: JSON.stringify(data),
+            cache: "no-cache",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include"
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+            return response.json();
+        });
+    }
+    Utilities.Post = Post;
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map

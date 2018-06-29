@@ -14,5 +14,9 @@
   {
     "outputFile": "Scripts/app/Utilities.es5.js",
     "inputFile": "Scripts/app/Utilities.js"
+  },
+  {
+    "outputFile": "Content/myBulma.css",
+    "inputFile": "bower_components/bulma/myBulma.sass"
   }
 ]

@@ -11,7 +11,13 @@ namespace ClayPay.Controllers.MVC.ImpactFees
     // GET: ImpactFees
     public ActionResult Index()
     {
-      return View();
+      var ua = Models.UserAccess.GetUserAccess(User.Identity.Name);
+      if (!ua.impactfee_access)
+      {
+        return new HttpUnauthorizedResult();
+      }
+      ViewBag.Page = "impactfees";
+      return View(ua);
     }
   }
 }

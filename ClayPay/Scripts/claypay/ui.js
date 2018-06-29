@@ -13,11 +13,105 @@ var clayPay;
         let CurrentCharges = [];
         UI.ExpMonths = ['01', '02', '03', '04', '05',
             '06', '07', '08', '09', '10', '11', '12'];
+        UI.States = [
+            { state: "ALABAMA", abv: "	AL" },
+            { state: "ALASKA", abv: "AK" },
+            { state: "ARIZONA", abv: "	AZ" },
+            { state: "ARKANSAS", abv: "AR" },
+            { state: "CALIFORNIA", abv: "CA" },
+            { state: "COLORADO", abv: "CO" },
+            { state: "CONNECTICUT", abv: "CT" },
+            { state: "DELAWARE", abv: "DE" },
+            { state: "FLORIDA", abv: "	FL" },
+            { state: "GEORGIA", abv: "	GA" },
+            { state: "HAWAII", abv: "HI" },
+            { state: "IDAHO", abv: "	ID" },
+            { state: "ILLINOIS", abv: "IL" },
+            { state: "INDIANA", abv: "	IN" },
+            { state: "IOWA", abv: "IA" },
+            { state: "KANSAS", abv: "KS" },
+            { state: "KENTUCKY", abv: "KY" },
+            { state: "LOUISIANA", abv: "	LA" },
+            { state: "MAINE", abv: "	ME" },
+            { state: "MARYLAND", abv: "MD" },
+            { state: "MASSACHUSETTS", abv: "	MA" },
+            { state: "MICHIGAN", abv: "MI" },
+            { state: "MINNESOTA", abv: "	MN" },
+            { state: "MISSISSIPPI", abv: "	MS" },
+            { state: "MISSOURI", abv: "MO" },
+            { state: "MONTANA", abv: "	MT" },
+            { state: "NEBRASKA", abv: "NE" },
+            { state: "NEVADA", abv: "NV" },
+            { state: "NEW HAMPSHIRE", abv: "	NH" },
+            { state: "NEW JERSEY", abv: "NJ" },
+            { state: "NEW MEXICO", abv: "NM" },
+            { state: "NEW YORK", abv: "NY" },
+            { state: "NORTH CAROLINA", abv: "NC" },
+            { state: "NORTH DAKOTA", abv: "ND" },
+            { state: "OHIO", abv: "OH" },
+            { state: "OKLAHOMA", abv: "OK" },
+            { state: "OREGON", abv: "OR" },
+            { state: "PENNSYLVANIA", abv: "PA" },
+            { state: "RHODE ISLAND", abv: "RI" },
+            { state: "SOUTH CAROLINA", abv: "SC" },
+            { state: "SOUTH DAKOTA", abv: "SD" },
+            { state: "TENNESSEE", abv: "	TN" },
+            { state: "TEXAS", abv: "	TX" },
+            { state: "UTAH", abv: "	UT" },
+            { state: "VERMONT", abv: "	VT" },
+            { state: "VIRGINIA", abv: "VA" },
+            { state: "WASHINGTON", abv: "WA" },
+            { state: "WEST VIRGINIA", abv: "	WV" },
+            { state: "WISCONSIN", abv: "	WI" },
+            { state: "WYOMING", abv: "	WY" }
+        ];
         UI.ExpYears = [];
+        let Menus = [
+            {
+                id: "nav-Home",
+                title: "Welcome!",
+                subTitle: "You can use this application to easily find and pay Clay County fees.",
+                icon: "fas fa-home",
+                label: "Home",
+                selected: true
+            },
+            {
+                id: "nav-permitFees",
+                title: "Search by Permit Number",
+                subTitle: "Searching by Permit number will show you all of the unpaid fees for a given permit number.",
+                icon: "fas fa-file",
+                label: "Permit Fees",
+                selected: false
+            },
+            {
+                id: "nav-contractorFees",
+                title: "Search by Contractor ID number",
+                subTitle: "Searching by Contractor ID will list any unpaid fees for a given contractor.",
+                icon: "fas fa-user",
+                label: "Contractor Fees",
+                selected: false
+            },
+            {
+                id: "nav-applicationFees",
+                title: "Search by Application Type and Application Number",
+                subTitle: "Pick an application type and then enter an application number to see any unpaid fees associated with that application.",
+                icon: "fas fa-clipboard",
+                label: "Application Fees",
+                selected: false
+            },
+            {
+                id: "nav-cart",
+                title: "Your Shopping Cart",
+                subTitle: "Shows the charges you have added to your shopping cart. You can pay for them here.",
+                icon: "fas fa-shopping-cart",
+                label: "Cart",
+                selected: false
+            }
+        ];
         function Submit() {
             Disable('btnSubmit');
-            Hide('errorList');
-            Hide('PaymentPosting');
+            Utilities.Hide('errorList');
+            Utilities.Hide('PaymentPosting');
             let f = document.getElementById('paymentForm');
             if (!f.checkValidity())
                 return false;
@@ -31,25 +125,25 @@ var clayPay;
             let cc = new clayPay.CCData(getValue('ccFirstName'), getValue('ccLastName'), getValue('cardNumber'), getValue('ccTypes'), getValue('ccExpMonth'), getValue('ccExpYear'), getValue('ccCVV'), getValue('ccZip'), getValue('emailAddress'), total, itemIds);
             let errors = cc.Validate(); // clientside validation
             if (errors.length === 0) {
-                Hide('CCForm'); // Hide the form
-                Show('PaymentPosting'); // show swirly
+                Utilities.Hide('CCForm'); // Hide the form
+                Utilities.Show('PaymentPosting'); // show swirly
                 let save = cc.Save();
                 save.then(function (response) {
                     let pr = JSON.parse(response);
                     resetApp();
                     PopulateReceipt(pr);
                 }, function (reject) {
-                    Show('errorList');
+                    Utilities.Show('errorList');
                     errors = [reject];
                     BuildErrors(errors);
-                    Show('CCForm');
-                    Hide('PaymentPosting');
+                    Utilities.Show('CCForm');
+                    Utilities.Hide('PaymentPosting');
                     Enable('btnSubmit');
                 });
             }
             else {
                 // show errors section
-                Show('errorList');
+                Utilities.Show('errorList');
                 BuildErrors(errors);
                 Enable('btnSubmit');
             }
@@ -65,11 +159,11 @@ var clayPay;
             let f = document.getElementById('paymentForm');
             f.reset();
             Enable('btnSubmit');
-            Show('CCForm');
-            Hide('PaymentPosting');
+            Utilities.Show('CCForm');
+            Utilities.Hide('PaymentPosting');
         }
         function PopulateReceipt(pr) {
-            clayPay.toggleNavDisplay('receipt');
+            //clayPay.toggleNavDisplay('receipt');
             SetInputValue("receiptUniqueId", pr.CashierId);
             SetInputValue("receiptTimestamp", pr.TimeStamp_Display);
             SetInputValue("receiptAmount", pr.Amount.toFixed(2));
@@ -86,7 +180,7 @@ var clayPay;
         function BuildErrors(errors) {
             let errorList = document.getElementById("errorList");
             let df = document.createDocumentFragment();
-            clearElement(errorList);
+            Utilities.Clear_Element(errorList);
             for (let error of errors) {
                 let li = document.createElement("li");
                 li.textContent = error;
@@ -97,12 +191,21 @@ var clayPay;
         function getValue(id) {
             return document.getElementById(id).value;
         }
+        function BuildPayerStates() {
+            let stateSelect = document.getElementById("payerState");
+            Utilities.Clear_Element(stateSelect);
+            for (let state of UI.States) {
+                stateSelect.appendChild(Utilities.Create_Option(state.abv, state.state));
+            }
+            stateSelect.selectedIndex = 0;
+        }
+        UI.BuildPayerStates = BuildPayerStates;
         function BuildAppTypes(appTypes) {
-            let appSelect = document.getElementById("ApplicationTypeSelect");
-            clearElement(appSelect);
-            appSelect.appendChild(createOption("-1", "Select Application Type"));
+            let appSelect = document.getElementById("applicationSearchType");
+            Utilities.Clear_Element(appSelect);
+            appSelect.appendChild(Utilities.Create_Option("-1", "Select Application Type", true));
             for (let appType of appTypes) {
-                appSelect.appendChild(createOption(appType.Value, appType.Label));
+                appSelect.appendChild(Utilities.Create_Option(appType.Value, appType.Label));
             }
         }
         UI.BuildAppTypes = BuildAppTypes;
@@ -114,9 +217,9 @@ var clayPay;
                 { label: 'Visa', value: 'VISA' }
             ];
             let selectTypes = document.getElementById(id);
-            clearElement(selectTypes);
+            Utilities.Clear_Element(selectTypes);
             ccTypes.map(function (ccType) {
-                selectTypes.appendChild(createOption(ccType.value, ccType.label));
+                selectTypes.appendChild(Utilities.Create_Option(ccType.value, ccType.label));
             });
         }
         UI.BuildCardTypes = BuildCardTypes;
@@ -124,35 +227,23 @@ var clayPay;
             let expMonth = document.getElementById(id);
             if (expMonth === undefined)
                 return;
-            clearElement(expMonth);
+            Utilities.Clear_Element(expMonth);
             UI.ExpMonths.map(function (month) {
-                expMonth.appendChild(createOption(month, month));
+                expMonth.appendChild(Utilities.Create_Option(month, month));
             });
         }
         UI.BuildExpMonths = BuildExpMonths;
         function BuildExpYears(id) {
             let expYear = document.getElementById(id);
-            clearElement(expYear);
+            Utilities.Clear_Element(expYear);
             var year = new Date().getFullYear();
             for (var i = 0; i < 10; i++) {
                 let y = (year + i).toString();
-                expYear.appendChild(createOption(y, y));
+                expYear.appendChild(Utilities.Create_Option(y, y));
                 UI.ExpYears.push(y);
             }
         }
         UI.BuildExpYears = BuildExpYears;
-        function createOption(value, label) {
-            let opt = document.createElement("option");
-            opt.setAttribute("value", value);
-            opt.appendChild(document.createTextNode(label));
-            return opt;
-        }
-        function clearElement(node) {
-            while (node.firstChild) {
-                node.removeChild(node.firstChild);
-            }
-        }
-        UI.clearElement = clearElement;
         function toggleNav(nav, element) {
             let e = document.getElementById(nav);
             if (e === null)
@@ -167,59 +258,66 @@ var clayPay;
             eNav.classList.add("active");
         }
         UI.toggleNav = toggleNav;
-        function Show(id) {
-            let e = document.getElementById(id);
-            e.style.display = "block";
+        function toggleSearch(e, disabled) {
+            e.disabled = disabled;
+            e.classList.toggle("is-loading", disabled);
         }
-        function Hide(id) {
-            let e = document.getElementById(id);
-            e.style.display = "none";
-        }
-        function Search(key) {
-            Hide('InvalidSearch');
-            Hide('SearchFailed');
-            Hide('SearchSuccessful');
-            Show('SearchResults');
-            Show('Searching');
-            let k = key.trim().toUpperCase();
+        function Search(buttonId, inputId, errorId) {
+            let button = document.getElementById(buttonId);
+            toggleSearch(button, true);
+            let input = document.getElementById(inputId);
+            let k = input.value.trim().toUpperCase();
+            if (inputId.indexOf("application") > -1) {
+                // we'll need to validate the application data
+                // the user needs to select a valid application type 
+                // and enter a valid application number.
+                let appType = document.getElementById(inputId + "Type").value;
+                if (appType === "-1" || appType.length === 0) {
+                    Utilities.Error_Show(errorId, "You must select an Application Type in order to search by Application Number.");
+                    toggleSearch(button, false);
+                    return false;
+                }
+                k = appType.toUpperCase() + "-" + input.value.trim().toUpperCase();
+            }
             if (k.length > 0) {
-                clayPay.transport.GetCharges(k).then(function (charges) {
+                Utilities.Get("./API/Query/" + k).then(function (charges) {
                     CurrentCharges = charges;
-                    Hide('Searching');
-                    ProcessResults(charges, key);
+                    if (charges.length > 0) {
+                        ProcessResults(charges, k);
+                        Utilities.Show("searchResults");
+                    }
+                    else {
+                        Utilities.Error_Show(errorId, "No charges were found for search: " + k);
+                    }
+                    toggleSearch(button, false);
                     return true;
-                }, function () {
+                }, function (errorText) {
+                    Utilities.Error_Show(errorId, errorText);
                     console.log('error getting charges');
                     // do something with the error here
                     // need to figure out how to detect if something wasn't found
                     // versus an error.
-                    Hide('Searching');
+                    toggleSearch(button, false);
                     return false;
                 });
             }
             else {
-                // This message should be "Hey, you need to enter something in order to search!"
-                Hide('Searching');
-                Show('InvalidSearch');
+                Utilities.Error_Show("Invalid search. Please check your entry and try again.");
+                input.focus();
+                toggleSearch(this, false);
                 return false;
             }
         }
         UI.Search = Search;
         function ProcessResults(charges, key) {
             AddCharges(charges);
-            if (charges.length == 0) {
-                UpdateSearchFailed(key);
-            }
-            else {
-                Show('SearchSuccessful');
-                SetValue('ChargesKey', charges[0].AssocKey);
-                SetValue('ChargesDetail', charges[0].Detail);
-            }
+            SetValue('ChargesKey', charges[0].AssocKey);
+            SetValue('ChargesDetail', charges[0].Detail);
         }
         function AddCharges(charges) {
             let container = document.getElementById('Charges');
             let df = document.createDocumentFragment();
-            clearElement(container);
+            Utilities.Clear_Element(container);
             for (let charge of charges) {
                 df.appendChild(buildChargeRow(charge));
             }
@@ -234,7 +332,17 @@ var clayPay;
             df.appendChild(tr1);
             let tr2 = document.createElement("tr");
             tr2.appendChild(createTableElement("", "", 3));
-            tr2.appendChild(createViewCartTableElementButton("View Cart", clayPay.toggleNavDisplay));
+            let menulist = Menus.filter(function (j) { return j.id === "nav-cart"; });
+            let cartMenu = menulist[0];
+            tr2.appendChild(createViewCartTableElementButton("View Cart", function () {
+                let title = document.getElementById("menuTitle");
+                let subTitle = document.getElementById("menuSubTitle");
+                Utilities.Clear_Element(title);
+                Utilities.Clear_Element(subTitle);
+                title.appendChild(document.createTextNode(cartMenu.title));
+                subTitle.appendChild(document.createTextNode(cartMenu.subTitle));
+                Utilities.Show_Menu(cartMenu.id);
+            }));
             df.appendChild(tr2);
             return df;
         }
@@ -254,10 +362,6 @@ var clayPay;
                 Cart.push(item[0]);
             }
             ToggleAddRemoveButtons(itemId);
-            //let btnAdd: HTMLElement = document.getElementById("btnAdd" + itemId.toString());
-            //let btnRem: HTMLElement = document.getElementById("btnRemove" + itemId.toString());
-            //btnAdd.style.display = "none";
-            //btnRem.style.display = "block";
             updateCart();
         }
         function RemoveItemFromCart(ev, itemId, toggle) {
@@ -312,7 +416,7 @@ var clayPay;
             add.style.display = IsInCart ? "none" : "inline-block";
             add.type = "button";
             add.id = "btnAdd" + itemId.toString();
-            add.className = "btn btn-primary";
+            add.className = "button is-primary";
             add.onclick = (ev) => {
                 addOnClickFunction(ev, itemId);
             };
@@ -321,8 +425,9 @@ var clayPay;
             remove.style.display = IsInCart ? "inline-block" : "none";
             remove.appendChild(document.createTextNode('Added ('));
             let removeButton = document.createElement("a");
-            removeButton;
-            removeButton.style.color = "darkgoldenrod";
+            //removeButton
+            removeButton.classList.add("is-warning");
+            //removeButton.style.color = "darkgoldenrod";
             removeButton.style.cursor = "pointer";
             removeButton.appendChild(document.createTextNode('remove'));
             removeButton.onclick = (ev) => {
@@ -351,9 +456,9 @@ var clayPay;
             let d = document.createElement("td");
             let add = document.createElement("button");
             add.type = "button";
-            add.className = "btn btn-success";
+            add.className = "button is-primary";
             add.onclick = (ev) => {
-                ViewCartClickFunction('cart');
+                ViewCartClickFunction();
             };
             add.appendChild(document.createTextNode(value));
             d.appendChild(add);
@@ -365,16 +470,8 @@ var clayPay;
         }
         function SetValue(id, value) {
             let e = document.getElementById(id);
-            clearElement(e);
+            Utilities.Clear_Element(e);
             e.appendChild(document.createTextNode(value));
-        }
-        function UpdateSearchFailed(key) {
-            let e = document.getElementById('SearchFailed');
-            clearElement(e);
-            let message = document.createElement("h4");
-            message.appendChild(document.createTextNode("No charges were found for search: " + key));
-            e.appendChild(message);
-            Show('SearchFailed');
         }
         function updateCartNav() {
             // This function is going to take the contents of the Cart array and 
@@ -382,32 +479,28 @@ var clayPay;
             // it's also going to make some changes to the cart Div, 
             // specifically it's going to hide and unhide the CartEmpty Div
             // based on the size of the array.
-            let CartNav = document.getElementById('CartNav');
-            clearElement(CartNav);
-            let cartIcon = document.createElement("span");
-            cartIcon.classList.add("glyphicon");
-            cartIcon.classList.add("glyphicon-shopping-cart");
-            CartNav.appendChild(cartIcon);
+            let CartNav = document.getElementById('nav-cart-total');
+            // emptyCart / fullCart is used when displaying the Cart
+            // if there are no charges, we show emptyCart.
+            // if there are charges, we show fullCart.
+            let emptyCart = document.getElementById("emptyCart");
+            let fullCart = document.getElementById("fullCart");
+            Utilities.Hide(emptyCart);
+            Utilities.Hide(fullCart);
+            Utilities.Clear_Element(CartNav);
             if (Cart.length === 0) {
-                Hide('CartNotEmpty');
-                Show('CartEmpty');
-                CartNav.appendChild(document.createTextNode('Cart: ('));
-                let span = document.createElement("span");
-                span.style.color = "darkgoldenrod";
-                span.appendChild(document.createTextNode('empty'));
-                CartNav.appendChild(span);
-                CartNav.appendChild(document.createTextNode(')'));
+                CartNav.appendChild(document.createTextNode("(empty)"));
+                Utilities.Show(emptyCart);
             }
             else {
-                Show('CartNotEmpty');
-                Hide('CartEmpty');
-                CartNav.appendChild(document.createTextNode('Cart: ' + Cart.length.toString() + (Cart.length === 1 ? ' item' : ' items')));
+                CartNav.appendChild(document.createTextNode(+Cart.length.toString() + (Cart.length === 1 ? ' item' : ' items')));
+                Utilities.Show(fullCart);
             }
         }
         function updateCart() {
             let CartCharges = document.getElementById('CartCharges');
             let df = document.createDocumentFragment();
-            clearElement(CartCharges);
+            Utilities.Clear_Element(CartCharges);
             for (let charge of Cart) {
                 df.appendChild(buildCartRow(charge));
             }
@@ -424,6 +517,9 @@ var clayPay;
             let TotalAmount = Cart.reduce((total, b) => {
                 return total + b.Total;
             }, 0);
+            let cartTotalPayment = document.getElementById("cartTotalAmountDue");
+            Utilities.Clear_Element(cartTotalPayment);
+            cartTotalPayment.appendChild(document.createTextNode(TotalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })));
             tr.appendChild(createTableElement(TotalAmount.toFixed(2), "", 1));
             tr.appendChild(createTableElement("", "", 1));
             return tr;
@@ -446,6 +542,59 @@ var clayPay;
             tr.appendChild(createTableElementButton("Add to Cart", charge.ItemId, "center", true, AddItemToCart, RemoveItemFromCart));
             return tr;
         }
+        function buildMenuElements() {
+            let menu = document.getElementById("menuTabs");
+            for (let menuItem of Menus) {
+                menu.appendChild(createMenuElement(menuItem));
+            }
+            createNavCart();
+        }
+        UI.buildMenuElements = buildMenuElements;
+        function createNavCart() {
+            let cart = document.getElementById("nav-cart");
+            let cartTotal = document.createElement("span");
+            cartTotal.id = "nav-cart-total";
+            cartTotal.style.fontSize = "larger";
+            cartTotal.style.fontWeight = "bolder";
+            cartTotal.style.paddingLeft = "1em";
+            cartTotal.appendChild(document.createTextNode("(empty)"));
+            cart.appendChild(cartTotal);
+        }
+        function createMenuElement(menuItem) {
+            let li = document.createElement("li");
+            if (menuItem.selected)
+                li.classList.add("is-active");
+            let a = document.createElement("a");
+            a.id = menuItem.id;
+            a.href = "#";
+            a.onclick = function () {
+                let title = document.getElementById("menuTitle");
+                let subTitle = document.getElementById("menuSubTitle");
+                Utilities.Clear_Element(title);
+                Utilities.Clear_Element(subTitle);
+                title.appendChild(document.createTextNode(menuItem.title));
+                subTitle.appendChild(document.createTextNode(menuItem.subTitle));
+                Utilities.Show_Menu(menuItem.id);
+            };
+            if (menuItem.icon.length > 0) {
+                let span = document.createElement("span");
+                span.classList.add("icon");
+                span.classList.add("is-medium");
+                let i = document.createElement("i");
+                let icons = menuItem.icon.split(" ");
+                for (let icon of icons) {
+                    i.classList.add(icon);
+                }
+                span.appendChild(i);
+                a.appendChild(span);
+            }
+            a.appendChild(document.createTextNode(menuItem.label));
+            li.appendChild(a);
+            return li;
+        }
+        function ShowPaymentMethod(id) {
+        }
+        UI.ShowPaymentMethod = ShowPaymentMethod;
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map
