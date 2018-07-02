@@ -69,29 +69,6 @@ var clayPay;
             }
             return errors;
         }
-        Save() {
-            let ccd = this;
-            return new Promise(function (resolve, reject) {
-                if (ccd.Validate().length > 0) {
-                    return reject(false);
-                }
-                else {
-                    // do actual save stuff here        
-                    var x = XHR.Put("./API/Pay", JSON.stringify(ccd));
-                    x.then(function (response) {
-                        // decide what happens when the payment is successful.
-                        return resolve(response.Text);
-                    }, function (e) {
-                        if (e.Text.toLowerCase().indexOf("message")) {
-                            return reject(JSON.parse(e.Text).Message);
-                        }
-                        else {
-                            return reject(e.Text);
-                        }
-                    });
-                }
-            });
-        }
     }
     clayPay.CCData = CCData;
 })(clayPay || (clayPay = {}));

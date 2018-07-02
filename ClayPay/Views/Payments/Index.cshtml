@@ -186,14 +186,13 @@
           <th width="10%"></th>
         </tr>
       </thead>
-      <tbody id="Charges">
-
-      </tbody>
+      <tbody id="Charges"></tbody>
     </table>
 
   </section>
 
-  <section class="hide"
+  <section style="margin-bottom: 5em;"
+           class="hide"
            id="cart">
     <div id="emptyCart"
          class="level show">
@@ -215,7 +214,8 @@
       <tbody id="CartCharges"></tbody>
     </table>
 
-    <div id="payerInformation">
+    <div class="hide"
+         id="payerData">
       <div style="margin-bottom: 0;"
            class="columns">
         <div class="field column">
@@ -330,117 +330,219 @@
       </div>
 
     </div>
-    
 
-    <div style="margin-top: 1em; margin-bottom: 1em;"
-         class="columns">
-      <div class="column is-one-fifth">
-        <div class="menu">
-          <p class="menu-label">
-            Method of Payment
-          </p>
+    <div class="hide"
+         id="paymentData">
+      @if (Model.djournal_access)
+      {
 
-          <ul class="menu-list">
-            <li>
-              <div class="level">
-                <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
-                      class="level-item">
-                  <span class="icon is-medium">
-                    <i class="fas fa-credit-card"></i>
+
+
+
+        <div style="margin-top: 1em; margin-bottom: 1em;"
+             class="columns">
+          <div class="column is-one-fifth">
+            <div class="menu">
+              <p class="menu-label">
+                Method of Payment
+              </p>
+
+              <ul class="menu-list">
+                <li>
+                  <div class="level">
+                    <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
+                          class="level-item">
+                      <span class="icon is-medium">
+                        <i class="fas fa-credit-card"></i>
+                      </span>
+                      Credit Card
+                    </span>
+                    <a id="creditCardPaymentTotal"
+                       onclick="Utilities.Show_Hide_Selector('#paymentInformation section', 'creditCardPaymentType'); return false;"
+                       style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
+                       class="has-text-link level-item">
+
+                      Add
+                    </a>
+                  </div>
+                </li>
+                <li>
+                  <div class="level">
+                    <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
+                          class="level-item">
+                      <span class="icon is-medium">
+                        <i class="fas fa-money-check"></i>
+                      </span>
+                      Check
+                    </span>
+                    <a id="checkPaymentTotal"
+                       onclick="Utilities.Show_Hide_Selector('#paymentInformation section', 'checkPaymentType'); return false;"
+                       style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
+                       class="has-text-link level-item">
+                      Add
+                    </a>
+                  </div>
+                </li>
+                <li>
+                  <div class="level">
+                    <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
+                          class="level-item">
+                      <span class="icon is-medium">
+                        <i class="fas fa-money-bill-alt"></i>
+                      </span>
+                      Cash
+                    </span>
+                    <a id="cashPaymentTotal"
+                       onclick="Utilities.Show_Hide_Selector('#paymentInformation section', 'cashPaymentType'); return false;"
+                       style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
+                       class="has-text-link level-item">
+                      Add
+                    </a>
+                  </div>
+                </li>
+              </ul>
+
+              <p class="menu-label">
+                Total Amount Paid
+              </p>
+              <ul class="menu-list">
+                <li class="level">
+                  <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%;"
+                        id="cartTotalAmountPaid"
+                        class="level-item">
+                    $0.00
                   </span>
-                  Credit Card
-                </span>
-                <a id="creditcardPaymentTotal"
-                   style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
-                   class="has-text-link level-item">
-                  Add
-                </a>
-              </div>
-            </li>
-            <li>
-              <div class="level">
-                <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
-                      class="level-item">
-                  <span class="icon is-medium">
-                    <i class="fas fa-money-check"></i>
+                </li>
+              </ul>
+
+              <p class="menu-label">
+                Total Amount Due
+              </p>
+              <ul class="menu-list">
+                <li class="level">
+                  <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%;"
+                        id="cartTotalAmountDue"
+                        class="level-item">
                   </span>
-                  Check
-                </span>
-                <a id="checkPaymentTotal"
-                   style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
-                   class="has-text-link level-item">
-                  Add
-                </a>
-              </div>
-            </li>
-            <li>
+                </li>
+                <li class="level">
+                  <button id="processPayments"
+                          disabled
+                          class="level-item button is-success is-disabled">
+                    Pay Now
+                  </button>
+                </li>
+              </ul>
+
+            </div>
+          </div>
+          <div class="column is-four-fifths"
+               id="paymentInformation">
+            <section class="hide"
+                     id="creditCardPaymentType">
+              @Html.Partial("CreditCardPayment")
+            </section>
+
+            <section class="hide"
+                     id="checkPaymentType">
+
               <div class="level">
-                <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
-                      class="level-item">
-                  <span class="icon is-medium">
-                    <i class="fas fa-money-bill-alt"></i>
-                  </span>
-                  Cash
-                </span>
-                <a id="cashPaymentTotal"
-                   style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
-                   class="has-text-link level-item">
-                  Add
-                </a>
+                <h2 class="level-item title">
+                  Pay By Check
+                </h2>
               </div>
-            </li>
-          </ul>
+              <hr />
 
-          <p class="menu-label">
-            Total Amount Paid
-          </p>
-          <ul class="menu-list">
-            <li class="level">
-              <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%;"
-                    id="cartTotalAmountPaid"
-                    class="level-item">
-                $0.00
-              </span>
-            </li>
-          </ul>
+              <div class="columns">
+                <div class="field column is-half">
+                  <label class="label">Amount Tendered</label>
+                  <div class="control has-icons-left">
+                    <input id="checkPaymentAmount"
+                           class="input"
+                           type="number"
+                           placeholder="0.00" />
+                    <span class="icon is-medium is-left">
+                      <i class="fas fa-dollar-sign"></i>
+                    </span>
+                  </div>
+                </div>
+                <div class="field column is-one-quarter">
+                  <label class="label">Check Number</label>
+                  <div class="control">
+                    <input id="checkNumber"
+                           class="input"
+                           type="text"
+                           placeholder="Check #" />
+                  </div>
+                </div>
+                <div class="column is-one-quarter"></div>
+              </div>
+              <div class="level">
+                <button style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
+                        type="button"
+                        class="button is-success level-item">
+                  Continue
+                </button>
 
-          <p class="menu-label">
-            Total Amount Due
-          </p>
-          <ul class="menu-list">
-            <li class="level">
-              <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%;"
-                    id="cartTotalAmountDue"
-                    class="level-item">
-              </span>
-            </li>
-            <li class="level">
-              <button class="level-item button is-success">
-                Pay Now
-              </button>
-            </li>
-          </ul>
+                <button style="width: calc(50% - .75rem); flex-grow: 0; margin-left: .75rem;"
+                        onclick="Utilities.Hide('checkPaymentType');"
+                        type="button"
+                        class="button is-warning level-item">
+                  Cancel
+                </button>
+              </div>
 
+
+            </section>
+
+            <section class="hide"
+                     id="cashPaymentType">
+              <div class="level">
+                <h2 class="level-item title">
+                  Pay With Cash
+                </h2>
+              </div>
+              <hr />
+
+              <div class="columns">
+                <div class="field column is-half">
+                  <label class="label">Amount Tendered</label>
+                  <div class="control has-icons-left">
+                    <input id="cashPaymentAmount"
+                           class="input"
+                           type="number"
+                           placeholder="0.00" />
+                    <span class="icon is-medium is-left">
+                      <i class="fas fa-dollar-sign"></i>
+                    </span>
+                  </div>
+                </div>
+                <div class="column is-half"></div>
+              </div>
+              <div class="level">
+                <button style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
+                        type="button"
+                        class="button is-success level-item">
+                  Continue
+                </button>
+
+                <button style="width: calc(50% - .75rem); flex-grow: 0; margin-left: .75rem;"
+                        onclick="Utilities.Hide('cashPaymentType');"
+                        type="button"
+                        class="button is-warning level-item">
+                  Cancel
+                </button>
+              </div>
+            </section>
+          </div>
         </div>
-      </div>
-      <div class="column is-four-fifths"
-           id="paymentInformation">
-        <section class="hide"
-                 id="creditCardPaymentType">
-          credit card payment
-        </section>
-        <section class="hide"
-                 id="checkPaymentType">
-          check
-        </section>
-        <section class="hide"
-                 id="cashPaymentType">
-          cash
-        </section>
-      </div>
+      }
+      else
+      {
+        @Html.Partial("CreditCardPayment", Model)
+        // will need to render paynow button
+      }
     </div>
-
-
   </section>
 </div>
 
@@ -450,6 +552,8 @@
 <script src="~/Scripts/claypay/UI.js"></script>
 <script src="~/Scripts/claypay/Charge.js"></script>
 <script src="~/Scripts/claypay/AppTypes.js"></script>
+<script src="~/Scripts/claypay/Payment.js"></script>
+<script src="~/Scripts/claypay/NewTransaction.js"></script>
 <script src="~/Scripts/claypay/claypay.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function (event)

@@ -1,0 +1,182 @@
+﻿@model ClayPay.Models.UserAccess
+
+<div id="creditCardPayment">
+
+  <div class="field">
+    <div class="control">
+      <label class="checkbox">
+        <input id="usePayerInformation"
+               type="checkbox" />
+        This is the same as the Payer Information
+      </label>
+    </div>
+  </div>
+  <div style="margin-bottom: 0;"
+       class="columns">
+    <div class="field column">
+      <label class="label">First Name</label>
+      <div class="control">
+        <input id="creditCardFirstName"
+               class="input"
+               type="text"
+               maxlength="50"
+               required
+               placeholder="Firstname" />
+      </div>
+    </div>
+
+    <div class="field column">
+      <label class="label">Last Name</label>
+      <div class="control">
+        <input id="creditCardLastName"
+               class="input"
+               type="text"
+               maxlength="50"
+               required
+               placeholder="Lastname" />
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 0;"
+       class="columns">
+    <div class="field column">
+      <label class="label">Zip Code</label>
+      <div class="control">
+        <input id="creditCardZip"
+               class="input"
+               type="text"
+               maxlength="10"
+               required
+               placeholder="Zip Code" />
+      </div>
+    </div>
+
+    <div class="field column">
+      <label class="label">Email Address for Receipts</label>
+      <div class="control">
+        <input id="creditCardEmailAddress"
+               class="input"
+               type="text"
+               maxlength="50"
+               required
+               placeholder="email@example.com" />
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 0;"
+       class="columns">
+    <div class="field column">
+      <label class="label">Credit Card Number</label>
+      <div class="control has-icons-left">
+        <input id="creditCardNumber"
+               class="input"
+               type="text"
+               required
+               placeholder="Zip Code" />
+        <span class="icon is-medium is-left">
+          <i class="fas fa-credit-card"></i>
+        </span>
+      </div>
+    </div>
+
+    <div class="field column">
+      <label class="label">Card Type</label>
+      <div class="control">
+        <div class="select">
+          <select id="creditCardType">
+            <option value="AMEX">American Express</option>
+            <option value="DISCOVER">Discover</option>
+            <option value="MASTERCARD">Mastercard</option>
+            <option value="VISA">Visa</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 0;"
+       class="columns">
+
+    <div class="field column">
+      <label class="label">Exp. Month</label>
+      <div class="control">
+        <div class="select">
+          <select id="creditCardMonth"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="field column">
+      <label class="label">Exp. Year</label>
+      <div class="control">
+        <div class="select">
+          <select id="creditCardYear"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="field column">
+      <label class="label">CV Code</label>
+      <div class="control">
+        <input id="creditCardNumber"
+               class="input"
+               type="number"
+               maxlength="4"
+               required
+               placeholder="CVC" />
+      </div>
+    </div>
+    <div class="column is-half">
+
+    </div>
+
+  </div>
+  @if (Model.djournal_access)
+  {
+    // let's render a continue button
+
+    <div class="columns">
+      <div class="field column">
+        <label class="label">Amount to Pay via Credit Card</label>
+        <div class="control">
+          <input id="creditCardPaymentAmount"
+                 class="input"
+                 type="number"
+                 required
+                 placeholder="0.00" />
+        </div>
+      </div>
+      <div class="column">
+
+      </div>
+    </div>
+    <div class="level">
+      <button style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
+              type="button"
+              class="button is-success level-item">
+        Continue
+      </button>
+
+      <button style="width: calc(50% - .75rem); flex-grow: 0; margin-left: .75rem;"
+              onclick="Utilities.Hide('creditCardPaymentType');"
+              type="button"
+              class="button is-warning level-item">
+        Cancel
+      </button>
+    </div>
+
+
+  }
+  else
+  {
+    <div class="level">
+      <button type="button"
+              class="button is-success level-item">
+        Pay Now
+      </button>
+    </div>
+  }
+
+</div>

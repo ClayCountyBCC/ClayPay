@@ -330,6 +330,7 @@
     <Content Include="Views\Payments\Index.cshtml" />
     <Content Include="Views\ImpactFees\Index.cshtml" />
     <Content Include="Views\Balancing\Index.cshtml" />
+    <Content Include="Views\Payments\CreditCardPayment.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -347,6 +348,8 @@
     <TypeScriptCompile Include="Scripts\claypay\AppTypes.ts" />
     <TypeScriptCompile Include="Scripts\claypay\CCData.ts" />
     <TypeScriptCompile Include="Scripts\claypay\Charge.ts" />
+    <TypeScriptCompile Include="Scripts\claypay\NewTransaction.ts" />
+    <TypeScriptCompile Include="Scripts\claypay\Payment.ts" />
     <TypeScriptCompile Include="Scripts\claypay\transport.ts" />
     <TypeScriptCompile Include="Scripts\claypay\UI.ts" />
     <TypeScriptCompile Include="Scripts\app\XHR.ts" />

@@ -141,23 +141,23 @@ namespace clayPay.UI
       Utilities.Hide('CCForm'); // Hide the form
       Utilities.Show('PaymentPosting'); // show swirly
 
-      let save = cc.Save();
-      save.then(function (response)
-      {
-        let pr = JSON.parse(response);
-        resetApp();
-        PopulateReceipt(pr);
+      //let save = cc.Save();
+      //save.then(function (response)
+      //{
+      //  let pr = JSON.parse(response);
+      //  resetApp();
+      //  PopulateReceipt(pr);
         
-      },
-        function (reject)
-        {
-          Utilities.Show('errorList');
-          errors = [reject];
-          BuildErrors(errors);          
-          Utilities.Show('CCForm');
-          Utilities.Hide('PaymentPosting');
-          Enable('btnSubmit');
-        });
+      //},
+      //  function (reject)
+      //  {
+      //    Utilities.Show('errorList');
+      //    errors = [reject];
+      //    BuildErrors(errors);          
+      //    Utilities.Show('CCForm');
+      //    Utilities.Hide('PaymentPosting');
+      //    Enable('btnSubmit');
+      //  });
 
     } else
     {
@@ -248,30 +248,16 @@ namespace clayPay.UI
     }
   }
 
-  export function BuildCardTypes(id: string): void
-  {
-    let ccTypes: { label: string, value: string }[] = [
-      { label: 'American Express', value: 'AMEX' },
-      { label: 'Discover', value: 'DISCOVER' },
-      { label: 'MasterCard', value: 'MASTERCARD' },
-      { label: 'Visa', value: 'VISA' }];
-    let selectTypes: HTMLSelectElement = (<HTMLSelectElement>document.getElementById(id));
-    Utilities.Clear_Element(selectTypes);    
-    ccTypes.map(function (ccType)
-    {
-      selectTypes.appendChild(Utilities.Create_Option(ccType.value, ccType.label));
-    });
-  }
-
   export function BuildExpMonths(id: string):void
   {
     let expMonth: HTMLSelectElement = (<HTMLSelectElement>document.getElementById(id));
     if (expMonth === undefined) return;
-    Utilities.Clear_Element(expMonth);        
-    ExpMonths.map(function(month)
+    Utilities.Clear_Element(expMonth);
+    for (let month of ExpMonths)
     {
       expMonth.appendChild(Utilities.Create_Option(month, month));
-    });
+    }
+    expMonth.selectedIndex = 0;
   }
 
   export function BuildExpYears(id: string): void
@@ -283,7 +269,7 @@ namespace clayPay.UI
     {
       let y = (year + i).toString();
       expYear.appendChild(Utilities.Create_Option(y, y));
-      ExpYears.push(y);
+      ExpYears.push(y); // save the year we're adding for later when we do some basic validation
     }
   }
   
@@ -614,8 +600,12 @@ namespace clayPay.UI
     // if there are charges, we show fullCart.
     let emptyCart: HTMLElement = document.getElementById("emptyCart"); 
     let fullCart: HTMLElement = document.getElementById("fullCart");
+    let payerData: HTMLElement = document.getElementById("payerData");
+    let paymentData: HTMLElement = document.getElementById("paymentData");
     Utilities.Hide(emptyCart);
     Utilities.Hide(fullCart);
+    Utilities.Hide(payerData);
+    Utilities.Hide(paymentData);
     Utilities.Clear_Element(CartNav);
     if (Cart.length === 0)
     {
@@ -625,6 +615,8 @@ namespace clayPay.UI
     {
       CartNav.appendChild(document.createTextNode(+ Cart.length.toString() + (Cart.length === 1 ? ' item' : ' items')));
       Utilities.Show(fullCart);
+      Utilities.Show(payerData);
+      Utilities.Show(paymentData);
     }
   }
 
@@ -747,7 +739,7 @@ namespace clayPay.UI
 
   export function ShowPaymentMethod(id: string): void
   {
-
+    
   }
 
 }

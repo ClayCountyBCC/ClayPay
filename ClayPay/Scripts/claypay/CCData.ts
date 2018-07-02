@@ -13,11 +13,8 @@
     ZipCode: string;
     Total: number;
     EmailAddress: string;
-    ItemIds: Array<number>;
 
     Validate(): Array<string>;
-
-    Save(): Promise<string>;
   }
   
 
@@ -119,38 +116,38 @@
       return errors;
     }
 
-    Save(): Promise<string>
-    {
-      let ccd = this;
-      return new Promise(function (resolve, reject)
-      {
-        if (ccd.Validate().length > 0)
-        {
-          return reject(false);
-        }
-        else
-        {
-          // do actual save stuff here        
-          var x = XHR.Put("./API/Pay", JSON.stringify(ccd));
-          x.then(function (response: XHR.Data)
-          {
-            // decide what happens when the payment is successful.
-            return resolve(response.Text);
-          },
-            function (e: XHR.Data)
-            {              
-              if (e.Text.toLowerCase().indexOf("message"))
-              {
-                return reject(JSON.parse(e.Text).Message);
-              }
-              else
-              {
-                return reject(e.Text);
-              }               
-            });
-        }
-      })
-    }    
+    //Save(): Promise<string>
+    //{
+    //  let ccd = this;
+    //  return new Promise(function (resolve, reject)
+    //  {
+    //    if (ccd.Validate().length > 0)
+    //    {
+    //      return reject(false);
+    //    }
+    //    else
+    //    {
+    //      // do actual save stuff here        
+    //      var x = XHR.Put("./API/Pay", JSON.stringify(ccd));
+    //      x.then(function (response: XHR.Data)
+    //      {
+    //        // decide what happens when the payment is successful.
+    //        return resolve(response.Text);
+    //      },
+    //        function (e: XHR.Data)
+    //        {              
+    //          if (e.Text.toLowerCase().indexOf("message"))
+    //          {
+    //            return reject(JSON.parse(e.Text).Message);
+    //          }
+    //          else
+    //          {
+    //            return reject(e.Text);
+    //          }               
+    //        });
+    //    }
+    //  })
+    //}    
 
   }
 }

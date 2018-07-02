@@ -3,6 +3,8 @@
 /// <reference path="charge.ts" />
 /// <reference path="ui.ts" />
 /// <reference path="ccdata.ts" />
+/// <reference path="newtransaction.ts" />
+/// <reference path="payment.ts" />
 //let Card: any;
 //let CurrentCard: any;
 var clayPay;
@@ -11,10 +13,17 @@ var clayPay;
 /// <reference path="charge.ts" />
 /// <reference path="ui.ts" />
 /// <reference path="ccdata.ts" />
+/// <reference path="newtransaction.ts" />
+/// <reference path="payment.ts" />
 //let Card: any;
 //let CurrentCard: any;
 (function (clayPay) {
     "use strict";
+    clayPay.TotalAmountDue = 0;
+    clayPay.CreditCardAmount = 0;
+    clayPay.CheckAmount = 0;
+    clayPay.CashAmount = 0;
+    clayPay.ChangeOwed = 0;
     function start() {
         HandleUIEvents();
         clayPay.UI.buildMenuElements();
@@ -64,12 +73,11 @@ var clayPay;
         loadApplicationTypes();
         clayPay.UI.BuildPayerStates();
         loadCreditCardFee();
-        //loadCreditCardExpirationValues();
-        //UI.BuildCardTypes("ccTypes");
+        loadCreditCardExpirationValues();
     }
     function loadCreditCardExpirationValues() {
-        clayPay.UI.BuildExpMonths("ccExpMonth");
-        clayPay.UI.BuildExpYears("ccExpYear");
+        clayPay.UI.BuildExpMonths("creditCardMonth");
+        clayPay.UI.BuildExpYears("creditCardYear");
     }
     function loadCreditCardFee() {
         //"./API/Fee/"

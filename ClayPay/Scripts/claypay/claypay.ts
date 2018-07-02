@@ -3,6 +3,8 @@
 /// <reference path="charge.ts" />
 /// <reference path="ui.ts" />
 /// <reference path="ccdata.ts" />
+/// <reference path="newtransaction.ts" />
+/// <reference path="payment.ts" />
 
 //let Card: any;
 //let CurrentCard: any;
@@ -12,6 +14,11 @@ namespace clayPay
   "use strict";
 
   export let ConvenienceFee: string;
+  export let TotalAmountDue: number = 0;
+  export let CreditCardAmount: number = 0;
+  export let CheckAmount: number = 0;
+  export let CashAmount: number = 0;
+  export let ChangeOwed: number = 0;
 
   export function start(): void
   {
@@ -78,14 +85,13 @@ namespace clayPay
     loadApplicationTypes();
     UI.BuildPayerStates();
     loadCreditCardFee();
-    //loadCreditCardExpirationValues();
-    //UI.BuildCardTypes("ccTypes");
+    loadCreditCardExpirationValues();
   }
 
   function loadCreditCardExpirationValues(): void
   {
-    UI.BuildExpMonths("ccExpMonth");
-    UI.BuildExpYears("ccExpYear");
+    UI.BuildExpMonths("creditCardMonth");
+    UI.BuildExpYears("creditCardYear");
   }
 
   function loadCreditCardFee(): void

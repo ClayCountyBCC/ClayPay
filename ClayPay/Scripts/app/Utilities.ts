@@ -122,13 +122,18 @@ namespace Utilities
         }
       }
     }
-    let sections = <NodeListOf<HTMLElement>>document.querySelectorAll("#views > section");
+    Show_Hide_Selector("#views > section", id);
+  }
+
+  export function Show_Hide_Selector(selector: string, id: string)
+  {
+    let sections = <NodeListOf<HTMLElement>>document.querySelectorAll(selector);
     if (sections.length > 0)
     {
       for (let i = 0; i < sections.length; i++)
       {
         let item = sections.item(i);
-        if (sections.item(i).id === id)
+        if (item.id === id)
         {
           Show(item);
         }

@@ -127,19 +127,22 @@ var clayPay;
             if (errors.length === 0) {
                 Utilities.Hide('CCForm'); // Hide the form
                 Utilities.Show('PaymentPosting'); // show swirly
-                let save = cc.Save();
-                save.then(function (response) {
-                    let pr = JSON.parse(response);
-                    resetApp();
-                    PopulateReceipt(pr);
-                }, function (reject) {
-                    Utilities.Show('errorList');
-                    errors = [reject];
-                    BuildErrors(errors);
-                    Utilities.Show('CCForm');
-                    Utilities.Hide('PaymentPosting');
-                    Enable('btnSubmit');
-                });
+                //let save = cc.Save();
+                //save.then(function (response)
+                //{
+                //  let pr = JSON.parse(response);
+                //  resetApp();
+                //  PopulateReceipt(pr);
+                //},
+                //  function (reject)
+                //  {
+                //    Utilities.Show('errorList');
+                //    errors = [reject];
+                //    BuildErrors(errors);          
+                //    Utilities.Show('CCForm');
+                //    Utilities.Hide('PaymentPosting');
+                //    Enable('btnSubmit');
+                //  });
             }
             else {
                 // show errors section
@@ -209,28 +212,15 @@ var clayPay;
             }
         }
         UI.BuildAppTypes = BuildAppTypes;
-        function BuildCardTypes(id) {
-            let ccTypes = [
-                { label: 'American Express', value: 'AMEX' },
-                { label: 'Discover', value: 'DISCOVER' },
-                { label: 'MasterCard', value: 'MASTERCARD' },
-                { label: 'Visa', value: 'VISA' }
-            ];
-            let selectTypes = document.getElementById(id);
-            Utilities.Clear_Element(selectTypes);
-            ccTypes.map(function (ccType) {
-                selectTypes.appendChild(Utilities.Create_Option(ccType.value, ccType.label));
-            });
-        }
-        UI.BuildCardTypes = BuildCardTypes;
         function BuildExpMonths(id) {
             let expMonth = document.getElementById(id);
             if (expMonth === undefined)
                 return;
             Utilities.Clear_Element(expMonth);
-            UI.ExpMonths.map(function (month) {
+            for (let month of UI.ExpMonths) {
                 expMonth.appendChild(Utilities.Create_Option(month, month));
-            });
+            }
+            expMonth.selectedIndex = 0;
         }
         UI.BuildExpMonths = BuildExpMonths;
         function BuildExpYears(id) {
@@ -240,7 +230,7 @@ var clayPay;
             for (var i = 0; i < 10; i++) {
                 let y = (year + i).toString();
                 expYear.appendChild(Utilities.Create_Option(y, y));
-                UI.ExpYears.push(y);
+                UI.ExpYears.push(y); // save the year we're adding for later when we do some basic validation
             }
         }
         UI.BuildExpYears = BuildExpYears;
@@ -485,8 +475,12 @@ var clayPay;
             // if there are charges, we show fullCart.
             let emptyCart = document.getElementById("emptyCart");
             let fullCart = document.getElementById("fullCart");
+            let payerData = document.getElementById("payerData");
+            let paymentData = document.getElementById("paymentData");
             Utilities.Hide(emptyCart);
             Utilities.Hide(fullCart);
+            Utilities.Hide(payerData);
+            Utilities.Hide(paymentData);
             Utilities.Clear_Element(CartNav);
             if (Cart.length === 0) {
                 CartNav.appendChild(document.createTextNode("(empty)"));
@@ -495,6 +489,8 @@ var clayPay;
             else {
                 CartNav.appendChild(document.createTextNode(+Cart.length.toString() + (Cart.length === 1 ? ' item' : ' items')));
                 Utilities.Show(fullCart);
+                Utilities.Show(payerData);
+                Utilities.Show(paymentData);
             }
         }
         function updateCart() {

@@ -87,11 +87,15 @@ var Utilities;
                 }
             }
         }
-        let sections = document.querySelectorAll("#views > section");
+        Show_Hide_Selector("#views > section", id);
+    }
+    Utilities.Show_Menu = Show_Menu;
+    function Show_Hide_Selector(selector, id) {
+        let sections = document.querySelectorAll(selector);
         if (sections.length > 0) {
             for (let i = 0; i < sections.length; i++) {
                 let item = sections.item(i);
-                if (sections.item(i).id === id) {
+                if (item.id === id) {
                     Show(item);
                 }
                 else {
@@ -100,7 +104,7 @@ var Utilities;
             }
         }
     }
-    Utilities.Show_Menu = Show_Menu;
+    Utilities.Show_Hide_Selector = Show_Hide_Selector;
     function Get(url) {
         return fetch(url, {
             method: "GET",
