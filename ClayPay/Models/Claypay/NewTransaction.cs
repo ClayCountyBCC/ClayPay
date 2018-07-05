@@ -50,7 +50,7 @@ namespace ClayPay.Models.Claypay
         var charges = Charge.Get(ItemIds);
 
 
-        // Process credit card payment if there is one.
+        // Process credit card payment if there is one. this will be moved to a separate function
         if (CCPayment.CardNumber != null && CCPayment.CardType != null && CCPayment.CardType != "" && CCPayment.CardNumber != "")
         {
           var pr = PaymentResponse.PostPayment(CCPayment, ipAddress);
