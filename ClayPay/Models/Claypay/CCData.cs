@@ -18,7 +18,7 @@ namespace ClayPay.Models
     public decimal Total { get; set; }
     public string EmailAddress { get; set; }
     public string IPAddress { get; set; }
-    //public List<int> ItemIds { get; set; } = new List<int>();
+    public string TransactionId { get; set; }
 
     public readonly static string[] CardTypes = { "MASTERCARD", "VISA", "DISCOVER", "AMEX" };
 
@@ -122,21 +122,13 @@ namespace ClayPay.Models
       return e;
     }
 
-    public void UnlockIds(List<int> itemIds)
+    public void UnlockIds(List<long> itemIds)
     {
       //ActiveTransactions.Finish(this.ItemIds);
       ActiveTransactions.UnlockChargeItems(itemIds);
 
     }
 
-    public List<string> GetAssocKeys()
-    {
-
-      string query = @"
-        SELECT DISTINCT LTRIM(RTRIM(AssocKey)) AS AssocKey FROM ccCashierItem
-        WHERE ItemId IN @ids;";
-      return Constants.Get_Data<string>(query, ItemIds);
-    }
 
   }
 }

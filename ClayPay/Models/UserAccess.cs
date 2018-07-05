@@ -8,18 +8,17 @@ namespace ClayPay.Models
 {
   public class UserAccess
   {
-    private const string event_djournal_group = "gClayDjournal"; // We may make this an argument if we end up using this code elsewhere.
-    private const string event_impactfee_group = "gEventImpactFee"; // We may make this an argument if we end up using this code elsewhere.
-
+    private const string claycashier_djournal_group = "gClayCashierDjournal"; // We may make this an argument if we end up using this code elsewhere.
+    private const string claycashier_impactfee_group = "gClayCashierImpactFee"; // We may make this an argument if we end up using this code elsewhere.
     private const string mis_access_group = "gMIS_Deveoloper_Group";
 
     public bool authenticated { get; set; } = false;
     public string user_name { get; set; }
     public int employee_id { get; set; } = 0;
     public string display_name { get; set; } = "";
-    public bool in_event_djournal_group = false;
-    public bool in_event_impactfee_group = false;
-    public bool in_event_admin_group = false;
+    public bool in_claycashier_djournal_group = false;
+    public bool in_claycashier_impactfee_group = false;
+    public bool in_claycashier_admin_group = false;
 
     public UserAccess(string name)
     {
@@ -70,15 +69,13 @@ namespace ClayPay.Models
 
           if(groups.Contains(mis_access_group)) 
           {
-            in_event_djournal_group = true;
-            in_event_impactfee_group = true;
-            //in_event_admin_group = true;
+            in_claycashier_djournal_group = true;
+            in_claycashier_impactfee_group = true;
           }
           else
           {
-            in_event_djournal_group = groups.Contains(event_djournal_group);
-            in_event_impactfee_group = groups.Contains(event_impactfee_group);
-            //in_event_admin_group = groups.Contains(event_admin_group);
+            in_claycashier_djournal_group = groups.Contains(claycashier_djournal_group);
+            in_claycashier_impactfee_group = groups.Contains(claycashier_impactfee_group);
           }
 
         }
@@ -125,8 +122,8 @@ namespace ClayPay.Models
             break;
           default:
             ParseGroup(mis_access_group, ref d);
-            ParseGroup(event_djournal_group, ref d);
-            ParseGroup(event_impactfee_group, ref d);
+            ParseGroup(claycashier_djournal_group, ref d);
+            ParseGroup(claycashier_impactfee_group, ref d);
 
             d[""] = new UserAccess("");
             break;

@@ -21,13 +21,7 @@ namespace ClayPay.Controllers
 
       return Ok(thisTransaction);
     }
-
-    private string CreateEmailBody(CCData ccd, string cashierId)
-    {
-      string keys = String.Join(", \n", ccd.GetAssocKeys());
-      string body = $"A payment of { ccd.Total.ToString("C") } was made on the following items: \n";
-      return body += keys;
-    }
+    
 
     private IHttpActionResult CreateError(string message, HttpStatusCode codeToUse)
     {
