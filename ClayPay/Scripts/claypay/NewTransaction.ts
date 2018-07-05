@@ -19,12 +19,15 @@ namespace clayPay
     PayerCity: string;
     PayerState: string;
     PayerZip: string;
+    CheckPayment: Payment;
+    CashPayment: Payment;
+    Validate(): boolean;
   }
 
   export class NewTransaction implements INewTransaction
   {
-    public OTid: number = 0;
-    public CashierId: string = "";
+    public OTid: number = 0; // used after the transaction is saved
+    public CashierId: string = ""; // used after the transaction is saved
     public ItemIds: Array<number> = [];
     public CCPayment: CCData = null;
     public Payments: Array<Payment> = [];
@@ -38,11 +41,20 @@ namespace clayPay
     public PayerCity: string;
     public PayerState: string;
     public PayerZip: string;
+    public CheckPayment: Payment = new Payment(payment_type.check);
+    public CashPayment: Payment = new Payment(payment_type.cash);
 
     constructor()
     {
 
     }
+
+    public Validate():boolean
+    {
+      
+      return false;
+    }
+
 
   }
 }

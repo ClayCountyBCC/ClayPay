@@ -45,8 +45,7 @@ var Utilities;
             e = document.getElementById(e);
         }
         if (errorText) {
-            Clear_Element(e);
-            e.appendChild(document.createTextNode(errorText));
+            Set_Text(e, errorText);
         }
         Show(e);
         window.setTimeout(function (j) {
@@ -70,6 +69,28 @@ var Utilities;
         return o;
     }
     Utilities.Create_Option = Create_Option;
+    function Get_Value(e) {
+        if (typeof e == "string") {
+            e = document.getElementById(e);
+        }
+        return e.value;
+    }
+    Utilities.Get_Value = Get_Value;
+    function Set_Value(e, value) {
+        if (typeof e == "string") {
+            e = document.getElementById(e);
+        }
+        e.value = value;
+    }
+    Utilities.Set_Value = Set_Value;
+    function Set_Text(e, value) {
+        if (typeof e == "string") {
+            e = document.getElementById(e);
+        }
+        Clear_Element(e);
+        e.appendChild(document.createTextNode(value));
+    }
+    Utilities.Set_Text = Set_Text;
     function Show_Menu(elementId) {
         //let element = e.srcElement;
         // we expect the element's id to be in a "nav-XXX" name format, where 

@@ -187,9 +187,9 @@ namespace clayPay.UI
   function PopulateReceipt(pr: {CashierId:string, TimeStamp_Display: string, Amount: number}):void
   {
     //clayPay.toggleNavDisplay('receipt');
-    SetInputValue("receiptUniqueId", pr.CashierId);
-    SetInputValue("receiptTimestamp", pr.TimeStamp_Display);
-    SetInputValue("receiptAmount", pr.Amount.toFixed(2));
+    Utilities.Set_Value("receiptUniqueId", pr.CashierId);
+    Utilities.Set_Value("receiptTimestamp", pr.TimeStamp_Display);
+    Utilities.Set_Value("receiptAmount", pr.Amount.toFixed(2));
   }
 
   function ToggleDisabled(id: string, status: boolean): void
@@ -355,8 +355,8 @@ namespace clayPay.UI
   function ProcessResults(charges: Array<Charge>, key: string): void
   {
     AddCharges(charges);
-    SetValue('ChargesKey', charges[0].AssocKey);
-    SetValue('ChargesDetail', charges[0].Detail);
+    Utilities.Set_Text('ChargesKey', charges[0].AssocKey);
+    Utilities.Set_Text('ChargesDetail', charges[0].Detail);
   }
 
   function AddCharges(charges: Array<Charge>)
@@ -574,18 +574,18 @@ namespace clayPay.UI
     return d;
   }
 
-  function SetInputValue(id: string, value: string)
-  {
-    let e: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
-    e.value = value;    
-  }
+  //function SetInputValue(id: string, value: string)
+  //{
+  //  let e: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
+  //  e.value = value;    
+  //}
 
-  function SetValue(id: string, value: string)
-  {
-    let e: HTMLElement = document.getElementById(id);
-    Utilities.Clear_Element(e);
-    e.appendChild(document.createTextNode(value));
-  }
+  //function SetValue(id: string, value: string)
+  //{
+  //  let e: HTMLElement = document.getElementById(id);
+  //  Utilities.Clear_Element(e);
+  //  e.appendChild(document.createTextNode(value));
+  //}
 
   function updateCartNav():void
   {

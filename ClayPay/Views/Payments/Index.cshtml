@@ -460,6 +460,7 @@
                     <input id="checkPaymentAmount"
                            class="input"
                            type="number"
+                           required
                            placeholder="0.00" />
                     <span class="icon is-medium is-left">
                       <i class="fas fa-dollar-sign"></i>
@@ -472,10 +473,20 @@
                     <input id="checkNumber"
                            class="input"
                            type="text"
+                           required
                            placeholder="Check #" />
                   </div>
                 </div>
                 <div class="column is-one-quarter"></div>
+              </div>
+              <div class="field">
+                <div class="field">
+                  <div class="control">
+                    <p id="checkPaymentError"
+                       class="help is-danger hide">
+                    </p>
+                  </div>
+                </div>
               </div>
               <div class="level">
                 <button style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
@@ -519,6 +530,16 @@
                 </div>
                 <div class="column is-half"></div>
               </div>
+              <div class="field">
+                <div class="field">
+                  <div class="control">
+                    <p id="cashPaymentError"
+                       class="help is-danger hide">
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div class="level">
                 <button style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
                         type="button"

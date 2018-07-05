@@ -72,8 +72,7 @@ namespace Utilities
     }
     if (errorText)
     {
-      Clear_Element(e);
-      (<HTMLElement>e).appendChild(document.createTextNode(errorText));
+      Set_Text(e, errorText);
     }
     Show(e);
     window.setTimeout(function (j)
@@ -98,6 +97,42 @@ namespace Utilities
     o.text = label;
     o.selected = selected;
     return o;
+  }
+
+  export function Get_Value(e: string): string
+  export function Get_Value(e: HTMLSelectElement): string
+  export function Get_Value(e: HTMLInputElement): string
+  export function Get_Value(e: any): string
+  {
+    if (typeof e == "string")
+    {
+      e = document.getElementById(e);
+    }
+    return (<HTMLInputElement>e).value;
+  }
+
+  export function Set_Value(e: string, value: string): void
+  export function Set_Value(e: HTMLSelectElement, value: string): void
+  export function Set_Value(e: HTMLInputElement, value: string): void
+  export function Set_Value(e: any, value: string): void
+  {
+    if (typeof e == "string")
+    {
+      e = document.getElementById(e);
+    }
+    (<HTMLInputElement>e).value = value;
+  }
+
+  export function Set_Text(e: string, value: string): void
+  export function Set_Text(e: HTMLElement, value: string): void
+  export function Set_Text(e: any, value: string): void
+  {
+    if (typeof e == "string")
+    {
+      e = document.getElementById(e);
+    }
+    Clear_Element(e);
+    (<HTMLElement>e).appendChild(document.createTextNode(value));
   }
 
   export function Show_Menu(elementId: string)

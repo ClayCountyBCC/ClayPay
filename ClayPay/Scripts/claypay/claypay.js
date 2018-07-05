@@ -19,11 +19,7 @@ var clayPay;
 //let CurrentCard: any;
 (function (clayPay) {
     "use strict";
-    clayPay.TotalAmountDue = 0;
-    clayPay.CreditCardAmount = 0;
-    clayPay.CheckAmount = 0;
-    clayPay.CashAmount = 0;
-    clayPay.ChangeOwed = 0;
+    clayPay.CurrentTransaction = new clayPay.NewTransaction();
     function start() {
         HandleUIEvents();
         clayPay.UI.buildMenuElements();

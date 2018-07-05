@@ -167,9 +167,9 @@ var clayPay;
         }
         function PopulateReceipt(pr) {
             //clayPay.toggleNavDisplay('receipt');
-            SetInputValue("receiptUniqueId", pr.CashierId);
-            SetInputValue("receiptTimestamp", pr.TimeStamp_Display);
-            SetInputValue("receiptAmount", pr.Amount.toFixed(2));
+            Utilities.Set_Value("receiptUniqueId", pr.CashierId);
+            Utilities.Set_Value("receiptTimestamp", pr.TimeStamp_Display);
+            Utilities.Set_Value("receiptAmount", pr.Amount.toFixed(2));
         }
         function ToggleDisabled(id, status) {
             document.getElementById(id).disabled = status;
@@ -301,8 +301,8 @@ var clayPay;
         UI.Search = Search;
         function ProcessResults(charges, key) {
             AddCharges(charges);
-            SetValue('ChargesKey', charges[0].AssocKey);
-            SetValue('ChargesDetail', charges[0].Detail);
+            Utilities.Set_Text('ChargesKey', charges[0].AssocKey);
+            Utilities.Set_Text('ChargesDetail', charges[0].Detail);
         }
         function AddCharges(charges) {
             let container = document.getElementById('Charges');
@@ -454,15 +454,17 @@ var clayPay;
             d.appendChild(add);
             return d;
         }
-        function SetInputValue(id, value) {
-            let e = document.getElementById(id);
-            e.value = value;
-        }
-        function SetValue(id, value) {
-            let e = document.getElementById(id);
-            Utilities.Clear_Element(e);
-            e.appendChild(document.createTextNode(value));
-        }
+        //function SetInputValue(id: string, value: string)
+        //{
+        //  let e: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
+        //  e.value = value;    
+        //}
+        //function SetValue(id: string, value: string)
+        //{
+        //  let e: HTMLElement = document.getElementById(id);
+        //  Utilities.Clear_Element(e);
+        //  e.appendChild(document.createTextNode(value));
+        //}
         function updateCartNav() {
             // This function is going to take the contents of the Cart array and 
             // update the CartNav element.

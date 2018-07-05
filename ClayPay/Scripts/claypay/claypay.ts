@@ -14,11 +14,7 @@ namespace clayPay
   "use strict";
 
   export let ConvenienceFee: string;
-  export let TotalAmountDue: number = 0;
-  export let CreditCardAmount: number = 0;
-  export let CheckAmount: number = 0;
-  export let CashAmount: number = 0;
-  export let ChangeOwed: number = 0;
+  export let CurrentTransaction: NewTransaction = new NewTransaction();
 
   export function start(): void
   {
