@@ -43,13 +43,11 @@ namespace ClayPay.Models.Claypay
       useraccess = ua;
       Errors = new List<string>();
 
-      ValidateTransaction();
       // process cc payments here
-      try
+      if (ValidateTransaction())
       {
-        LockChargeItems();
+        // LockChargeItems();
         var charges = Charge.Get(ItemIds);
-
 
         // Process credit card payment if there is one. this will be moved to a separate function
         if (CCPayment.CardNumber != null && CCPayment.CardType != null && CCPayment.CardType != "" && CCPayment.CardNumber != "")
@@ -82,6 +80,7 @@ namespace ClayPay.Models.Claypay
               {
                 Constants.Log(ex);
                 Errors.Add("Issue adding credit card payment to Payment List");
+                return this;
               }
 
             }
@@ -90,67 +89,51 @@ namespace ClayPay.Models.Claypay
 
 
         // Validate, Save, and Finalize all payment types here
-        if (ua.authenticated)
+
+        // Inside pr.Save take all payments and process them.
+        if (Errors.Count() == 0)
         {
-
-          // Inside pr.Save take all payments and process them.
-          if (Errors.Count() == 0)
-          { 
-            if (SavePayments())
-            {
-              FinalizePayments();
-            }
-            else
-            {
+          if (SavePayments())
+          {
+            FinalizePayments();
+          }
+          else
+          {
             // getting here is bad
-              Errors.Add("There was an issue saving the transaction.");
-            }
+            Errors.Add("There was an issue saving the transaction.");
+            // This may be where we put the transaction to attempt it again.
+          }
 
-            // This will be moved to new function
-            if (Constants.UseProduction())
+          // This will be moved to new function
+          if (Constants.UseProduction())
+          {
+            if (ua.authenticated)
             {
-              if (ua.authenticated)
-              {
 
-              }
-              else
-              {
-                Constants.SaveEmail("OnlinePermits@claycountygov.com",
-                  $"Payment made - Receipt # {CashierId}, Transaction # {CCPayment.TransactionId} ",
-                  CreateEmailBody());
-              }
             }
             else
             {
-              if (ua.authenticated)
-              {
-
-              }
-              else
-              {
-                Constants.SaveEmail("daniel.mccartney@claycountygov.com",
-                $"TEST Payment made - Receipt # {CashierId}, Transaction # {CCPayment.TransactionId} -- TEST SERVER",
+              Constants.SaveEmail("OnlinePermits@claycountygov.com",
+                $"Payment made - Receipt # {CashierId}, Transaction # {CCPayment.TransactionId} ",
                 CreateEmailBody());
-              }
+            }
+          }
+          else
+          {
+            if (ua.authenticated)
+            {
+
+            }
+            else
+            {
+              Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+              $"TEST Payment made - Receipt # {CashierId}, Transaction # {CCPayment.TransactionId} -- TEST SERVER",
+              CreateEmailBody());
             }
           }
         }
-
-        UnlockChargeItems();
-
       }
-      catch (Exception ex)
-      {
-        // This is bad. Very Bad
-
-        Constants.Log(ex);
-        UnlockChargeItems();
-        Errors.Add("There was an issue processing the transaction");
-        return this;
-      }
-      
-      // unlock ItemIds
-
+      UnlockChargeItems();
       return this;
     }
 
@@ -159,7 +142,7 @@ namespace ClayPay.Models.Claypay
       if (ipAddress.Length == 0)
       {
         Constants.Log("Issue in PayController", "IP Address could not be captured", "", "", "");
-        Errors.Add("IP Address could not be captured");
+        //Errors.Add("IP Address could not be captured");
       }
 
       Errors = CCPayment.ValidateCCData(CCPayment);
@@ -176,13 +159,9 @@ namespace ClayPay.Models.Claypay
                       "Error setting payment type.",
                       "",
                       $"Number of payment types: {Payments.Count()}, function call: Payment.SetPaymentTypeString().", "");
-      }
-      
-
-      if (Errors.Count() > 0)
-      {
         return false;
       }
+
       // If not cashier and cash || check, return error
       if (!useraccess.in_claycashier_djournal_group &&
          !useraccess.in_claycashier_admin_group &&
@@ -203,9 +182,9 @@ namespace ClayPay.Models.Claypay
       var totalCharges = (from c in Charge.Get(ItemIds) select c.Total).Sum();
       decimal totalPaymentAmount = (from p in Payments select p.Amount).Sum();
 
-      if (totalPaymentAmount <= 0)
+      if (totalPaymentAmount <= 0 || totalPaymentAmount < totalCharges)
       {
-        Errors.Add("Payment amount must be greater than 0.\n");
+        Errors.Add("Payment amount must be greater than 0 and equal to or greater than the sum of the charges.\n");
         return false;
       }
 
@@ -245,8 +224,6 @@ namespace ClayPay.Models.Claypay
       }
       return true;
     }
-
-    Payment FUNCTION 
 
     IMPACT FEE WAIVER FUNCTION
 
@@ -333,29 +310,34 @@ namespace ClayPay.Models.Claypay
       }
     }
 
-    public bool Save()
+    public bool SavePayments()
     {
-      var transId = (from p in payments where p.PaymentType != "CA" && p.PaymentType != "CK" select p.TransactionId).FirstOrDefault();
+      var transId = (from p in Payments 
+                     where p.GetPaymentTypeString() != "CA" 
+                        && p.GetPaymentTypeString() != "CK" 
+                     select p.TransactionId).FirstOrDefault();
       var dbArgs = new DynamicParameters();
       dbArgs.Add("@cId", dbType: DbType.String, size: 9, direction: ParameterDirection.Output);
       dbArgs.Add("@otId", dbType: DbType.Int64, direction: ParameterDirection.Output);
       dbArgs.Add("@PayerName", PayerName);
-      dbArgs.Add("@Total", ccd.Total);
-      dbArgs.Add("@TransId", ();
-      //dbArgs.Add("@ItemIds", ccd.ItemIds);
-      //DECLARE @cId VARCHAR(9) = NULL;
-      //DECLARE @otId int = NULL;
+      dbArgs.Add("@Total", CCPayment.Total);
+      dbArgs.Add("@TransId", transId);
+      dbArgs.Add("@ItemIds", ItemIds);
+
+
       string query = @"
         DECLARE @now DATETIME = GETDATE();
-        
+        DECLARE @CashierId VARCHAR(9) = NULL;
+        DECLARE @otId int = NULL;
+
         BEGIN TRANSACTION;
 
         BEGIN TRY
-          EXEC dbo.prc_upd_ccNextCashierId @cId OUTPUT;
+          EXEC dbo.prc_upd_ccNextCashierId @CashierId OUTPUT;
           
           EXEC dbo.prc_ins_ccCashier 
             @OTId = @otId OUTPUT, 
-            @CashierId = @cId, 
+            @CashierId = @CashierId, 
             @LstUpdt = NULL, 
             @Name = @PayerName,
             @TransDt = @now;
@@ -369,7 +351,7 @@ namespace ClayPay.Models.Claypay
             @Addr2 = '',
             @NTUser='claypay';
 
-          EXEC dbo.prc_upd_ccCashierPmt 
+          EXEC dbo.prc_ins_CashierNewPayment 
             @PayId = 0,
             @OTId = @otId, 
             @PmtType ='CC On',
@@ -379,7 +361,7 @@ namespace ClayPay.Models.Claypay
             @CkNo = @TransId;
 
           UPDATE ccCashierItem 
-            SET OTId = @otId, CashierId = @cId
+            SET OTId = @otId, CashierId = @CashierId
             WHERE itemId IN @ItemIds
 
           -- Add the ccGU rows
@@ -438,8 +420,8 @@ namespace ClayPay.Models.Claypay
       try
       {
         var i = Constants.Exec_Query(query, dbArgs);
-        CashierId = dbArgs.Get<string>("@cId");
-        OTId = dbArgs.Get<Int64>("@otId");
+        CashierId = dbArgs.Get<string>("@CashierId");
+        OTid = dbArgs.Get<Int32>("@otId");
         return (i != -1);
       }
       catch (Exception ex)
@@ -627,7 +609,7 @@ namespace ClayPay.Models.Claypay
       //param.Add("@NTUser", NTUser);
       //param.Add("@StationId", stationId);
       return @"
-      DECLARE OTid INT;
+      DECLARE @OTid INT;
 
       INSERT INTO ccCashier
         (Name, CashierId, LstUpdt, OperId, TransDt, StationId)
