@@ -43,6 +43,7 @@ namespace ClayPay.Models.Claypay
       useraccess = ua;
       Errors = new List<string>();
 
+      ValidateTransaction();
       // process cc payments here
       try
       {
@@ -53,6 +54,7 @@ namespace ClayPay.Models.Claypay
         // Process credit card payment if there is one. this will be moved to a separate function
         if (CCPayment.CardNumber != null && CCPayment.CardType != null && CCPayment.CardType != "" && CCPayment.CardNumber != "")
         {
+
           var pr = PaymentResponse.PostPayment(CCPayment, ipAddress);
 
           if (pr == null)
@@ -88,46 +90,54 @@ namespace ClayPay.Models.Claypay
 
 
         // Validate, Save, and Finalize all payment types here
-        if (ua.authenticated && ValidateTransaction())
+        if (ua.authenticated)
         {
 
           // Inside pr.Save take all payments and process them.
           if (Errors.Count() == 0)
-          {
-            if (Save())
+          { 
+            if (SavePayments())
             {
-              Finalize();
-              UnlockChargeItems();
+              FinalizePayments();
             }
             else
             {
+            // getting here is bad
               Errors.Add("There was an issue saving the transaction.");
             }
 
+            // This will be moved to new function
             if (Constants.UseProduction())
             {
-              Constants.SaveEmail("OnlinePermits@claycountygov.com",
-                $"Payment made - Receipt # {CashierId}, Transaction # {CCPayment.TransactionId} ",
-                CreateEmailBody());
+              if (ua.authenticated)
+              {
+
+              }
+              else
+              {
+                Constants.SaveEmail("OnlinePermits@claycountygov.com",
+                  $"Payment made - Receipt # {CashierId}, Transaction # {CCPayment.TransactionId} ",
+                  CreateEmailBody());
+              }
             }
             else
             {
-              Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+              if (ua.authenticated)
+              {
+
+              }
+              else
+              {
+                Constants.SaveEmail("daniel.mccartney@claycountygov.com",
                 $"TEST Payment made - Receipt # {CashierId}, Transaction # {CCPayment.TransactionId} -- TEST SERVER",
                 CreateEmailBody());
+              }
             }
           }
-          //else
-          //{
-          //  var items = String.Join(",", ItemIds);
-          //  Constants.Log("Error attempting to save transaction.",
-          //    items,
-          //    pr.UniqueId,
-          //    CCPayment.EmailAddress);
-          //  Errors.Add("Error Attempting to save transaction.");
-          //}
-
         }
+
+        UnlockChargeItems();
+
       }
       catch (Exception ex)
       {
@@ -138,11 +148,9 @@ namespace ClayPay.Models.Claypay
         Errors.Add("There was an issue processing the transaction");
         return this;
       }
-
-
-
+      
       // unlock ItemIds
-      UnlockChargeItems();
+
       return this;
     }
 
@@ -154,20 +162,22 @@ namespace ClayPay.Models.Claypay
         Errors.Add("IP Address could not be captured");
       }
 
-      foreach (var p in Payments)
+      Errors = CCPayment.ValidateCCData(CCPayment);
+      if (Errors.Count() > 0) return false;
+
+
+      if ((from p in Payments
+         where p.GetPaymentTypeString() == ""
+         select p).ToList().Count() > 0)
       {
-        if (p.GetPaymentTypeString() == "")
-        {
-          // This is bad. if we have a credit card transaction, the money has already been taken, and no payment will be recorded.
-          // We may want to consider how we want to handle this.
-          var paymentnumber = Payments.IndexOf(p) + 1;
-          Errors.Add($"There is an issue with recording the payment type for one or more payment types in this transaction.");
-          Constants.Log("issue with recording payment type.",
-                        "Error setting payment type.",
-                        "",
-                        $"Number of payment types: {Payments.Count()}, function call: Payment.SetPaymentTypeString(). Payment object: {p.ToString()}", "");
-        }
+
+        Errors.Add($"There is an issue recording one or more payment types in this transaction.");
+        Constants.Log("issue with recording payment type.",
+                      "Error setting payment type.",
+                      "",
+                      $"Number of payment types: {Payments.Count()}, function call: Payment.SetPaymentTypeString().", "");
       }
+      
 
       if (Errors.Count() > 0)
       {
@@ -187,11 +197,7 @@ namespace ClayPay.Models.Claypay
       }
 
       // validate credit card data
-      CCPayment.ValidateCCData(CCPayment);
-      if (Errors.Count() > 0)
-      {
-        return false;
-      }
+
 
 
       var totalCharges = (from c in Charge.Get(ItemIds) select c.Total).Sum();
@@ -202,6 +208,7 @@ namespace ClayPay.Models.Claypay
         Errors.Add("Payment amount must be greater than 0.\n");
         return false;
       }
+
 
       // AmountTenderd and Total of charges can be different if cash is involved 
       var hasCash = (from p in Payments
@@ -238,6 +245,10 @@ namespace ClayPay.Models.Claypay
       }
       return true;
     }
+
+    Payment FUNCTION 
+
+    IMPACT FEE WAIVER FUNCTION
 
     public int LockChargeItems()
     {

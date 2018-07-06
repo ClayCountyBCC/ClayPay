@@ -117,7 +117,7 @@ namespace ClayPay.Models
       {
         Constants.Log(ex);
 
-        e.Add("Error in validation, unable to continue.");
+        e.Add("Error in credit card validation, unable to continue.");
       }
       return e;
     }
