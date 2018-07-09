@@ -236,4 +236,4 @@ var ImpactFees;
     //  return tr;
     //}
 })(ImpactFees || (ImpactFees = {}));
-//# sourceMappingURL=impactfees.js.map
+//# sourceMappingURL=ImpactFees.js.map

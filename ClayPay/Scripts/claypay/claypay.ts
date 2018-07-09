@@ -2,7 +2,7 @@
 /// <reference path="apptypes.ts" />
 /// <reference path="charge.ts" />
 /// <reference path="ui.ts" />
-/// <reference path="ccdata.ts" />
+/// <reference path="CCPayment.ts" />
 /// <reference path="newtransaction.ts" />
 /// <reference path="payment.ts" />
 
@@ -93,7 +93,7 @@ namespace clayPay
   function loadCreditCardFee(): void
   {
     //"./API/Fee/"
-    Utilities.Get<string>("./API/Fee/")
+    Utilities.Get<string>("../API/Payments/Fee/")
       .then(function (fee: string)
       {
         ConvenienceFee = fee;
@@ -108,8 +108,7 @@ namespace clayPay
 
   function loadApplicationTypes(): void
   {
-    //transport.GetApplicationTypes().then(function (appTypes: Array<AppType>)
-    Utilities.Get<Array<AppType>>("./API/Apptypes/")
+    Utilities.Get<Array<AppType>>("../API/Payments/Apptypes/")
       .then(function (appTypes: Array<AppType>)
       {
         UI.BuildAppTypes(appTypes);
@@ -120,21 +119,5 @@ namespace clayPay
         });
   }
 
-  //export function toggleNavDisplay(element: string): void
-  //{
-
-
-  //  UI.toggleNav("navTopMenu", element);
-
-  //  let section = document.getElementsByTagName("section");
-  //  for (var i = 0; i < section.length; i++)
-  //  {
-  //    if (section[i].style.display !== "none")
-  //    {
-  //      section[i].style.display = "none";
-  //    }
-  //  }
-  //  document.getElementById(element).style.display = "block";
-  //}
 
 }

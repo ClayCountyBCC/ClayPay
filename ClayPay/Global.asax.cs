@@ -13,11 +13,12 @@ namespace ClayPay
   {
     protected void Application_Start()
     {
+      BundleConfig.RegisterBundles(BundleTable.Bundles);
       GlobalConfiguration.Configure(WebApiConfig.Register);
       AreaRegistration.RegisterAllAreas();
       RouteConfig.RegisterRoutes(RouteTable.Routes);
       FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
-      BundleConfig.RegisterBundles(BundleTable.Bundles);
+   
     }
   }
 }

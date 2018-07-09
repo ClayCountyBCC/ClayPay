@@ -47,8 +47,7 @@ var Utilities;
             e = document.getElementById(e);
         }
         if (errorText) {
-            Clear_Element(e);
-            e.appendChild(document.createTextNode(errorText));
+            Set_Text(e, errorText);
         }
         Show(e);
         window.setTimeout(function (j) {
@@ -73,6 +72,28 @@ var Utilities;
         return o;
     }
     Utilities.Create_Option = Create_Option;
+    function Get_Value(e) {
+        if (typeof e == "string") {
+            e = document.getElementById(e);
+        }
+        return e.value;
+    }
+    Utilities.Get_Value = Get_Value;
+    function Set_Value(e, value) {
+        if (typeof e == "string") {
+            e = document.getElementById(e);
+        }
+        e.value = value;
+    }
+    Utilities.Set_Value = Set_Value;
+    function Set_Text(e, value) {
+        if (typeof e == "string") {
+            e = document.getElementById(e);
+        }
+        Clear_Element(e);
+        e.appendChild(document.createTextNode(value));
+    }
+    Utilities.Set_Text = Set_Text;
     function Show_Menu(elementId) {
         //let element = e.srcElement;
         // we expect the element's id to be in a "nav-XXX" name format, where
@@ -107,6 +128,7 @@ var Utilities;
     }
     Utilities.Show_Hide_Selector = Show_Hide_Selector;
     function Get(url) {
+        console.log('Get URL', url);
         return fetch(url, {
             method: "GET",
             headers: {
@@ -139,6 +161,28 @@ var Utilities;
         });
     }
     Utilities.Post = Post;
+    function Format_Amount(amount) {
+        return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    }
+    Utilities.Format_Amount = Format_Amount;
+    function Validate_Text(e, errorElementId, errorText) {
+        // this should only be used for required elements.
+        if (typeof e == "string") {
+            e = document.getElementById(e);
+        }
+        var ele = e;
+        ele.tagName.toLowerCase() === "select" ? ele.parentElement.classList.remove("is-danger") : ele.classList.remove("is-danger");
+        var v = Get_Value(ele).trim();
+        if (v.length == 0) {
+            ele.tagName.toLowerCase() === "select" ? ele.parentElement.classList.add("is-danger") : ele.classList.add("is-danger");
+            Error_Show(errorElementId, errorText);
+            ele.focus();
+            ele.scrollTo();
+            return "";
+        }
+        return v;
+    }
+    Utilities.Validate_Text = Validate_Text;
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map
 

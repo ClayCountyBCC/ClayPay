@@ -182,6 +182,7 @@ namespace Utilities
 
   export function Get<T>(url: string): Promise<T>
   {
+    console.log('Get URL', url);
     return fetch(url,
       {
         method: "GET",
@@ -222,5 +223,35 @@ namespace Utilities
     })
   }
 
+  export function Format_Amount(amount: number): string
+  {
+    return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  }
+
+  export function Validate_Text(e: string, errorElementId: string, errorText: string): string
+  export function Validate_Text(e: HTMLInputElement, errorElementId: string, errorText: string): string
+  export function Validate_Text(e: HTMLSelectElement, errorElementId: string, errorText: string): string
+  export function Validate_Text(e: HTMLElement, errorElementId: string, errorText: string):string
+  export function Validate_Text(e: any, errorElementId: string, errorText: string):string
+  {
+    // this should only be used for required elements.
+    if (typeof e == "string")
+    {
+      e = document.getElementById(e);
+    }    
+    let ele = (<HTMLInputElement>e);
+    ele.tagName.toLowerCase() === "select" ? ele.parentElement.classList.remove("is-danger") : ele.classList.remove("is-danger");
+    let v = Get_Value(ele).trim();
+    if (v.length == 0)
+    {
+      ele.tagName.toLowerCase() === "select" ? ele.parentElement.classList.add("is-danger") : ele.classList.add("is-danger");
+      Error_Show(errorElementId, errorText);
+      ele.focus();
+      ele.scrollTo();
+      return "";
+    }
+    return v;
+
+  }
 
 }

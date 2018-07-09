@@ -2,7 +2,7 @@
 /// <reference path="apptypes.ts" />
 /// <reference path="charge.ts" />
 /// <reference path="ui.ts" />
-/// <reference path="ccdata.ts" />
+/// <reference path="CCPayment.ts" />
 /// <reference path="newtransaction.ts" />
 /// <reference path="payment.ts" />
 //let Card: any;
@@ -12,7 +12,7 @@ var clayPay;
 /// <reference path="apptypes.ts" />
 /// <reference path="charge.ts" />
 /// <reference path="ui.ts" />
-/// <reference path="ccdata.ts" />
+/// <reference path="CCPayment.ts" />
 /// <reference path="newtransaction.ts" />
 /// <reference path="payment.ts" />
 //let Card: any;
@@ -77,7 +77,7 @@ var clayPay;
     }
     function loadCreditCardFee() {
         //"./API/Fee/"
-        Utilities.Get("./API/Fee/")
+        Utilities.Get("../API/Payments/Fee/")
             .then(function (fee) {
             clayPay.ConvenienceFee = fee;
             console.log('conv fee is', fee);
@@ -87,8 +87,7 @@ var clayPay;
         });
     }
     function loadApplicationTypes() {
-        //transport.GetApplicationTypes().then(function (appTypes: Array<AppType>)
-        Utilities.Get("./API/Apptypes/")
+        Utilities.Get("../API/Payments/Apptypes/")
             .then(function (appTypes) {
             clayPay.UI.BuildAppTypes(appTypes);
         }, function () {
@@ -96,18 +95,5 @@ var clayPay;
             // do something with the error here
         });
     }
-    //export function toggleNavDisplay(element: string): void
-    //{
-    //  UI.toggleNav("navTopMenu", element);
-    //  let section = document.getElementsByTagName("section");
-    //  for (var i = 0; i < section.length; i++)
-    //  {
-    //    if (section[i].style.display !== "none")
-    //    {
-    //      section[i].style.display = "none";
-    //    }
-    //  }
-    //  document.getElementById(element).style.display = "block";
-    //}
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=claypay.js.map

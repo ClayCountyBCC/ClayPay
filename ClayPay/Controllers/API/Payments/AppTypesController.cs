@@ -8,9 +8,11 @@ using ClayPay.Models;
 
 namespace ClayPay.Controllers
 {
+  [RoutePrefix("API/Payments")]
   public class AppTypesController : ApiController
   {
     // GET: api/AppTypes
+    [Route("Apptypes")]
     public IHttpActionResult Get()
     {
       List<AppType> lat = (List<AppType>)MyCache.GetItem("apptypes");

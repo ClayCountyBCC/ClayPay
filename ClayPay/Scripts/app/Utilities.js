@@ -127,6 +127,7 @@ var Utilities;
     }
     Utilities.Show_Hide_Selector = Show_Hide_Selector;
     function Get(url) {
+        console.log('Get URL', url);
         return fetch(url, {
             method: "GET",
             headers: {
@@ -160,5 +161,27 @@ var Utilities;
         });
     }
     Utilities.Post = Post;
+    function Format_Amount(amount) {
+        return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    }
+    Utilities.Format_Amount = Format_Amount;
+    function Validate_Text(e, errorElementId, errorText) {
+        // this should only be used for required elements.
+        if (typeof e == "string") {
+            e = document.getElementById(e);
+        }
+        let ele = e;
+        ele.tagName.toLowerCase() === "select" ? ele.parentElement.classList.remove("is-danger") : ele.classList.remove("is-danger");
+        let v = Get_Value(ele).trim();
+        if (v.length == 0) {
+            ele.tagName.toLowerCase() === "select" ? ele.parentElement.classList.add("is-danger") : ele.classList.add("is-danger");
+            Error_Show(errorElementId, errorText);
+            ele.focus();
+            ele.scrollTo();
+            return "";
+        }
+        return v;
+    }
+    Utilities.Validate_Text = Validate_Text;
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map

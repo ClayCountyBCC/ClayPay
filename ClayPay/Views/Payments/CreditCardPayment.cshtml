@@ -6,6 +6,7 @@
     <div class="control">
       <label class="checkbox">
         <input id="usePayerInformation"
+               onchange="clayPay.CurrentTransaction.CopyPayerData();"
                type="checkbox" />
         This is the same as the Payer Information
       </label>
@@ -17,6 +18,7 @@
       <label class="label">First Name</label>
       <div class="control">
         <input id="creditCardFirstName"
+               autocomplete="cc-given-name"
                class="input"
                type="text"
                maxlength="50"
@@ -29,6 +31,7 @@
       <label class="label">Last Name</label>
       <div class="control">
         <input id="creditCardLastName"
+               autocomplete="cc-family-name"
                class="input"
                type="text"
                maxlength="50"
@@ -44,6 +47,7 @@
       <label class="label">Zip Code</label>
       <div class="control">
         <input id="creditCardZip"
+               autocomplete="postal-code"
                class="input"
                type="text"
                maxlength="10"
@@ -56,6 +60,7 @@
       <label class="label">Email Address for Receipts</label>
       <div class="control">
         <input id="creditCardEmailAddress"
+               autocomplete="email"
                class="input"
                type="text"
                maxlength="50"
@@ -71,10 +76,11 @@
       <label class="label">Credit Card Number</label>
       <div class="control has-icons-left">
         <input id="creditCardNumber"
+               autocomplete="cc-number"
                class="input"
                type="text"
                required
-               placeholder="Zip Code" />
+               placeholder="" />
         <span class="icon is-medium is-left">
           <i class="fas fa-credit-card"></i>
         </span>
@@ -85,7 +91,8 @@
       <label class="label">Card Type</label>
       <div class="control">
         <div class="select">
-          <select id="creditCardType">
+          <select autocomplete="cc-type"
+                  id="creditCardType">
             <option value="AMEX">American Express</option>
             <option value="DISCOVER">Discover</option>
             <option value="MASTERCARD">Mastercard</option>
@@ -103,7 +110,8 @@
       <label class="label">Exp. Month</label>
       <div class="control">
         <div class="select">
-          <select id="creditCardMonth"></select>
+          <select autocomplete="cc-exp-month"
+                  id="creditCardMonth"></select>
         </div>
       </div>
     </div>
@@ -112,7 +120,8 @@
       <label class="label">Exp. Year</label>
       <div class="control">
         <div class="select">
-          <select id="creditCardYear"></select>
+          <select autocomplete="cc-exp-year"
+                  id="creditCardYear"></select>
         </div>
       </div>
     </div>
@@ -120,7 +129,8 @@
     <div class="field column">
       <label class="label">CV Code</label>
       <div class="control">
-        <input id="creditCardNumber"
+        <input id="creditCardCVV"
+               autocomplete="cc-csc"
                class="input"
                type="number"
                maxlength="4"

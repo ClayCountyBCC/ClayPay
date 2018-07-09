@@ -13,7 +13,8 @@ var clayPay;
         let CurrentCharges = [];
         UI.ExpMonths = ['01', '02', '03', '04', '05',
             '06', '07', '08', '09', '10', '11', '12'];
-        UI.States = [
+        UI.AllStates = [
+            { state: "Select", abv: "" },
             { state: "ALABAMA", abv: "	AL" },
             { state: "ALASKA", abv: "AK" },
             { state: "ARIZONA", abv: "	AZ" },
@@ -108,51 +109,53 @@ var clayPay;
                 selected: false
             }
         ];
-        function Submit() {
-            Disable('btnSubmit');
-            Utilities.Hide('errorList');
-            Utilities.Hide('PaymentPosting');
-            let f = document.getElementById('paymentForm');
-            if (!f.checkValidity())
-                return false;
-            let itemIds = Cart.map(function (i) {
-                return i.ItemId;
-            });
-            let total = Cart.reduce((total, b) => {
-                return total + b.Total;
-            }, 0);
-            total = parseFloat(total.toFixed(2));
-            let cc = new clayPay.CCData(getValue('ccFirstName'), getValue('ccLastName'), getValue('cardNumber'), getValue('ccTypes'), getValue('ccExpMonth'), getValue('ccExpYear'), getValue('ccCVV'), getValue('ccZip'), getValue('emailAddress'), total, itemIds);
-            let errors = cc.Validate(); // clientside validation
-            if (errors.length === 0) {
-                Utilities.Hide('CCForm'); // Hide the form
-                Utilities.Show('PaymentPosting'); // show swirly
-                //let save = cc.Save();
-                //save.then(function (response)
-                //{
-                //  let pr = JSON.parse(response);
-                //  resetApp();
-                //  PopulateReceipt(pr);
-                //},
-                //  function (reject)
-                //  {
-                //    Utilities.Show('errorList');
-                //    errors = [reject];
-                //    BuildErrors(errors);          
-                //    Utilities.Show('CCForm');
-                //    Utilities.Hide('PaymentPosting');
-                //    Enable('btnSubmit');
-                //  });
-            }
-            else {
-                // show errors section
-                Utilities.Show('errorList');
-                BuildErrors(errors);
-                Enable('btnSubmit');
-            }
-            return false;
-        }
-        UI.Submit = Submit;
+        //export function Submit():boolean
+        //{
+        //  Disable('btnSubmit');
+        //  Utilities.Hide('errorList');
+        //  Utilities.Hide('PaymentPosting');
+        //  let f: HTMLFormElement = <HTMLFormElement>document.getElementById('paymentForm');
+        //  if (!f.checkValidity()) return false;
+        //  let itemIds: Array<number> = Cart.map(function (i)
+        //  {
+        //    return i.ItemId;
+        //  });
+        //  let total: number = Cart.reduce((total: number, b: Charge) =>
+        //  {
+        //    return total + b.Total;
+        //  }, 0);
+        //  total = parseFloat(total.toFixed(2));
+        //  let cc = new clayPay.CCPayment();
+        //  let errors: Array<string> = cc.Validate(); // clientside validation
+        //  if (errors.length === 0)
+        //  {
+        //    Utilities.Hide('CCForm'); // Hide the form
+        //    Utilities.Show('PaymentPosting'); // show swirly
+        //    //let save = cc.Save();
+        //    //save.then(function (response)
+        //    //{
+        //    //  let pr = JSON.parse(response);
+        //    //  resetApp();
+        //    //  PopulateReceipt(pr);
+        //    //},
+        //    //  function (reject)
+        //    //  {
+        //    //    Utilities.Show('errorList');
+        //    //    errors = [reject];
+        //    //    BuildErrors(errors);          
+        //    //    Utilities.Show('CCForm');
+        //    //    Utilities.Hide('PaymentPosting');
+        //    //    Enable('btnSubmit');
+        //    //  });
+        //  } else
+        //  {
+        //    // show errors section
+        //    Utilities.Show('errorList');
+        //    BuildErrors(errors);
+        //    Enable('btnSubmit');
+        //  }    
+        //  return false;
+        //}
         function resetApp() {
             CurrentCharges = [];
             Cart = [];
@@ -196,9 +199,11 @@ var clayPay;
         }
         function BuildPayerStates() {
             let stateSelect = document.getElementById("payerState");
+            if (stateSelect === undefined)
+                return;
             Utilities.Clear_Element(stateSelect);
-            for (let state of UI.States) {
-                stateSelect.appendChild(Utilities.Create_Option(state.abv, state.state));
+            for (let sta of UI.AllStates) {
+                stateSelect.appendChild(Utilities.Create_Option(sta.abv, sta.state));
             }
             stateSelect.selectedIndex = 0;
         }
@@ -207,9 +212,10 @@ var clayPay;
             let appSelect = document.getElementById("applicationSearchType");
             Utilities.Clear_Element(appSelect);
             appSelect.appendChild(Utilities.Create_Option("-1", "Select Application Type", true));
-            for (let appType of appTypes) {
-                appSelect.appendChild(Utilities.Create_Option(appType.Value, appType.Label));
+            for (let a of appTypes) {
+                appSelect.appendChild(Utilities.Create_Option(a.Value, a.Label));
             }
+            appSelect.selectedIndex = 0;
         }
         UI.BuildAppTypes = BuildAppTypes;
         function BuildExpMonths(id) {
@@ -270,7 +276,7 @@ var clayPay;
                 k = appType.toUpperCase() + "-" + input.value.trim().toUpperCase();
             }
             if (k.length > 0) {
-                Utilities.Get("./API/Query/" + k).then(function (charges) {
+                Utilities.Get("../API/Payments/Query/?key=" + k).then(function (charges) {
                     CurrentCharges = charges;
                     if (charges.length > 0) {
                         ProcessResults(charges, k);
@@ -454,17 +460,6 @@ var clayPay;
             d.appendChild(add);
             return d;
         }
-        //function SetInputValue(id: string, value: string)
-        //{
-        //  let e: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
-        //  e.value = value;    
-        //}
-        //function SetValue(id: string, value: string)
-        //{
-        //  let e: HTMLElement = document.getElementById(id);
-        //  Utilities.Clear_Element(e);
-        //  e.appendChild(document.createTextNode(value));
-        //}
         function updateCartNav() {
             // This function is going to take the contents of the Cart array and 
             // update the CartNav element.
@@ -492,7 +487,7 @@ var clayPay;
                 CartNav.appendChild(document.createTextNode(+Cart.length.toString() + (Cart.length === 1 ? ' item' : ' items')));
                 Utilities.Show(fullCart);
                 Utilities.Show(payerData);
-                Utilities.Show(paymentData);
+                //Utilities.Show(paymentData);
             }
         }
         function updateCart() {
@@ -515,9 +510,11 @@ var clayPay;
             let TotalAmount = Cart.reduce((total, b) => {
                 return total + b.Total;
             }, 0);
-            let cartTotalPayment = document.getElementById("cartTotalAmountDue");
-            Utilities.Clear_Element(cartTotalPayment);
-            cartTotalPayment.appendChild(document.createTextNode(TotalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })));
+            clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
+            Utilities.Set_Text(clayPay.NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(TotalAmount));
+            //let cartTotalPayment = document.getElementById("cartTotalAmountDue");
+            //Utilities.Clear_Element(cartTotalPayment);
+            //cartTotalPayment.appendChild(document.createTextNode(TotalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })));
             tr.appendChild(createTableElement(TotalAmount.toFixed(2), "", 1));
             tr.appendChild(createTableElement("", "", 1));
             return tr;

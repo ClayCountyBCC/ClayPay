@@ -1,18 +1,16 @@
 var clayPay;
 (function (clayPay) {
-    class CCData {
-        constructor(FirstName, LastName, CardNumber, CardType, ExpMonth, ExpYear, CVVNumber, ZipCode, EmailAddress, Total, ItemIds) {
-            this.FirstName = FirstName;
-            this.LastName = LastName;
-            this.CardNumber = CardNumber;
-            this.CardType = CardType;
-            this.ExpMonth = ExpMonth;
-            this.ExpYear = ExpYear;
-            this.CVVNumber = CVVNumber;
-            this.ZipCode = ZipCode;
-            this.EmailAddress = EmailAddress;
-            this.Total = Total;
-            this.ItemIds = ItemIds;
+    class CCPayment {
+        constructor() {
+        }
+        UpdatePayerData() {
+            Utilities.Set_Value(CCPayment.FirstNameInput, this.FirstName);
+            Utilities.Set_Value(CCPayment.LastNameInput, this.LastName);
+            Utilities.Set_Value(CCPayment.EmailAddressInput, this.EmailAddress);
+            Utilities.Set_Value(CCPayment.ZipCodeInput, this.ZipCode);
+        }
+        UpdateTotal() {
+            Utilities.Set_Value(CCPayment.AmountPaidInput, this.Total.toFixed(2));
         }
         Validate() {
             let errors = [];
@@ -41,9 +39,10 @@ var clayPay;
                 errors.push('You must enter an Email Address.');
             }
             // let's make sure there are some items
-            if (this.ItemIds === null || this.ItemIds.length === 0) {
-                errors.push('No items were found in the cart.  Please check this and try again.');
-            }
+            //if (this.ItemIds === null || this.ItemIds.length === 0)
+            //{
+            //  errors.push('No items were found in the cart.  Please check this and try again.');
+            //}
             // check the card type is one of the 4 we care about
             let cardTypes = ['AMEX', 'DISCOVER', 'MASTERCARD', 'VISA'];
             if (cardTypes.indexOf(this.CardType) === -1) {
@@ -70,6 +69,16 @@ var clayPay;
             return errors;
         }
     }
-    clayPay.CCData = CCData;
+    CCPayment.FirstNameInput = "creditCardFirstName";
+    CCPayment.LastNameInput = "creditCardLastName";
+    CCPayment.ZipCodeInput = "creditCardZip";
+    CCPayment.EmailAddressInput = "creditCardEmailAddress";
+    CCPayment.ccNumberInput = "creditCardNumber";
+    CCPayment.ccTypeSelect = "creditCardType";
+    CCPayment.ccMonthSelect = "creditCardMonth";
+    CCPayment.ccYearSelect = "creditCardYear";
+    CCPayment.ccCVCInput = "creditCardCVV";
+    CCPayment.AmountPaidInput = "creditCardPaymentAmount";
+    clayPay.CCPayment = CCPayment;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=CCData.js.map
+//# sourceMappingURL=CCPayment.js.map

@@ -1,7 +1,7 @@
 ﻿namespace clayPay
 {
 
-  interface ICCData
+  interface ICCPayment
   {
     FirstName: string;
     LastName: string;
@@ -18,23 +18,46 @@
   }
   
 
-  export class CCData implements ICCData
+  export class CCPayment implements ICCPayment
   {
-    constructor(
-      public FirstName: string,
-      public LastName: string,
-      public CardNumber: string,
-      public CardType: string,
-      public ExpMonth: string,
-      public ExpYear: string,
-      public CVVNumber: string,
-      public ZipCode: string,
-      public EmailAddress: string,
-      public Total: number,
-      public ItemIds: Array<number>
-    )
+    public FirstName: string;
+    public LastName: string;
+    public CardNumber: string;
+    public CardType: string;
+    public ExpMonth: string;
+    public ExpYear: string;
+    public CVVNumber: string;
+    public ZipCode: string;
+    public EmailAddress: string;
+    public Total: number;
+
+    static FirstNameInput: string = "creditCardFirstName";
+    static LastNameInput: string = "creditCardLastName";
+    static ZipCodeInput: string = "creditCardZip";
+    static EmailAddressInput: string = "creditCardEmailAddress";
+    static ccNumberInput: string = "creditCardNumber";
+    static ccTypeSelect: string = "creditCardType";
+    static ccMonthSelect: string = "creditCardMonth";
+    static ccYearSelect: string = "creditCardYear";
+    static ccCVCInput: string = "creditCardCVV";
+    static AmountPaidInput: string = "creditCardPaymentAmount";
+
+    constructor()
     {
 
+    }
+
+    public UpdatePayerData(): void
+    {
+      Utilities.Set_Value(CCPayment.FirstNameInput, this.FirstName);
+      Utilities.Set_Value(CCPayment.LastNameInput, this.LastName);
+      Utilities.Set_Value(CCPayment.EmailAddressInput, this.EmailAddress);
+      Utilities.Set_Value(CCPayment.ZipCodeInput, this.ZipCode);
+    }
+
+    public UpdateTotal(): void
+    {
+      Utilities.Set_Value(CCPayment.AmountPaidInput, this.Total.toFixed(2));
     }
 
     Validate(): Array<string>
@@ -78,10 +101,10 @@
       }
 
       // let's make sure there are some items
-      if (this.ItemIds === null || this.ItemIds.length === 0)
-      {
-        errors.push('No items were found in the cart.  Please check this and try again.');
-      }
+      //if (this.ItemIds === null || this.ItemIds.length === 0)
+      //{
+      //  errors.push('No items were found in the cart.  Please check this and try again.');
+      //}
 
       // check the card type is one of the 4 we care about
       let cardTypes: Array<string> = ['AMEX', 'DISCOVER', 'MASTERCARD', 'VISA'];

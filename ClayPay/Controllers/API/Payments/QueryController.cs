@@ -8,10 +8,12 @@ using ClayPay.Models;
 
 namespace ClayPay.Controllers
 {
+  [RoutePrefix("API/Payments")]
   public class QueryController : ApiController
   {
 
-    // GET: api/Query/5
+    [HttpGet]
+    [Route("Query")]
     public IHttpActionResult Get(string Key)
     {
       List<Charge> lc = Charge.Get(Key);

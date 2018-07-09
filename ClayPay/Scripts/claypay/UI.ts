@@ -10,8 +10,9 @@ namespace clayPay.UI
   let CurrentCharges: Array<Charge> = [];  
   export let ExpMonths: Array<string> = ['01', '02', '03', '04', '05',
     '06', '07', '08', '09', '10', '11', '12'];
-  export let States: Array<{ state: string, abv: string }> =
+  export let AllStates: Array<{ state: string, abv: string }> =
     [
+      {state: "Select", abv: ""},
       { state: "ALABAMA", abv: "	AL" },
       { state: "ALASKA", abv: "AK" },
       { state: "ARIZONA", abv: "	AZ" },
@@ -107,67 +108,56 @@ namespace clayPay.UI
     }
   ];
 
-  export function Submit():boolean
-  {
-    Disable('btnSubmit');
-    Utilities.Hide('errorList');
-    Utilities.Hide('PaymentPosting');
-    let f: HTMLFormElement = <HTMLFormElement>document.getElementById('paymentForm');
-    if (!f.checkValidity()) return false;
-    let itemIds: Array<number> = Cart.map(function (i)
-    {
-      return i.ItemId;
-    });
-    let total: number = Cart.reduce((total: number, b: Charge) =>
-    {
-      return total + b.Total;
-    }, 0);
-    total = parseFloat(total.toFixed(2));
-    let cc = new clayPay.CCData(
-      getValue('ccFirstName'),
-      getValue('ccLastName'),
-      getValue('cardNumber'),
-      getValue('ccTypes'),
-      getValue('ccExpMonth'),
-      getValue('ccExpYear'),
-      getValue('ccCVV'),
-      getValue('ccZip'),
-      getValue('emailAddress'),
-      total,
-      itemIds);
-    let errors: Array<string> = cc.Validate(); // clientside validation
-    if (errors.length === 0)
-    {
-      Utilities.Hide('CCForm'); // Hide the form
-      Utilities.Show('PaymentPosting'); // show swirly
+  //export function Submit():boolean
+  //{
+  //  Disable('btnSubmit');
+  //  Utilities.Hide('errorList');
+  //  Utilities.Hide('PaymentPosting');
+  //  let f: HTMLFormElement = <HTMLFormElement>document.getElementById('paymentForm');
+  //  if (!f.checkValidity()) return false;
+  //  let itemIds: Array<number> = Cart.map(function (i)
+  //  {
+  //    return i.ItemId;
+  //  });
+  //  let total: number = Cart.reduce((total: number, b: Charge) =>
+  //  {
+  //    return total + b.Total;
+  //  }, 0);
+  //  total = parseFloat(total.toFixed(2));
+  //  let cc = new clayPay.CCPayment();
+  //  let errors: Array<string> = cc.Validate(); // clientside validation
+  //  if (errors.length === 0)
+  //  {
+  //    Utilities.Hide('CCForm'); // Hide the form
+  //    Utilities.Show('PaymentPosting'); // show swirly
 
-      //let save = cc.Save();
-      //save.then(function (response)
-      //{
-      //  let pr = JSON.parse(response);
-      //  resetApp();
-      //  PopulateReceipt(pr);
+  //    //let save = cc.Save();
+  //    //save.then(function (response)
+  //    //{
+  //    //  let pr = JSON.parse(response);
+  //    //  resetApp();
+  //    //  PopulateReceipt(pr);
         
-      //},
-      //  function (reject)
-      //  {
-      //    Utilities.Show('errorList');
-      //    errors = [reject];
-      //    BuildErrors(errors);          
-      //    Utilities.Show('CCForm');
-      //    Utilities.Hide('PaymentPosting');
-      //    Enable('btnSubmit');
-      //  });
+  //    //},
+  //    //  function (reject)
+  //    //  {
+  //    //    Utilities.Show('errorList');
+  //    //    errors = [reject];
+  //    //    BuildErrors(errors);          
+  //    //    Utilities.Show('CCForm');
+  //    //    Utilities.Hide('PaymentPosting');
+  //    //    Enable('btnSubmit');
+  //    //  });
 
-    } else
-    {
-      // show errors section
-      Utilities.Show('errorList');
-      BuildErrors(errors);
-      Enable('btnSubmit');
-    }    
-    return false;
-  }
+  //  } else
+  //  {
+  //    // show errors section
+  //    Utilities.Show('errorList');
+  //    BuildErrors(errors);
+  //    Enable('btnSubmit');
+  //  }    
+  //  return false;
+  //}
 
   function resetApp():void
   {
@@ -228,11 +218,12 @@ namespace clayPay.UI
 
   export function BuildPayerStates(): void
   {
-    let stateSelect = (<HTMLSelectElement>document.getElementById("payerState"));
+    let stateSelect:HTMLSelectElement = (<HTMLSelectElement>document.getElementById("payerState"));
+    if (stateSelect === undefined) return;
     Utilities.Clear_Element(stateSelect);
-    for (let state of States)
+    for (let sta of UI.AllStates)
     {
-      stateSelect.appendChild(Utilities.Create_Option(state.abv, state.state));
+      stateSelect.appendChild(Utilities.Create_Option(sta.abv, sta.state));
     }
     stateSelect.selectedIndex = 0;
   }
@@ -242,10 +233,11 @@ namespace clayPay.UI
     let appSelect: HTMLSelectElement = (<HTMLSelectElement>document.getElementById("applicationSearchType"));
     Utilities.Clear_Element(appSelect);
     appSelect.appendChild(Utilities.Create_Option("-1", "Select Application Type", true));
-    for (let appType of appTypes)
+    for (let a of appTypes)
     {
-      appSelect.appendChild(Utilities.Create_Option(appType.Value, appType.Label));
+      appSelect.appendChild(Utilities.Create_Option(a.Value, a.Label));
     }
+    appSelect.selectedIndex = 0;
   }
 
   export function BuildExpMonths(id: string):void
@@ -316,7 +308,7 @@ namespace clayPay.UI
     }
     if (k.length > 0)
     {
-      Utilities.Get("./API/Query/" + k).then(function (charges: Array<Charge>)
+      Utilities.Get("../API/Payments/Query/?key=" + k).then(function (charges: Array<Charge>)
       {
         CurrentCharges = charges;
         if (charges.length > 0)
@@ -406,7 +398,6 @@ namespace clayPay.UI
     df.appendChild(tr2);
     return df;
   }
-
 
   function buildChargeRow(charge: Charge): HTMLElement
   {
@@ -574,19 +565,6 @@ namespace clayPay.UI
     return d;
   }
 
-  //function SetInputValue(id: string, value: string)
-  //{
-  //  let e: HTMLInputElement = <HTMLInputElement>document.getElementById(id);
-  //  e.value = value;    
-  //}
-
-  //function SetValue(id: string, value: string)
-  //{
-  //  let e: HTMLElement = document.getElementById(id);
-  //  Utilities.Clear_Element(e);
-  //  e.appendChild(document.createTextNode(value));
-  //}
-
   function updateCartNav():void
   {
     // This function is going to take the contents of the Cart array and 
@@ -616,7 +594,7 @@ namespace clayPay.UI
       CartNav.appendChild(document.createTextNode(+ Cart.length.toString() + (Cart.length === 1 ? ' item' : ' items')));
       Utilities.Show(fullCart);
       Utilities.Show(payerData);
-      Utilities.Show(paymentData);
+      //Utilities.Show(paymentData);
     }
   }
 
@@ -645,9 +623,11 @@ namespace clayPay.UI
     {
       return total + b.Total;
     }, 0);
-    let cartTotalPayment = document.getElementById("cartTotalAmountDue");
-    Utilities.Clear_Element(cartTotalPayment);
-    cartTotalPayment.appendChild(document.createTextNode(TotalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })));
+    clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
+    Utilities.Set_Text(NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(TotalAmount));
+    //let cartTotalPayment = document.getElementById("cartTotalAmountDue");
+    //Utilities.Clear_Element(cartTotalPayment);
+    //cartTotalPayment.appendChild(document.createTextNode(TotalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })));
 
     tr.appendChild(createTableElement(TotalAmount.toFixed(2), "", 1));
     tr.appendChild(createTableElement("", "", 1));
@@ -684,7 +664,6 @@ namespace clayPay.UI
       menu.appendChild(createMenuElement(menuItem));
     }
     createNavCart();
-
   }
 
   function createNavCart()

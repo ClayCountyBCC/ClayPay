@@ -222,6 +222,7 @@
           <label class="label">Your First Name</label>
           <div class="control">
             <input id="payerFirstName"
+                   autocomplete="given-name"
                    class="input"
                    type="text"
                    maxlength="50"
@@ -234,6 +235,7 @@
           <label class="label">Last Name</label>
           <div class="control">
             <input id="payerLastName"
+                   autocomplete="family-name"
                    class="input"
                    type="text"
                    maxlength="50"
@@ -244,23 +246,35 @@
 
       </div>
 
+      <div class="field">
+        <div class="field">
+          <div class="control">
+            <p id="payerNameError"
+               class="help is-danger hide">
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div style="margin-bottom: 0;"
            class="columns">
         <div class="field column">
           <label class="label">Phone #</label>
           <div class="control">
             <input id="payerPhone"
+                   autocomplete="tel"
                    class="input"
                    type="tel"
                    maxlength="12"
-                   placeholder="" />
+                   placeholder="904-555-1212" />
           </div>
         </div>
 
         <div class="field column">
           <label class="label">Email Address</label>
           <div class="control">
-            <input id="payerPhone"
+            <input id="payerEmailAddress"
+                   autocomplete="email"
                    class="input"
                    type="email"
                    maxlength="12"
@@ -271,9 +285,21 @@
       </div>
 
       <div class="field">
+        <div class="field">
+          <div class="control">
+            <p id="payerPhoneError"
+               class="help is-danger hide">
+            </p>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="field">
         <label class="label">Company Name</label>
         <div class="control">
           <input id="payerCompany"
+                 autocomplete="organization"
                  class="input"
                  type="text"
                  maxlength="50"
@@ -285,6 +311,7 @@
         <label class="label">Street Address</label>
         <div class="control">
           <input id="payerStreetAddress"
+                 autocomplete="street-address"
                  class="input"
                  type="text"
                  required
@@ -293,11 +320,22 @@
         </div>
       </div>
 
+      <div class="field">
+        <div class="field">
+          <div class="control">
+            <p id="payerStreetError"
+               class="help is-danger hide">
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div class="columns">
         <div class="field column is-three-fifths">
           <label class="label">City</label>
           <div class="control">
             <input id="payerCity"
+                   autocomplete="address-level2"
                    class="input"
                    type="text"
                    required
@@ -310,7 +348,8 @@
           <label class="label">State</label>
           <div class="control">
             <div class="select">
-              <select id="payerState"></select>
+              <select autocomplete="address-level1"
+                      id="payerState"></select>
             </div>
           </div>
         </div>
@@ -319,6 +358,7 @@
           <label class="label">Zip</label>
           <div class="control">
             <input id="payerZip"
+                   autocomplete="postal-code"
                    class="input"
                    type="text"
                    required
@@ -329,6 +369,32 @@
 
       </div>
 
+      <div class="field">
+        <div class="field">
+          <div class="control">
+            <p id="payerCityError"
+               class="help is-danger hide">
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div id="validatePayer">
+        <div class="columns">
+          <div class="column">
+          </div>
+          <div class="column is-centered">
+            <button onclick="clayPay.CurrentTransaction.ValidatePayer();"
+                    type="button"
+                    class="button is-success is-fullwidth is-large">
+              Continue
+            </button>
+          </div>
+          <div class="column">
+
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="hide"
@@ -361,7 +427,6 @@
                        onclick="Utilities.Show_Hide_Selector('#paymentInformation section', 'creditCardPaymentType'); return false;"
                        style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
                        class="has-text-link level-item">
-
                       Add
                     </a>
                   </div>
@@ -407,7 +472,7 @@
               </p>
               <ul class="menu-list">
                 <li class="level">
-                  <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%;"
+                  <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%; padding-right: .75em;"
                         id="cartTotalAmountPaid"
                         class="level-item">
                     $0.00
@@ -420,19 +485,47 @@
               </p>
               <ul class="menu-list">
                 <li class="level">
-                  <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%;"
+                  <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%; padding-right: .75em;"
                         id="cartTotalAmountDue"
                         class="level-item">
                   </span>
                 </li>
+              </ul>
+              <p class="menu-label">
+                Total Amount Remaining
+              </p>
+              <ul class="menu-list">
                 <li class="level">
-                  <button id="processPayments"
-                          disabled
-                          class="level-item button is-success is-disabled">
-                    Pay Now
-                  </button>
+                  <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%; padding-right: .75em;"
+                        id="cartTotalAmountRemaining"
+                        class="level-item">
+                    $0.00
+                  </span>
                 </li>
               </ul>
+
+              <p class="menu-label">
+                Total Change Due
+              </p>
+              <ul class="menu-list">
+                <li class="level">
+                  <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%; padding-right: .75em;"
+                        id="cartTotalChangeDue"
+                        class="level-item">
+                    $0.00
+                  </span>
+                </li>
+              </ul>
+
+
+              <p style="margin-top: .75em;"
+                 class="level">
+                <button id="processPayments"
+                        disabled
+                        class="level-item button is-success is-disabled is-large">
+                  Pay Now
+                </button>
+              </p>
 
             </div>
           </div>
@@ -489,14 +582,15 @@
                 </div>
               </div>
               <div class="level">
-                <button style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
+                <button onclick="clayPay.CurrentTransaction.CheckPayment.Validate(); return false;"
+                        style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
                         type="button"
                         class="button is-success level-item">
                   Continue
                 </button>
 
                 <button style="width: calc(50% - .75rem); flex-grow: 0; margin-left: .75rem;"
-                        onclick="Utilities.Hide('checkPaymentType');"
+                        onclick="clayPay.Payment.ResetCheck();"
                         type="button"
                         class="button is-warning level-item">
                   Cancel
@@ -541,14 +635,15 @@
               </div>
 
               <div class="level">
-                <button style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
+                <button onclick="clayPay.CurrentTransaction.CashPayment.Validate(); return false;"
+                        style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
                         type="button"
                         class="button is-success level-item">
                   Continue
                 </button>
 
                 <button style="width: calc(50% - .75rem); flex-grow: 0; margin-left: .75rem;"
-                        onclick="Utilities.Hide('cashPaymentType');"
+                        onclick="clayPay.Payment.ResetCash();"
                         type="button"
                         class="button is-warning level-item">
                   Cancel
@@ -566,16 +661,18 @@
     </div>
   </section>
 </div>
+@Scripts.Render("~/Scripts/claypay/claypay-bundle.js")
 
-<script src="bower_components/promise-polyfill/dist/polyfill.min.js"></script>
+@*<script src="~/bower_components/promise-polyfill/dist/polyfill.min.js"></script>
 <script src="~/bower_components/fetch/fetch.js"></script>
 <script src="~/Scripts/app/Utilities.js"></script>
 <script src="~/Scripts/claypay/UI.js"></script>
 <script src="~/Scripts/claypay/Charge.js"></script>
 <script src="~/Scripts/claypay/AppTypes.js"></script>
 <script src="~/Scripts/claypay/Payment.js"></script>
+<script src="~/Scripts/claypay/CCPayment.js"></script>
 <script src="~/Scripts/claypay/NewTransaction.js"></script>
-<script src="~/Scripts/claypay/claypay.js"></script>
+<script src="~/Scripts/claypay/claypay.js"></script>*@
 <script>
   document.addEventListener("DOMContentLoaded", function (event)
   {
