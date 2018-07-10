@@ -128,7 +128,6 @@ var Utilities;
     }
     Utilities.Show_Hide_Selector = Show_Hide_Selector;
     function Get(url) {
-        console.log('Get URL', url);
         return fetch(url, {
             method: "GET",
             headers: {

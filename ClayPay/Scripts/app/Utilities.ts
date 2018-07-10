@@ -182,7 +182,6 @@ namespace Utilities
 
   export function Get<T>(url: string): Promise<T>
   {
-    console.log('Get URL', url);
     return fetch(url,
       {
         method: "GET",

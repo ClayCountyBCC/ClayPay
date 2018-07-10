@@ -41,6 +41,16 @@
     </div>
   </div>
 
+  <div class="field">
+    <div class="field">
+      <div class="control">
+        <p id="creditCardNameError"
+           class="help is-danger hide">
+        </p>
+      </div>
+    </div>
+  </div>
+
   <div style="margin-bottom: 0;"
        class="columns">
     <div class="field column">
@@ -62,10 +72,19 @@
         <input id="creditCardEmailAddress"
                autocomplete="email"
                class="input"
-               type="text"
+               type="email"
                maxlength="50"
-               required
                placeholder="email@example.com" />
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="field">
+      <div class="control">
+        <p id="creditCardZipError"
+           class="help is-danger hide">
+        </p>
       </div>
     </div>
   </div>
@@ -99,6 +118,16 @@
             <option value="VISA">Visa</option>
           </select>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="field">
+      <div class="control">
+        <p id="creditCardNumberError"
+           class="help is-danger hide">
+        </p>
       </div>
     </div>
   </div>
@@ -143,6 +172,17 @@
     </div>
 
   </div>
+
+  <div class="field">
+    <div class="field">
+      <div class="control">
+        <p id="creditCardExpirationError"
+           class="help is-danger hide">
+        </p>
+      </div>
+    </div>
+  </div>
+
   @if (Model.djournal_access)
   {
     // let's render a continue button
@@ -162,18 +202,30 @@
 
       </div>
     </div>
+
+    <div class="field">
+      <div class="field">
+        <div class="control">
+          <p id="creditCardPaymentAmountError"
+             class="help is-danger hide">
+          </p>
+        </div>
+      </div>
+    </div>
+
     <div class="level">
-      <button style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
+      <button onclick = "clayPay.CurrentTransaction.CCData.Validate(); return false;"
+              style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
               type="button"
               class="button is-success level-item">
         Continue
       </button>
 
       <button style="width: calc(50% - .75rem); flex-grow: 0; margin-left: .75rem;"
-              onclick="Utilities.Hide('creditCardPaymentType');"
+              onclick="clayPay.CCData.ResetForm();"
               type="button"
               class="button is-warning level-item">
-        Cancel
+        Clear
       </button>
     </div>
 

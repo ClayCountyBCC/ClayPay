@@ -20,7 +20,9 @@ var clayPay;
 (function (clayPay) {
     "use strict";
     clayPay.CurrentTransaction = new clayPay.NewTransaction();
-    function start() {
+    function start(isCashier) {
+        console.log('Is Public?', isCashier);
+        clayPay.CurrentTransaction.IsCashier = isCashier;
         HandleUIEvents();
         clayPay.UI.buildMenuElements();
         loadDefaultValues();
@@ -67,7 +69,7 @@ var clayPay;
     }
     function loadDefaultValues() {
         loadApplicationTypes();
-        clayPay.UI.BuildPayerStates();
+        clayPay.UI.BuildPayerStates(clayPay.UI.AllStates, "payerState");
         loadCreditCardFee();
         loadCreditCardExpirationValues();
     }

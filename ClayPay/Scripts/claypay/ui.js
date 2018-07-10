@@ -15,35 +15,35 @@ var clayPay;
             '06', '07', '08', '09', '10', '11', '12'];
         UI.AllStates = [
             { state: "Select", abv: "" },
-            { state: "ALABAMA", abv: "	AL" },
+            { state: "ALABAMA", abv: "AL" },
             { state: "ALASKA", abv: "AK" },
-            { state: "ARIZONA", abv: "	AZ" },
+            { state: "ARIZONA", abv: "AZ" },
             { state: "ARKANSAS", abv: "AR" },
             { state: "CALIFORNIA", abv: "CA" },
             { state: "COLORADO", abv: "CO" },
             { state: "CONNECTICUT", abv: "CT" },
             { state: "DELAWARE", abv: "DE" },
-            { state: "FLORIDA", abv: "	FL" },
-            { state: "GEORGIA", abv: "	GA" },
+            { state: "FLORIDA", abv: "FL" },
+            { state: "GEORGIA", abv: "GA" },
             { state: "HAWAII", abv: "HI" },
-            { state: "IDAHO", abv: "	ID" },
+            { state: "IDAHO", abv: "ID" },
             { state: "ILLINOIS", abv: "IL" },
-            { state: "INDIANA", abv: "	IN" },
+            { state: "INDIANA", abv: "IN" },
             { state: "IOWA", abv: "IA" },
             { state: "KANSAS", abv: "KS" },
             { state: "KENTUCKY", abv: "KY" },
-            { state: "LOUISIANA", abv: "	LA" },
-            { state: "MAINE", abv: "	ME" },
+            { state: "LOUISIANA", abv: "LA" },
+            { state: "MAINE", abv: "ME" },
             { state: "MARYLAND", abv: "MD" },
-            { state: "MASSACHUSETTS", abv: "	MA" },
+            { state: "MASSACHUSETTS", abv: "MA" },
             { state: "MICHIGAN", abv: "MI" },
-            { state: "MINNESOTA", abv: "	MN" },
-            { state: "MISSISSIPPI", abv: "	MS" },
+            { state: "MINNESOTA", abv: "MN" },
+            { state: "MISSISSIPPI", abv: "MS" },
             { state: "MISSOURI", abv: "MO" },
-            { state: "MONTANA", abv: "	MT" },
+            { state: "MONTANA", abv: "MT" },
             { state: "NEBRASKA", abv: "NE" },
             { state: "NEVADA", abv: "NV" },
-            { state: "NEW HAMPSHIRE", abv: "	NH" },
+            { state: "NEW HAMPSHIRE", abv: "NH" },
             { state: "NEW JERSEY", abv: "NJ" },
             { state: "NEW MEXICO", abv: "NM" },
             { state: "NEW YORK", abv: "NY" },
@@ -56,15 +56,15 @@ var clayPay;
             { state: "RHODE ISLAND", abv: "RI" },
             { state: "SOUTH CAROLINA", abv: "SC" },
             { state: "SOUTH DAKOTA", abv: "SD" },
-            { state: "TENNESSEE", abv: "	TN" },
-            { state: "TEXAS", abv: "	TX" },
-            { state: "UTAH", abv: "	UT" },
-            { state: "VERMONT", abv: "	VT" },
+            { state: "TENNESSEE", abv: "TN" },
+            { state: "TEXAS", abv: "TX" },
+            { state: "UTAH", abv: "UT" },
+            { state: "VERMONT", abv: "VT" },
             { state: "VIRGINIA", abv: "VA" },
             { state: "WASHINGTON", abv: "WA" },
-            { state: "WEST VIRGINIA", abv: "	WV" },
-            { state: "WISCONSIN", abv: "	WI" },
-            { state: "WYOMING", abv: "	WY" }
+            { state: "WEST VIRGINIA", abv: "WV" },
+            { state: "WISCONSIN", abv: "WI" },
+            { state: "WYOMING", abv: "WY" }
         ];
         UI.ExpYears = [];
         let Menus = [
@@ -197,14 +197,14 @@ var clayPay;
         function getValue(id) {
             return document.getElementById(id).value;
         }
-        function BuildPayerStates() {
-            let stateSelect = document.getElementById("payerState");
+        function BuildPayerStates(States, id) {
+            let stateSelect = document.getElementById(id);
             if (stateSelect === undefined)
                 return;
             Utilities.Clear_Element(stateSelect);
-            for (let sta of UI.AllStates) {
-                stateSelect.appendChild(Utilities.Create_Option(sta.abv, sta.state));
-            }
+            States.forEach(function (j) {
+                stateSelect.appendChild(Utilities.Create_Option(j.abv, j.state));
+            });
             stateSelect.selectedIndex = 0;
         }
         UI.BuildPayerStates = BuildPayerStates;
@@ -212,9 +212,9 @@ var clayPay;
             let appSelect = document.getElementById("applicationSearchType");
             Utilities.Clear_Element(appSelect);
             appSelect.appendChild(Utilities.Create_Option("-1", "Select Application Type", true));
-            for (let a of appTypes) {
+            appTypes.forEach(function (a) {
                 appSelect.appendChild(Utilities.Create_Option(a.Value, a.Label));
-            }
+            });
             appSelect.selectedIndex = 0;
         }
         UI.BuildAppTypes = BuildAppTypes;
@@ -511,7 +511,8 @@ var clayPay;
                 return total + b.Total;
             }, 0);
             clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
-            Utilities.Set_Text(clayPay.NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(TotalAmount));
+            clayPay.CurrentTransaction.Validate();
+            //Utilities.Set_Text(NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(TotalAmount));
             //let cartTotalPayment = document.getElementById("cartTotalAmountDue");
             //Utilities.Clear_Element(cartTotalPayment);
             //cartTotalPayment.appendChild(document.createTextNode(TotalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })));

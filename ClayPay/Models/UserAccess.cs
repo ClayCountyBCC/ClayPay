@@ -72,13 +72,11 @@ namespace ClayPay.Models
           {
             djournal_access = true;
             impactfee_access = true;
-            //in_event_admin_group = true;
           }
           else
           {
             djournal_access = groups.Contains(djournal_group);
             impactfee_access = groups.Contains(impactfee_group);
-            //in_event_admin_group = groups.Contains(event_admin_group);
           }
 
         }

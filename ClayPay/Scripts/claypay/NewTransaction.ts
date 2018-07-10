@@ -19,6 +19,7 @@ namespace clayPay
     PayerCity: string;
     PayerState: string;
     PayerZip: string;
+    IsCashier: boolean;
     TotalAmountDue: number;
     CheckPayment: Payment;
     CashPayment: Payment;
@@ -30,7 +31,7 @@ namespace clayPay
     public OTid: number = 0; // used after the transaction is saved
     public CashierId: string = ""; // used after the transaction is saved
     public ItemIds: Array<number> = [];
-    public CCData: CCPayment = null;
+    public CCData: CCPayment = new CCPayment();
     public Payments: Array<Payment> = [];
     public errors: Array<string> = [];
     public PayerFirstName: string;
@@ -42,14 +43,18 @@ namespace clayPay
     public PayerCity: string;
     public PayerState: string;
     public PayerZip: string;
-    public TotalAmountDue: number = 0;
+    public IsCashier: boolean = false;    
     public CheckPayment: Payment = new Payment(payment_type.check);
     public CashPayment: Payment = new Payment(payment_type.cash);
+    public TotalAmountDue: number = 0;
+    public TotalAmountPaid: number = 0;
+    public TotalAmountRemaining: number = 0;
+    public TotalChangeDue: number = 0;
     // Menu Ids
     public static TotalAmountPaidMenu = "cartTotalAmountPaid";
     public static TotalAmountDueMenu = "cartTotalAmountDue";
-    public static TotalAmountRemainingMenu = "";
-    public static TotalChangeDueMenu = "";
+    public static TotalAmountRemainingMenu = "cartTotalAmountRemaining";
+    public static TotalChangeDueMenu = "cartTotalChangeDue";
 
     // Payer Inputs
     public static payerFirstName = "payerFirstName";
@@ -79,10 +84,31 @@ namespace clayPay
 
     UpdateTotals(): void
     {
+      this.TotalAmountPaid = 0;
+      this.TotalAmountRemaining = 0;
+      this.TotalChangeDue = 0;
+
       let TotalPaid = 0;
       if (this.CheckPayment.Validated) TotalPaid += this.CheckPayment.Amount;
       if (this.CashPayment.Validated) TotalPaid += this.CashPayment.Amount;
-      Utilities.Set_Text(NewTransaction.TotalAmountPaidMenu, Utilities.Format_Amount(TotalPaid));
+      if (this.CCData.Validated) TotalPaid += this.CCData.Amount;
+      
+      this.TotalAmountPaid = TotalPaid;
+      this.TotalAmountRemaining = Math.max(this.TotalAmountDue - this.TotalAmountPaid, 0);
+      if (this.TotalAmountDue - this.TotalAmountPaid < 0)
+      {
+        this.TotalChangeDue = this.TotalAmountPaid - this.TotalAmountDue;
+      }
+      this.UpdateForm();
+    }
+
+    UpdateForm()
+    {
+      Utilities.Set_Text(NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(this.TotalAmountDue));
+      Utilities.Set_Text(NewTransaction.TotalAmountPaidMenu, Utilities.Format_Amount(this.TotalAmountPaid));
+      Utilities.Set_Text(NewTransaction.TotalChangeDueMenu, Utilities.Format_Amount(this.TotalChangeDue));
+      Utilities.Set_Text(NewTransaction.TotalAmountRemainingMenu, Utilities.Format_Amount(this.TotalAmountRemaining));
+
     }
 
     public ValidatePayer(): void
@@ -107,6 +133,8 @@ namespace clayPay
       }
 
       this.PayerEmailAddress = Utilities.Get_Value(NewTransaction.payerEmail).trim();
+
+
       this.PayerCompanyName = Utilities.Get_Value(NewTransaction.payerCompany).trim();
 
       this.PayerStreetAddress = Utilities.Validate_Text(NewTransaction.payerStreet, NewTransaction.payerStreetError, "The street address field is required.");

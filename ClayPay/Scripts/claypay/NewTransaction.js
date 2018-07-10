@@ -7,24 +7,44 @@ var clayPay;
             this.OTid = 0; // used after the transaction is saved
             this.CashierId = ""; // used after the transaction is saved
             this.ItemIds = [];
-            this.CCData = null;
+            this.CCData = new clayPay.CCPayment();
             this.Payments = [];
             this.errors = [];
-            this.TotalAmountDue = 0;
+            this.IsCashier = false;
             this.CheckPayment = new clayPay.Payment(clayPay.payment_type.check);
             this.CashPayment = new clayPay.Payment(clayPay.payment_type.cash);
+            this.TotalAmountDue = 0;
+            this.TotalAmountPaid = 0;
+            this.TotalAmountRemaining = 0;
+            this.TotalChangeDue = 0;
         }
         Validate() {
             this.UpdateTotals();
             return false;
         }
         UpdateTotals() {
+            this.TotalAmountPaid = 0;
+            this.TotalAmountRemaining = 0;
+            this.TotalChangeDue = 0;
             let TotalPaid = 0;
             if (this.CheckPayment.Validated)
                 TotalPaid += this.CheckPayment.Amount;
             if (this.CashPayment.Validated)
                 TotalPaid += this.CashPayment.Amount;
-            Utilities.Set_Text(NewTransaction.TotalAmountPaidMenu, Utilities.Format_Amount(TotalPaid));
+            if (this.CCData.Validated)
+                TotalPaid += this.CCData.Amount;
+            this.TotalAmountPaid = TotalPaid;
+            this.TotalAmountRemaining = Math.max(this.TotalAmountDue - this.TotalAmountPaid, 0);
+            if (this.TotalAmountDue - this.TotalAmountPaid < 0) {
+                this.TotalChangeDue = this.TotalAmountPaid - this.TotalAmountDue;
+            }
+            this.UpdateForm();
+        }
+        UpdateForm() {
+            Utilities.Set_Text(NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(this.TotalAmountDue));
+            Utilities.Set_Text(NewTransaction.TotalAmountPaidMenu, Utilities.Format_Amount(this.TotalAmountPaid));
+            Utilities.Set_Text(NewTransaction.TotalChangeDueMenu, Utilities.Format_Amount(this.TotalChangeDue));
+            Utilities.Set_Text(NewTransaction.TotalAmountRemainingMenu, Utilities.Format_Amount(this.TotalAmountRemaining));
         }
         ValidatePayer() {
             this.ResetPayerData();
@@ -98,8 +118,8 @@ var clayPay;
     // Menu Ids
     NewTransaction.TotalAmountPaidMenu = "cartTotalAmountPaid";
     NewTransaction.TotalAmountDueMenu = "cartTotalAmountDue";
-    NewTransaction.TotalAmountRemainingMenu = "";
-    NewTransaction.TotalChangeDueMenu = "";
+    NewTransaction.TotalAmountRemainingMenu = "cartTotalAmountRemaining";
+    NewTransaction.TotalChangeDueMenu = "cartTotalChangeDue";
     // Payer Inputs
     NewTransaction.payerFirstName = "payerFirstName";
     NewTransaction.payerLastName = "payerLastName";
@@ -117,4 +137,4 @@ var clayPay;
     NewTransaction.payerCityError = "payerCityError";
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=newtransaction.js.map
+//# sourceMappingURL=NewTransaction.js.map

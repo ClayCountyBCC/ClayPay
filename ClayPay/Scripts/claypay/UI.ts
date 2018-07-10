@@ -8,40 +8,40 @@ namespace clayPay.UI
 
   let Cart: Array<Charge> = [];
   let CurrentCharges: Array<Charge> = [];  
-  export let ExpMonths: Array<string> = ['01', '02', '03', '04', '05',
+  export const ExpMonths: Array<string> = ['01', '02', '03', '04', '05',
     '06', '07', '08', '09', '10', '11', '12'];
-  export let AllStates: Array<{ state: string, abv: string }> =
+  export const AllStates: Array<{ state: string, abv: string }> =
     [
       {state: "Select", abv: ""},
-      { state: "ALABAMA", abv: "	AL" },
+      { state: "ALABAMA", abv: "AL" },
       { state: "ALASKA", abv: "AK" },
-      { state: "ARIZONA", abv: "	AZ" },
+      { state: "ARIZONA", abv: "AZ" },
       { state: "ARKANSAS", abv: "AR" },
       { state: "CALIFORNIA", abv: "CA" },
       { state: "COLORADO", abv: "CO" },
       { state: "CONNECTICUT", abv: "CT" },
       { state: "DELAWARE", abv: "DE" },
-      { state: "FLORIDA", abv: "	FL" },
-      { state: "GEORGIA", abv: "	GA" },
+      { state: "FLORIDA", abv: "FL" },
+      { state: "GEORGIA", abv: "GA" },
       { state: "HAWAII", abv: "HI" },
-      { state: "IDAHO", abv: "	ID" },
+      { state: "IDAHO", abv: "ID" },
       { state: "ILLINOIS", abv: "IL" },
-      { state: "INDIANA", abv: "	IN" },
+      { state: "INDIANA", abv: "IN" },
       { state: "IOWA", abv: "IA" },
       { state: "KANSAS", abv: "KS" },
       { state: "KENTUCKY", abv: "KY" },
-      { state: "LOUISIANA", abv: "	LA" },
-      { state: "MAINE", abv: "	ME" },
+      { state: "LOUISIANA", abv: "LA" },
+      { state: "MAINE", abv: "ME" },
       { state: "MARYLAND", abv: "MD" },
-      { state: "MASSACHUSETTS", abv: "	MA" },
+      { state: "MASSACHUSETTS", abv: "MA" },
       { state: "MICHIGAN", abv: "MI" },
-      { state: "MINNESOTA", abv: "	MN" },
-      { state: "MISSISSIPPI", abv: "	MS" },
+      { state: "MINNESOTA", abv: "MN" },
+      { state: "MISSISSIPPI", abv: "MS" },
       { state: "MISSOURI", abv: "MO" },
-      { state: "MONTANA", abv: "	MT" },
+      { state: "MONTANA", abv: "MT" },
       { state: "NEBRASKA", abv: "NE" },
       { state: "NEVADA", abv: "NV" },
-      { state: "NEW HAMPSHIRE", abv: "	NH" },
+      { state: "NEW HAMPSHIRE", abv: "NH" },
       { state: "NEW JERSEY", abv: "NJ" },
       { state: "NEW MEXICO", abv: "NM" },
       { state: "NEW YORK", abv: "NY" },
@@ -54,15 +54,15 @@ namespace clayPay.UI
       { state: "RHODE ISLAND", abv: "RI" },
       { state: "SOUTH CAROLINA", abv: "SC" },
       { state: "SOUTH DAKOTA", abv: "SD" },
-      { state: "TENNESSEE", abv: "	TN" },
-      { state: "TEXAS", abv: "	TX" },
-      { state: "UTAH", abv: "	UT" },
-      { state: "VERMONT", abv: "	VT" },
+      { state: "TENNESSEE", abv: "TN" },
+      { state: "TEXAS", abv: "TX" },
+      { state: "UTAH", abv: "UT" },
+      { state: "VERMONT", abv: "VT" },
       { state: "VIRGINIA", abv: "VA" },
       { state: "WASHINGTON", abv: "WA" },
-      { state: "WEST VIRGINIA", abv: "	WV" },
-      { state: "WISCONSIN", abv: "	WI" },
-      { state: "WYOMING", abv: "	WY" }
+      { state: "WEST VIRGINIA", abv: "WV" },
+      { state: "WISCONSIN", abv: "WI" },
+      { state: "WYOMING", abv: "WY" }
   ];
   export let ExpYears: Array<string> = [];
   let Menus: Array<{ id: string, title: string, subTitle: string, icon: string, label: string, selected: boolean }> =  [
@@ -216,15 +216,15 @@ namespace clayPay.UI
     return (<HTMLInputElement>document.getElementById(id)).value;
   }
 
-  export function BuildPayerStates(): void
+  export function BuildPayerStates(States: Array<any>, id: string): void
   {
-    let stateSelect:HTMLSelectElement = (<HTMLSelectElement>document.getElementById("payerState"));
+    let stateSelect:HTMLSelectElement = (<HTMLSelectElement>document.getElementById(id));
     if (stateSelect === undefined) return;
     Utilities.Clear_Element(stateSelect);
-    for (let sta of UI.AllStates)
+    States.forEach(function (j)
     {
-      stateSelect.appendChild(Utilities.Create_Option(sta.abv, sta.state));
-    }
+      stateSelect.appendChild(Utilities.Create_Option(j.abv, j.state));
+    });
     stateSelect.selectedIndex = 0;
   }
 
@@ -233,10 +233,10 @@ namespace clayPay.UI
     let appSelect: HTMLSelectElement = (<HTMLSelectElement>document.getElementById("applicationSearchType"));
     Utilities.Clear_Element(appSelect);
     appSelect.appendChild(Utilities.Create_Option("-1", "Select Application Type", true));
-    for (let a of appTypes)
+    appTypes.forEach(function (a)
     {
       appSelect.appendChild(Utilities.Create_Option(a.Value, a.Label));
-    }
+    });
     appSelect.selectedIndex = 0;
   }
 
@@ -624,7 +624,8 @@ namespace clayPay.UI
       return total + b.Total;
     }, 0);
     clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
-    Utilities.Set_Text(NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(TotalAmount));
+    clayPay.CurrentTransaction.Validate();
+    //Utilities.Set_Text(NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(TotalAmount));
     //let cartTotalPayment = document.getElementById("cartTotalAmountDue");
     //Utilities.Clear_Element(cartTotalPayment);
     //cartTotalPayment.appendChild(document.createTextNode(TotalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })));

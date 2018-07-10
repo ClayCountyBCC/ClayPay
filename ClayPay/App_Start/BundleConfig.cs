@@ -10,7 +10,7 @@ namespace ClayPay
   {
     public static void RegisterBundles(BundleCollection bundles)
     {
-      BundleTable.EnableOptimizations = true;      
+      //BundleTable.EnableOptimizations = true;      
       bundles.IgnoreList.Clear();
       bundles.FileSetOrderList.Clear();
 

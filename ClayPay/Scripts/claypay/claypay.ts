@@ -16,8 +16,10 @@ namespace clayPay
   export let ConvenienceFee: string;
   export let CurrentTransaction: NewTransaction = new NewTransaction();
 
-  export function start(): void
+  export function start(isCashier: boolean): void
   {
+    console.log('Is Public?', isCashier);
+    CurrentTransaction.IsCashier = isCashier;
     HandleUIEvents();
     UI.buildMenuElements();
     loadDefaultValues();
@@ -79,7 +81,7 @@ namespace clayPay
   function loadDefaultValues(): void
   { // this function will load the application values from a web service.
     loadApplicationTypes();
-    UI.BuildPayerStates();
+    clayPay.UI.BuildPayerStates(clayPay.UI.AllStates, "payerState");
     loadCreditCardFee();
     loadCreditCardExpirationValues();
   }
