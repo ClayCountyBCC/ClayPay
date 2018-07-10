@@ -19,9 +19,13 @@ namespace ClayPay.Controllers
       var ip = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
       if (thisTransaction.ValidateTransaction())
       {
-        thisTransaction.ProcessTransaction(ip, new UserAccess(User.Identity.Name));
+        var response = thisTransaction.ProcessTransaction(ip, new UserAccess(User.Identity.Name)); 
+        return Ok(response);
       }
-      return Ok(thisTransaction);
+      else
+      {
+        return Ok(new ClientResponse(thisTransaction.TimeStamp, "", "", thisTransaction.Errors));
+      }
     }
     
 

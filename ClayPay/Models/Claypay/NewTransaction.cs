@@ -16,18 +16,17 @@ namespace ClayPay.Models.Claypay
     public string PayerName { get; set; }
     public string PayerPhone { get; set; }
     public string PayerEmail { get; set; }
-    private string ipAddress { get; set; }
+    public string ipAddress { get; set; }
     public string PayerAddress1 { get; set; }
     public string PayerAddress2 { get; set; }
-
     public string PayerCity { get; set; }
     public string PayerState { get; set; }
     public string PayerZip { get; set; }
-
+    public DateTime TimeStamp { get; set; }
     public int OTid { get; set; }
     public string CashierId { get; set; }
     public List<int> ItemIds { get; set; }
-    private CCData CCPayment { get; set; }
+    public  CCData CCPayment { get; set; }
     public List<Payment> Payments { get; set; }
     public List<string> Errors { get; set; }
     public decimal Change { get; set; }
@@ -37,7 +36,7 @@ namespace ClayPay.Models.Claypay
 
     }
 
-    public NewTransaction ProcessTransaction(string ip, UserAccess ua)
+    public ClientResponse ProcessTransaction(string ip, UserAccess ua)
     {
       ipAddress = ip;
       useraccess = ua;
@@ -59,7 +58,7 @@ namespace ClayPay.Models.Claypay
           {
             Errors.Add("There was an issue with processing the credit card transaction.");
             UnlockChargeItems();
-            return this;
+            return new ClientResponse(TimeStamp, "", "", Errors);
           }
           else
           {
@@ -67,7 +66,7 @@ namespace ClayPay.Models.Claypay
             {
               Errors.Add(pr.ErrorText);
               UnlockChargeItems();
-              return this;
+              return new ClientResponse(TimeStamp, "","", Errors);
             }
             else
             {
@@ -79,8 +78,9 @@ namespace ClayPay.Models.Claypay
               catch (Exception ex)
               {
                 Constants.Log(ex);
-                Errors.Add("Issue adding credit card payment to Payment List");
-                return this;
+                Errors.Add($@"Issue processing credit payment. Please do not attempt transaction again. 
+                             Contact the Building Department. Credit Card Transaction ID: {CCPayment.TransactionId}.");
+                return new ClientResponse(TimeStamp, "", CCPayment.TransactionId, Errors);
               }
 
             }
@@ -95,7 +95,8 @@ namespace ClayPay.Models.Claypay
         {
           if (SavePayments())
           {
-            FinalizePayments();
+            return new ClientResponse(TimeStamp, CashierId, CCPayment.TransactionId, Errors);
+
           }
           else
           {
@@ -134,7 +135,7 @@ namespace ClayPay.Models.Claypay
         }
       }
       UnlockChargeItems();
-      return this;
+      return new ClientResponse(TimeStamp, CashierId, CCPayment.TransactionId, Errors);
     }
 
     public bool ValidateTransaction()
@@ -224,8 +225,6 @@ namespace ClayPay.Models.Claypay
       }
       return true;
     }
-
-    IMPACT FEE WAIVER FUNCTION
 
     public int LockChargeItems()
     {
@@ -317,15 +316,20 @@ namespace ClayPay.Models.Claypay
                         && p.GetPaymentTypeString() != "CK" 
                      select p.TransactionId).FirstOrDefault();
       var dbArgs = new DynamicParameters();
-
+      dbArgs.Add("@Payments", Payments);
       dbArgs.Add("@PayerName", PayerName);
       dbArgs.Add("@Total", CCPayment.Total);
       dbArgs.Add("@TransId", transId);
       dbArgs.Add("@ItemIds", ItemIds);
       dbArgs.Add("@TransDt", DateTime.Now);
 
+      string selectQuery = @"
+        select ItemId, TransactionId, 
+      ";
+
 
       string query = @"
+        USE WATSC;
         DECLARE @CashierId VARCHAR(9) = NULL;
         DECLARE @otId int = NULL;
 
@@ -354,7 +358,7 @@ namespace ClayPay.Models.Claypay
             @AmtApplied = @Total,
             @AmtTendered = @Total, 
             @PmtInfo = @PayerName,
-            @CkNo = @TransId
+            @CkNo = @CheckNo
             
 
           UPDATE ccCashierItem 
@@ -429,7 +433,7 @@ namespace ClayPay.Models.Claypay
     {
       var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add("@cId", CashierId);
-      dbArgs.Add("@otId", OTId);
+      dbArgs.Add("@otId", OTid);
       //DECLARE @cId VARCHAR(9) = NULL;
       //DECLARE @otId int = NULL;
 
@@ -862,13 +866,7 @@ namespace ClayPay.Models.Claypay
     public string CreateEmailBody()
     {
       string keys = String.Join(", \n", GetAssocKeys(ItemIds));
-      string body = $"A payment was made totalling { ((from c in Charge.Get(ItemIds) select c.Total).Sum()).ToString("C") }\n";
-      body += $"consisting of {Payments.Count()} payment types:\n";
-      foreach (var p in Payments)
-      {
-        if(p.GetPaymentTypeString() == "CC On")
-        body += $@"Payment {(Payments.IndexOf(p) + 1)}: {GetPayType(p.PaymentType)} payment of {p.Amount.ToString("C")}.\n";
-      }
+      string body = $"An online credit card payment of {CCPayment.Total.ToString("C")}.\n";
       return body += "This payment was for the following items: \n" + keys;
     }
 
@@ -878,37 +876,6 @@ namespace ClayPay.Models.Claypay
         SELECT DISTINCT LTRIM(RTRIM(AssocKey)) AS AssocKey FROM ccCashierItem
         WHERE ItemId IN @ids;";
       return Constants.Get_Data<string>(query, ItemIds);
-    }
-
-    public string GetPayType(Payment.payment_type_enum paytype)
-    {
-      switch (paytype)
-      {
-        case Payment.payment_type_enum.check:
-          return "A check";
-        case Payment.payment_type_enum.cash:
-          return "A cash";
-        case Payment.payment_type_enum.cc_online:
-          return "An online credit card";
-        case Payment.payment_type_enum.visa:
-          return "A Visa";
-        case Payment.payment_type_enum.mastercard:
-          return "MasterCard";
-        case Payment.payment_type_enum.discover:
-          return "A Discover Card";
-        case Payment.payment_type_enum.amex:
-          return "An American Express";
-        case Payment.payment_type_enum.impact_fee_credit:
-          return "An impactfee credit";
-        case Payment.payment_type_enum.impact_waiver_road:
-          return "A road impact fee waiver";
-        case Payment.payment_type_enum.impact_waiver_school:
-          return "A school impact fee waiver";
-        case Payment.payment_type_enum.impact_fee_exemption:
-          return "An impact fee exemption";
-        default:
-          return "An unknown";
-      }
     }
 
   }
