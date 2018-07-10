@@ -317,59 +317,53 @@ namespace ClayPay.Models.Claypay
                         && p.GetPaymentTypeString() != "CK" 
                      select p.TransactionId).FirstOrDefault();
       var dbArgs = new DynamicParameters();
-      dbArgs.Add("@cId", dbType: DbType.String, size: 9, direction: ParameterDirection.Output);
-      dbArgs.Add("@otId", dbType: DbType.Int64, direction: ParameterDirection.Output);
+
       dbArgs.Add("@PayerName", PayerName);
       dbArgs.Add("@Total", CCPayment.Total);
       dbArgs.Add("@TransId", transId);
       dbArgs.Add("@ItemIds", ItemIds);
+      dbArgs.Add("@TransDt", DateTime.Now);
 
 
       string query = @"
-        DECLARE @now DATETIME = GETDATE();
         DECLARE @CashierId VARCHAR(9) = NULL;
         DECLARE @otId int = NULL;
 
         BEGIN TRANSACTION;
 
         BEGIN TRY
-          EXEC dbo.prc_upd_ccNextCashierId @CashierId OUTPUT;
+          EXEC dbo.prc_upd_ClayPay_ccNextAvail_GetNextCashierId @CashierId OUTPUT;
           
-          EXEC dbo.prc_ins_ccCashier 
-            @OTId = @otId OUTPUT, 
-            @CashierId = @CashierId, 
-            @LstUpdt = NULL, 
-            @Name = @PayerName,
-            @TransDt = @now;
+          EXEC dbo.prc_ins_ClayPay_ccCashier_NewOTid 
+            @otId int output, 
+            @CoName varchar(50),
+            @CashierId varchar(10) = null,
+            @Name varchar(50),
+            @OperId varchar(4),
+            @TransDt DateTime = null,
+            @StationId Int = null,
+            @Phone varchar(12),
+            @Addr1 varchar(50),
+            @Addr2 varchar(50),
+            @NTUser varchar(50)
 
-          EXEC dbo.prc_upd_ccCashierX
-            @OTId = @otId,
-            @Name = @PayerName,
-            @CoName = '',
-            @Phone = '',
-            @Addr1 = '',
-            @Addr2 = '',
-            @NTUser='claypay';
-
-          EXEC dbo.prc_ins_CashierNewPayment 
+          EXEC dbo.prc_ins_ClayPay_ccCashierPayment_NewPayment
             @PayId = 0,
             @OTId = @otId, 
             @PmtType ='CC On',
             @AmtApplied = @Total,
             @AmtTendered = @Total, 
             @PmtInfo = @PayerName,
-            @CkNo = @TransId;
+            @CkNo = @TransId
+            
 
           UPDATE ccCashierItem 
             SET OTId = @otId, CashierId = @CashierId
-            WHERE itemId IN @ItemIds
+            WHERE itemId IN (@ItemIds)
 
           -- Add the ccGU rows
-          INSERT INTO ccGU (OTId, CashierId, ItemId, PayID, CatCode, TransDt)
-          SELECT DISTINCT CCI.OTId, CCI.CashierId, CCI.ItemId, NULL, CCI.CatCode, GETDATE()
-          FROM ccCashierItem CCI
-          INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
-          WHERE CCI.OTId = @OTId
+            EXEC dbo.prc_ins_ClayPay_ccGU_NewGU
+              @OTId = @otId
 
           -- Add the ccGUItem rows
           INSERT INTO ccGUItem (GUID, Account, Amount, Type)
@@ -868,13 +862,14 @@ namespace ClayPay.Models.Claypay
     public string CreateEmailBody()
     {
       string keys = String.Join(", \n", GetAssocKeys(ItemIds));
-      string body = $"Payments were made totalling { ((from c in Charge.Get(ItemIds) select c.Total).Sum()).ToString("C") }\n";
+      string body = $"A payment was made totalling { ((from c in Charge.Get(ItemIds) select c.Total).Sum()).ToString("C") }\n";
       body += $"consisting of {Payments.Count()} payment types:\n";
       foreach (var p in Payments)
       {
+        if(p.GetPaymentTypeString() == "CC On")
         body += $@"Payment {(Payments.IndexOf(p) + 1)}: {GetPayType(p.PaymentType)} payment of {p.Amount.ToString("C")}.\n";
       }
-      return body += "This payment was for the ollowing items: \n" + keys;
+      return body += "This payment was for the following items: \n" + keys;
     }
 
     public List<string> GetAssocKeys(List<int> ItemIds)
