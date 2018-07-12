@@ -11,8 +11,8 @@ namespace ClayPay.Models.Claypay
 {
   public class NewTransaction
   {
-    private UserAccess useraccess { get; set; }
-
+    public UserAccess useraccess { get; set; }
+    public string CoName { get; set; }
     public string PayerName { get; set; }
     public string PayerPhone { get; set; }
     public string PayerEmail { get; set; }
@@ -22,13 +22,14 @@ namespace ClayPay.Models.Claypay
     public string PayerCity { get; set; }
     public string PayerState { get; set; }
     public string PayerZip { get; set; }
-    public DateTime TimeStamp { get; set; }
+    public DateTime TimeStamp { get; set; } = DateTime.Now;
     public int OTid { get; set; }
     public string CashierId { get; set; }
     public List<int> ItemIds { get; set; }
-    public  CCData CCPayment { get; set; }
+    public CCData CCPayment { get; set; }
     public List<Payment> Payments { get; set; }
     public List<string> Errors { get; set; }
+    public List<string> PartialErrors { get; set; }
     public decimal Change { get; set; }
 
     public NewTransaction()
@@ -41,6 +42,7 @@ namespace ClayPay.Models.Claypay
       ipAddress = ip;
       useraccess = ua;
       Errors = new List<string>();
+      PartialErrors = new List<string>();
 
       // process cc payments here
       if (ValidateTransaction())
@@ -58,65 +60,50 @@ namespace ClayPay.Models.Claypay
           {
             Errors.Add("There was an issue with processing the credit card transaction.");
             UnlockChargeItems();
-            return new ClientResponse(TimeStamp, "", "", Errors);
+            return new ClientResponse(TimeStamp, "", "", Errors, PartialErrors, 0);
           }
           else
           {
             if (pr.ErrorText.Length > 0)
             {
-              Errors.Add(pr.ErrorText);
+              PartialErrors.Add(pr.ErrorText);
               UnlockChargeItems();
-              return new ClientResponse(TimeStamp, "","", Errors);
+              return new ClientResponse(TimeStamp, "","", Errors, PartialErrors, 0);
             }
             else
             {
-              CCPayment.TransactionId = pr.UniqueId;
-              try
-              {
-                Payments.Add(new Payment(CCPayment, ua));
-              }
-              catch (Exception ex)
-              {
-                Constants.Log(ex);
-                Errors.Add($@"Issue processing credit payment. Please do not attempt transaction again. 
-                             Contact the Building Department. Credit Card Transaction ID: {CCPayment.TransactionId}.");
-                return new ClientResponse(TimeStamp, "", CCPayment.TransactionId, Errors);
-              }
-
+              var ccpayment = (from p in Payments where p.PaymentType == Payment.payment_type_enum.credit_card select p).FirstOrDefault();
+              Payments[Payments.IndexOf(ccpayment)].TransactionId = pr.UniqueId;
             }
           }
         }
 
-
-        // Validate, Save, and Finalize all payment types here
-
         // Inside pr.Save take all payments and process them.
         if (Errors.Count() == 0)
         {
+          LockChargeItems();
           if (SavePayments())
           {
-            return new ClientResponse(TimeStamp, CashierId, CCPayment.TransactionId, Errors);
-
+            var amountPaid = (from payment in Payments select payment.AmtApplied).Sum();
+            return new ClientResponse(TimeStamp, CashierId, CCPayment.TransactionId, Errors, PartialErrors, amountPaid );
           }
           else
           {
             // getting here is bad
-            Errors.Add("There was an issue saving the transaction.");
-            // This may be where we put the transaction to attempt it again.
+            PartialErrors.Add($@"There was an issue saving the transaction. 
+                                 Please do not attempt the transaction again and contact the building department.
+                                 Reference Credit Card Transaction Id: {CCPayment.TransactionId}");
+                            
+            // TODO: This is where we handle the transaction if we need to attempt saving it again.
           }
 
-          // This will be moved to new function
           if (Constants.UseProduction())
           {
-            if (ua.authenticated)
-            {
-
-            }
-            else
-            {
+            if (!ua.authenticated)
+            {   
               Constants.SaveEmail("OnlinePermits@claycountygov.com",
-                $"Payment made - Receipt # {CashierId}, Transaction # {CCPayment.TransactionId} ",
-                CreateEmailBody());
+              $"Payment made - Receipt # {CashierId}, Transaction # {CCPayment.TransactionId} ",
+              CreateEmailBody());
             }
           }
           else
@@ -127,7 +114,7 @@ namespace ClayPay.Models.Claypay
             }
             else
             {
-              Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+              Constants.SaveEmail("daniel.mccartney@claycountygov.com; jeremy.west@claycountygov.com",
               $"TEST Payment made - Receipt # {CashierId}, Transaction # {CCPayment.TransactionId} -- TEST SERVER",
               CreateEmailBody());
             }
@@ -135,51 +122,57 @@ namespace ClayPay.Models.Claypay
         }
       }
       UnlockChargeItems();
-      return new ClientResponse(TimeStamp, CashierId, CCPayment.TransactionId, Errors);
+      return new ClientResponse(TimeStamp, CashierId, CCPayment.TransactionId, Errors, PartialErrors, -1);
     }
 
     public bool ValidateTransaction()
     {
       if (ipAddress.Length == 0)
       {
-        Constants.Log("Issue in PayController", "IP Address could not be captured", "", "", "");
-        //Errors.Add("IP Address could not be captured");
+        Constants.Log("Issue in ValidateTransaction()", 
+                      "IP Address could not be captured", 
+                       Environment.MachineName.ToUpper() + "; Date: " + TimeStamp.ToString(), "ClayPay.NewTransaction.cs");
+      }
+      if (CCPayment != null && CCPayment.Total > 0)
+      { // validate credit card data if exists
+        Errors = CCPayment.ValidateCCData(CCPayment);
+
+        if (Errors.Count() > 0)
+        {
+          return false;
+        }
+        else
+        {
+          Payments.Add(new Payment(CCPayment, useraccess));
+        }
       }
 
-      Errors = CCPayment.ValidateCCData(CCPayment);
-      if (Errors.Count() > 0) return false;
-
-
       if ((from p in Payments
-         where p.GetPaymentTypeString() == ""
+         where p.PaymentTypeString == ""
          select p).ToList().Count() > 0)
       {
 
         Errors.Add($"There is an issue recording one or more payment types in this transaction.");
         Constants.Log("issue with recording payment type.",
                       "Error setting payment type.",
-                      "",
-                      $"Number of payment types: {Payments.Count()}, function call: Payment.SetPaymentTypeString().", "");
+                      Payments.ToString(),
+                      $"Number of payment types: {Payments.Count()}, function call: Payment.SetPaymentTypeString().");
         return false;
       }
 
       // If not cashier and cash || check, return error
-      if (!useraccess.in_claycashier_djournal_group &&
-         !useraccess.in_claycashier_admin_group &&
+      if (!useraccess.in_claypay_djournal_group &&
+         !useraccess.in_claypay_impactfee_group &&
          (from p in Payments
-          where p.GetPaymentTypeString() == "CK" ||
-          p.GetPaymentTypeString() == "CA"
+          where p.PaymentTypeString == "CK" ||
+          p.PaymentTypeString == "CA"
           select p).ToList().Count() > 0
          )
       {
         Errors.Add("Only cashier can accept cash and check payments");
         return false;
       }
-
-      // validate credit card data
-
-
-
+      
       var totalCharges = (from c in Charge.Get(ItemIds) select c.Total).Sum();
       decimal totalPaymentAmount = (from p in Payments select p.Amount).Sum();
 
@@ -188,8 +181,7 @@ namespace ClayPay.Models.Claypay
         Errors.Add("Payment amount must be greater than 0 and equal to or greater than the sum of the charges.\n");
         return false;
       }
-
-
+      
       // AmountTenderd and Total of charges can be different if cash is involved 
       var hasCash = (from p in Payments
                      where p.PaymentType == Payment.payment_type_enum.cash
@@ -203,7 +195,9 @@ namespace ClayPay.Models.Claypay
 
       if (hasCash)
       {
-        if (Change > totalPaymentAmount)
+        var 
+        Change = totalPaymentAmount - totalCharges;
+        if (Change > (from p in Payments where p.PaymentType == Payment.payment_type_enum.cash select p.AmtTendered).Sum())
         {
           Change = 0;
           Errors.Add("The amount returned to the customer cannot be greater than the amount of cash tendered.");
@@ -211,7 +205,8 @@ namespace ClayPay.Models.Claypay
         }
         else
         {
-          Change = totalPaymentAmount - totalCharges;
+          Payment cashPayment = (from p in Payments where p.PaymentType == Payment.payment_type_enum.cash select p).First();
+          Payments[Payments.IndexOf(cashPayment)].AmtApplied = cashPayment.AmtTendered - Change;
         }
       }
 
@@ -294,6 +289,7 @@ namespace ClayPay.Models.Claypay
           COMMIT
         END TRY
         BEGIN CATCH
+          ROLBACK
           PRINT ERROR_MESSAGE()
         END CATCH
       
@@ -311,27 +307,27 @@ namespace ClayPay.Models.Claypay
 
     public bool SavePayments()
     {
-      var transId = (from p in Payments 
-                     where p.GetPaymentTypeString() != "CA" 
-                        && p.GetPaymentTypeString() != "CK" 
-                     select p.TransactionId).FirstOrDefault();
+      //var transId = (from p in Payments 
+      //               where p.GetPaymentTypeString() != "CA" 
+      //                  && p.GetPaymentTypeString() != "CK" 
+      //               select p.TransactionId).FirstOrDefault();
       var dbArgs = new DynamicParameters();
-      dbArgs.Add("@Payments", Payments);
-      dbArgs.Add("@PayerName", PayerName);
-      dbArgs.Add("@Total", CCPayment.Total);
-      dbArgs.Add("@TransId", transId);
-      dbArgs.Add("@ItemIds", ItemIds);
-      dbArgs.Add("@TransDt", DateTime.Now);
-
+      //dbArgs.Add("@Payments", Payments);
+      //dbArgs.Add("@PayerName", PayerName);
+      //dbArgs.Add("@Total", CCPayment.Total);
+      //dbArgs.Add("@TransactionId", CCPayment.TransactionId);
+      //dbArgs.Add("@ItemIds", ItemIds);
+      //dbArgs.Add("@TransDt", DateTime.Now);
+    
       string selectQuery = @"
         select ItemId, TransactionId, 
       ";
-
-
+      
       string query = @"
         USE WATSC;
         DECLARE @CashierId VARCHAR(9) = NULL;
         DECLARE @otId int = NULL;
+        DECLARE @TransDt = @TimeStamp
 
         BEGIN TRANSACTION;
 
@@ -351,62 +347,32 @@ namespace ClayPay.Models.Claypay
             @Addr2 varchar(50),
             @NTUser varchar(50)
 
-          EXEC dbo.prc_ins_ClayPay_ccCashierPayment_NewPayment
-            @PayId = 0,
-            @OTId = @otId, 
-            @PmtType ='CC On',
-            @AmtApplied = @Total,
-            @AmtTendered = @Total, 
-            @PmtInfo = @PayerName,
-            @CkNo = @CheckNo
-            
+
+          INSERT INTO ccCashierPayment
+          VALUES (@Payments)
+          
+          -- EXEC dbo.prc_ins_ClayPay_ccCashierPayment_NewPayment
+          --  @OTId = @otId, 
+          --  @PmtType = @PaymentTypeString,
+          --  @AmtApplied = @Amount,
+          --  @AmtTendered = @Amount, 
+          --  @PmtInfo = @PayerName,
+          --  @CkNo = @CheckNo,
+          --  @TransId = @TransactionId
+
 
           UPDATE ccCashierItem 
             SET OTId = @otId, CashierId = @CashierId
             WHERE itemId IN (@ItemIds)
 
           -- Add the ccGU rows
-            EXEC dbo.prc_ins_ClayPay_ccGU_NewGU
-              @OTId = @otId
+          EXEC dbo.prc_ins_ClayPay_ccGU_NewGU
+            @OTId = @otId
 
           -- Add the ccGUItem rows
-          INSERT INTO ccGUItem (GUID, Account, Amount, Type)
-          SELECT 
-            GU.GUId,
-            GL.Fund + '*' + GL.Account + '**' AS Account,
-          FORMAT(
-          CASE GL.[Percent] 
-            WHEN 0.05 THEN
-              CASE WHEN CAST(ROUND((Total * 99.9) / 100, 2) + (ROUND((Total * 0.05) / 100, 2)*2) AS MONEY) > CCI.Total THEN
-                CASE WHEN Fund <> '001' THEN 
-                  ROUND((Total * GL.[Percent]) / 100, 2) - .01
-                ELSE 
-                  ROUND((Total * GL.[Percent]) / 100, 2) 
-                END
-              ELSE
-                ROUND((Total * GL.[Percent]) / 100, 2) 
-              END
-            WHEN 50 THEN
-              CASE WHEN (ROUND((Total * GL.[Percent]) / 100, 2)*2) <> CCI.Total THEN
-                CASE WHEN GL.Account = '322100' THEN
-                    ROUND((Total * GL.[Percent]) / 100, 2) + (CCI.Total -  (ROUND((Total * GL.[Percent]) / 100, 2)*2))
-                ELSE
-                  ROUND((Total * GL.[Percent]) / 100, 2) 
-                END
-              ELSE
-                ROUND((Total * GL.[Percent]) / 100, 2) 
-              END
-            ELSE
-              ROUND(Total / (100 / GL.[Percent]), 2) 
-            END
-          , 'N2') AS Amount,
-            GL.Type
-          FROM ccCashierItem CCI
-          INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
-          INNER JOIN ccGU GU ON CCI.OTId = GU.OTId AND CCI.ItemId = GU.ItemId
-          WHERE CCI.OTId = @OTId
-          ORDER BY CCI.ItemId, GL.Type
-      
+          EXEC dbo.prc_ins_ClayPay_ccGUItem_NewGUItemAccountRows
+            @OTId = @otId
+          
         END TRY
         BEGIN CATCH
           IF @@TRANCOUNT > 0
@@ -417,10 +383,10 @@ namespace ClayPay.Models.Claypay
           COMMIT TRANSACTION;";
       try
       {
-        var i = Constants.Exec_Query(query, dbArgs);
+        var i = Constants.Save_Data(query, this);
         CashierId = dbArgs.Get<string>("@CashierId");
         OTid = dbArgs.Get<Int32>("@otId");
-        return (i != -1);
+        return (i);
       }
       catch (Exception ex)
       {
@@ -865,9 +831,24 @@ namespace ClayPay.Models.Claypay
 
     public string CreateEmailBody()
     {
-      string keys = String.Join(", \n", GetAssocKeys(ItemIds));
+      var AssocKeys = GetAssocKeys(ItemIds);
+      var chargeItems = new List<Charge>();
+
+      foreach (var k in AssocKeys)
+      {
+        chargeItems.AddRange(Charge.Get(k));
+      }
+
+      var keys = String.Join(", \n", AssocKeys);
       string body = $"An online credit card payment of {CCPayment.Total.ToString("C")}.\n";
-      return body += "This payment was for the following items: \n" + keys;
+      body += $"The Charges paid include:\n";
+      foreach (var c in chargeItems)
+      {
+        body += $"{c.Description}\t\t{c.TotalDisplay}\n{keys}";
+      }
+      body += "\nThis payment is asoociated with the following items: \n" + keys;
+
+      return body;
     }
 
     public List<string> GetAssocKeys(List<int> ItemIds)

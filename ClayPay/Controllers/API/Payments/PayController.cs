@@ -24,7 +24,7 @@ namespace ClayPay.Controllers
       }
       else
       {
-        return Ok(new ClientResponse(thisTransaction.TimeStamp, "", "", thisTransaction.Errors));
+        return Ok(new ClientResponse(DateTime.Now, "", "", thisTransaction.Errors, thisTransaction.PartialErrors, 0));
       }
     }
     

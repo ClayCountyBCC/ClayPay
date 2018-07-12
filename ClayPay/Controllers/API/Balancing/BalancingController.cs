@@ -74,10 +74,10 @@ namespace ClayPay.Controllers
         var finalize = DateToFinalize.Date < DateTime.Now.Date;
         var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
-        finalize = ua.in_claycashier_djournal_group;
+        finalize = ua.in_claypay_djournal_group;
         var dj = new DJournal(DateToFinalize, finalize, User.Identity.Name);
 
-        if(ua.in_claycashier_djournal_group == false)
+        if(ua.in_claypay_djournal_group == false)
         {
           dj.Error.Add("DJournal was not finalized. User does not have the correct level of access.");
 

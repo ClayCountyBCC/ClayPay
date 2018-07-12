@@ -12,13 +12,17 @@ namespace ClayPay.Models.Claypay
     public string CashierId { get; set; } = "";
     public string TransactionId { get; set; } = "";
     public List<string> Errors { get; set; }
+    public List<string> PartialErrors { get; set; }
+    public decimal AmountPaid { get; set; }
 
-    public ClientResponse(DateTime datetime, string cId, string transId, List<string> err)
+    public ClientResponse(DateTime datetime, string cashierid, string transId, List<string> err, List<string> partErr, decimal AmtApplied)
     {
       TimeStamp = datetime.ToString();
-      CashierId = cId;
+      CashierId = cashierid;
       TransactionId = transId;
       Errors = err;
+      PartialErrors = partErr;
+      AmountPaid = AmtApplied;
     }
 
   }

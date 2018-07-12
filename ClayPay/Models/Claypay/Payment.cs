@@ -11,33 +11,33 @@ namespace ClayPay.Models.Claypay
     //public string Info { get; set; }
     public enum payment_type_enum : int
     {
-      none,
       check,
       cash,
-      //visa,
-      //mastercard,
-      //amex,
-      //discover,
-      credit_card,
-      impact_fee_credit,
-      impact_fee_exemption,
-      impact_waiver_school,
-      impact_waiver_road
-      // need 
+      credit_card
+      //impact_fee_credit,
+      //impact_fee_exemption,
+      //impact_waiver_school,
+      //impact_waiver_road
+
     }
 
     public payment_type_enum PaymentType { get; set; } = 0;
 
     // This is to set the payment type string for inserting into db. Client does not need this.
-    private string PaymentTypeString { get; set; } = "";
-
+    public string PaymentTypeString { get; set; } = "";
     public decimal Amount { get; set; }
-    public string CheckNumber { get; set; } = "";
+    public decimal AmtTendered { get; set; }
+    public decimal AmtApplied { get; set; }
+    public string Info { get; set; }
+    public string CkNo { get; set; } = "";
     public string TransactionId { get; set; } = "";
 
     public Payment()
     {
       SetPaymentTypeString();
+      AmtApplied = Amount;
+      AmtTendered = Amount;
+
     }
     
     public Payment(CCData ccpayment, UserAccess ua)
@@ -51,7 +51,8 @@ namespace ClayPay.Models.Claypay
         PaymentTypeString = ccpayment.CardType.ToUpper();
       }
 
-      Amount = ccpayment.Total;
+      AmtApplied = ccpayment.Total;
+      AmtTendered = ccpayment.Total;
       TransactionId = ccpayment.TransactionId;
     }
 
@@ -61,31 +62,37 @@ namespace ClayPay.Models.Claypay
       {
         switch (PaymentType)
         {
+          case payment_type_enum.credit_card:
+            switch (Environment.MachineName.ToUpper())
+            {
+              case "CLAYBCCIIS01":
+                return "cc_cashier";
+              case "CLAYBCCDMZIIS01":
+                return "cc_online";
+              case "CLAYBCCDV10":
+                return "cc_test";
+            }
+            return "credit_card";
           case payment_type_enum.check:
             return "CK";
           case payment_type_enum.cash:
             return "CA";            
-          case payment_type_enum.impact_fee_credit:
-            return "IFCR";
-          case payment_type_enum.impact_fee_exemption:
-            return "IFEX";
-          case payment_type_enum.impact_waiver_school:
-            return "IFWS";
-          case payment_type_enum.impact_waiver_road:
-            return "IFWR";
+          //case payment_type_enum.impact_fee_credit:
+          //  return "IFCR";
+          //case payment_type_enum.impact_fee_exemption:
+          //  return "IFEX";
+          //case payment_type_enum.impact_waiver_school:
+          //  return "IFWS";
+          //case payment_type_enum.impact_waiver_road:
+          //  return "IFWR";
           default:
             return "";
 
         }
-
       }        
+
       return this.PaymentTypeString;
 
-    }
-
-    public string GetPaymentTypeString()
-    {
-      return PaymentTypeString;
     }
 
 
