@@ -20,6 +20,7 @@ namespace ClayPay
         "~/bower_components/fetch/fetch.js",
         "~/Scripts/app/Utilities.js",
         "~/Scripts/claypay/Charge.js",
+        "~/Scripts/claypay/ClientResponse.js",
         "~/Scripts/claypay/AppTypes.js",
         "~/Scripts/claypay/Payment.js",
         "~/Scripts/claypay/CCPayment.js",

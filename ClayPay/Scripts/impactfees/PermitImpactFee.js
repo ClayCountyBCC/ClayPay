@@ -1,6 +1,4 @@
-/// <reference path="../app/xhr.ts" />
 var ImpactFees;
-/// <reference path="../app/xhr.ts" />
 (function (ImpactFees) {
     class PermitImpactFee {
         constructor() {
@@ -10,7 +8,7 @@ var ImpactFees;
             if (Agreement_Number.length > 0) {
                 qs += "&agreement_number=" + Agreement_Number;
             }
-            return XHR.GetObject("./API/ImpactFees/GetPermit", qs);
+            return Utilities.Get("../API/ImpactFees/GetPermit" + qs);
         }
     }
     ImpactFees.PermitImpactFee = PermitImpactFee;

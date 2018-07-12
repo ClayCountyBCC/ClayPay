@@ -1,6 +1,4 @@
-/// <reference path="../app/xhr.ts" />
 var ImpactFees;
-/// <reference path="../app/xhr.ts" />
 (function (ImpactFees) {
     class PermitAllocation {
         constructor() {
@@ -189,7 +187,9 @@ var ImpactFees;
         Save() {
             let permitAllocationErrorContainer = document.getElementById("permitAllocationError");
             let permitAllocationError = document.getElementById("permitAllocationErrorList");
-            XHR.SaveObject("./API/ImpactFees/SavePermitAllocation", this).then(function (a) {
+            //XHR.SaveObject<PermitAllocation>("./API/ImpactFees/SavePermitAllocation", this)
+            Utilities.Post("./API/ImpactFees/SavePermitAllocation", this)
+                .then(function (a) {
                 console.log('response', a);
                 if (a.length > 0) {
                     Utilities.Show(permitAllocationErrorContainer);

@@ -1,6 +1,4 @@
-﻿/// <reference path="../app/xhr.ts" />
-
-namespace ImpactFees
+﻿namespace ImpactFees
 {
   interface IPermitAllocation
   {
@@ -264,7 +262,9 @@ namespace ImpactFees
     {
       let permitAllocationErrorContainer = document.getElementById("permitAllocationError");
       let permitAllocationError = <HTMLTextAreaElement>document.getElementById("permitAllocationErrorList");
-      XHR.SaveObject<PermitAllocation>("./API/ImpactFees/SavePermitAllocation", this).then(
+      //XHR.SaveObject<PermitAllocation>("./API/ImpactFees/SavePermitAllocation", this)
+      Utilities.Post<Array<string>>("./API/ImpactFees/SavePermitAllocation", this)
+        .then(
         function (a)
         {
           console.log('response', a);

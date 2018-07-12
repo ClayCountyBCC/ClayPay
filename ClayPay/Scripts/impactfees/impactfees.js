@@ -3,7 +3,42 @@ var ImpactFees;
 /// <reference path="../app/utilities.ts" />
 (function (ImpactFees) {
     ImpactFees.CombinedAllocations = [];
+    let Menus = [
+        {
+            id: "nav-existingAllocations",
+            title: "Existing Agreements and Allocations",
+            subTitle: "View the existing allocations by Developer, Builder, or Permit.",
+            icon: "fas fa-home",
+            label: "Current Allocations",
+            selected: true
+        },
+        {
+            id: "nav-developerAgreement",
+            title: "Developer Agreements",
+            subTitle: "Use this menu to add or make changes to existing developer agreements.",
+            icon: "fas fa-user",
+            label: "Developer",
+            selected: false
+        },
+        {
+            id: "nav-builderAllocations",
+            title: "Builder Allocations",
+            subTitle: "Use this menu to add or make changes to existing builder allocations.",
+            icon: "fas fa-user",
+            label: "Builder",
+            selected: false
+        },
+        {
+            id: "nav-permitAllocations",
+            title: "Permit Waivers, Exemptions, and Allocations",
+            subTitle: "Use this menu to add or make changes to existing permit allocations, or to apply waivers or exemptions.",
+            icon: "fas fa-clipboard",
+            label: "Permit",
+            selected: false
+        }
+    ];
     function Start() {
+        buildMenuElements();
         LoadAgreements();
     }
     ImpactFees.Start = Start;
@@ -212,6 +247,7 @@ var ImpactFees;
     }
     function BuildRow(key1, key2, ...values) {
         let tr = document.createElement("tr");
+        tr.style.cursor = "pointer";
         tr.classList.add("tr");
         tr.onclick = function () {
             View(key1, key2);
@@ -224,16 +260,44 @@ var ImpactFees;
         }
         return tr;
     }
-    //function BuildBigRow(id: string, colSpan: number): HTMLTableRowElement
-    //{
-    //  let tr = document.createElement("tr");
-    //  tr.classList.add("tr");
-    //  tr.id = id;
-    //  Utilities.Hide(tr);
-    //  let td = document.createElement("td");
-    //  td.colSpan = colSpan;
-    //  tr.appendChild(td);
-    //  return tr;
-    //}
+    function createMenuElement(menuItem) {
+        let li = document.createElement("li");
+        if (menuItem.selected)
+            li.classList.add("is-active");
+        let a = document.createElement("a");
+        a.id = menuItem.id;
+        a.href = "#";
+        a.onclick = function () {
+            let title = document.getElementById("menuTitle");
+            let subTitle = document.getElementById("menuSubTitle");
+            Utilities.Clear_Element(title);
+            Utilities.Clear_Element(subTitle);
+            title.appendChild(document.createTextNode(menuItem.title));
+            subTitle.appendChild(document.createTextNode(menuItem.subTitle));
+            Utilities.Show_Menu(menuItem.id);
+        };
+        if (menuItem.icon.length > 0) {
+            let span = document.createElement("span");
+            span.classList.add("icon");
+            span.classList.add("is-medium");
+            let i = document.createElement("i");
+            let icons = menuItem.icon.split(" ");
+            for (let icon of icons) {
+                i.classList.add(icon);
+            }
+            span.appendChild(i);
+            a.appendChild(span);
+        }
+        a.appendChild(document.createTextNode(menuItem.label));
+        li.appendChild(a);
+        return li;
+    }
+    function buildMenuElements() {
+        let menu = document.getElementById("menuTabs");
+        for (let menuItem of Menus) {
+            menu.appendChild(createMenuElement(menuItem));
+        }
+    }
+    ImpactFees.buildMenuElements = buildMenuElements;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=ImpactFees.js.map

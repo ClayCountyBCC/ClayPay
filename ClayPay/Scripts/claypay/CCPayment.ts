@@ -31,7 +31,7 @@ namespace clayPay
     public Amount: number;
     public Validated: boolean = false;
     // credit card form container
-    static CreditCardForm: string = "creditCardPayment";
+    static CreditCardForm: string = "creditCardPaymentType";
     // inputs
     static FirstNameInput: string = "creditCardFirstName";
     static LastNameInput: string = "creditCardLastName";
@@ -50,6 +50,9 @@ namespace clayPay
     static NumberError: string = "creditCardNumberError";
     static ExpirationError: string = "creditCardExpirationError";
     static AmountError: string = "creditCardPaymentAmountError";
+
+    // Menus
+    static creditCardTotalMenu: string = "creditCardPaymentTotal";
 
     constructor()
     {
@@ -113,7 +116,11 @@ namespace clayPay
       document.getElementById(CCPayment.ccMonthSelect).parentElement.classList.remove("is-danger");
       document.getElementById(CCPayment.ccYearSelect).parentElement.classList.remove("is-danger");
       document.getElementById(CCPayment.ccCVCInput).classList.remove("is-danger");
-      document.getElementById(CCPayment.AmountPaidInput).classList.remove("is-danger");
+      if (clayPay.CurrentTransaction.IsCashier)
+      {
+        document.getElementById(CCPayment.AmountPaidInput).classList.remove("is-danger");
+      }
+      
     }
 
     public Validate(): boolean
@@ -224,12 +231,35 @@ namespace clayPay
           Utilities.Error_Show(CCPayment.AmountError, "An invalid amount was entered.");
           return false;
         }
+        if (this.Amount > clayPay.CurrentTransaction.TotalAmountDue)
+        {
+          let element = document.getElementById(CCPayment.AmountPaidInput);
+          element.classList.add("is-danger");
+          element.focus();
+          element.scrollTo();
+          Utilities.Error_Show(Payment.checkErrorElement, "You cannot enter an amount for more than the total amount due.");
+          return false;
+        }
+      }
+      else
+      {
+        clayPay.CurrentTransaction.CCData.Amount = clayPay.CurrentTransaction.TotalAmountDue;
       }
 
       this.Validated = true;
-
-      return false;
+      if (clayPay.CurrentTransaction.IsCashier)
+      {
+        Utilities.Set_Text(CCPayment.creditCardTotalMenu, Utilities.Format_Amount(this.Amount));
+        Utilities.Hide(CCPayment.CreditCardForm);
+      }
+      return clayPay.CurrentTransaction.Validate();
     }
-    
+
+    public ValidateAndSave(): void
+    {
+      if (!this.Validate()) return;
+      clayPay.CurrentTransaction.Save();
+    }
+
   }
 }

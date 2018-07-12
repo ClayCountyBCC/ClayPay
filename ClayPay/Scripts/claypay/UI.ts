@@ -6,8 +6,13 @@ namespace clayPay.UI
 {
   "use strict"
 
-  let Cart: Array<Charge> = [];
+  // CurrentCharges are the search results (charges) returned and displayed
+  // in the results container.
   let CurrentCharges: Array<Charge> = [];  
+  // Cart are the charges that the user chose from the CurrentCharges to
+  // pay for in this session.
+  export let Cart: Array<Charge> = [];
+  
   export const ExpMonths: Array<string> = ['01', '02', '03', '04', '05',
     '06', '07', '08', '09', '10', '11', '12'];
   export const AllStates: Array<{ state: string, abv: string }> =
@@ -159,20 +164,20 @@ namespace clayPay.UI
   //  return false;
   //}
 
-  function resetApp():void
-  {
-    CurrentCharges = [];
-    Cart = [];
-    updateCart();
-    updateCartNav();
-    // reset paymentForm
-    let f: HTMLFormElement = <HTMLFormElement>document.getElementById('paymentForm');
-    f.reset();
-    Enable('btnSubmit');
-    Utilities.Show('CCForm');
-    Utilities.Hide('PaymentPosting');
+  //function resetApp():void
+  //{
+  //  CurrentCharges = [];
+  //  Cart = [];
+  //  updateCart();
+  //  updateCartNav();
+  //  // reset paymentForm
+  //  let f: HTMLFormElement = <HTMLFormElement>document.getElementById('paymentForm');
+  //  f.reset();
+  //  Enable('btnSubmit');
+  //  Utilities.Show('CCForm');
+  //  Utilities.Hide('PaymentPosting');
 
-  }
+  //}
 
   function PopulateReceipt(pr: {CashierId:string, TimeStamp_Display: string, Amount: number}):void
   {
@@ -265,31 +270,31 @@ namespace clayPay.UI
     }
   }
   
-  export function toggleNav(nav: string, element: string): void
-  {
-    let e = document.getElementById(nav);
-    if (e === null) return;
-    let activeNodes: NodeListOf<Element> = e.getElementsByClassName("active");
+  //export function toggleNav(nav: string, element: string): void
+  //{
+  //  let e = document.getElementById(nav);
+  //  if (e === null) return;
+  //  let activeNodes: NodeListOf<Element> = e.getElementsByClassName("active");
 
-    for (var i = 0; i < activeNodes.length; i++)
-    {
-      activeNodes[i].classList.remove("active");
-    }
-    let eNav = document.getElementById("nav-" + element);
-    if (eNav === null) return;
-    eNav.classList.add("active");
-  }
+  //  for (var i = 0; i < activeNodes.length; i++)
+  //  {
+  //    activeNodes[i].classList.remove("active");
+  //  }
+  //  let eNav = document.getElementById("nav-" + element);
+  //  if (eNav === null) return;
+  //  eNav.classList.add("active");
+  //}
 
-  function toggleSearch(e: HTMLButtonElement, disabled: boolean)
-  {
-    e.disabled = disabled;
-    e.classList.toggle("is-loading", disabled);
-  }
+  //function toggleSearch(e: HTMLButtonElement, disabled: boolean)
+  //{
+  //  e.disabled = disabled;
+  //  e.classList.toggle("is-loading", disabled);
+  //}
 
   export function Search(buttonId: string, inputId: string, errorId: string): boolean
   {
-    let button = <HTMLButtonElement>document.getElementById(buttonId);
-    toggleSearch(button, true);
+    //let button = <HTMLButtonElement>document.getElementById(buttonId);
+    Utilities.Toggle_Loading_Button(buttonId, true);
     let input = <HTMLInputElement>document.getElementById(inputId);
     let k: string = input.value.trim().toUpperCase();
     if (inputId.indexOf("application") > -1)
@@ -301,7 +306,7 @@ namespace clayPay.UI
       if (appType === "-1" || appType.length === 0)
       {
         Utilities.Error_Show(errorId, "You must select an Application Type in order to search by Application Number.");
-        toggleSearch(button, false);
+        Utilities.Toggle_Loading_Button(buttonId, false);
         return false;
       }
       k = appType.toUpperCase() + "-" + input.value.trim().toUpperCase();
@@ -321,7 +326,7 @@ namespace clayPay.UI
           Utilities.Error_Show(errorId, "No charges were found for search: " + k);
         }
 
-        toggleSearch(button, false);
+        Utilities.Toggle_Loading_Button(buttonId, false);
         return true;
       },
         function (errorText)
@@ -331,15 +336,15 @@ namespace clayPay.UI
           // do something with the error here
           // need to figure out how to detect if something wasn't found
           // versus an error.
-          toggleSearch(button, false);
+          Utilities.Toggle_Loading_Button(buttonId, false);
 
           return false;
         });
     } else
     {
-      Utilities.Error_Show("Invalid search. Please check your entry and try again.")
+      Utilities.Error_Show(errorId, "Invalid search. Please check your entry and try again.")
       input.focus();
-      toggleSearch(this, false);
+      Utilities.Toggle_Loading_Button(buttonId, false);
       return false;
     }
   }
@@ -583,7 +588,8 @@ namespace clayPay.UI
     Utilities.Hide(emptyCart);
     Utilities.Hide(fullCart);
     Utilities.Hide(payerData);
-    Utilities.Hide(paymentData);
+    //Utilities.Hide(paymentData);
+    //Utilities.Show()
     Utilities.Clear_Element(CartNav);
     if (Cart.length === 0)
     {
@@ -624,12 +630,7 @@ namespace clayPay.UI
       return total + b.Total;
     }, 0);
     clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
-    clayPay.CurrentTransaction.Validate();
-    //Utilities.Set_Text(NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(TotalAmount));
-    //let cartTotalPayment = document.getElementById("cartTotalAmountDue");
-    //Utilities.Clear_Element(cartTotalPayment);
-    //cartTotalPayment.appendChild(document.createTextNode(TotalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })));
-
+    clayPay.CurrentTransaction.UpdateTotals();
     tr.appendChild(createTableElement(TotalAmount.toFixed(2), "", 1));
     tr.appendChild(createTableElement("", "", 1));
     return tr;

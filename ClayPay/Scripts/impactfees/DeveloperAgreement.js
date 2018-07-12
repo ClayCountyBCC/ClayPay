@@ -1,6 +1,4 @@
-/// <reference path="../app/xhr.ts" />
 var ImpactFees;
-/// <reference path="../app/xhr.ts" />
 (function (ImpactFees) {
     class DeveloperAgreement {
         constructor() {
@@ -8,15 +6,6 @@ var ImpactFees;
             this.Amount_Currently_Allocated = 0;
             this.Audit_Log = "";
         }
-        //public static GetAll(agreementNumber: string = ""): Promise<Array<DeveloperAgreement>>
-        //{
-        //  let agreement: string = "";
-        //  if (agreementNumber.length > 0)
-        //  {
-        //    agreement = "?agreementNumber=" + agreementNumber;
-        //  }
-        //  return GetArray<DeveloperAgreement>("./API/ImpactFees/GetDeveloperAgreements", agreement);
-        //}
         static Load(e) {
             let parent = e.parentElement;
             parent.classList.add("is-loading");
@@ -70,7 +59,9 @@ var ImpactFees;
                 let d = new DeveloperAgreement();
                 d.Agreement_Amount = Amount;
                 d.Agreement_Number = agreementNumber;
-                XHR.SaveObject("./API/ImpactFees/SaveDeveloperAgreement", d).then(function (a) {
+                //XHR.SaveObject<DeveloperAgreement>("../API/ImpactFees/SaveDeveloperAgreement", d)
+                Utilities.Post("../API/ImpactFees/SaveDeveloperAgreement", d)
+                    .then(function (a) {
                     console.log('response', a);
                     if (a.length > 0) {
                         Utilities.Show(developerAgreementErrorContainer);
@@ -81,6 +72,7 @@ var ImpactFees;
                     }
                 }).catch(function (e) {
                     // figure out what we want to do with the errors.
+                    console.log('error response', e);
                     Utilities.Show(developerAgreementErrorContainer);
                     developerAgreementError.value = e;
                 });

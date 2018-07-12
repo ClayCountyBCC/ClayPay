@@ -7,9 +7,55 @@
 <div style="margin-top: 1em;"
      id="views"
      class="container">
-  <section class="show"
+  <section class="show content is-large"
            id="Home">
-    <p>Let's explain the different sections with a bit more detail here.</p>
+    <ul>
+      <li>
+        Permit
+        <ul>
+          <li>
+            Impact Fees
+          </li>
+          <li>
+            Inspection Fees
+          </li>
+          <li>
+            Plan Review Fees
+          </li>
+        </ul>
+      </li>
+      <li>
+        Contractor
+        <ul>
+          <li>
+            Registration Fees
+          </li>
+          <li>
+            Re-Instatement Fees
+          </li>
+          <li>
+            Renewal Fees
+          </li>
+        </ul>
+      </li>
+      <li>
+        Application Fees
+        <ul>
+          <li>
+            Merchant Application
+          </li>
+          <li>
+            DRC Fees
+          </li>
+          <li>
+            Driveway Permits
+          </li>
+          <li>
+            Code Enforcement Violations
+          </li>
+        </ul>
+      </li>
+    </ul>
   </section>
 
   <section class="hide"
@@ -39,20 +85,31 @@
         </div>
       </div>
     </div>
-    <div class="field is-horizontal">
+    <div class="columns">
+      <div class="column is-offset-1">
+        <div class="hide"
+             id="permitSearchError">
+
+        </div>
+      </div>
+      <div class="column">
+
+      </div>
+    </div>
+    @*<div class="field is-horizontal">
       <div class="field-label is-normal">
         <label class="label is-hidden">Error text</label>
       </div>
       <div class="field-body">
         <div class="field">
           <div class="control">
-            <p id="permitSearchError"
-               class="help is-danger hide">
-            </p>
+            <div id="permitSearchError"
+                 class="is-danger hide">
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </div>*@
 
   </section>
 
@@ -81,21 +138,15 @@
         </div>
       </div>
     </div>
-    <div class="field is-horizontal">
-      <div class="field-label is-normal">
-        <label class="label is-hidden">Error text</label>
-      </div>
-      <div class="field-body">
-        <div class="field">
-          <div class="control">
-            <p id="contractorSearchError"
-               class="help is-danger hide">
-            </p>
-          </div>
+    <div class="columns">
+      <div class="column is-offset-1">
+        <div class="hide"
+             id="contractorSearchError">
         </div>
       </div>
+      <div class="column">
+      </div>
     </div>
-
   </section>
 
   <section class="hide"
@@ -139,18 +190,13 @@
         </div>
       </div>
     </div>
-    <div class="field is-horizontal">
-      <div class="field-label is-normal">
-        <label class="label is-hidden">Error text</label>
-      </div>
-      <div class="field-body">
-        <div class="field">
-          <div class="control">
-            <p id="applicationSearchError"
-               class="help is-danger hide">
-            </p>
-          </div>
+    <div class="columns">
+      <div class="column is-offset-1">
+        <div class="hide"
+             id="applicationSearchError">
         </div>
+      </div>
+      <div class="column">
       </div>
     </div>
 
@@ -385,7 +431,7 @@
             <div class="column">
             </div>
             <div class="column is-centered">
-              <button onclick="clayPay.CurrentTransaction.ValidatePayer();"
+              <button onclick="clayPay.CurrentTransaction.Validate();"
                       type="button"
                       class="button is-success is-fullwidth is-large">
                 Continue
@@ -526,6 +572,7 @@
               <p style="margin-top: .75em;"
                  class="level">
                 <button id="processPayments"
+                        onclick="clayPay.CurrentTransaction.Save();"
                         disabled
                         class="level-item button is-success is-disabled is-large">
                   Pay Now
@@ -587,7 +634,7 @@
                 </div>
               </div>
               <div class="level">
-                <button onclick="clayPay.CurrentTransaction.CheckPayment.Validate(); return false;"
+                <button onclick="clayPay.CurrentTransaction.CheckPayment.Validate();"
                         style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
                         type="button"
                         class="button is-success level-item">
@@ -604,7 +651,10 @@
 
 
             </section>
+            <section class="hide"
+                     id="paymentError">
 
+            </section>
             <section class="hide"
                      id="cashPaymentType">
               <div class="level">
@@ -640,7 +690,7 @@
               </div>
 
               <div class="level">
-                <button onclick="clayPay.CurrentTransaction.CashPayment.Validate(); return false;"
+                <button onclick="clayPay.CurrentTransaction.CashPayment.Validate();"
                         style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
                         type="button"
                         class="button is-success level-item">
@@ -664,6 +714,66 @@
       }
     </div>
   </section>
+  <section class="hide"
+           id="receipt">
+    <div class="level">
+      <div class="level-item title">
+        Payment Receipt
+      </div>
+      <div id="receiptTimeStamp"
+           class="level-item subtitle">
+
+      </div>
+    </div>
+    <div class="field is-horizontal">
+      <div class="field-label is-normal">
+        <label class="label">Amount Paid</label>
+      </div>
+      <div class="field-body">
+        <div class="field">
+          <p class="control">
+            <input id="receiptAmountPaid"
+                   class="input is-static"
+                   type="text"
+                   readonly>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="field is-horizontal">
+      <div class="field-label is-normal">
+        <label class="label">Cashier Id</label>
+      </div>
+      <div class="field-body">
+        <div class="field">
+          <p class="control">
+            <input id="receiptCashierId"
+                   class="input is-static"
+                   type="text"
+                   readonly>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div id="receiptTransactionIdContainer"
+         class="field is-horizontal hide">
+      <div class="field-label is-normal">
+        <label class="label">Credit Card Transaction Id:</label>
+      </div>
+      <div class="field-body">
+        <div class="field">
+          <p class="control">
+            <input id="receiptTransactionId"
+                   class="input is-static"
+                   type="text"
+                   readonly>
+          </p>
+        </div>
+      </div>
+    </div>
+
+
+  </section>
 </div>
 @Scripts.Render("~/Scripts/claypay/claypay-bundle.js")
 
@@ -680,7 +790,7 @@
 <script>
   document.addEventListener("DOMContentLoaded", function (event)
   {
-    clayPay.start(@Model.djournal_access.ToString().ToLower());
+    clayPay.start();
   });
 </script>
 

@@ -1,4 +1,5 @@
 ﻿/// <reference path="payment.ts" />
+/// <reference path="clientresponse.ts" />
 
 namespace clayPay
 {
@@ -9,7 +10,6 @@ namespace clayPay
     ItemIds: Array<number>;
     CCData: CCPayment;
     Payments: Array<Payment>;
-    errors: Array<string>;
     PayerFirstName: string;
     PayerLastName: string;
     PayerPhoneNumber: string;
@@ -33,7 +33,6 @@ namespace clayPay
     public ItemIds: Array<number> = [];
     public CCData: CCPayment = new CCPayment();
     public Payments: Array<Payment> = [];
-    public errors: Array<string> = [];
     public PayerFirstName: string;
     public PayerLastName: string;
     public PayerPhoneNumber: string;
@@ -66,24 +65,57 @@ namespace clayPay
     public static payerCity = "payerCity";
     public static payerState = "payerState";
     public static payerZip = "payerZip";
+    public static PayNowCashierButton = "processPayments";
+    public static PayNowPublicButton = "processCCPayment";
+
     // Payer error text elemnets
     public static payerNameError = "payerNameError";
     public static payerPhoneError = "payerPhoneError";
     public static payerStreetError = "payerStreetError";
     public static payerCityError = "payerCityError";
+
+    // Transaction Error container
+    public static paymentError = "paymentError";
+
     constructor()
     {
 
     }
 
+    public UpdateIsCashier(): void
+    {
+      let e = document.getElementById(Payment.checkPaymentContainer);
+      this.IsCashier = e !== undefined && e !== null;
+    }
+
     public Validate():boolean
     {
-      this.UpdateTotals();
-      return false;
+      let payer = this.ValidatePayer();
+      if (!payer)
+      {
+        Utilities.Show("validatePayer");
+        Utilities.Hide("paymentData");
+        return false;
+      } else
+      {
+        Utilities.Hide("validatePayer");
+        Utilities.Show("paymentData");        
+      }
+      if (this.IsCashier)
+      {
+        this.UpdateTotals();
+        let payments = this.ValidatePayments();
+        let button = <HTMLButtonElement>document.getElementById(NewTransaction.PayNowCashierButton);
+        button.disabled = !(payer && payments);
+        return (payer && payments);
+      }
+      return true;
     }
 
     UpdateTotals(): void
     {
+      if (!this.IsCashier) return;
+
       this.TotalAmountPaid = 0;
       this.TotalAmountRemaining = 0;
       this.TotalChangeDue = 0;
@@ -108,20 +140,45 @@ namespace clayPay
       Utilities.Set_Text(NewTransaction.TotalAmountPaidMenu, Utilities.Format_Amount(this.TotalAmountPaid));
       Utilities.Set_Text(NewTransaction.TotalChangeDueMenu, Utilities.Format_Amount(this.TotalChangeDue));
       Utilities.Set_Text(NewTransaction.TotalAmountRemainingMenu, Utilities.Format_Amount(this.TotalAmountRemaining));
-
+      let amount = this.TotalAmountRemaining.toFixed(2);
+      if (!this.CCData.Validated) Utilities.Set_Value(CCPayment.AmountPaidInput, amount);
+      if (!this.CheckPayment.Validated) Utilities.Set_Value(Payment.checkAmountInput, amount);
+      if (!this.CashPayment.Validated) Utilities.Set_Value(Payment.cashAmountInput, amount);
     }
 
-    public ValidatePayer(): void
+    public ValidatePayments(): boolean
+    {
+      if (this.IsCashier)
+      {
+        if (this.CashPayment.Validated && this.CashPayment.Amount > 0)
+        {
+          if (this.TotalChangeDue >= this.CashPayment.Amount)
+          {
+            Utilities.Error_Show(NewTransaction.paymentError, "The Total Change due the customer cannot be more than or equal to the amount of Cash paid.");
+            return false;
+          }
+        }
+        if (this.TotalChangeDue > 0 && (!this.CashPayment.Validated || this.CashPayment.Amount === 0))
+        {
+          Utilities.Error_Show(NewTransaction.paymentError, "The Total Amount Paid cannot be greater than the Total Amount Due if no cash has been received.")
+          return false;
+        }
+        if (this.TotalAmountRemaining > 0) return false;
+      }
+      return true;
+    }
+
+    public ValidatePayer(): boolean
     {
       this.ResetPayerData();
       this.PayerFirstName = Utilities.Validate_Text(NewTransaction.payerFirstName, NewTransaction.payerNameError, "The Firstname field is required.");
-      if (this.PayerFirstName.length === 0) return;
+      if (this.PayerFirstName.length === 0) return false;
 
       this.PayerLastName = Utilities.Validate_Text(NewTransaction.payerLastName, NewTransaction.payerNameError, "The Lastname field is required.");
-      if (this.PayerLastName.length === 0) return;
+      if (this.PayerLastName.length === 0) return false;
 
       this.PayerPhoneNumber = Utilities.Validate_Text(NewTransaction.payerPhone, NewTransaction.payerPhoneError, "The Phone number field is required.");
-      if (this.PayerPhoneNumber.length === 0) return;
+      if (this.PayerPhoneNumber.length === 0) return false;
       if (this.PayerPhoneNumber.length < 10)
       {
         Utilities.Error_Show(NewTransaction.payerPhoneError, "The Phone Number should include area code and a 7 digit number.");
@@ -129,7 +186,7 @@ namespace clayPay
         element.classList.add("is-danger");
         element.focus();
         element.scrollTo();
-        return;
+        return false;
       }
 
       this.PayerEmailAddress = Utilities.Get_Value(NewTransaction.payerEmail).trim();
@@ -138,14 +195,14 @@ namespace clayPay
       this.PayerCompanyName = Utilities.Get_Value(NewTransaction.payerCompany).trim();
 
       this.PayerStreetAddress = Utilities.Validate_Text(NewTransaction.payerStreet, NewTransaction.payerStreetError, "The street address field is required.");
-      if (this.PayerStreetAddress.length === 0) return;
+      if (this.PayerStreetAddress.length === 0) return false;
 
       this.PayerCity = Utilities.Validate_Text(NewTransaction.payerCity, NewTransaction.payerCityError, "The City field is required.");
-      if (this.PayerCity.length === 0) return;
+      if (this.PayerCity.length === 0) return false;
       this.PayerState = Utilities.Validate_Text(NewTransaction.payerState, NewTransaction.payerCityError, "The State field is required.");
-      if (this.PayerState.length === 0) return;
+      if (this.PayerState.length === 0) return false;
       this.PayerZip = Utilities.Validate_Text(NewTransaction.payerZip, NewTransaction.payerCityError, "You must enter a Zip code of at least 5 digits.");
-      if (this.PayerZip.length === 0) return;
+      if (this.PayerZip.length === 0) return false;
       if (this.PayerZip.length < 5)
       {
         Utilities.Error_Show(NewTransaction.payerCityError, "You must enter a Zip code of at least 5 digits.");
@@ -153,18 +210,21 @@ namespace clayPay
         element.classList.add("is-danger");
         element.focus();
         element.scrollTo();
-        return;
+        return false;
       }
-
-      // if they make it to the end, let's hide the button and show the payment info
-      Utilities.Hide("validatePayer");
-      Utilities.Show("paymentData");
-
+      return true;
     }
 
     public ResetPayerForm():void
     {
-
+      Utilities.Set_Value(NewTransaction.payerCity, "");
+      Utilities.Set_Value(NewTransaction.payerCompany, "");
+      Utilities.Set_Value(NewTransaction.payerFirstName, "");
+      Utilities.Set_Value(NewTransaction.payerLastName, "");
+      Utilities.Set_Value(NewTransaction.payerPhone, "");
+      Utilities.Set_Value(NewTransaction.payerEmail, "");
+      Utilities.Set_Value(NewTransaction.payerStreet, "");
+      (<HTMLSelectElement>document.getElementById(NewTransaction.payerState)).selectedIndex = 0;
     }
 
     CopyPayerData(): void
@@ -192,6 +252,75 @@ namespace clayPay
       this.PayerZip = "";
     }
 
+    Save(): void
+    {
+      if (!this.Validate) return;
+
+      if (this.IsCashier)
+      {
+        Utilities.Toggle_Loading_Button(NewTransaction.PayNowCashierButton, true);
+      }
+      else
+      {
+        Utilities.Toggle_Loading_Button(NewTransaction.PayNowPublicButton, true);
+      }
+
+      this.ItemIds = clayPay.UI.Cart.map((c) =>
+      {
+        return c.ItemId;
+      });
+
+      this.Payments = [];
+
+      if (this.IsCashier)
+      {
+        this.SaveAll();
+
+      }
+      else
+      {
+        this.SaveCC();
+      }
+
+
+
+    }
+
+    SaveAll(): void
+    {
+      this.Payments.push(this.CashPayment);
+      this.Payments.push(this.CheckPayment);      
+      console.log('putting this object', this);
+      Utilities.Put<ClientResponse>("../API/Payments/Pay/", this)
+        .then(function (cr)
+        {
+          ClientResponse.HandleResponse(cr, this.IsCashier);
+          Utilities.Toggle_Loading_Button(NewTransaction.PayNowCashierButton, false);
+        },
+          function (e)
+          {
+            // We should show an error in the same spot we'd show a client response error.
+            Utilities.Error_Show(ClientResponse.CashierErrorTarget, e);
+            Utilities.Toggle_Loading_Button(NewTransaction.PayNowCashierButton, false);
+          });
+    }
+
+    SaveCC(): void
+    {
+      console.log('putting this object', this);
+      Utilities.Put<ClientResponse>("../API/Payments/Pay/", this)
+        .then(function (cr)
+        {
+          ClientResponse.HandleResponse(cr, this.IsCashier);
+          Utilities.Toggle_Loading_Button(NewTransaction.PayNowPublicButton, false);
+        },
+          function (e)
+          {
+            // We should show an error in the same spot we'd show a client response error.
+            Utilities.Error_Show(ClientResponse.PublicErrorTarget, e);
+            Utilities.Toggle_Loading_Button(NewTransaction.PayNowPublicButton, false);
+          });
+    }
 
   }
 }

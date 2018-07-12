@@ -1,6 +1,7 @@
 ﻿@model ClayPay.Models.UserAccess
 
-<div id="creditCardPayment">
+<div style="margin-bottom: 2em;"
+     id="creditCardPayment">
 
   <div class="field">
     <div class="control">
@@ -214,7 +215,7 @@
     </div>
 
     <div class="level">
-      <button onclick = "clayPay.CurrentTransaction.CCData.Validate(); return false;"
+      <button onclick = "clayPay.CurrentTransaction.CCData.Validate();"
               style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
               type="button"
               class="button is-success level-item">
@@ -222,7 +223,7 @@
       </button>
 
       <button style="width: calc(50% - .75rem); flex-grow: 0; margin-left: .75rem;"
-              onclick="clayPay.CCData.ResetForm();"
+              onclick="clayPay.CurrentTransaction.CCData.ResetForm();"
               type="button"
               class="button is-warning level-item">
         Clear
@@ -234,10 +235,16 @@
   else
   {
     <div class="level">
-      <button type="button"
-              class="button is-success level-item">
+      <button id="processCCPayment"
+              onclick="clayPay.CurrentTransaction.CCData.ValidateAndSave();"
+              type="button"
+              class="button is-success level-item is-large">
         Pay Now
       </button>
+    </div>
+    <div class="hide"
+         id="publicPaymentError">
+
     </div>
   }
 

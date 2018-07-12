@@ -3,22 +3,16 @@
   Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section id="developerAgreement"
-         class="hide">
 
-  <section class="hero is-info is-bold hero-buffer">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title">Developer Agreements</h1>
-        <h2 class="subtitle">
-          Use this menu to add or make changes to existing developer agreements.
-        </h2>
-      </div>
-    </div>
-  </section>
+<div style="margin-top: 1em;"
+     id="views"
+     class="container">
 
-  <form id="formDeveloperAgreement">
-    <div class="container">
+
+  <section id="developerAgreement"
+           class="hide">
+
+    <form id="formDeveloperAgreement">
       <div class="field">
         <label class="label">Developer Agreement</label>
         <div class="control">
@@ -109,25 +103,11 @@
         </div>
 
       </div>
-    </div>
-  </form>
-</section>
-
-<section id="builderAllocations"
-         class="hide">
-
-  <section class="hero is-info is-bold hero-buffer">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title">Builder Allocations</h1>
-        <h2 class="subtitle">
-          Use this menu to add or make changes to existing builder allocations.
-        </h2>
-      </div>
-    </div>
+    </form>
   </section>
 
-  <div class="container">
+  <section id="builderAllocations"
+           class="hide">
 
     <form id="formBuilderAllocations">
 
@@ -280,24 +260,11 @@
       </div>
 
     </form>
-  </div>
-</section>
-
-<section id="permitAllocations"
-         class="hide">
-
-  <section class="hero is-primary is-bold hero-buffer">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title">Permit Allocations</h1>
-        <h2 class="subtitle">
-          Use this menu to add or make changes to existing permit allocations.
-        </h2>
-      </div>
-    </div>
   </section>
 
-  <div class="container">
+  <section id="permitAllocations"
+           class="hide">
+
     <form id="formPermitAllocations">
 
       <div class="columns">
@@ -557,23 +524,11 @@
       </div>
 
     </form>
-  </div>
-</section>
-
-<section id="existingAllocations"
-         class="show">
-  <section class="hero is-primary is-bold hero-buffer">
-    <div class="hero-body">
-      <div class="container">
-        <h1 class="title">Existing Allocations</h1>
-        <h2 class="subtitle">
-          View the existing allocations by Developer, Builder, or Permit.
-        </h2>
-      </div>
-    </div>
   </section>
 
-  <div class="container">
+  <section id="existingAllocations"
+           class="show">
+
     <nav style="padding: .5em;"
          class="breadcrumb has-background-white"
          aria-label="breadcrumbs">
@@ -583,22 +538,23 @@
     <div id="existingAllocationsContainer">
 
     </div>
-  </div>
 
-</section>
+  </section>
 
-<script src="bower_components/promise-polyfill/dist/polyfill.min.js"></script>
-<script src="bower_components/fetch/fetch.js"></script>
-<!--<script src="Scripts/app/es6-promise.min.js"></script>-->
-<script src="Scripts/app/XHR.js"></script>
-<script src="Scripts/app/Utilities.js"></script>
-<script src="Scripts/impactfees/PermitAllocation.js"></script>
-<script src="Scripts/impactfees/DeveloperAgreement.js"></script>
-<script src="Scripts/impactfees/BuilderAllocation.js"></script>
-<script src="Scripts/impactfees/CombinedAllocation.js"></script>
-<script src="Scripts/impactfees/PermitImpactFee.js"></script>
-<script src="Scripts/impactfees/ImpactFees.js"></script>
-<script>
+</div>
+
+  <script src="~/bower_components/promise-polyfill/dist/polyfill.js"></script>
+  <script src="~/bower_components/fetch/fetch.js"></script>
+  <!--<script src="Scripts/app/es6-promise.min.js"></script>-->
+  @*<script src="Scripts/app/XHR.js"></script>*@
+  <script src="~/Scripts/app/Utilities.js"></script>
+  <script src="~/Scripts/impactfees/PermitAllocation.js"></script>
+  <script src="~/Scripts/impactfees/DeveloperAgreement.js"></script>
+  <script src="~/Scripts/impactfees/BuilderAllocation.js"></script>
+  <script src="~/Scripts/impactfees/CombinedAllocation.js"></script>
+  <script src="~/Scripts/impactfees/PermitImpactFee.js"></script>
+  <script src="~/Scripts/impactfees/ImpactFees.js"></script>
+  <script>
     document.addEventListener("DOMContentLoaded", function (event)
     {
       ImpactFees.Start();
@@ -612,4 +568,4 @@
           ImpactFees.PermitAllocation.SearchPermit();
         }
       });
-</script>
+  </script>

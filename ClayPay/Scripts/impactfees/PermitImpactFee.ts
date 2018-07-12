@@ -1,5 +1,4 @@
-﻿/// <reference path="../app/xhr.ts" />
-
+﻿
 namespace ImpactFees
 {
   interface IPermitImpactFee
@@ -35,7 +34,7 @@ namespace ImpactFees
       {
         qs += "&agreement_number=" + Agreement_Number;
       }
-      return XHR.GetObject("./API/ImpactFees/GetPermit", qs);
+      return Utilities.Get<PermitImpactFee>("../API/ImpactFees/GetPermit" + qs);
     }
 
   }

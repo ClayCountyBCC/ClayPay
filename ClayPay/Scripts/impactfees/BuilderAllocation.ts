@@ -1,6 +1,4 @@
-﻿/// <reference path="../app/xhr.ts" />
-
-namespace ImpactFees
+﻿namespace ImpactFees
 {
   interface IBuilderAllocation
   {
@@ -192,8 +190,9 @@ namespace ImpactFees
       b.Builder_Name = BuilderName;
       b.Allocation_Amount = Amount;
       b.Id = builderId;
-      XHR.SaveObject<BuilderAllocation>("./API/ImpactFees/SaveBuilderAllocation", b).then(
-        function (a)
+      //XHR.SaveObject<BuilderAllocation>("./.API/ImpactFees/SaveBuilderAllocation", b)
+      Utilities.Post<Array<string>>("./.API/ImpactFees/SaveBuilderAllocation", b)
+        .then(function (a)
         {
           console.log('response', a);
           if (a.length > 0)
@@ -212,7 +211,6 @@ namespace ImpactFees
           Utilities.Show(builderAllocationErrorContainer);
           builderAllocationError.value = e;
         });
-
     }
 
   }

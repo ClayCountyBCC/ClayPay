@@ -33,10 +33,12 @@ namespace clayPay
     static checkAmountInput: string = "checkPaymentAmount";
     static checkNumberInput: string = "checkNumber";
     static checkPaymentTotalMenu: string = "checkPaymentTotal";
+    static checkPaymentContainer: string = "checkPaymentType";
 
     static cashErrorElement: string = "cashPaymentError";
     static cashAmountInput: string = "cashPaymentAmount";
     static cashPaymentTotalMenu: string = "cashPaymentTotal";
+    static cashPaymentContainer: string = "cashPaymentType";
 
     constructor(paymentType: payment_type)
     {
@@ -71,32 +73,30 @@ namespace clayPay
     {
       this.Validated = false;
       let cashAmount = <HTMLInputElement>document.getElementById(Payment.cashAmountInput);
-      let cashError = document.getElementById(Payment.cashErrorElement);
-      cashAmount.classList.remove("is-danger");
 
       // check that an amount was entered.
-      let testAmount = Utilities.Get_Value(cashAmount).trim();
-      if (testAmount.length === 0)
-      {
-        cashAmount.classList.add("is-danger");
-        Utilities.Error_Show(cashError, "You must enter an amount in order to continue.");
-        return false;
-      }
+      // It must be 0 or greater.
+
+      let testAmount = Utilities.Validate_Text(Payment.cashAmountInput, Payment.cashErrorElement, "You must enter an amount of 0 or greater in order to continue.");
+      if (testAmount.length === 0) return;
+
       // check that it's a valid amount.
       // 0 is valid because they could've set it to greater than 0
-      // and are now wanting to revert it back to 0.
-      // We are also going to make sure that the amount is >= 0.
+      // and are now wanting to revert it back to 0.      
       this.Amount = parseFloat(testAmount);
       if (Number.isNaN(this.Amount) || this.Amount < 0)
       {
+        cashAmount.classList.add("is-danger");
+        cashAmount.focus();
+        cashAmount.scrollTo();
         this.Amount = 0;
-        Utilities.Error_Show(cashError, "An invalid amount was entered.");
+        Utilities.Error_Show(Payment.cashErrorElement, "An invalid amount was entered.");
         return false;
       }
 
       this.Validated = true;
       Utilities.Set_Text(Payment.cashPaymentTotalMenu, Utilities.Format_Amount(this.Amount));
-      Utilities.Hide('cashPaymentType');
+      Utilities.Hide(Payment.cashPaymentContainer);
 
       clayPay.CurrentTransaction.Validate();
 
@@ -107,19 +107,15 @@ namespace clayPay
     {
       this.Validated = false;
       let checkAmount = <HTMLInputElement>document.getElementById(Payment.checkAmountInput);
-      let checkNumber = <HTMLInputElement>document.getElementById(Payment.checkNumberInput);
-      let checkError = document.getElementById(Payment.checkErrorElement);
-      checkAmount.classList.remove("is-danger");
-      checkNumber.classList.remove("is-danger");
+      //let checkNumber = <HTMLInputElement>document.getElementById(Payment.checkNumberInput);
+      //let checkError = document.getElementById(Payment.checkErrorElement);
+      //checkAmount.classList.remove("is-danger");
+      //checkNumber.classList.remove("is-danger");
 
       // check that an amount was entered.
-      let testAmount = Utilities.Get_Value(checkAmount).trim();
-      if (testAmount.length === 0)
-      {
-        checkAmount.classList.add("is-danger");
-        Utilities.Error_Show(checkError, "You must enter an amount in order to continue.");
-        return false;
-      }
+      let testAmount = Utilities.Validate_Text(Payment.checkAmountInput, Payment.checkErrorElement, "You must enter an amount of 0 or greater in order to continue.");
+      if (testAmount.length === 0) return;
+
       // check that it's a valid amount.
       // 0 is valid because they could've set it to greater than 0
       // and are now wanting to revert it back to 0.
@@ -127,23 +123,29 @@ namespace clayPay
       this.Amount = parseFloat(testAmount);
       if (Number.isNaN(this.Amount) || this.Amount < 0)
       {
+        checkAmount.classList.add("is-danger");
+        checkAmount.focus();
+        checkAmount.scrollTo();
         this.Amount = 0;
-        Utilities.Error_Show(checkError, "An invalid amount was entered.");
+        Utilities.Error_Show(Payment.checkErrorElement, "An invalid amount was entered.");
+        return false;
+      }
+      if (this.Amount > clayPay.CurrentTransaction.TotalAmountDue)
+      {
+        checkAmount.classList.add("is-danger");
+        checkAmount.focus();
+        checkAmount.scrollTo();        
+        Utilities.Error_Show(Payment.checkErrorElement, "You cannot enter an amount for more than the total amount due.");
         return false;
       }
 
       // get the check number
-      this.CheckNumber = Utilities.Get_Value(checkNumber).trim();
-      if (this.CheckNumber.length === 0)
-      {
-        checkNumber.classList.add("is-danger");
-        Utilities.Error_Show(checkError, "The Check number is required.");
-        return false;
-      }
+      this.CheckNumber = Utilities.Validate_Text(Payment.checkNumberInput, Payment.checkErrorElement, "You must enter the check number to continue.");
+      if (this.CheckNumber.length === 0) return;
 
       this.Validated = true;
       Utilities.Set_Text(Payment.checkPaymentTotalMenu, Utilities.Format_Amount(this.Amount));
-      Utilities.Hide('checkPaymentType');
+      Utilities.Hide(Payment.checkPaymentContainer);
 
       clayPay.CurrentTransaction.Validate();
 
@@ -164,7 +166,7 @@ namespace clayPay
       e.classList.remove("is-danger");
       let menu = document.getElementById(Payment.cashPaymentTotalMenu);
       Utilities.Set_Text(menu, "Add");
-      Utilities.Hide('cashPaymentType');
+      Utilities.Hide(Payment.cashPaymentContainer);
       clayPay.CurrentTransaction.Validate();
     }
 
@@ -179,7 +181,7 @@ namespace clayPay
       number.classList.remove("is-danger");
       let menu = document.getElementById(Payment.checkPaymentTotalMenu);
       Utilities.Set_Text(menu, "Add");      
-      Utilities.Hide('checkPaymentType');
+      Utilities.Hide(Payment.checkPaymentContainer);
       clayPay.CurrentTransaction.Validate();
     }
 

@@ -5,6 +5,7 @@
 /// <reference path="CCPayment.ts" />
 /// <reference path="newtransaction.ts" />
 /// <reference path="payment.ts" />
+/// <reference path="clientresponse.ts" />
 
 //let Card: any;
 //let CurrentCard: any;
@@ -16,10 +17,10 @@ namespace clayPay
   export let ConvenienceFee: string;
   export let CurrentTransaction: NewTransaction = new NewTransaction();
 
-  export function start(isCashier: boolean): void
+  export function start(): void
   {
-    console.log('Is Public?', isCashier);
-    CurrentTransaction.IsCashier = isCashier;
+    
+    CurrentTransaction.UpdateIsCashier();
     HandleUIEvents();
     UI.buildMenuElements();
     loadDefaultValues();
@@ -50,14 +51,14 @@ namespace clayPay
         var e = event || window.event;
         if (event.keyCode == 13)
         {
-          clayPay.UI.Search('contractorSearchButton', 'contractorSearch', 'contractorSearchError'); return false;
+          clayPay.UI.Search('contractorSearchButton', 'contractorSearch', 'contractorSearchError');
         }
       };
 
     (<HTMLButtonElement>document.getElementById("contractorSearchButton"))
       .onclick = () =>
       {
-        clayPay.UI.Search('contractorSearchButton', 'contractorSearch', 'contractorSearchError'); return false;
+        clayPay.UI.Search('contractorSearchButton', 'contractorSearch', 'contractorSearchError');
       };
 
     (<HTMLInputElement>document.getElementById('applicationSearch'))
@@ -66,14 +67,14 @@ namespace clayPay
         var e = event || window.event;
         if (event.keyCode == 13)
         {
-          clayPay.UI.Search('applicationSearchButton', 'applicationSearch', 'applicationSearchError'); return false;
+          clayPay.UI.Search('applicationSearchButton', 'applicationSearch', 'applicationSearchError'); 
         }
       };
 
     (<HTMLButtonElement>document.getElementById("applicationSearchButton"))
       .onclick = () =>
       {
-        clayPay.UI.Search('applicationSearchButton', 'applicationSearch', 'applicationSearchError'); return false;
+        clayPay.UI.Search('applicationSearchButton', 'applicationSearch', 'applicationSearchError'); 
       };
 
   }

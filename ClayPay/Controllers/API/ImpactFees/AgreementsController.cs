@@ -37,7 +37,7 @@ namespace ClayPay.Controllers.ImpactFees
           errors.Add("An error occurred while saving this agreement, please try again.  If the error persists, please contact MIS.");
           return Ok(errors);
         }
-        return Ok();
+        return Ok(new List<string>());
       }
     }
 
@@ -59,7 +59,7 @@ namespace ClayPay.Controllers.ImpactFees
           errors.Add("An error occurred while saving this builder's allocation, please try again.  If the error persists, please contact MIS.");
           return Ok(errors);
         }
-        return Ok();
+        return Ok(new List<string>());
       }
     }
 
@@ -81,7 +81,7 @@ namespace ClayPay.Controllers.ImpactFees
           errors.Add("An error occurred while saving this permit's allocation, please try again.  If the error persists, please contact MIS.");
           return Ok(errors);
         }
-        return Ok();
+        return Ok(new List<string>());
       }
     }
 

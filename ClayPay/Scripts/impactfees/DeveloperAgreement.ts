@@ -1,6 +1,4 @@
-﻿/// <reference path="../app/xhr.ts" />
-
-namespace ImpactFees
+﻿namespace ImpactFees
 {
   interface IDeveloperAgreement
   {
@@ -23,16 +21,6 @@ namespace ImpactFees
     constructor()
     {
     }
-
-    //public static GetAll(agreementNumber: string = ""): Promise<Array<DeveloperAgreement>>
-    //{
-    //  let agreement: string = "";
-    //  if (agreementNumber.length > 0)
-    //  {
-    //    agreement = "?agreementNumber=" + agreementNumber;
-    //  }
-    //  return GetArray<DeveloperAgreement>("./API/ImpactFees/GetDeveloperAgreements", agreement);
-    //}
 
     public static Load(e: HTMLSelectElement): void
     {
@@ -86,7 +74,7 @@ namespace ImpactFees
 
     }
 
-    public static SaveAgreement():void
+    public static SaveAgreement(): void
     {
       let developerAgreementError = <HTMLInputElement>document.getElementById("developerAgreementErrorList");
       let developerAgreementErrorContainer = document.getElementById("developerAgreementError");
@@ -101,25 +89,28 @@ namespace ImpactFees
         let d = new DeveloperAgreement();
         d.Agreement_Amount = Amount;
         d.Agreement_Number = agreementNumber;
-        XHR.SaveObject<DeveloperAgreement>("./API/ImpactFees/SaveDeveloperAgreement", d).then(function (a)
-        {
-          console.log('response', a);
-          if (a.length > 0)
+        //XHR.SaveObject<DeveloperAgreement>("../API/ImpactFees/SaveDeveloperAgreement", d)
+        Utilities.Post<Array<string>>("../API/ImpactFees/SaveDeveloperAgreement", d)
+          .then(function (a)
           {
-            Utilities.Show(developerAgreementErrorContainer);      
-            developerAgreementError.value = a.join("\n");
-          }
-          else
+            console.log('response', a);
+            if (a.length > 0)
+            {
+              Utilities.Show(developerAgreementErrorContainer);
+              developerAgreementError.value = a.join("\n");
+            }
+            else
+            {
+              DeveloperAgreement.Load(agreementSelect);
+            }
+
+          }).catch(function (e)
           {
-            DeveloperAgreement.Load(agreementSelect);
-          }
-          
-        }).catch(function (e)
-        {
-          // figure out what we want to do with the errors.
-          Utilities.Show(developerAgreementErrorContainer);
-          developerAgreementError.value = e;
-        });
+            // figure out what we want to do with the errors.
+            console.log('error response', e);
+            Utilities.Show(developerAgreementErrorContainer);
+            developerAgreementError.value = e;
+          });
       }
       else
       {

@@ -5,6 +5,7 @@
 /// <reference path="CCPayment.ts" />
 /// <reference path="newtransaction.ts" />
 /// <reference path="payment.ts" />
+/// <reference path="clientresponse.ts" />
 //let Card: any;
 //let CurrentCard: any;
 var clayPay;
@@ -15,14 +16,14 @@ var clayPay;
 /// <reference path="CCPayment.ts" />
 /// <reference path="newtransaction.ts" />
 /// <reference path="payment.ts" />
+/// <reference path="clientresponse.ts" />
 //let Card: any;
 //let CurrentCard: any;
 (function (clayPay) {
     "use strict";
     clayPay.CurrentTransaction = new clayPay.NewTransaction();
-    function start(isCashier) {
-        console.log('Is Public?', isCashier);
-        clayPay.CurrentTransaction.IsCashier = isCashier;
+    function start() {
+        clayPay.CurrentTransaction.UpdateIsCashier();
         HandleUIEvents();
         clayPay.UI.buildMenuElements();
         loadDefaultValues();
@@ -45,26 +46,22 @@ var clayPay;
             var e = event || window.event;
             if (event.keyCode == 13) {
                 clayPay.UI.Search('contractorSearchButton', 'contractorSearch', 'contractorSearchError');
-                return false;
             }
         };
         document.getElementById("contractorSearchButton")
             .onclick = () => {
             clayPay.UI.Search('contractorSearchButton', 'contractorSearch', 'contractorSearchError');
-            return false;
         };
         document.getElementById('applicationSearch')
             .onkeydown = function (event) {
             var e = event || window.event;
             if (event.keyCode == 13) {
                 clayPay.UI.Search('applicationSearchButton', 'applicationSearch', 'applicationSearchError');
-                return false;
             }
         };
         document.getElementById("applicationSearchButton")
             .onclick = () => {
             clayPay.UI.Search('applicationSearchButton', 'applicationSearch', 'applicationSearchError');
-            return false;
         };
     }
     function loadDefaultValues() {

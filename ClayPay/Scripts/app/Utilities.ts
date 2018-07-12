@@ -61,10 +61,11 @@ namespace Utilities
     e.classList.remove("show");
   }
 
+  export function Error_Show(e: string, errorText?: Array<string>): void
   export function Error_Show(e: string, errorText?: string): void
   export function Error_Show(e: HTMLElement, errorText?: string ): void
   export function Error_Show(e: Element, errorText?: string): void
-  export function Error_Show(e: any, errorText?: string): void
+  export function Error_Show(e: any, errorText?: any): void
   {
     if (typeof e == "string")
     {
@@ -72,7 +73,37 @@ namespace Utilities
     }
     if (errorText)
     {
-      Set_Text(e, errorText);
+      //Set_Text(e, errorText);
+      Clear_Element(e);
+      let notification = document.createElement("div");
+      notification.classList.add("notification");
+      notification.classList.add("is-danger");
+      let deleteButton = document.createElement("button");
+      deleteButton.classList.add("delete");
+      deleteButton.onclick = () =>
+      {
+        Hide(e);
+      }
+      notification.appendChild(deleteButton);
+      if (Array.isArray(errorText))
+      {
+        // we're assuming that errorText is an array if we get here.
+        let ul = document.createElement("ul");
+        errorText.forEach((et) =>
+        {
+          let li = document.createElement("li");
+          li.appendChild(document.createTextNode(<string>et));
+          ul.appendChild(li);
+        });
+        notification.appendChild(ul);        
+      } else
+      { 
+        notification.appendChild(document.createTextNode(errorText));
+
+      }
+      
+      (<HTMLElement>e).appendChild(notification);
+
     }
     Show(e);
     window.setTimeout(function (j)
@@ -186,9 +217,9 @@ namespace Utilities
       {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
-          "Upgrade-Insecure-Requests": "1"
+          "Content-Type": "application/json"//,"Upgrade-Insecure-Requests": "1"
         },
+        cache: "no-cache",
         credentials: "include"
       }
     )
@@ -202,7 +233,7 @@ namespace Utilities
       });
   }
 
-  export function Post<T>(url: string, data: T): Promise<Array<string>>
+  export function Post<T>(url: string, data: object): Promise<T>
   {
     return fetch(url, {
       method: "POST",
@@ -211,6 +242,27 @@ namespace Utilities
       headers: {
         "Content-Type": "application/json"
       }, 
+      credentials: "include"
+    }).then(response =>
+    {
+      console.log('Post Response', response);
+      if (!response.ok)
+      {
+        throw new Error(response.statusText)
+      }
+      return response.json();
+    })
+  }
+
+  export function Put<T>(url: string, data: object): Promise<T>
+  {
+    return fetch(url, {
+      method: "PUT",
+      body: JSON.stringify(data),
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json"
+      },
       credentials: "include"
     }).then(response =>
     {
@@ -251,6 +303,19 @@ namespace Utilities
     }
     return v;
 
+  }
+
+  export function Toggle_Loading_Button(e: string, disabled: boolean)
+  export function Toggle_Loading_Button(e: HTMLButtonElement, disabled: boolean)
+  export function Toggle_Loading_Button(e: any, disabled: boolean)
+  {
+    if (typeof e == "string")
+    {
+      e = document.getElementById(e);
+    }
+    let b = <HTMLButtonElement>e;
+    b.disabled = disabled;
+    b.classList.toggle("is-loading", disabled);
   }
 
 }

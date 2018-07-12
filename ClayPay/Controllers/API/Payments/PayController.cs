@@ -10,9 +10,12 @@ using ClayPay.Models;
 
 namespace ClayPay.Controllers
 {
+  [RoutePrefix("API/Payments")]
   public class PayController : ApiController
   {
     // PUT: api/Pay
+    [HttpPut]
+    [Route("Pay")]
     public IHttpActionResult Put(CCData ccd)
     {
       try

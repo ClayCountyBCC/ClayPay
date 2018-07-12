@@ -264,10 +264,6 @@
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile1.pubxml" />
     <Content Include="index.html" />
-    <Content Include="Scripts\impactfees\impactfees-bundle.js" />
-    <Content Include="Scripts\impactfees\impactfees-bundle.min.js">
-      <DependentUpon>impactfees-bundle.js</DependentUpon>
-    </Content>
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -342,6 +338,7 @@
     <Folder Include="Scripts\app\typings\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\claypay\ClientResponse.ts" />
     <TypeScriptCompile Include="Scripts\app\Utilities.ts" />
     <TypeScriptCompile Include="Scripts\claypay\claypay.ts" />
     <TypeScriptCompile Include="Scripts\claypay\AppTypes.ts" />
@@ -349,9 +346,7 @@
     <TypeScriptCompile Include="Scripts\claypay\Charge.ts" />
     <TypeScriptCompile Include="Scripts\claypay\NewTransaction.ts" />
     <TypeScriptCompile Include="Scripts\claypay\Payment.ts" />
-    <TypeScriptCompile Include="Scripts\claypay\transport.ts" />
     <TypeScriptCompile Include="Scripts\claypay\UI.ts" />
-    <TypeScriptCompile Include="Scripts\app\XHR.ts" />
     <TypeScriptCompile Include="Scripts\impactfees\BuilderAllocation.ts" />
     <TypeScriptCompile Include="Scripts\impactfees\CombinedAllocation.ts" />
     <TypeScriptCompile Include="Scripts\impactfees\DeveloperAgreement.ts" />

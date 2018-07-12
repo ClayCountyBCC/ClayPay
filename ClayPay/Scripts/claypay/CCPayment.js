@@ -52,7 +52,9 @@ var clayPay;
             document.getElementById(CCPayment.ccMonthSelect).parentElement.classList.remove("is-danger");
             document.getElementById(CCPayment.ccYearSelect).parentElement.classList.remove("is-danger");
             document.getElementById(CCPayment.ccCVCInput).classList.remove("is-danger");
-            document.getElementById(CCPayment.AmountPaidInput).classList.remove("is-danger");
+            if (clayPay.CurrentTransaction.IsCashier) {
+                document.getElementById(CCPayment.AmountPaidInput).classList.remove("is-danger");
+            }
         }
         Validate() {
             this.ResetData();
@@ -151,13 +153,33 @@ var clayPay;
                     Utilities.Error_Show(CCPayment.AmountError, "An invalid amount was entered.");
                     return false;
                 }
+                if (this.Amount > clayPay.CurrentTransaction.TotalAmountDue) {
+                    let element = document.getElementById(CCPayment.AmountPaidInput);
+                    element.classList.add("is-danger");
+                    element.focus();
+                    element.scrollTo();
+                    Utilities.Error_Show(clayPay.Payment.checkErrorElement, "You cannot enter an amount for more than the total amount due.");
+                    return false;
+                }
+            }
+            else {
+                clayPay.CurrentTransaction.CCData.Amount = clayPay.CurrentTransaction.TotalAmountDue;
             }
             this.Validated = true;
-            return false;
+            if (clayPay.CurrentTransaction.IsCashier) {
+                Utilities.Set_Text(CCPayment.creditCardTotalMenu, Utilities.Format_Amount(this.Amount));
+                Utilities.Hide(CCPayment.CreditCardForm);
+            }
+            return clayPay.CurrentTransaction.Validate();
+        }
+        ValidateAndSave() {
+            if (!this.Validate())
+                return;
+            clayPay.CurrentTransaction.Save();
         }
     }
     // credit card form container
-    CCPayment.CreditCardForm = "creditCardPayment";
+    CCPayment.CreditCardForm = "creditCardPaymentType";
     // inputs
     CCPayment.FirstNameInput = "creditCardFirstName";
     CCPayment.LastNameInput = "creditCardLastName";
@@ -175,6 +197,8 @@ var clayPay;
     CCPayment.NumberError = "creditCardNumberError";
     CCPayment.ExpirationError = "creditCardExpirationError";
     CCPayment.AmountError = "creditCardPaymentAmountError";
+    // Menus
+    CCPayment.creditCardTotalMenu = "creditCardPaymentTotal";
     clayPay.CCPayment = CCPayment;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=CCPayment.js.map
