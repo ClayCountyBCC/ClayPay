@@ -256,7 +256,7 @@ namespace Utilities
 
   export function Put<T>(url: string, data: object): Promise<T>
   {
-    return fetch(url, {
+     return fetch(url, {
       method: "PUT",
       body: JSON.stringify(data),
       cache: "no-cache",

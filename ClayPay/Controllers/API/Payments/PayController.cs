@@ -11,15 +11,18 @@ using ClayPay.Models.Claypay;
 
 namespace ClayPay.Controllers
 {
+  [RoutePrefix("API/Payments")]
   public class PayController : ApiController
   {
     // PUT: api/Pay
+    [HttpPut]
+    [Route("Pay")]
     public IHttpActionResult Put(NewTransaction thisTransaction)
     {
-      var ip = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+      thisTransaction.ipAddress = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
       if (thisTransaction.ValidateTransaction())
       {
-        var response = thisTransaction.ProcessTransaction(ip, new UserAccess(User.Identity.Name)); 
+        var response = thisTransaction.ProcessTransaction(new UserAccess(User.Identity.Name)); 
         return Ok(response);
       }
       else

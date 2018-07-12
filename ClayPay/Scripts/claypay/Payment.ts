@@ -8,9 +8,9 @@ namespace clayPay
 
   export enum payment_type 
   {
-    credit_card = 0,
+    cash = 0,
     check = 1,
-    cash = 2
+    credit_card = 2
   }
 
   interface IPayment

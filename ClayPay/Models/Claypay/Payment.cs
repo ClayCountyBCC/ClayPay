@@ -9,11 +9,11 @@ namespace ClayPay.Models.Claypay
   {
 
     //public string Info { get; set; }
-    public enum payment_type_enum : int
+    public enum payment_type_enum 
     {
-      check,
-      cash,
-      credit_card
+      cash = 0,
+      check = 1,
+      credit_card = 2
       //impact_fee_credit,
       //impact_fee_exemption,
       //impact_waiver_school,
@@ -21,7 +21,7 @@ namespace ClayPay.Models.Claypay
 
     }
 
-    public payment_type_enum PaymentType { get; set; } = 0;
+    public payment_type_enum PaymentType { get; set; }
 
     // This is to set the payment type string for inserting into db. Client does not need this.
     public string PaymentTypeString { get; set; } = "";
@@ -29,7 +29,7 @@ namespace ClayPay.Models.Claypay
     public decimal AmtTendered { get; set; }
     public decimal AmtApplied { get; set; }
     public string Info { get; set; }
-    public string CkNo { get; set; } = "";
+    public string CheckNumber { get; set; } = "";
     public string TransactionId { get; set; } = "";
 
     public Payment()
@@ -42,41 +42,40 @@ namespace ClayPay.Models.Claypay
     
     public Payment(CCData ccpayment, UserAccess ua)
     {
-      if (ua.authenticated == false)
-      {
-        PaymentType = payment_type_enum.credit_card;
-      }
-      else
-      {
-        PaymentTypeString = ccpayment.CardType.ToUpper();
-      }
 
+      PaymentType = payment_type_enum.credit_card;
       AmtApplied = ccpayment.Total;
       AmtTendered = ccpayment.Total;
       TransactionId = ccpayment.TransactionId;
     }
 
-    private string SetPaymentTypeString() // only used to enter payment type into payment row. Client does not need this data
+    private void SetPaymentTypeString() // only used to enter payment type into payment row. Client does not need this data
     {
-      if (this.PaymentTypeString == "")
+      if (PaymentTypeString == "")
       {
-        switch (PaymentType)
+        switch (payType)
         {
           case payment_type_enum.credit_card:
             switch (Environment.MachineName.ToUpper())
             {
               case "CLAYBCCIIS01":
-                return "cc_cashier";
+                PaymentTypeString = "cc_cashier";
+                return;
               case "CLAYBCCDMZIIS01":
-                return "cc_online";
+                PaymentTypeString = "cc_online";
+                return;
               case "CLAYBCCDV10":
-                return "cc_test";
+                PaymentTypeString = "cc_test";
+                return;
             }
-            return "credit_card";
+            PaymentTypeString = "credit_card";
+            return;
           case payment_type_enum.check:
-            return "CK";
+            PaymentTypeString = "CK";
+            return;
           case payment_type_enum.cash:
-            return "CA";            
+            PaymentTypeString = "CA";     
+            return;
           //case payment_type_enum.impact_fee_credit:
           //  return "IFCR";
           //case payment_type_enum.impact_fee_exemption:
@@ -86,12 +85,12 @@ namespace ClayPay.Models.Claypay
           //case payment_type_enum.impact_waiver_road:
           //  return "IFWR";
           default:
-            return "";
-
+            PaymentTypeString = "";
+            return;
         }
       }        
 
-      return this.PaymentTypeString;
+
 
     }
 

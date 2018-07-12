@@ -34,14 +34,10 @@ namespace ClayPay.Models
     {
       switch (Environment.MachineName.ToUpper())
       {
-        case "CLAYBCCDV10":        
-          // Test Environment Machines
-          return false;
-
+        //case "MISHL05":
         case "MISSL01":
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":
-          // will need to add the DMZ machine name(s) here.
           return true;
 
         default:

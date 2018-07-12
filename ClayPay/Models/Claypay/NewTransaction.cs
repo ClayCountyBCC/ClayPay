@@ -28,8 +28,8 @@ namespace ClayPay.Models.Claypay
     public List<int> ItemIds { get; set; }
     public CCData CCPayment { get; set; }
     public List<Payment> Payments { get; set; }
-    public List<string> Errors { get; set; }
-    public List<string> PartialErrors { get; set; }
+    public List<string> Errors { get; set; } = new List<string>();
+    public List<string> PartialErrors { get; set; } = new List<string>();
     public decimal Change { get; set; }
 
     public NewTransaction()
@@ -37,12 +37,9 @@ namespace ClayPay.Models.Claypay
 
     }
 
-    public ClientResponse ProcessTransaction(string ip, UserAccess ua)
+    public ClientResponse ProcessTransaction(UserAccess ua)
     {
-      ipAddress = ip;
       useraccess = ua;
-      Errors = new List<string>();
-      PartialErrors = new List<string>();
 
       // process cc payments here
       if (ValidateTransaction())
@@ -127,7 +124,7 @@ namespace ClayPay.Models.Claypay
 
     public bool ValidateTransaction()
     {
-      if (ipAddress.Length == 0)
+      if (this.ipAddress.Length == 0)
       {
         Constants.Log("Issue in ValidateTransaction()", 
                       "IP Address could not be captured", 
@@ -152,7 +149,7 @@ namespace ClayPay.Models.Claypay
          select p).ToList().Count() > 0)
       {
 
-        Errors.Add($"There is an issue recording one or more payment types in this transaction.");
+        this.Errors.Add($"There is an issue recording one or more payment types in this transaction.");
         Constants.Log("issue with recording payment type.",
                       "Error setting payment type.",
                       Payments.ToString(),
@@ -161,8 +158,8 @@ namespace ClayPay.Models.Claypay
       }
 
       // If not cashier and cash || check, return error
-      if (!useraccess.in_claypay_djournal_group &&
-         !useraccess.in_claypay_impactfee_group &&
+      if (!useraccess.djournal_access &&
+         !useraccess.impactfee_access &&
          (from p in Payments
           where p.PaymentTypeString == "CK" ||
           p.PaymentTypeString == "CA"
@@ -178,7 +175,7 @@ namespace ClayPay.Models.Claypay
 
       if (totalPaymentAmount <= 0 || totalPaymentAmount < totalCharges)
       {
-        Errors.Add("Payment amount must be greater than 0 and equal to or greater than the sum of the charges.\n");
+        this.Errors.Add("Payment amount must be greater than 0 and equal to or greater than the sum of the charges.\n");
         return false;
       }
       
