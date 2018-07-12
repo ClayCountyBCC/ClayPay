@@ -17,7 +17,8 @@ namespace ClayPay.Models
     public string ZipCode { get; set; }
     public decimal Total { get; set; }
     public string EmailAddress { get; set; }
-    public List<int> ItemIds { get; set; } = new List<int>();
+    public string IPAddress { get; set; }
+    public string TransactionId { get; set; }
 
     public readonly static string[] CardTypes = { "MASTERCARD", "VISA", "DISCOVER", "AMEX" };
 
@@ -26,13 +27,13 @@ namespace ClayPay.Models
     // it returns an error string if anything that's required isn't present,
     // and no error if everything is present and seeming valid.
     // the error returned should contain all errors that were detected.
-    public List<string> Validate(List<Charge> charges)
+    public List<string> ValidateCCData(CCData ccd)
     {
       List<string> e = new List<string>();
       try
       {
 
-        var dbTotal = (from c in charges select c.Total).Sum();
+        //var dbTotal = (from c in charges select c.Total).Sum();
 
         // We'll start by cleaning up the data that they can key in, 
         // removing extraneous whitespace.
@@ -81,51 +82,53 @@ namespace ClayPay.Models
           e.Add("Expiration Year is not a number.\n");
         }
         // Payment amount validiation
-        if (Total <= 0)
-        {
-          e.Add("Payment amount must be greater than 0.\n");
-        }
-        if (Total != dbTotal)
-        {
-          e.Add("The total for this transaction has changed.  Please check the charges and try again.");
-        }
-        if (ActiveTransactions.AnyExists(this.ItemIds))
-        {
-          e.Add("A transaction is already in process for one or more of these charges.  Please wait a few moments and try again.");
-        }
-        // this is the last thing we'll validate.  If this doesn't fail then we'll be able
-        // to start sending data.
-        if (e.Count == 0)
-        {
-          if (!ActiveTransactions.Start(this.ItemIds))
-          {
-            e.Add("A transaction is already in process for one or more of these charges.  Please wait a few moments and try again.");
-          }
-        }
+        //if (Total <= 0)
+        //{
+        //  e.Add("Payment amount must be greater than 0.\n");
+        //}
+
+        //if (Total != dbTotal)
+        //{
+        //  e.Add("The total for this transaction has changed.  Please check the charges and try again.");
+        //}
+        //if (ActiveTransactions.AnyExists(this.ItemIds))
+        //var numberOfLockedItems = (ActiveTransactions.ChargeItemsLocked(this.ItemIds));
+
+        //if (numberOfLockedItems == 0)
+        //{
+        //  e.Add("A transaction is already in process for one or more of these charges.  Please wait a few moments and try again.");
+        //}
+        //if(numberOfLockedItems != 0 && (numberOfLockedItems == -1 || numberOfLockedItems != this.ItemIds.Count()))
+        //{
+        //  e.Add("There was an issue starting the transaction.  Please wait a few moments and try again.");
+        //}
+        //// this is the last thing we'll validate.  If this doesn't fail then we'll be able
+        //// to start sending data.
+        //if (e.Count == 0)
+        //{
+        //  if (!ActiveTransactions.Start(this.ItemIds))
+        //  {
+        //    e.Add("A transaction is already in process for one or more of these charges.  Please wait a few moments and try again.");
+        //  }
+        //}
         // if e has a length, it's an error.        
       }
       catch (Exception ex)
       {
         Constants.Log(ex);
-        this.UnlockIds();
-        e.Add("Error in validation, unable to continue.");
+
+        e.Add("Error in credit card validation, unable to continue.");
       }
       return e;
     }
 
-    public void UnlockIds()
+    public void UnlockIds(List<long> itemIds)
     {
-      ActiveTransactions.Finish(this.ItemIds);
+      //ActiveTransactions.Finish(this.ItemIds);
+      ActiveTransactions.UnlockChargeItems(itemIds);
+
     }
 
-    public List<string> GetAssocKeys()
-    {
-
-      string query = @"
-        SELECT DISTINCT LTRIM(RTRIM(AssocKey)) AS AssocKey FROM ccCashierItem
-        WHERE ItemId IN @ids;";
-      return Constants.Get_Data<string>(query, ItemIds);
-    }
 
   }
 }

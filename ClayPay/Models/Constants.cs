@@ -13,7 +13,7 @@ namespace ClayPay.Models
   {
     public const int appId = 20016;
 
-    public enum PaymentTypes: int
+    public enum PaymentTypes: int // This may need to be changed to reflect actual data: this is a department, not payment type.
     {
       Building = 0,
       Rescue = 1

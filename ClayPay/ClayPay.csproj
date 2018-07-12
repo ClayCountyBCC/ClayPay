@@ -292,8 +292,11 @@
     <Compile Include="Models\Balancing\Payment.cs" />
     <Compile Include="Models\Claypay\ActiveTransactions.cs" />
     <Compile Include="Models\Claypay\AppType.cs" />
+    <Compile Include="Models\Claypay\ClientResponse.cs" />
+    <Compile Include="Models\Claypay\Payment.cs" />
     <Compile Include="Models\Claypay\CCData.cs" />
     <Compile Include="Models\Claypay\Charge.cs" />
+    <Compile Include="Models\Claypay\NewTransaction.cs" />
     <Compile Include="Models\Constants.cs" />
     <Compile Include="Models\ErrorLog.cs" />
     <Compile Include="Models\ImpactFees\BuilderAllocation.cs" />

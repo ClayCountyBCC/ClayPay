@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Web;
+using Dapper;
 
 namespace ClayPay.Models
 {
@@ -20,6 +21,56 @@ namespace ClayPay.Models
         }
       }      
       return false; // We return false if none exist.
+    }
+    public static int ChargeItemsLocked(List<int> items)
+    {
+      if (items != null && items.Count() > 0)
+      {
+        var param = new DynamicParameters();
+        param.Add("@items", items);
+        var sql = @"
+        USE WATSC;
+
+        DECLARE @LockItems varchar(20) = 'LockingItems';  
+        BEGIN TRAN @LockItems
+          BEGIN TRY
+            DELETE ccChargeItemsLocked
+            WHERE TransactionDate < DATEADD(MI, -3, GETDATE())
+
+            INSERT INTO ccChargeItemsLocked
+            (ItemId)
+            VALUES
+            (@items)
+
+
+            COMMIT
+          END TRY
+          BEGIN CATCH
+            ROLLBACK TRAN @LockItems
+            -- PRINT 'THIS COULD BE A CUSTOM MESSAGE'
+            -- PRINT ERROR_MESSAGE()
+            -- Error can be returned from within the CATCH by using a print statement or 
+            -- the actual error can be raised using 
+            --    RAISERROR (ERROR_MESSAGE() -- Message text.  
+            --      ERROR_SEVERITY(), -- Severity.  
+            --      ERROR_STATE() -- State.  
+            --    );  
+
+          END CATCH
+      ";
+
+        try
+        {
+          return Constants.Exec_Query(sql, param);  // return false if no rows affected
+        }
+        catch (Exception ex)
+        {
+          Constants.Log(ex, sql);
+          return -1;
+        }
+      }
+
+      return -1;
     }
 
     public static bool Start(List<int> items)
@@ -45,6 +96,39 @@ namespace ClayPay.Models
         }
       }
       return true;
+    }
+
+    public static void UnlockChargeItems(List<long> itemIdsToUnlock)
+    {
+      if (itemIdsToUnlock != null && itemIdsToUnlock.Count() > 0)
+      {
+        var param = new DynamicParameters();
+        param.Add("@itemIdsToUnlock", itemIdsToUnlock);
+        var sql = @"
+        USE WATSC;
+
+        BEGIN TRAN
+        BEGIN TRY
+        DELETE ccChargeItemsLocked
+        WHERE TransactionDate < DATEADD(MI, -3, GETDATE())
+          OR ItemId IN (@itemIdsToUnlock)
+          COMMIT
+        END TRY
+        BEGIN CATCH
+          PRINT ERROR_MESSAGE()
+        END CATCH
+
+      
+      ";
+        try
+        {
+          Constants.Exec_Query(sql, param);
+        }
+        catch (Exception ex)
+        {
+          Constants.Log(ex, sql);
+        }
+      }
     }
 
     public static void Finish(List<int> items)
