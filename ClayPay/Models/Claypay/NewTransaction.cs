@@ -37,9 +37,8 @@ namespace ClayPay.Models.Claypay
 
     }
 
-    public ClientResponse ProcessTransaction(UserAccess ua)
+    public ClientResponse ProcessTransaction()
     {
-      useraccess = ua;
 
       // process cc payments here
       if (ValidateTransaction())
@@ -48,7 +47,7 @@ namespace ClayPay.Models.Claypay
         var charges = Charge.Get(ItemIds);
 
         // Process credit card payment if there is one. this will be moved to a separate function
-        if (CCPayment.CardNumber != null && CCPayment.CardType != null && CCPayment.CardType != "" && CCPayment.CardNumber != "")
+        if (CCPayment != null)
         {
 
           var pr = PaymentResponse.PostPayment(CCPayment, ipAddress);
@@ -78,7 +77,6 @@ namespace ClayPay.Models.Claypay
         // Inside pr.Save take all payments and process them.
         if (Errors.Count() == 0)
         {
-          LockChargeItems();
           if (SavePayments())
           {
             var amountPaid = (from payment in Payments select payment.AmtApplied).Sum();
@@ -87,16 +85,18 @@ namespace ClayPay.Models.Claypay
           else
           {
             // getting here is bad
-            PartialErrors.Add($@"There was an issue saving the transaction. 
-                                 Please do not attempt the transaction again and contact the building department.
+            Errors.Add(@"There was an issue saving the transaction.");
+            if (CCPayment != null)
+            {
+              PartialErrors.Add($@"\nPlease do not attempt the transaction again and contact the building department.
                                  Reference Credit Card Transaction Id: {CCPayment.TransactionId}");
-                            
+            }              
             // TODO: This is where we handle the transaction if we need to attempt saving it again.
           }
 
           if (Constants.UseProduction())
           {
-            if (!ua.authenticated)
+            if (useraccess.authenticated)
             {   
               Constants.SaveEmail("OnlinePermits@claycountygov.com",
               $"Payment made - Receipt # {CashierId}, Transaction # {CCPayment.TransactionId} ",
@@ -105,7 +105,7 @@ namespace ClayPay.Models.Claypay
           }
           else
           {
-            if (ua.authenticated)
+            if (useraccess.authenticated)
             {
 
             }
@@ -119,7 +119,7 @@ namespace ClayPay.Models.Claypay
         }
       }
       UnlockChargeItems();
-      return new ClientResponse(TimeStamp, CashierId, CCPayment.TransactionId, Errors, PartialErrors, -1);
+      return new ClientResponse(TimeStamp, CashierId, CCPayment != null ? CCPayment.TransactionId : "", Errors, PartialErrors, -1);
     }
 
     public bool ValidateTransaction()
@@ -156,10 +156,10 @@ namespace ClayPay.Models.Claypay
                       $"Number of payment types: {Payments.Count()}, function call: Payment.SetPaymentTypeString().");
         return false;
       }
-
+    
       // If not cashier and cash || check, return error
-      if (!useraccess.djournal_access &&
-         !useraccess.impactfee_access &&
+      if (!this.useraccess.djournal_access &&
+         !this.useraccess.impactfee_access &&
          (from p in Payments
           where p.PaymentTypeString == "CK" ||
           p.PaymentTypeString == "CA"
@@ -202,14 +202,23 @@ namespace ClayPay.Models.Claypay
         }
         else
         {
-          Payment cashPayment = (from p in Payments where p.PaymentType == Payment.payment_type_enum.cash select p).First();
-          Payments[Payments.IndexOf(cashPayment)].AmtApplied = cashPayment.AmtTendered - Change;
-        }
+          var cashpayment = (from p in Payments
+                             where p.PaymentType == Payment.payment_type_enum.cash
+                             select p).First();
+          int cashindex = Payments.IndexOf(cashpayment);
+
+          Payments[cashindex].AmtApplied = cashpayment.AmtTendered - Change;
+        
+          
+          
+          
+          }
       }
 
       if (Errors.Count == 0)
       {
-        if (LockChargeItems() == 0)
+        var lockCheck = LockChargeItems();
+        if (!lockCheck)
         {
           Errors.Add("A transaction is already in process for one or more of these charges.  Please wait a few moments and try again.");
           return false;
@@ -218,55 +227,35 @@ namespace ClayPay.Models.Claypay
       return true;
     }
 
-    public int LockChargeItems()
+    public bool LockChargeItems()
     {
       if (ItemIds != null && ItemIds.Count() > 0)
       {
         var param = new DynamicParameters();
-        param.Add("@items", ItemIds);
+        param.Add("@ItemIds", ItemIds);
         var sql = @"
         USE WATSC;
-
-        DECLARE @LockItems varchar(20) = 'LockingItems';  
+        DECLARE @LockItems varchar(20) = 'LockingItems';
         BEGIN TRAN @LockItems
           BEGIN TRY
             DELETE ccChargeItemsLocked
             WHERE TransactionDate < DATEADD(MI, -3, GETDATE())
-
             INSERT INTO ccChargeItemsLocked
-            (ItemId)
+            (ItemId)  
             VALUES
-            (@items)
-
-
+            (@ItemIds)
             COMMIT
           END TRY
           BEGIN CATCH
             ROLLBACK TRAN @LockItems
-            -- PRINT 'THIS COULD BE A CUSTOM MESSAGE'
-            -- PRINT ERROR_MESSAGE()
-            -- Error can be returned from within the CATCH by using a print statement or 
-            -- the actual error can be raised using 
-            --    RAISERROR (ERROR_MESSAGE() -- Message text.  
-            --      ERROR_SEVERITY(), -- Severity.  
-            --      ERROR_STATE() -- State.  
-            --    );  
-
           END CATCH
       ";
 
-        try
-        {
-          return Constants.Exec_Query(sql, param);  // return false if no rows affected
-        }
-        catch (Exception ex)
-        {
-          Constants.Log(ex, sql);
-          return -1;
-        }
+          var rowsAffected = Constants.Save_Data(sql, ItemIds);  // return false if no rows affected
+          return rowsAffected;
       }
 
-      return -1;
+      return false;
     }
 
     public void UnlockChargeItems()

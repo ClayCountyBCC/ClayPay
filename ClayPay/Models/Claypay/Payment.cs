@@ -9,7 +9,7 @@ namespace ClayPay.Models.Claypay
   {
 
     //public string Info { get; set; }
-    public enum payment_type_enum 
+    public enum payment_type_enum
     {
       cash = 0,
       check = 1,
@@ -22,60 +22,26 @@ namespace ClayPay.Models.Claypay
     }
 
     public payment_type_enum PaymentType { get; set; }
-
     // This is to set the payment type string for inserting into db. Client does not need this.
-    public string PaymentTypeString { get; set; } = "";
-    public decimal Amount { get; set; }
-    public decimal AmtTendered { get; set; }
-    public decimal AmtApplied { get; set; }
-    public string Info { get; set; }
-    public string CheckNumber { get; set; } = "";
-    public string TransactionId { get; set; } = "";
-
-    public Payment()
+    public string PaymentTypeString
     {
-      SetPaymentTypeString();
-      AmtApplied = Amount;
-      AmtTendered = Amount;
-
-    }
-    
-    public Payment(CCData ccpayment, UserAccess ua)
-    {
-
-      PaymentType = payment_type_enum.credit_card;
-      AmtApplied = ccpayment.Total;
-      AmtTendered = ccpayment.Total;
-      TransactionId = ccpayment.TransactionId;
-    }
-
-    private void SetPaymentTypeString() // only used to enter payment type into payment row. Client does not need this data
-    {
-      if (PaymentTypeString == "")
+      get
       {
-        switch (payType)
+        switch (PaymentType)
         {
           case payment_type_enum.credit_card:
             switch (Environment.MachineName.ToUpper())
             {
               case "CLAYBCCIIS01":
-                PaymentTypeString = "cc_cashier";
-                return;
+                return "cc_cashier";
               case "CLAYBCCDMZIIS01":
-                PaymentTypeString = "cc_online";
-                return;
-              case "CLAYBCCDV10":
-                PaymentTypeString = "cc_test";
-                return;
+                return "cc_online";
             }
-            PaymentTypeString = "credit_card";
-            return;
+            return "cc_test";
           case payment_type_enum.check:
-            PaymentTypeString = "CK";
-            return;
+            return "CK";
           case payment_type_enum.cash:
-            PaymentTypeString = "CA";     
-            return;
+            return "CA";
           //case payment_type_enum.impact_fee_credit:
           //  return "IFCR";
           //case payment_type_enum.impact_fee_exemption:
@@ -85,15 +51,73 @@ namespace ClayPay.Models.Claypay
           //case payment_type_enum.impact_waiver_road:
           //  return "IFWR";
           default:
-            PaymentTypeString = "";
-            return;
+            return "";
         }
-      }        
-
-
+      }
+    }
+    public decimal Amount { get; set; }
+    public decimal AmtTendered
+    {
+      get
+      {
+        return Amount;
+      }
 
     }
+    public decimal AmtApplied { get; set; }
+    public string Info { get; set; }
+    public string CheckNumber { get; set; } = "";
+    public string TransactionId { get; set; } = "";
 
+    public Payment()
+    { 
+    }
 
+    public Payment(CCData ccpayment, UserAccess ua)
+    {
+
+      PaymentType = payment_type_enum.credit_card;
+
+      TransactionId = ccpayment.TransactionId;
+    }
+
+    //public string SetPaymentTypeString() // only used to enter payment type into payment row. Client does not need this data
+    //{
+    //  if (PaymentTypeString == "")
+    //  {
+    //    switch (PaymentType)
+    //    {
+    //      case payment_type_enum.credit_card:
+    //        switch (Environment.MachineName.ToUpper())
+    //        {
+    //          case "CLAYBCCIIS01":
+    //            return"cc_cashier";
+    //          case "CLAYBCCDMZIIS01":
+    //            return "cc_online";
+    //        }
+    //        return "cc_test";
+    //      case payment_type_enum.check:
+    //        return "CK";
+    //      case payment_type_enum.cash:
+    //        return "CA";
+    //      //case payment_type_enum.impact_fee_credit:
+    //      //  return "IFCR";
+    //      //case payment_type_enum.impact_fee_exemption:
+    //      //  return "IFEX";
+    //      //case payment_type_enum.impact_waiver_school:
+    //      //  return "IFWS";
+    //      //case payment_type_enum.impact_waiver_road:
+    //      //  return "IFWR";
+    //      default:
+    //      return "";
+    //    }
+       
+    //  }
+    //  else
+    //  {
+    //     return PaymentTypeString;
+    //  }
+    //}
   }
+
 }
