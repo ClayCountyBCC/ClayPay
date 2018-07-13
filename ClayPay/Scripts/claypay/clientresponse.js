@@ -29,10 +29,9 @@ var clayPay;
             Utilities.Set_Value(ClientResponse.TimeStampInput, cr.TimeStamp);
             Utilities.Set_Value(ClientResponse.CashierIdInput, cr.CashierId);
             Utilities.Set_Value(ClientResponse.AmountPaidInput, Utilities.Format_Amount(cr.AmountPaid));
-            if (cr.ChangeDue > 0) {
-                Utilities.Set_Value(ClientResponse.ChangeDueInput, Utilities.Format_Amount(cr.ChangeDue));
-            }
-            Utilities.Show(ClientResponse.ReceiptContainer);
+            Utilities.Set_Value(ClientResponse.ChangeDueInput, Utilities.Format_Amount(cr.ChangeDue));
+            // this needs to hide all of the other sections and just show the receipt.
+            Utilities.Show_Hide_Selector("#views > section", ClientResponse.ReceiptContainer);
         }
     }
     ClientResponse.CashierErrorTarget = "paymentError";

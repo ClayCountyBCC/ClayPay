@@ -24,7 +24,16 @@ namespace clayPay
     HandleUIEvents();
     UI.buildMenuElements();
     loadDefaultValues();
-
+    // let's test the receipt view
+    // uncomment this to test the receipt view.
+    //let cr = new ClientResponse();
+    //cr.AmountPaid = 165;
+    //cr.CashierId = "18-55544";
+    //cr.ChangeDue = 0;
+    //cr.Errors = [];
+    //cr.TimeStamp = "7/13/2018 7:34 AM";
+    //cr.TransactionId = "555ff";
+    //ClientResponse.HandleResponse(cr, true);
   }
 
   function HandleUIEvents(): void
