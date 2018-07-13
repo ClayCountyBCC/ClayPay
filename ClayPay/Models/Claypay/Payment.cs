@@ -9,7 +9,7 @@ namespace ClayPay.Models.Claypay
   {
 
     //public string Info { get; set; }
-    public enum payment_type_enum
+    public enum payment_type
     {
       cash = 0,
       check = 1,
@@ -21,7 +21,7 @@ namespace ClayPay.Models.Claypay
 
     }
 
-    public payment_type_enum PaymentType { get; set; }
+    public payment_type PaymentType { get; set; }
     // This is to set the payment type string for inserting into db. Client does not need this.
     public string PaymentTypeString
     {
@@ -29,7 +29,7 @@ namespace ClayPay.Models.Claypay
       {
         switch (PaymentType)
         {
-          case payment_type_enum.credit_card:
+          case payment_type.credit_card:
             switch (Environment.MachineName.ToUpper())
             {
               case "CLAYBCCIIS01":
@@ -38,18 +38,18 @@ namespace ClayPay.Models.Claypay
                 return "cc_online";
             }
             return "cc_test";
-          case payment_type_enum.check:
+          case payment_type.check:
             return "CK";
-          case payment_type_enum.cash:
+          case payment_type.cash:
             return "CA";
-          //case payment_type_enum.impact_fee_credit:
-          //  return "IF_credit";
-          //case payment_type_enum.impact_fee_exemption:
-          //  return "IF_exemption";
-          //case payment_type_enum.impact_waiver_school:
-          //  return "IF_waiver_school";
-          //case payment_type_enum.impact_waiver_road:
-          //  return "IF_waiver_road";
+          //case payment_type.impact_fee_credit:
+          //  return "IFCR";
+          //case payment_type.impact_fee_exemption:
+          //  return "IFEX";
+          //case payment_type.impact_waiver_school:
+          //  return "IFWS";
+          //case payment_type.impact_waiver_road:
+          //  return "IFWR";
           default:
             return "";
         }
@@ -77,7 +77,7 @@ namespace ClayPay.Models.Claypay
     public Payment(CCPayment ccpayment, UserAccess ua)
     {
 
-      PaymentType = payment_type_enum.credit_card;
+      PaymentType = payment_type.credit_card;
 
       TransactionId = ccpayment.TransactionId;
     }
