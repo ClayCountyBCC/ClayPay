@@ -14,15 +14,18 @@ namespace ClayPay.Models.Claypay
     public List<string> Errors { get; set; }
     public List<string> PartialErrors { get; set; }
     public decimal AmountPaid { get; set; }
+    private decimal ConvenienceFeeAmount { get; set; }
     public decimal ChangeDue { get; set; } // only applicable in Cash payments.
 
-    public ClientResponse(string cashierid, string transId, List<string> err, List<string> partErr, decimal AmtApplied)
+    public ClientResponse(string cashierid, string transId, List<string> err, List<string> partErr, decimal AmtApplied, decimal change, decimal convFeeAmount = 0)
     {
       CashierId = cashierid;
       TransactionId = transId;
       Errors = err;
       PartialErrors = partErr;
       AmountPaid = AmtApplied;
+      ChangeDue = change;
+      ConvenienceFeeAmount = convFeeAmount;
     }
 
   }

@@ -9,6 +9,7 @@ using System.IO;
 using System.Data;
 using Dapper;
 using ClayPay.Models.Claypay;
+using System.Web.WebPages;
 
 namespace ClayPay.Models
 {
@@ -19,6 +20,7 @@ namespace ClayPay.Models
     public Constants.PaymentTypes PaymentType { get; set; }
     public string ErrorText { get; set; } = ""; //
     public string ConvFee { get; set; } // function GetConvenienceFee();
+    public decimal ConvFeeAmount => Convert.ToDecimal(ConvFee) * Amount;
     public bool UseProduction { get; set; } //
     public DateTime TimeStamp { get; set; } //
     public string CashierId { get; set; } //

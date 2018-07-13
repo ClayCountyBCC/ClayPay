@@ -35,7 +35,7 @@ namespace ClayPay.Models.Claypay
     public CCPayment CCData { get; set; }
     public List<Payment> Payments { get; set; }
     public List<string> Errors { get; set; } = new List<string>();
-    public List<string> PartialErrors { get; set; } = new List<string>();
+    public List<string> ProcessingErros { get; set; } = new List<string>();
     public decimal Change { get; set; }
 
     public NewTransaction()
@@ -62,20 +62,22 @@ namespace ClayPay.Models.Claypay
           {
             Errors.Add("There was an issue with processing the credit card transaction.");
             UnlockChargeItems();
-            return new ClientResponse("", "", Errors, PartialErrors, 0);
+            return new ClientResponse("", "", Errors, ProcessingErros, 0,0);
           }
           else
           {
             if (pr.ErrorText.Length > 0)
             {
-              PartialErrors.Add(pr.ErrorText);
+              ProcessingErros.Add(pr.ErrorText);
               UnlockChargeItems();
-              return new ClientResponse("","", Errors, PartialErrors, 0);
+              return new ClientResponse("","", Errors, ProcessingErros, 0,0);
             }
             else
             {
-              var ccpayment = (from p in Payments where p.PaymentType == Payment.payment_type_enum.credit_card select p).FirstOrDefault();
-              Payments[Payments.IndexOf(ccpayment)].TransactionId = pr.UniqueId;
+              var ccdata = (from p in Payments where p.PaymentType == Payment.payment_type_enum.credit_card select p).FirstOrDefault();
+              Payments[Payments.IndexOf(ccdata)].TransactionId = pr.UniqueId;
+              CCData.ConvenienceFeeAmount = pr.ConvFeeAmount;
+
             }
           }
         }
@@ -86,46 +88,43 @@ namespace ClayPay.Models.Claypay
           if (SavePayments())
           {
             var amountPaid = (from payment in Payments select payment.AmtApplied).Sum();
-            return new ClientResponse(CashierId, this.CCData.TransactionId, Errors, PartialErrors, amountPaid );
-          }
-          else
-          {
-            // getting here is bad
-            Errors.Add(@"There was an issue saving the transaction.");
-            if (this.CCData != null) // 
-            {
-              PartialErrors.Add($@"\nPlease do not attempt the transaction again and contact the building department.
-                                 Reference Credit Card Transaction Id: {this.CCData.TransactionId}");
-            }              
-            // TODO: This is where we handle the transaction if we need to attempt saving it again.
-          }
 
-          if (Constants.UseProduction())
-          {
-            if (useraccess.authenticated)
-            {   
-              Constants.SaveEmail("OnlinePermits@claycountygov.com",
-              $"Payment made - Receipt # {CashierId}, Transaction # {this.CCData.TransactionId} ",
-              CreateEmailBody());
-            }
-          }
-          else
-          {
-            if (useraccess.authenticated)
+            // Set up Email for online Credit card payments
+            if (Constants.UseProduction() && CCData.Validated)
             {
 
+                Constants.SaveEmail("OnlinePermits@claycountygov.com",
+                $"Payment made - Receipt # {CashierId}, Transaction # {this.CCData.TransactionId} ",
+                CreateEmailBody());
             }
             else
             {
-              Constants.SaveEmail("daniel.mccartney@claycountygov.com; jeremy.west@claycountygov.com",
-              $"TEST Payment made - Receipt # {CashierId}, Transaction # {this.CCData.TransactionId} -- TEST SERVER",
-              CreateEmailBody());
+                Constants.SaveEmail("daniel.mccartney@claycountygov.com; jeremy.west@claycountygov.com",
+                $"TEST Payment made - Receipt # {CashierId}, Transaction # {this.CCData.TransactionId} -- TEST SERVER",
+                CreateEmailBody());
             }
+            return new ClientResponse(CashierId, this.CCData.TransactionId, Errors, ProcessingErros, amountPaid, Change, CCData.Validated ? CCData.ConvenienceFeeAmount : 0);
           }
+          else
+          {
+            
+            if (this.CCData.Validated) 
+            {
+              // getting here is bad
+              ProcessingErros.Add($@"\nPlease do not attempt the transaction again and contact the building department.
+                                 Reference Credit Card Transaction Id: {this.CCData.TransactionId}");
+            }     
+            else
+            {
+              Errors.Add(@"There was an issue saving the transaction.");
+            }
+            // TODO: This is where we handle the transaction if we need to attempt saving it again.
+          }
+          
         }
       }
       UnlockChargeItems();
-      return new ClientResponse(CashierId, this.CCData.Validated ? this.CCData.TransactionId : "", Errors, PartialErrors, -1);
+      return new ClientResponse(CashierId, this.CCData.Validated ? this.CCData.TransactionId : "", Errors, ProcessingErros, -1, 0);
     }
 
     public bool ValidateTransaction()
@@ -136,6 +135,7 @@ namespace ClayPay.Models.Claypay
                       "IP Address could not be captured", 
                        Environment.MachineName.ToUpper() + "; Date: " + DateTime.Now.ToString(), "ClayPay.NewTransaction.cs");
       }
+
       if (this.CCData.Validated)//CCPayment != null && CCPayment.Total > 0)
       { // validate credit card data if exists
         Errors = this.CCData.ValidateCCData();
@@ -156,6 +156,8 @@ namespace ClayPay.Models.Claypay
       {
 
         this.Errors.Add($"There is an issue recording one or more payment types in this transaction.");
+        ProcessingErros.Add($@"\nPlease do not attempt the transaction again and contact the building department.
+                                 Reference Credit Card Transaction Id: {this.CCData.TransactionId}");
         Constants.Log("issue with recording payment type.",
                       "Error setting payment type.",
                       Payments.ToString(),
@@ -215,9 +217,6 @@ namespace ClayPay.Models.Claypay
 
           Payments[cashindex].AmtApplied = cashpayment.AmtTendered - Change;
         
-          
-          
-          
           }
       }
 
@@ -243,14 +242,18 @@ namespace ClayPay.Models.Claypay
         USE WATSC;
         BEGIN TRAN
           BEGIN TRY
+
             DELETE ccChargeItemsLocked
             WHERE TransactionDate < DATEADD(MI, -3, GETDATE())
+
             INSERT INTO ccChargeItemsLocked
             (ItemId)  
             VALUES
             (@ItemIds)
+
             COMMIT
           END TRY
+
           BEGIN CATCH
             ROLLBACK TRAN
           END CATCH
@@ -364,14 +367,14 @@ namespace ClayPay.Models.Claypay
           EXEC dbo.prc_ins_ClayPay_ccGUItem_NewGUItemAccountRows
             @OTId = @otId
           
-        END TRY
-        BEGIN CATCH
-          IF @@TRANCOUNT > 0
-            ROLLBACK TRANSACTION;
-        END CATCH;
+          END TRY
+          BEGIN CATCH
+            IF @@TRANCOUNT > 0
+              ROLLBACK TRANSACTION;
+          END CATCH;
         
-        IF @@TRANCOUNT > 0
-          COMMIT TRANSACTION;";
+          IF @@TRANCOUNT > 0
+            COMMIT TRANSACTION;";
       try
       {
         var i = Constants.Save_Data(query, this);

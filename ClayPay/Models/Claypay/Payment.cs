@@ -43,13 +43,13 @@ namespace ClayPay.Models.Claypay
           case payment_type_enum.cash:
             return "CA";
           //case payment_type_enum.impact_fee_credit:
-          //  return "IFCR";
+          //  return "IF_credit";
           //case payment_type_enum.impact_fee_exemption:
-          //  return "IFEX";
+          //  return "IF_exemption";
           //case payment_type_enum.impact_waiver_school:
-          //  return "IFWS";
+          //  return "IF_waiver_school";
           //case payment_type_enum.impact_waiver_road:
-          //  return "IFWR";
+          //  return "IF_waiver_road";
           default:
             return "";
         }
