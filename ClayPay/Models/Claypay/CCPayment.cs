@@ -5,7 +5,7 @@ using System.Web;
 
 namespace ClayPay.Models
 {
-  public class CCData
+  public class CCPayment
   {
     public string FirstName { get; set; }
     public string LastName { get; set; }
@@ -19,6 +19,7 @@ namespace ClayPay.Models
     public string EmailAddress { get; set; }
     public string IPAddress { get; set; }
     public string TransactionId { get; set; }
+    public bool Validated { get; set; } = false;
 
     public readonly static string[] CardTypes = { "MASTERCARD", "VISA", "DISCOVER", "AMEX" };
 
@@ -27,7 +28,7 @@ namespace ClayPay.Models
     // it returns an error string if anything that's required isn't present,
     // and no error if everything is present and seeming valid.
     // the error returned should contain all errors that were detected.
-    public List<string> ValidateCCData(CCData ccd)
+    public List<string> ValidateCCData()
     {
       List<string> e = new List<string>();
       try
@@ -122,12 +123,12 @@ namespace ClayPay.Models
       return e;
     }
 
-    public void UnlockIds(List<long> itemIds)
-    {
-      //ActiveTransactions.Finish(this.ItemIds);
-      ActiveTransactions.UnlockChargeItems(itemIds);
+    //public void UnlockIds(List<long> itemIds)
+    //{
+    //  //ActiveTransactions.Finish(this.ItemIds);
+    //  ActiveTransactions.UnlockChargeItems(itemIds);
 
-    }
+    //}
 
 
   }

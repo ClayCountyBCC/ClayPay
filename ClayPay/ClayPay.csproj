@@ -294,7 +294,7 @@
     <Compile Include="Models\Claypay\AppType.cs" />
     <Compile Include="Models\Claypay\ClientResponse.cs" />
     <Compile Include="Models\Claypay\Payment.cs" />
-    <Compile Include="Models\Claypay\CCData.cs" />
+    <Compile Include="Models\Claypay\CCPayment.cs" />
     <Compile Include="Models\Claypay\Charge.cs" />
     <Compile Include="Models\Claypay\NewTransaction.cs" />
     <Compile Include="Models\Constants.cs" />

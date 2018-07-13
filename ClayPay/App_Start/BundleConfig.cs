@@ -26,7 +26,7 @@ namespace ClayPay
         "~/Scripts/claypay/CCPayment.js",
         "~/Scripts/claypay/NewTransaction.js",
         "~/Scripts/claypay/UI.js",
-        "~/Scripts/claypay/claypay.js"));     
+        "~/Scripts/claypay/claypay.js")); 
       
     }
   }

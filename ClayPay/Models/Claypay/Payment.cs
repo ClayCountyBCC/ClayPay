@@ -68,12 +68,13 @@ namespace ClayPay.Models.Claypay
     public string Info { get; set; }
     public string CheckNumber { get; set; } = "";
     public string TransactionId { get; set; } = "";
+    public bool Validated { get; set; } = false;
 
     public Payment()
     { 
     }
 
-    public Payment(CCData ccpayment, UserAccess ua)
+    public Payment(CCPayment ccpayment, UserAccess ua)
     {
 
       PaymentType = payment_type_enum.credit_card;

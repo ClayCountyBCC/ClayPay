@@ -59,7 +59,7 @@ namespace ClayPay.Models
       }
     }
 
-    public static PaymentResponse PostPayment(CCData ccd, string ipAddress)
+    public static PaymentResponse PostPayment(CCPayment ccd, string ipAddress)
     {
       try
       {
@@ -81,7 +81,7 @@ namespace ClayPay.Models
 
     }
 
-    private bool Post(CCData ccd, string ipAddress)
+    private bool Post(CCPayment ccd, string ipAddress)
     {
       try
       {
@@ -211,7 +211,7 @@ namespace ClayPay.Models
       return sb.ToString();
     }
 
-    private string BuildURL(CCData CC, string ipAddress)
+    private string BuildURL(CCPayment CC, string ipAddress)
     {      
       var sb = new StringBuilder();
       try
