@@ -25,7 +25,7 @@
     static TimeStampInput: string = "receiptTimeStamp";
     static CashierIdInput: string = "receiptCashierId";
     static AmountPaidInput: string = "receiptAmountPaid";
-    static ChangeDueInput: string = "receiptChangeDue"
+    static ChangeDueInput: string = "receiptChangeDue";
     static TransactionIdContainer: string = "receiptTransactionIdContainer";
     static TransactionId: string = "receiptTransactionId";
 

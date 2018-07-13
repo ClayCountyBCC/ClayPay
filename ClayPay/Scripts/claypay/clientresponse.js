@@ -46,4 +46,4 @@ var clayPay;
     ClientResponse.TransactionId = "receiptTransactionId";
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=clientresponse.js.map
+//# sourceMappingURL=ClientResponse.js.map
