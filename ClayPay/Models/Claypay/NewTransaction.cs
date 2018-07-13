@@ -74,7 +74,7 @@ namespace ClayPay.Models.Claypay
             }
             else
             {
-              var ccpayment = (from p in Payments where p.PaymentType == Payment.payment_type_enum.credit_card select p).FirstOrDefault();
+              var ccpayment = (from p in Payments where p.PaymentType == Payment.payment_type.credit_card select p).FirstOrDefault();
               Payments[Payments.IndexOf(ccpayment)].TransactionId = pr.UniqueId;
             }
           }
@@ -187,7 +187,7 @@ namespace ClayPay.Models.Claypay
       
       // AmountTenderd and Total of charges can be different if cash is involved 
       var hasCash = (from p in Payments
-                     where p.PaymentType == Payment.payment_type_enum.cash
+                     where p.PaymentType == Payment.payment_type.cash
                      select p).ToList().Count() > 0;
 
       if ((!hasCash && totalPaymentAmount != totalCharges))
@@ -200,7 +200,7 @@ namespace ClayPay.Models.Claypay
       {
         var 
         Change = totalPaymentAmount - totalCharges;
-        if (Change > (from p in Payments where p.PaymentType == Payment.payment_type_enum.cash select p.AmtTendered).Sum())
+        if (Change > (from p in Payments where p.PaymentType == Payment.payment_type.cash select p.AmtTendered).Sum())
         {
           Change = 0;
           Errors.Add("The amount returned to the customer cannot be greater than the amount of cash tendered.");
@@ -209,7 +209,7 @@ namespace ClayPay.Models.Claypay
         else
         {
           var cashpayment = (from p in Payments
-                             where p.PaymentType == Payment.payment_type_enum.cash
+                             where p.PaymentType == Payment.payment_type.cash
                              select p).First();
           int cashindex = Payments.IndexOf(cashpayment);
 
