@@ -70,9 +70,9 @@
           <div class="control">
             <input id="permitSearch"
                    class="input"
-                   type="number"
+                   type="number"                   
                    maxlength="8"
-                   value="11701545"
+                   value="@(HttpContext.Current.IsDebuggingEnabled ? "11701545" : "")"
                    placeholder="18000001" />
           </div>
           <div class="control">
@@ -274,6 +274,7 @@
                      type="text"
                      maxlength="50"
                      required
+                     value="@(HttpContext.Current.IsDebuggingEnabled ? "Firstname" : "")"
                      placeholder="Firstname" />
             </div>
           </div>
@@ -287,6 +288,7 @@
                      type="text"
                      maxlength="50"
                      required
+                     value="@(HttpContext.Current.IsDebuggingEnabled ? "Lastname" : "")"
                      placeholder="Lastname" />
             </div>
           </div>
@@ -313,6 +315,7 @@
                      class="input"
                      type="tel"
                      maxlength="12"
+                     value="@(HttpContext.Current.IsDebuggingEnabled ? "904-555-1212" : "")"
                      placeholder="904-555-1212" />
             </div>
           </div>
@@ -324,6 +327,7 @@
                      autocomplete="email"
                      class="input"
                      type="email"
+                     value="@(HttpContext.Current.IsDebuggingEnabled ? "test@example.com" : "")"
                      maxlength="50"
                      placeholder="email@example.com" />
             </div>
@@ -350,6 +354,7 @@
                    class="input"
                    type="text"
                    maxlength="50"
+                   value="@(HttpContext.Current.IsDebuggingEnabled ? "CBCC" : "")"
                    placeholder="Company Name" />
           </div>
         </div>
@@ -363,6 +368,7 @@
                    type="text"
                    required
                    maxlength="50"
+                   value="@(HttpContext.Current.IsDebuggingEnabled ? "555 Blanding" : "")"
                    placeholder="Address" />
           </div>
         </div>
@@ -387,6 +393,7 @@
                      type="text"
                      required
                      maxlength="50"
+                     value="@(HttpContext.Current.IsDebuggingEnabled ? "Orange" : "")"
                      placeholder="City" />
             </div>
           </div>
@@ -396,6 +403,7 @@
             <div class="control">
               <div class="select">
                 <select autocomplete="address-level1"
+                        value="@(HttpContext.Current.IsDebuggingEnabled ? "FL" : "")"
                         id="payerState"></select>
               </div>
             </div>
@@ -410,6 +418,7 @@
                      type="text"
                      required
                      maxlength="5"
+                     value="@(HttpContext.Current.IsDebuggingEnabled ? "32000" : "")"
                      placeholder="Zip" />
             </div>
           </div>

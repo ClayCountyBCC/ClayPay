@@ -6,6 +6,7 @@ var clayPay;
             this.CashierId = "";
             this.TransactionId = "";
             this.AmountPaid = 0;
+            this.ChangeDue = 0;
             this.Errors = [];
         }
         static HandleResponse(cr, IsCashier) {
@@ -28,6 +29,9 @@ var clayPay;
             Utilities.Set_Value(ClientResponse.TimeStampInput, cr.TimeStamp);
             Utilities.Set_Value(ClientResponse.CashierIdInput, cr.CashierId);
             Utilities.Set_Value(ClientResponse.AmountPaidInput, Utilities.Format_Amount(cr.AmountPaid));
+            if (cr.ChangeDue > 0) {
+                Utilities.Set_Value(ClientResponse.ChangeDueInput, Utilities.Format_Amount(cr.ChangeDue));
+            }
             Utilities.Show(ClientResponse.ReceiptContainer);
         }
     }
@@ -37,6 +41,7 @@ var clayPay;
     ClientResponse.TimeStampInput = "receiptTimeStamp";
     ClientResponse.CashierIdInput = "receiptCashierId";
     ClientResponse.AmountPaidInput = "receiptAmountPaid";
+    ClientResponse.ChangeDueInput = "receiptChangeDue";
     ClientResponse.TransactionIdContainer = "receiptTransactionIdContainer";
     ClientResponse.TransactionId = "receiptTransactionId";
     clayPay.ClientResponse = ClientResponse;

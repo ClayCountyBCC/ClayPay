@@ -6,6 +6,7 @@
     CashierId: string;
     TransactionId: string;
     AmountPaid: number;
+    ChangeDue: number;
     Errors: Array<string>;
   }
 
@@ -15,6 +16,7 @@
     public CashierId: string = "";
     public TransactionId: string = "";
     public AmountPaid: number = 0;
+    public ChangeDue: number = 0;
     public Errors: Array<string> = [];
 
     static CashierErrorTarget: string = "paymentError";
@@ -23,6 +25,7 @@
     static TimeStampInput: string = "receiptTimeStamp";
     static CashierIdInput: string = "receiptCashierId";
     static AmountPaidInput: string = "receiptAmountPaid";
+    static ChangeDueInput: string = "receiptChangeDue"
     static TransactionIdContainer: string = "receiptTransactionIdContainer";
     static TransactionId: string = "receiptTransactionId";
 
@@ -56,6 +59,10 @@
       Utilities.Set_Value(ClientResponse.TimeStampInput, cr.TimeStamp);
       Utilities.Set_Value(ClientResponse.CashierIdInput, cr.CashierId);
       Utilities.Set_Value(ClientResponse.AmountPaidInput, Utilities.Format_Amount(cr.AmountPaid));
+      if (cr.ChangeDue > 0)
+      {
+        Utilities.Set_Value(ClientResponse.ChangeDueInput, Utilities.Format_Amount(cr.ChangeDue));
+      }
 
       Utilities.Show(ClientResponse.ReceiptContainer);
 

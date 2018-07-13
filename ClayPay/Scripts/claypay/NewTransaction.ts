@@ -288,8 +288,9 @@ namespace clayPay
 
     SaveAll(): void
     {
-      this.Payments.push(this.CashPayment);
-      this.Payments.push(this.CheckPayment);      
+      if (this.CashPayment.Validated) this.Payments.push(this.CashPayment);
+      if (this.CheckPayment.Validated) this.Payments.push(this.CheckPayment);      
+
       console.log('putting this object', this);
       Utilities.Put<ClientResponse>("../API/Payments/Pay/", this)
         .then(function (cr)

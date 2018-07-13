@@ -8,16 +8,16 @@ namespace ClayPay.Models.Claypay
   public class ClientResponse
   {
 
-    public string TimeStamp { get; set; } = "";
+    public string TimeStamp { get; set; } = DateTime.Now.ToString();
     public string CashierId { get; set; } = "";
     public string TransactionId { get; set; } = "";
     public List<string> Errors { get; set; }
     public List<string> PartialErrors { get; set; }
     public decimal AmountPaid { get; set; }
+    public decimal ChangeDue { get; set; } // only applicable in Cash payments.
 
-    public ClientResponse(DateTime datetime, string cashierid, string transId, List<string> err, List<string> partErr, decimal AmtApplied)
+    public ClientResponse(string cashierid, string transId, List<string> err, List<string> partErr, decimal AmtApplied)
     {
-      TimeStamp = datetime.ToString();
       CashierId = cashierid;
       TransactionId = transId;
       Errors = err;

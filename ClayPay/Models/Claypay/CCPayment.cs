@@ -7,18 +7,18 @@ namespace ClayPay.Models
 {
   public class CCPayment
   {
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string CardNumber { get; set; }
-    public string CardType { get; set; }
-    public string ExpMonth { get; set; }
-    public string ExpYear { get; set; }
-    public string CVVNumber { get; set; }
-    public string ZipCode { get; set; }
-    public decimal Total { get; set; }
-    public string EmailAddress { get; set; }
-    public string IPAddress { get; set; }
-    public string TransactionId { get; set; }
+    public string FirstName { get; set; } = "";
+    public string LastName { get; set; } = "";
+    public string CardNumber { get; set; } = "";
+    public string CardType { get; set; } = "";
+    public string ExpMonth { get; set; } = "";
+    public string ExpYear { get; set; } = "";
+    public string CVVNumber { get; set; } = "";
+    public string ZipCode { get; set; } = "";
+    public decimal Amount { get; set; } = 0;
+    public string EmailAddress { get; set; } = "";
+    //public string IPAddress { get; set; } = "";
+    public string TransactionId { get; set; } = "";
     public bool Validated { get; set; } = false;
 
     public readonly static string[] CardTypes = { "MASTERCARD", "VISA", "DISCOVER", "AMEX" };

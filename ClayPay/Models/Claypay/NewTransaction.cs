@@ -12,17 +12,23 @@ namespace ClayPay.Models.Claypay
   public class NewTransaction
   {
     public UserAccess useraccess { get; set; }
-    public string CoName { get; set; }
-    public string PayerName { get; set; }
-    public string PayerPhone { get; set; }
-    public string PayerEmail { get; set; }
-    public string ipAddress { get; set; }
-    public string PayerAddress1 { get; set; }
-    public string PayerAddress2 { get; set; }
-    public string PayerCity { get; set; }
-    public string PayerState { get; set; }
-    public string PayerZip { get; set; }
-    public DateTime TimeStamp { get; set; } = DateTime.Now;
+    public string PayerCompanyName { get; set; } = "";
+    public string PayerFirstName { get; set; } = ""; // Required
+    public string PayerLastName { get; set; } = "";// Required
+    public string PayerPhoneNumber { get; set; } = "";// Required
+    public string PayerEmailAddress { get; set; } = "";
+    public string ipAddress { get; set; } = "";
+    public string PayerStreetAddress { get; set; } = ""; // Required
+    public string PayerAddress2 // Required, but this is a combination of City State, Zip
+    {
+      get
+      {
+        return PayerCity + " " + PayerState + ", " + PayerZip;
+      }
+    }
+    public string PayerCity { get; set; } = "";// Required
+    public string PayerState { get; set; } = "";// Required
+    public string PayerZip { get; set; } = "";// Required
     public int OTid { get; set; }
     public string CashierId { get; set; }
     public List<int> ItemIds { get; set; }
@@ -56,7 +62,7 @@ namespace ClayPay.Models.Claypay
           {
             Errors.Add("There was an issue with processing the credit card transaction.");
             UnlockChargeItems();
-            return new ClientResponse(TimeStamp, "", "", Errors, PartialErrors, 0);
+            return new ClientResponse("", "", Errors, PartialErrors, 0);
           }
           else
           {
@@ -64,7 +70,7 @@ namespace ClayPay.Models.Claypay
             {
               PartialErrors.Add(pr.ErrorText);
               UnlockChargeItems();
-              return new ClientResponse(TimeStamp, "","", Errors, PartialErrors, 0);
+              return new ClientResponse("","", Errors, PartialErrors, 0);
             }
             else
             {
@@ -80,7 +86,7 @@ namespace ClayPay.Models.Claypay
           if (SavePayments())
           {
             var amountPaid = (from payment in Payments select payment.AmtApplied).Sum();
-            return new ClientResponse(TimeStamp, CashierId, this.CCData.TransactionId, Errors, PartialErrors, amountPaid );
+            return new ClientResponse(CashierId, this.CCData.TransactionId, Errors, PartialErrors, amountPaid );
           }
           else
           {
@@ -119,7 +125,7 @@ namespace ClayPay.Models.Claypay
         }
       }
       UnlockChargeItems();
-      return new ClientResponse(TimeStamp, CashierId, this.CCData.Validated ? this.CCData.TransactionId : "", Errors, PartialErrors, -1);
+      return new ClientResponse(CashierId, this.CCData.Validated ? this.CCData.TransactionId : "", Errors, PartialErrors, -1);
     }
 
     public bool ValidateTransaction()
@@ -128,7 +134,7 @@ namespace ClayPay.Models.Claypay
       {
         Constants.Log("Issue in ValidateTransaction()", 
                       "IP Address could not be captured", 
-                       Environment.MachineName.ToUpper() + "; Date: " + TimeStamp.ToString(), "ClayPay.NewTransaction.cs");
+                       Environment.MachineName.ToUpper() + "; Date: " + DateTime.Now.ToString(), "ClayPay.NewTransaction.cs");
       }
       if (this.CCData.Validated)//CCPayment != null && CCPayment.Total > 0)
       { // validate credit card data if exists
@@ -825,7 +831,7 @@ namespace ClayPay.Models.Claypay
       }
 
       var keys = String.Join(", \n", AssocKeys);
-      string body = $"An online credit card payment of {this.CCData.Total.ToString("C")}.\n";
+      string body = $"An online credit card payment of {this.CCData.Amount.ToString("C")}.\n";
       body += $"The Charges paid include:\n";
       foreach (var c in chargeItems)
       {

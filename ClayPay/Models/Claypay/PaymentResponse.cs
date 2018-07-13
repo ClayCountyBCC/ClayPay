@@ -63,7 +63,7 @@ namespace ClayPay.Models
     {
       try
       {
-        var pr = new PaymentResponse(ccd.Total, Constants.PaymentTypes.Building, Constants.UseProduction());
+        var pr = new PaymentResponse(ccd.Amount, Constants.PaymentTypes.Building, Constants.UseProduction());
         if (pr.Post(ccd, ipAddress))
         {
           return pr;
@@ -225,7 +225,7 @@ namespace ClayPay.Models
         sb.Append("&CARD_EXP_YEAR=").Append(CC.ExpYear);
         sb.Append("&CVV=").Append(CC.CVVNumber);
         sb.Append("&ZIPCODE=").Append(CC.ZipCode);
-        sb.Append("&PAYMENT_AMOUNT=").Append(CC.Total);
+        sb.Append("&PAYMENT_AMOUNT=").Append(CC.Amount);
         sb.Append("&mode=AS");
         sb.Append("&*EmailAddress=").Append(CC.EmailAddress);
         sb.Append("&*IPAddress=").Append(ipAddress);
