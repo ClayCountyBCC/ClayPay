@@ -288,11 +288,10 @@ namespace clayPay
       // we're going to be doing this on the backend now.
       //if (this.CashPayment.Validated) this.Payments.push(this.CashPayment);
       //if (this.CheckPayment.Validated) this.Payments.push(this.CheckPayment);      
-
       Utilities.Put<ClientResponse>("../API/Payments/Pay/", this)
         .then(function (cr)
         {
-          ClientResponse.HandleResponse(cr, this.IsCashier);
+          ClientResponse.HandleResponse(cr, true);
           Utilities.Toggle_Loading_Button(NewTransaction.PayNowCashierButton, false);
           // need to reset the form and transaction / payment objects
         },
@@ -309,7 +308,7 @@ namespace clayPay
       Utilities.Put<ClientResponse>("../API/Payments/Pay/", this)
         .then(function (cr)
         {
-          ClientResponse.HandleResponse(cr, this.IsCashier);
+          ClientResponse.HandleResponse(cr, false);
           Utilities.Toggle_Loading_Button(NewTransaction.PayNowPublicButton, false);
           // need to reset the form and transaction / payment objects
         },

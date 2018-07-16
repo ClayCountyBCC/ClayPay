@@ -118,7 +118,7 @@ namespace ClayPay.Models.Claypay
         return false;
       }
 
-      return false;
+      return true;
     }
 
     public ClientResponse ProcessPaymentTransaction()

@@ -193,7 +193,7 @@ var clayPay;
             //if (this.CheckPayment.Validated) this.Payments.push(this.CheckPayment);      
             Utilities.Put("../API/Payments/Pay/", this)
                 .then(function (cr) {
-                clayPay.ClientResponse.HandleResponse(cr, this.IsCashier);
+                clayPay.ClientResponse.HandleResponse(cr, true);
                 Utilities.Toggle_Loading_Button(NewTransaction.PayNowCashierButton, false);
                 // need to reset the form and transaction / payment objects
             }, function (e) {
@@ -205,7 +205,7 @@ var clayPay;
         SaveCC() {
             Utilities.Put("../API/Payments/Pay/", this)
                 .then(function (cr) {
-                clayPay.ClientResponse.HandleResponse(cr, this.IsCashier);
+                clayPay.ClientResponse.HandleResponse(cr, false);
                 Utilities.Toggle_Loading_Button(NewTransaction.PayNowPublicButton, false);
                 // need to reset the form and transaction / payment objects
             }, function (e) {
@@ -241,4 +241,4 @@ var clayPay;
     NewTransaction.paymentError = "paymentError";
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=NewTransaction.js.map
+//# sourceMappingURL=newtransaction.js.map
