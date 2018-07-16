@@ -42,9 +42,9 @@ namespace ClayPay.Models.Claypay
     public List<Payment> Payments { get; set; } = new List<Payment>();
     public List<string> Errors { get; set; } = new List<string>();
     public List<string> ProcessingErrors { get; set; } = new List<string>();
-    public decimal Change { get; set; } = 0;
     public decimal TotalAmountDue { get; set; } = 0; // provided by the client, this is the amount they used to calculate how much money to accept.
     public decimal ChangeDue { get; set; } = 0;
+
     public NewTransaction()
     {
 
@@ -170,7 +170,7 @@ namespace ClayPay.Models.Claypay
       {
         var amountPaid = (from payment in Payments select payment.AmountApplied).Sum();
 
-        return new ClientResponse(CashierId, this.CCData.TransactionId, ProcessingErrors, amountPaid, Change, CCData.Validated ? CCData.ConvenienceFeeAmount : 0);
+        return new ClientResponse(CashierId, this.CCData.TransactionId, ProcessingErrors, amountPaid, ChangeDue, CCData.Validated ? CCData.ConvenienceFeeAmount : 0);
       }
       else
       {
@@ -191,7 +191,6 @@ namespace ClayPay.Models.Claypay
 
     public bool ValidatePaymentTransaction()
     {
-
       // These rules do not include fields / forms, just how we validate the amount.
       // Payment Items to validate:      
       // 1. The Total charges must match the amount sent from the client.
@@ -422,9 +421,7 @@ namespace ClayPay.Models.Claypay
         END TRY
         BEGIN CATCH
           ROLLBACK TRAN
-        END CATCH
-      
-      ";
+        END CATCH";
       try
       {
         Constants.Exec_Query(sql, Charges);
