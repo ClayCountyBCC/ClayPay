@@ -33,7 +33,7 @@ namespace ClayPay.Models.Claypay
     public string PayerZip { get; set; } = "";// Required
     public int OTid { get; set; }
     public string CashierId { get; set; }
-    public List<int> ItemIds { get; set; }
+    public List<int> ItemIds { get; set; } = new List<int>();
     public List<Charge> Charges { get; set; }
     public CCPayment CCData { get; set; }
     public Payment CashPayment { get; set; }
@@ -47,7 +47,6 @@ namespace ClayPay.Models.Claypay
 
     public NewTransaction()
     {
-
     }
 
     public bool ValidatePayerData()
@@ -201,6 +200,12 @@ namespace ClayPay.Models.Claypay
 
       if (!ValidatePayerData()) // Lock IDs at the end of this function
       {
+        return false;
+      }
+
+      if(ItemIds.Count() == 0)
+      {
+        Errors.Add("No charges were found, please refresh this page and add your charges again.");
         return false;
       }
 
