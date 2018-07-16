@@ -410,34 +410,28 @@ namespace ClayPay.Models.Claypay
 
     public void UnlockChargeItems()
     {
-      if (ItemIds != null && ItemIds.Count() > 0)
-      {
-        var param = new DynamicParameters();
-        param.Add("@itemIdsToUnlock", ItemIds);
-        var sql = @"
+      var sql = @"
         USE WATSC;
 
         BEGIN TRAN
         BEGIN TRY
-        DELETE FROM ccChargeItemsLocked
-        WHERE TransactionDate < DATEADD(MI, -3, GETDATE())
-          OR ItemId IN (@itemIdsToUnlock)
+          DELETE FROM ccChargeItemsLocked
+          WHERE TransactionDate < DATEADD(MI, -3, GETDATE())
+            OR ItemId IN (@ItemId)
           COMMIT
         END TRY
         BEGIN CATCH
-          ROLLBACK
-          PRINT ERROR_MESSAGE()
+          ROLLBACK TRAN
         END CATCH
       
       ";
-        try
-        {
-          Constants.Exec_Query(sql, param);
-        }
-        catch (Exception ex)
-        {
-          Constants.Log(ex, sql);
-        }
+      try
+      {
+        Constants.Exec_Query(sql, Charges);
+      }
+      catch (Exception ex)
+      {
+        Constants.Log(ex, sql);
       }
     }
 
