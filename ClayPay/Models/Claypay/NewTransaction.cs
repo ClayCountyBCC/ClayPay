@@ -247,22 +247,6 @@ namespace ClayPay.Models.Claypay
         totalAmountPaid += this.CheckPayment.Amount;
 
       }
-      // if we get here, our check/cash/credit card payment should all be valid.
-
-      //if ((from p in Payments
-      //   where p.PaymentTypeValue == ""
-      //   select p).ToList().Count() > 0)
-      //{
-
-      //  this.Errors.Add($"There is an issue recording one or more payment types in this transaction.");
-      //  ProcessingErrors.Add($@"\nPlease do not attempt the transaction again and contact the building department.
-      //                           Reference Credit Card Transaction Id: {this.CCData.TransactionId}");
-      //  Constants.Log("issue with recording payment type.",
-      //                "Error setting payment type.",
-      //                Payments.ToString(),
-      //                $"Number of payment types: {Payments.Count()}, function call: Payment.SetPaymentTypeString().");
-      //  return false;
-      //}
 
       // If not cashier and cash || check, return error
       if (!this.CurrentUser.djournal_access &&
@@ -272,17 +256,6 @@ namespace ClayPay.Models.Claypay
         Errors.Add("Only cashier can accept cash and check payments");
         return false;
       }
-      //if (!this.CurrentUser.djournal_access &&
-      //   !this.CurrentUser.impactfee_access &&
-      //   (from p in Payments
-      //    where p.PaymentTypeValue == "CK" ||
-      //    p.PaymentTypeValue == "CA"
-      //    select p).ToList().Count() > 0
-      //   )
-      //{
-      //  Errors.Add("Only cashier can accept cash and check payments");
-      //  return false;
-      //}
 
       this.Charges = Charge.Get(ItemIds);
       var totalCharges = (from c in this.Charges
@@ -320,17 +293,7 @@ namespace ClayPay.Models.Claypay
         {
           CashPayment.AmountApplied = CashPayment.Amount - ChangeDue;
         }
-        //else
-        //{
-          
-        //  var cashpayment = (from p in Payments
-        //                     where p.PaymentType == Payment.payment_type.cash
-        //                     select p).First();
-        //  int cashindex = Payments.IndexOf(cashpayment);
 
-        //  Payments[cashindex].AmountApplied = cashpayment.AmountTendered - Change;
-
-        //}
       }
       else
       {
