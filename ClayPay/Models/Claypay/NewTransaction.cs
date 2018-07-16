@@ -123,10 +123,6 @@ namespace ClayPay.Models.Claypay
 
     public ClientResponse ProcessPaymentTransaction()
     {
-      if (!ValidatePaymentTransaction())
-      {
-        return new ClientResponse(Errors);
-      }
       // Process credit card payment if there is one. this will be moved to a separate function
       if (CCData.Validated)
       {
@@ -407,8 +403,7 @@ namespace ClayPay.Models.Claypay
       
       string query = @"
         USE WATSC;
-        DECLARE @CashierId VARCHAR(9) = NULL;
-        DECLARE @otId int = NULL;
+        --DECLARE @otId int = NULL;
         DECLARE @TransDt = GETDATE();
 
         BEGIN TRANSACTION;
@@ -463,10 +458,10 @@ namespace ClayPay.Models.Claypay
             COMMIT TRANSACTION;";
       try
       {
-        var i = Constants.Save_Data(query, this);
+        var i = Constants.Exec_Query<NewTransaction>(query, this);
         CashierId = dbArgs.Get<string>("@CashierId");
         OTid = dbArgs.Get<Int32>("@otId");
-        return (i);
+        return i == 0;
       }
       catch (Exception ex)
       {
