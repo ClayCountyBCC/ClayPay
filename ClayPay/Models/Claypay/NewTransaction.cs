@@ -154,7 +154,7 @@ namespace ClayPay.Models.Claypay
       // Since we're ready to save, let's take the valid payments 
       // and add them to the payments list.
       if (CashPayment.Validated) Payments.Add(CashPayment);
-      if (CCData.Validated) Payments.Add(new Payment(CCData, CurrentUser));
+      if (CCData.Validated) Payments.Add(new Payment(CCData, Environment.MachineName.ToUpper() == "CLAYBCCIIS01" ? Payment.payment_type.credit_card_cashier : Payment.payment_type.credit_card_public));
       if (CheckPayment.Validated) Payments.Add(CheckPayment);
       // OtherPayment will probably only be used in this process to apply
       // the partial impact fee credit when the rest of the fee is paid.

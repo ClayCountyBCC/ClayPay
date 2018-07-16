@@ -10,11 +10,12 @@ namespace clayPay
   {
     cash = 0,
     check = 1,
-    credit_card = 2,
+    credit_card_public = 2,
     impact_fee_credit = 3,
     impact_fee_exemption = 4,
     impact_fee_waiver_school = 5,
-    impact_fee_waiver_road = 6
+    impact_fee_waiver_road = 6,
+    credit_card_cashier = 7
   }
 
   interface IPayment

@@ -13,11 +13,12 @@ namespace ClayPay.Models.Claypay
     {
       cash = 0,
       check = 1,
-      credit_card = 2,
+      credit_card_public = 2,
       impact_fee_credit = 3,
       impact_fee_exemption = 4,
       impact_waiver_school = 5,
-      impact_waiver_road = 6
+      impact_waiver_road = 6,
+      credit_card_cashier = 7
     }
 
     public payment_type PaymentType { get; set; }
@@ -28,16 +29,20 @@ namespace ClayPay.Models.Claypay
       {
         switch (PaymentType)
         {
+          case payment_type.credit_card_cashier:
+            return "cc_cashier";
+          case payment_type.credit_card_public:
+            return "cc_online";
 
-          case payment_type.credit_card:
-            switch (Environment.MachineName.ToUpper())
-            {
-              case "CLAYBCCIIS01":
-                return "cc_cashier";
-              case "CLAYBCCDMZIIS01":
-                return "cc_online";
-            }
-            return "cc_test";
+          //case payment_type.credit_card:
+          //  switch (Environment.MachineName.ToUpper())
+          //  {
+          //    case "CLAYBCCIIS01":
+          //      return "cc_cashier";
+          //    case "CLAYBCCDMZIIS01":
+          //      return "cc_online";
+          //  }
+          //  return "cc_test";
           case payment_type.check:
             return "CK";
           case payment_type.cash:
@@ -80,9 +85,9 @@ namespace ClayPay.Models.Claypay
       this.PaymentType = pt;
     }   
 
-    public Payment(CCPayment ccpayment, UserAccess ua)
+    public Payment(CCPayment ccpayment, payment_type pt)
     {
-      PaymentType = payment_type.credit_card;
+      PaymentType = pt;
       Amount = ccpayment.Amount;
       TransactionId = ccpayment.TransactionId;
     }
