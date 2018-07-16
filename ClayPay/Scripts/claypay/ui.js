@@ -595,4 +595,4 @@ var clayPay;
         UI.ShowPaymentMethod = ShowPaymentMethod;
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map

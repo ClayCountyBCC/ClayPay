@@ -8,6 +8,10 @@ var clayPay;
         payment_type[payment_type["cash"] = 0] = "cash";
         payment_type[payment_type["check"] = 1] = "check";
         payment_type[payment_type["credit_card"] = 2] = "credit_card";
+        payment_type[payment_type["impact_fee_credit"] = 3] = "impact_fee_credit";
+        payment_type[payment_type["impact_fee_exemption"] = 4] = "impact_fee_exemption";
+        payment_type[payment_type["impact_fee_waiver_school"] = 5] = "impact_fee_waiver_school";
+        payment_type[payment_type["impact_fee_waiver_road"] = 6] = "impact_fee_waiver_road";
     })(payment_type = clayPay.payment_type || (clayPay.payment_type = {}));
     class Payment {
         constructor(paymentType) {

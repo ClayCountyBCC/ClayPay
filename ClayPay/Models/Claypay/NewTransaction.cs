@@ -6,12 +6,14 @@ using Dapper;
 
 using ClayPay.Controllers;
 using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
 
 namespace ClayPay.Models.Claypay
 {
   public class NewTransaction
   {
-    public UserAccess useraccess { get; set; }
+    public UserAccess CurrentUser { get; set; }
     public string PayerCompanyName { get; set; } = "";
     public string PayerFirstName { get; set; } = ""; // Required
     public string PayerLastName { get; set; } = "";// Required
@@ -32,238 +34,368 @@ namespace ClayPay.Models.Claypay
     public int OTid { get; set; }
     public string CashierId { get; set; }
     public List<int> ItemIds { get; set; }
+    public List<Charge> Charges { get; set; }
     public CCPayment CCData { get; set; }
-    public List<Payment> Payments { get; set; }
+    public Payment CashPayment { get; set; }
+    public Payment CheckPayment { get; set; }
+    public Payment OtherPayment { get; set; } = new Payment(); // for waivers / credits / etc.
+    public List<Payment> Payments { get; set; } = new List<Payment>();
     public List<string> Errors { get; set; } = new List<string>();
-    public List<string> ProcessingErros { get; set; } = new List<string>();
-    public decimal Change { get; set; }
-
+    public List<string> ProcessingErrors { get; set; } = new List<string>();
+    public decimal Change { get; set; } = 0;
+    public decimal TotalAmountDue { get; set; } = 0; // provided by the client, this is the amount they used to calculate how much money to accept.
+    public decimal ChangeDue { get; set; } = 0;
     public NewTransaction()
     {
 
     }
 
-    public ClientResponse ProcessTransaction()
+    public bool ValidatePayerData()
     {
+      // Required fields:
+      // PayerFirstName
+      // PayerLastName
+      // PayerPhoneNumber
+      // PayerStreetAddress
+      // PayerCity
+      // PayerState
+      // PayerZip
+      PayerCity = PayerCity.Trim();
+      PayerFirstName = PayerFirstName.Trim();
+      PayerLastName = PayerLastName.Trim();
+      PayerCity = PayerCity.Trim();
+      PayerState = PayerState.Trim();
+      PayerZip = PayerZip.Trim();
+      PayerPhoneNumber = PayerPhoneNumber.Trim();
+      PayerEmailAddress = PayerEmailAddress.Trim();
+      PayerCompanyName = PayerCompanyName.Trim();
 
-      // process cc payments here
-      if (ValidateTransaction())
+      if(PayerFirstName.Length == 0)
       {
-        //LockChargeItems();
-        //var charges = Charge.Get(ItemIds);
-
-        // Process credit card payment if there is one. this will be moved to a separate function
-        if (CCData.Validated)
+        Errors.Add("The Payer's First name is a required field.");
+        return false;
+      }
+      if (PayerLastName.Length == 0)
+      {
+        Errors.Add("The Payer's Last name is a required field.");
+        return false;
+      }
+      if (PayerPhoneNumber.Length == 0)
+      {
+        Errors.Add("The Payer's phone number is a required field.");
+        return false;
+      }
+      if(PayerEmailAddress.Length > 0)
+      {
+        try
         {
-
-          var pr = PaymentResponse.PostPayment(this.CCData, ipAddress);
-
-          if (pr == null)
-          {
-            Errors.Add("There was an issue with processing the credit card transaction.");
-            UnlockChargeItems();
-            return new ClientResponse("", "", Errors, ProcessingErros, 0,0);
-          }
-          else
-          {
-            if (pr.ErrorText.Length > 0)
-            {
-              ProcessingErros.Add(pr.ErrorText);
-              UnlockChargeItems();
-              return new ClientResponse("","", Errors, ProcessingErros, 0,0);
-            }
-            else
-            {
-              var ccdata = (from p in Payments where p.PaymentType == Payment.payment_type_enum.credit_card select p).FirstOrDefault();
-              Payments[Payments.IndexOf(ccdata)].TransactionId = pr.UniqueId;
-              CCData.ConvenienceFeeAmount = pr.ConvFeeAmount;
-
-            }
-          }
+          var email = new System.Net.Mail.MailAddress(PayerEmailAddress);
         }
-
-        // Inside pr.Save take all payments and process them.
-        if (Errors.Count() == 0)
+        catch(FormatException fe)
         {
-          if (SavePayments())
-          {
-            var amountPaid = (from payment in Payments select payment.AmtApplied).Sum();
-
-            // Set up Email for online Credit card payments
-            if (Constants.UseProduction() && CCData.Validated)
-            {
-
-                Constants.SaveEmail("OnlinePermits@claycountygov.com",
-                $"Payment made - Receipt # {CashierId}, Transaction # {this.CCData.TransactionId} ",
-                CreateEmailBody());
-            }
-            else
-            {
-                Constants.SaveEmail("daniel.mccartney@claycountygov.com; jeremy.west@claycountygov.com",
-                $"TEST Payment made - Receipt # {CashierId}, Transaction # {this.CCData.TransactionId} -- TEST SERVER",
-                CreateEmailBody());
-            }
-            return new ClientResponse(CashierId, this.CCData.TransactionId, Errors, ProcessingErros, amountPaid, Change, CCData.Validated ? CCData.ConvenienceFeeAmount : 0);
-          }
-          else
-          {
-            
-            if (this.CCData.Validated) 
-            {
-              // getting here is bad
-              ProcessingErros.Add($@"\nPlease do not attempt the transaction again and contact the building department.
-                                 Reference Credit Card Transaction Id: {this.CCData.TransactionId}");
-            }     
-            else
-            {
-              Errors.Add(@"There was an issue saving the transaction.");
-            }
-            // TODO: This is where we handle the transaction if we need to attempt saving it again.
-          }
-          
+          Errors.Add("The email address provided does not appear to be in a valid format.");
+          return false;
         }
       }
-      UnlockChargeItems();
-      return new ClientResponse(CashierId, this.CCData.Validated ? this.CCData.TransactionId : "", Errors, ProcessingErros, -1, 0);
+      if(PayerStreetAddress.Length == 0)
+      {
+        Errors.Add("The Payer's Street Address must be provided.");
+        return false;
+      }
+
+      if(PayerCity.Length == 0)
+      {
+        Errors.Add("The Payer's City must be provided.");
+        return false;
+      }
+      if (PayerState.Length == 0)
+      {
+        Errors.Add("The Payer's State must be provided.");
+        return false;
+      }
+      if(PayerZip.Length == 0)
+      {
+        Errors.Add("The Payer's Zip Code must be provided.");
+        return false;
+      }
+
+      return false;
     }
 
-    public bool ValidateTransaction()
+    public ClientResponse ProcessPaymentTransaction()
     {
-      if (this.ipAddress.Length == 0)
+      if (!ValidatePaymentTransaction())
       {
-        Constants.Log("Issue in ValidateTransaction()", 
-                      "IP Address could not be captured", 
-                       Environment.MachineName.ToUpper() + "; Date: " + DateTime.Now.ToString(), "ClayPay.NewTransaction.cs");
+        return new ClientResponse(Errors);
       }
+      // Process credit card payment if there is one. this will be moved to a separate function
+      if (CCData.Validated)
+      {
 
-      if (this.CCData.Validated)//CCPayment != null && CCPayment.Total > 0)
-      { // validate credit card data if exists
-        Errors = this.CCData.ValidateCCData();
+        var pr = PaymentResponse.PostPayment(this.CCData, ipAddress);
 
-        if (Errors.Count() > 0)
+        if (pr == null)
         {
-          return false;
+          Errors.Add("There was an issue with processing the credit card transaction.");
+          UnlockChargeItems();
+          return new ClientResponse(Errors);
         }
         else
         {
-          Payments.Add(new Payment(this.CCData, useraccess));
+          if (pr.ErrorText.Length > 0)
+          {
+            Errors.Add(pr.ErrorText);
+            UnlockChargeItems();
+            return new ClientResponse(Errors);
+          }
+          else
+          {
+            CCData.TransactionId = pr.UniqueId;
+            CCData.ConvenienceFeeAmount = pr.ConvFeeAmount;
+          }
         }
       }
 
-      if ((from p in Payments
-         where p.PaymentTypeString == ""
-         select p).ToList().Count() > 0)
+      if (SaveTransaction()) // Unlock IDs at the end of this function
       {
+        var amountPaid = (from payment in Payments select payment.AmountApplied).Sum();
 
-        this.Errors.Add($"There is an issue recording one or more payment types in this transaction.");
-        ProcessingErros.Add($@"\nPlease do not attempt the transaction again and contact the building department.
+        return new ClientResponse(CashierId, this.CCData.TransactionId, ProcessingErrors, amountPaid, Change, CCData.Validated ? CCData.ConvenienceFeeAmount : 0);
+      }
+      else
+      {
+        if (this.CCData.Validated)
+        {
+          // getting here is bad
+          ProcessingErrors.Add($@"\nPlease do not attempt the transaction again and contact the building department.
                                  Reference Credit Card Transaction Id: {this.CCData.TransactionId}");
-        Constants.Log("issue with recording payment type.",
-                      "Error setting payment type.",
-                      Payments.ToString(),
-                      $"Number of payment types: {Payments.Count()}, function call: Payment.SetPaymentTypeString().");
+          return new ClientResponse("", this.CCData.TransactionId, ProcessingErrors, 0, 0);
+        }
+        else
+        {
+          Errors.Add(@"There was an issue saving the transaction.");
+          return new ClientResponse(Errors);
+        }
+      }
+    }
+
+    public bool ValidatePaymentTransaction()
+    {
+
+      // These rules do not include fields / forms, just how we validate the amount.
+      // Payment Items to validate:      
+      // 1. The Total charges must match the amount sent from the client.
+      // 2. The Total amount paid must be equal to or greater than the total charges.
+      //  2a. The total amount paid can only be greater than the amount paid if cash is being used.
+      //  2b. The difference between the total amount paid and the total charges cannot be greater
+      //      than the amount of cash paid. (TotalAmountPaid - TotalCharges) <= TotalCashPaid
+
+      if (!ValidatePayerData()) // Lock IDs at the end of this function
+      {
         return false;
       }
-    
+
+      if (this.CashPayment.PaymentType != Payment.payment_type.cash ||
+        this.CheckPayment.PaymentType != Payment.payment_type.check ||
+        this.OtherPayment.PaymentType == Payment.payment_type.cash ||
+        this.OtherPayment.PaymentType == Payment.payment_type.check)
+      {
+        this.Errors.Add("There is an issue with the chosen payment types.  Please refresh this page and try again.");
+        return false;
+      }
+
+      decimal totalAmountPaid = 0;
+
+      if (this.CCData.Validated)
+      { // validate credit card data if exists
+        Errors = this.CCData.ValidateCCData();
+
+        if (Errors.Count() > 0) return false;
+
+        totalAmountPaid += this.CCData.Amount;
+      }
+
+
+      if (this.CashPayment.Validated)
+      {
+        if (!this.CashPayment.Validate())
+        {
+          this.Errors.Add(this.CashPayment.Error);
+          return false;
+        }
+
+        totalAmountPaid += this.CashPayment.Amount;
+
+      }
+      if (this.CheckPayment.Validated)
+      {
+        if (!this.CheckPayment.Validate())
+        {
+          this.Errors.Add(this.CheckPayment.Error);
+          return false;
+        }
+
+        totalAmountPaid += this.CheckPayment.Amount;
+
+      }
+      // if we get here, our check/cash/credit card payment should all be valid.
+
+      //if ((from p in Payments
+      //   where p.PaymentTypeValue == ""
+      //   select p).ToList().Count() > 0)
+      //{
+
+      //  this.Errors.Add($"There is an issue recording one or more payment types in this transaction.");
+      //  ProcessingErrors.Add($@"\nPlease do not attempt the transaction again and contact the building department.
+      //                           Reference Credit Card Transaction Id: {this.CCData.TransactionId}");
+      //  Constants.Log("issue with recording payment type.",
+      //                "Error setting payment type.",
+      //                Payments.ToString(),
+      //                $"Number of payment types: {Payments.Count()}, function call: Payment.SetPaymentTypeString().");
+      //  return false;
+      //}
+
       // If not cashier and cash || check, return error
-      if (!this.useraccess.djournal_access &&
-         !this.useraccess.impactfee_access &&
-         (from p in Payments
-          where p.PaymentTypeString == "CK" ||
-          p.PaymentTypeString == "CA"
-          select p).ToList().Count() > 0
-         )
+      if (!this.CurrentUser.djournal_access &&
+        (this.CashPayment.Validated ||
+        this.CheckPayment.Validated))
       {
         Errors.Add("Only cashier can accept cash and check payments");
         return false;
       }
-      
-      var totalCharges = (from c in Charge.Get(ItemIds) select c.Total).Sum();
-      decimal totalPaymentAmount = (from p in Payments select p.Amount).Sum();
+      //if (!this.CurrentUser.djournal_access &&
+      //   !this.CurrentUser.impactfee_access &&
+      //   (from p in Payments
+      //    where p.PaymentTypeValue == "CK" ||
+      //    p.PaymentTypeValue == "CA"
+      //    select p).ToList().Count() > 0
+      //   )
+      //{
+      //  Errors.Add("Only cashier can accept cash and check payments");
+      //  return false;
+      //}
 
-      if (totalPaymentAmount <= 0 || totalPaymentAmount < totalCharges)
+      this.Charges = Charge.Get(ItemIds);
+      var totalCharges = (from c in this.Charges
+                          select c.Total).Sum();
+
+      ChangeDue = totalAmountPaid - totalCharges;
+
+      if (totalCharges != this.TotalAmountDue)
+      {
+        this.Errors.Add("Please clear your cart and try this payment again. It is likely that some of the charges in your cart have been paid, or their amounts have been changed.");
+        return false;
+      }
+
+      if (CCData.Amount > totalCharges || CheckPayment.Amount > totalCharges)
+      {
+        Errors.Add("The Total Charges cannot be less than the amount paid for Checks or Credit Cards.");
+        return false;
+      }
+
+      if (totalAmountPaid <= 0 || totalAmountPaid < totalCharges)
       {
         this.Errors.Add("Payment amount must be greater than 0 and equal to or greater than the sum of the charges.\n");
         return false;
       }
-      
+
       // AmountTenderd and Total of charges can be different if cash is involved 
-      var hasCash = (from p in Payments
-                     where p.PaymentType == Payment.payment_type_enum.cash
-                     select p).ToList().Count() > 0;
-
-      if ((!hasCash && totalPaymentAmount != totalCharges))
+      if (CashPayment.Validated) // do this if there is a cash payment.
       {
-        Errors.Add("The total for this transaction has changed.  Please check the charges and try again.");
-        return false;
-      }
-
-      if (hasCash)
-      {
-        var 
-        Change = totalPaymentAmount - totalCharges;
-        if (Change > (from p in Payments where p.PaymentType == Payment.payment_type_enum.cash select p.AmtTendered).Sum())
+        if (ChangeDue >= CashPayment.Amount)
         {
-          Change = 0;
           Errors.Add("The amount returned to the customer cannot be greater than the amount of cash tendered.");
           return false;
         }
-        else
+        if(ChangeDue > 0)
         {
-          var cashpayment = (from p in Payments
-                             where p.PaymentType == Payment.payment_type_enum.cash
-                             select p).First();
-          int cashindex = Payments.IndexOf(cashpayment);
+          CashPayment.AmountApplied = CashPayment.Amount - ChangeDue;
+        }
+        //else
+        //{
+          
+        //  var cashpayment = (from p in Payments
+        //                     where p.PaymentType == Payment.payment_type.cash
+        //                     select p).First();
+        //  int cashindex = Payments.IndexOf(cashpayment);
 
-          Payments[cashindex].AmtApplied = cashpayment.AmtTendered - Change;
-        
-          }
+        //  Payments[cashindex].AmountApplied = cashpayment.AmountTendered - Change;
+
+        //}
       }
-
-      if (Errors.Count == 0)
+      else
       {
-        var lockCheck = LockChargeItems();
-        if (!lockCheck)
+        if (totalAmountPaid > totalCharges) // this won't include any cash payments.
         {
-          Errors.Add("A transaction is already in process for one or more of these charges.  Please wait a few moments and try again.");
+          Errors.Add("The amount paid cannot be greater than the Total Amount Due.  Please refresh the page and try again.");
           return false;
         }
+      }
+      if (Errors.Count > 0) return false;
+      var lockCheck = LockChargeItems();
+      if (!lockCheck)
+      {
+        Errors.Add("A transaction is already in process for one or more of these charges.  Please wait a few moments and try again.");
+        return false;
       }
       return true;
     }
 
     public bool LockChargeItems()
     {
-      if (ItemIds != null && ItemIds.Count() > 0)
-      {
-        var param = new DynamicParameters();
-        param.Add("@ItemIds", ItemIds);
-        var sql = @"
+      var sql = @"
         USE WATSC;
         BEGIN TRAN
           BEGIN TRY
 
             DELETE ccChargeItemsLocked
-            WHERE TransactionDate < DATEADD(MI, -3, GETDATE())
+            WHERE TransactionDate < DATEADD(MI, -3, GETDATE());
 
             INSERT INTO ccChargeItemsLocked
             (ItemId)  
             VALUES
-            (@ItemIds)
+            (@ItemId)
 
-            COMMIT
+            COMMIT;
           END TRY
 
           BEGIN CATCH
             ROLLBACK TRAN
           END CATCH
       ";
-
-          var rowsAffected = Constants.Exec_Query(sql, param); 
-          return rowsAffected > 0;
-      }
-
-      return false;
+      return Constants.Exec_Query<List<Charge>>(sql, this.Charges) > 0;
+      // Profiling code to see what Dapper was doing.
+      // this code required MiniProfiler (3.2.something, the latest didn't work)
+      // and MiniProfiler.Integrations (2.2)
+      //try
+      //{
+      //  var cs = Constants.Get_ConnStr("WATSC" + (Constants.UseProduction() ? "Prod" : "QA"));
+      //  var factory = new SqlServerDbConnectionFactory(cs);
+      //  using (var connection = DbConnectionFactoryHelper.New(factory, CustomDbProfiler.Current))
+      //  {
+      //    try
+      //    {
+      //      //using (IDbConnection db = new SqlConnection(cs))
+      //      //{
+      //        var i = connection.Execute(sql, this.Charges);
+      //        string commands = CustomDbProfiler.Current.ProfilerContext.GetCommands();
+      //        return i > 0;
+      //      //}
+      //    }
+      //    catch(Exception ex)
+      //    {
+      //      string test = CustomDbProfiler.Current.ProfilerContext.GetCommands();
+      //      Constants.Log(ex, sql);
+      //      return false;
+      //    }
+      //  }
+      //}
+      //catch (Exception ex)
+      //{
+      //  string commands = CustomDbProfiler.Current.ProfilerContext.GetCommands();
+      //  Constants.Log(ex, sql);
+      //  return false;
+      //}
     }
 
     public void UnlockChargeItems()
@@ -299,7 +431,7 @@ namespace ClayPay.Models.Claypay
       }
     }
 
-    public bool SavePayments()
+    public bool SaveTransaction()
     {
       //var transId = (from p in Payments 
       //               where p.GetPaymentTypeString() != "CA" 
@@ -312,16 +444,13 @@ namespace ClayPay.Models.Claypay
       //dbArgs.Add("@TransactionId", CCPayment.TransactionId);
       //dbArgs.Add("@ItemIds", ItemIds);
       //dbArgs.Add("@TransDt", DateTime.Now);
-    
-      string selectQuery = @"
-        select ItemId, TransactionId, 
-      ";
+
       
       string query = @"
         USE WATSC;
         DECLARE @CashierId VARCHAR(9) = NULL;
         DECLARE @otId int = NULL;
-        DECLARE @TransDt = @TimeStamp
+        DECLARE @TransDt = GETDATE();
 
         BEGIN TRANSACTION;
 
@@ -330,19 +459,18 @@ namespace ClayPay.Models.Claypay
           
           EXEC dbo.prc_ins_ClayPay_ccCashier_NewOTid 
             @otId int output, 
-            @CoName varchar(50),
-            @CashierId varchar(10) = null,
-            @Name varchar(50),
-            @OperId varchar(4),
-            @TransDt DateTime = null,
-            @StationId Int = null,
-            @Phone varchar(12),
-            @Addr1 varchar(50),
-            @Addr2 varchar(50),
-            @NTUser varchar(50)
+            @CoName = @CompanyName,
+            @CashierId,
+            @Name = @PayerFirstName + ' ' + @PayerLastName,
+            @OperId = NULL,
+            @TransDt,
+            @Phone,
+            @Addr1,
+            @Addr2 = @PayerCity + ' ' + @PayerState + ', ' + @PayerZip,
+            @NTUser
 
 
-          INSERT INTO ccCashierPayment
+          INSERT INTO ccCashierPayment (OTid, PmtType, AmtApplied, AmtTendered, Info, CkNo)
           VALUES (@Payments)
           
           -- EXEC dbo.prc_ins_ClayPay_ccCashierPayment_NewPayment
@@ -386,6 +514,10 @@ namespace ClayPay.Models.Claypay
       {
         Constants.Log(ex, query);
         return false;
+      }
+      finally
+      {
+        UnlockChargeItems(); //always runs
       }
     }
 
@@ -526,302 +658,6 @@ namespace ClayPay.Models.Claypay
       }
     }
 
-    public string Save_GetNextCashierId_Query()
-    {
-      //var param = new DynamicParameters();
-      //param.Add("@YR", DateTime.Now.Year.ToString("yy"));
-
-
-      // I don't know if the year is supposed to be the fiscal year.
-      // the code in  prc_upd_ccNextCashierId sets FY = the @Yr var
-      // code for @Yr checks the current year against the FY field and if it is not equal,
-      // it updates the FY and next avail fieldfield
-      var sql = @"
-      DECLARE @YR VARCHAR(2) = RIGHT(CAST(DATEPART(YEAR,GETDATE()) AS VARCHAR), 2)
-
-      SELECT RTRIM(CAST(FY AS CHAR(2))) + '-' +  
-        REPLICATE('0', 6-LEN(LTRIM(CAST(NextAvail AS VARCHAR(6)))))  + 
-        CAST(NextAvail AS VARCHAR(6)) CashierId 
-      INTO #Next_Id
-      FROM ccNextAvail 
-      WHERE NAKey = 'Cashier'
-       
-      UPDATE ccNextAvail
-      SET
-        NextAvail = CASE WHEN FY != @YR THEN 1 ELSE NextAvail + 1 END,
-        FY = CASE WHEN FY != @YR THEN @YR ELSE FY END
-      WHERE NAKey = 'Cashier'
-
-      SELECT CashierId FROM #Next_Id
-      DROP TABLE #Next_Id
-      ";
-
-      return sql;
-    }
-
-    public string Save_InsertNewCashierRow_Query(string cashierId, string name, string NTUser, int stationId)
-    {
-      //var param = new DynamicParameters();
-      //param.Add("@CashierId", cashierId);
-      //param.Add("@name", name);
-      //param.Add("@NTUser", NTUser);
-      //param.Add("@StationId", stationId);
-      return @"
-      DECLARE @OTid INT;
-
-      INSERT INTO ccCashier
-        (Name, CashierId, LstUpdt, OperId, TransDt, StationId)
-      VALUES     
-        (@Name, @CashierId, @NTUser, @OperId, GETDATE(), @StationId)
-      set @OTId = @@IDENTITY
-      ";
-
-    }
-
-    public string Save_UpdateCashierRow_Query(int OTid, string phone, string address1, string address2, string name, string NTUser, int stationId)
-    {
-      //var param = new DynamicParameters();
-      //param.Add("@OTid", OTid);
-      //param.Add("@name", name);
-      //param.Add("@phone", phone);
-      //param.Add("@address1", address1);
-      //param.Add("@address2", address2);
-      //param.Add("@NTUser", NTUser);
-      //param.Add("@StationId", stationId);
-      return @"
-
-      UPDATE ccCashier
-      SET Name =@Name, CoName =@CoName, Phone =@Phone, Addr1 =@Addr1, Addr2 =@Addr2, 
-                  NTUser =@NTUser, StationId =@StationId, TimeStamp =GETDATE()
-      WHERE   (OTId = @OTId)
-      ";
-
-    }
-
-    public string Save_UpdateCashierItemRows_Query(List<int> itemIds)
-    {
-      //var param = new DynamicParameters();
-      //param.Add("@OTid", OTId);
-      //param.Add("@ItemIds", itemIds);
-      return @"
-      UPDATE ccCashierItem 
-      SET OTId = @otId, CashierId = @cId
-      WHERE itemId IN @ItemIds
-      ";
-
-    }
-
-    public string Save_AddGURows_Query(int OTid)
-    {
-      //var param = new DynamicParameters();
-      //param.Add("@OTid", OTId);
-      return @"
-        INSERT INTO ccGU (OTId, CashierId, ItemId, PayID, CatCode, TransDt)
-        SELECT DISTINCT CCI.OTId, CCI.CashierId, CCI.ItemId, NULL, CCI.CatCode, GETDATE()
-        FROM ccCashierItem CCI
-        INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
-        WHERE CCI.OTId = @OTId
-
-      ";
-    }
-
-    public string Save_AddGUIItemRows_Query(int OTid)
-    {
-      //var param = new DynamicParameters();
-      //param.Add("@OTid", OTId);
-      return @"
-          INSERT INTO ccGUItem (GUID, Account, Amount, Type)
-          SELECT 
-            GU.GUId,
-            GL.Fund + '*' + GL.Account + '**' AS Account,
-          FORMAT(
-          CASE GL.[Percent] 
-            WHEN 0.05 THEN
-              CASE WHEN CAST(ROUND((Total * 99.9) / 100, 2) + (ROUND((Total * 0.05) / 100, 2)*2) AS MONEY) > CCI.Total THEN
-                CASE WHEN Fund <> '001' THEN 
-                  ROUND((Total * GL.[Percent]) / 100, 2) - .01
-                ELSE 
-                  ROUND((Total * GL.[Percent]) / 100, 2) 
-                END
-              ELSE
-                ROUND((Total * GL.[Percent]) / 100, 2) 
-              END
-            WHEN 50 THEN
-              CASE WHEN (ROUND((Total * GL.[Percent]) / 100, 2)*2) <> CCI.Total THEN
-                CASE WHEN GL.Account = '322100' THEN
-                    ROUND((Total * GL.[Percent]) / 100, 2) + (CCI.Total -  (ROUND((Total * GL.[Percent]) / 100, 2)*2))
-                ELSE
-                  ROUND((Total * GL.[Percent]) / 100, 2) 
-                END
-              ELSE
-                ROUND((Total * GL.[Percent]) / 100, 2) 
-              END
-            ELSE
-              ROUND(Total / (100 / GL.[Percent]), 2) 
-            END
-          , 'N2') AS Amount,
-            GL.Type
-          FROM ccCashierItem CCI
-          INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
-          INNER JOIN ccGU GU ON CCI.OTId = GU.OTId AND CCI.ItemId = GU.ItemId
-          WHERE CCI.OTId = @OTId
-          ORDER BY CCI.ItemId, GL.Type
-
-      ";
-
-    }
-
-    public string Finalize_UpdateClearanceSheetHolds_Query(string cashierId, string username)
-    {
-      return @"
-      -- Handle Clearance Sheet Holds
-      UPDATE H
-        SET HldDate = GETDATE(), 
-          HldIntl ='claypay', 
-          HldInput =@cId
-      FROM bpHold H
-      INNER JOIN (
-      SELECT DISTINCT 
-        CASE CCI.Assoc
-          WHEN 'IF' THEN '1IMP'
-        ELSE 
-          CASE WHEN CCI.HoldId IS NULL OR CCI.HoldID = 0 THEN
-            CASE CCI.CatCode
-              WHEN 'REV' THEN '1REV'
-              WHEN 'REVF' THEN '0REV'
-              WHEN 'CLA' THEN '1SWF'
-            ELSE ''
-              END
-          ELSE
-            ''
-          END
-        END AS HldCd,
-        CASE WHEN CCI.Assoc = 'IF' THEN ''
-        ELSE CCI.AssocKey
-        END AS PermitNo,
-        CASE WHEN CCI.Assoc = 'IF' THEN CCI.AssocKey
-        ELSE ''
-        END AS Clrsht
-      FROM ccCashierItem CCI
-      INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
-      WHERE CCI.OTId = 0
-      AND CCI.Assoc='IF'
-      ) AS C ON H.Clrsht=C.Clrsht AND H.HldCd = C.HldCd
-      WHERE C.HldCd <> '' AND C.Clrsht <> '';
-
-      UPDATE H
-        SET HldDate = GETDATE(), 
-          HldIntl ='claypay', 
-          HldInput =@cId
-      FROM bpHold H
-      INNER JOIN (
-      SELECT DISTINCT 
-        CASE CCI.Assoc
-          WHEN 'IF' THEN '1IMP'
-        ELSE 
-          CASE WHEN CCI.HoldId IS NULL OR CCI.HoldID = 0 THEN
-            CASE CCI.CatCode
-              WHEN 'REV' THEN '1REV'
-              WHEN 'REVF' THEN '0REV'
-              WHEN 'CLA' THEN '1SWF'
-            ELSE ''
-              END
-          ELSE
-            ''
-          END
-        END AS HldCd,
-        CASE WHEN CCI.Assoc = 'IF' THEN ''
-        ELSE CCI.AssocKey
-        END AS PermitNo,
-        CASE WHEN CCI.Assoc = 'IF' THEN CCI.AssocKey
-        ELSE ''
-        END AS Clrsht
-      FROM ccCashierItem CCI
-      INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
-      WHERE CCI.OTId = @otId
-      AND CCI.Assoc='IF'
-      ) AS C ON H.PermitNo=C.PermitNo AND H.HldCd = C.HldCd
-      WHERE C.HldCd <> '' AND C.PermitNo <> '';
-      ";
-
-    }
-
-    public string Finalize_HandleHolds_Query()
-    {
-      return @"
-      --Handle HoldIds
-        USE WATSC;
-        WITH HoldIds (HoldId) AS (
-          SELECT HoldId FROM ccCashierItem
-          WHERE HoldId > 0
-            AND OTid = @OTid)
-        UPDATE H
-         SET HldDate = GETDATE(), 
-             HldIntl = 'claypay', 
-             HldInput = @cId
-         FROM bpHold H
-         INNER JOIN HoldIds HI ON H";
-
-
-    }
-
-    public string Finalize_IssueAssociatedPermits_Query()
-    {
-      return @"
-        
-
-      --Issue Associated Permits
-          UPDATE bpASSOC_PERMIT
-          SET IssueDate = GETDATE()
-          WHERE IssueDate IS NULL AND
-            PermitNo IN
-            (SELECT DISTINCT AssocKey
-              FROM ccCashierItem
-              WHERE OTId = @otId AND
-              Assoc NOT IN('AP', 'CL') AND
-              LEFT(AssocKey, 1) NOT IN('1', '7') AND
-              (SELECT ISNULL(SUM(Total), 0) AS Total
-                FROM ccCashierItem
-                WHERE AssocKey IN(SELECT DISTINCT AssocKey
-                                  FROM ccCashierItem
-                                  WHERE OTId = @otId) AND
-                CashierId IS NULL AND Total > 0) = 0);
-                ";
-    }
-
-    public string Finalize_UpdateContractorPayments_Query()
-    {
-      return @"         
-          -- Update Contractor Payments
-          DECLARE @ExpDt VARCHAR(20) = (SELECT TOP 1 Description
-          FROM clCategory_Codes WHERE Code = 'dt' AND Type_Code = '9');";
-
-
-    }
-
-    public string Finalize_UpdateContractor_Query()
-    {
-      return @"          UPDATE clContractor
-          SET IssueDt=GETDATE(), ExpDt=@ExpDt, BlkCrdExpDt=@ExpDt
-          WHERE ContractorCd NOT LIKE 'AP%' AND 
-            ContractorCd IN 
-            (SELECT DISTINCT AssocKey 
-              FROM ccCashierItem 
-              WHERE OTId=@otId AND
-                Assoc='CL' AND
-                CatCode IN ('CLLTF', 'CLFE', 'CIAC', 'LFE') AND
-              (SELECT ISNULL(SUM(Total), 0) AS Total 
-                FROM ccCashierItem
-                WHERE AssocKey IN (SELECT DISTINCT AssocKey 
-                                  FROM ccCashierItem 
-                                  WHERE OTId=@OTId) AND
-                CashierId IS NULL AND Total > 0) = 0);";
-    }
-
-    //public void GenerateEmail()
-    //{
-
-    //}
 
     public string CreateEmailBody()
     {

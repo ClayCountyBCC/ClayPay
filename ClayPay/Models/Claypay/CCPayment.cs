@@ -124,13 +124,5 @@ namespace ClayPay.Models
       return e;
     }
 
-    //public void UnlockIds(List<long> itemIds)
-    //{
-    //  //ActiveTransactions.Finish(this.ItemIds);
-    //  ActiveTransactions.UnlockChargeItems(itemIds);
-
-    //}
-
-
   }
 }

@@ -281,22 +281,20 @@ namespace clayPay
       {
         this.SaveCC();
       }
-
-
-
     }
 
     SaveAll(): void
     {
-      if (this.CashPayment.Validated) this.Payments.push(this.CashPayment);
-      if (this.CheckPayment.Validated) this.Payments.push(this.CheckPayment);      
+      // we're going to be doing this on the backend now.
+      //if (this.CashPayment.Validated) this.Payments.push(this.CashPayment);
+      //if (this.CheckPayment.Validated) this.Payments.push(this.CheckPayment);      
 
-      console.log('putting this object', this);
       Utilities.Put<ClientResponse>("../API/Payments/Pay/", this)
         .then(function (cr)
         {
           ClientResponse.HandleResponse(cr, this.IsCashier);
           Utilities.Toggle_Loading_Button(NewTransaction.PayNowCashierButton, false);
+          // need to reset the form and transaction / payment objects
         },
           function (e)
           {
@@ -308,12 +306,12 @@ namespace clayPay
 
     SaveCC(): void
     {
-      console.log('putting this object', this);
       Utilities.Put<ClientResponse>("../API/Payments/Pay/", this)
         .then(function (cr)
         {
           ClientResponse.HandleResponse(cr, this.IsCashier);
           Utilities.Toggle_Loading_Button(NewTransaction.PayNowPublicButton, false);
+          // need to reset the form and transaction / payment objects
         },
           function (e)
           {

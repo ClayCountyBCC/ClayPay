@@ -188,15 +188,14 @@ var clayPay;
             }
         }
         SaveAll() {
-            if (this.CashPayment.Validated)
-                this.Payments.push(this.CashPayment);
-            if (this.CheckPayment.Validated)
-                this.Payments.push(this.CheckPayment);
-            console.log('putting this object', this);
+            // we're going to be doing this on the backend now.
+            //if (this.CashPayment.Validated) this.Payments.push(this.CashPayment);
+            //if (this.CheckPayment.Validated) this.Payments.push(this.CheckPayment);      
             Utilities.Put("../API/Payments/Pay/", this)
                 .then(function (cr) {
                 clayPay.ClientResponse.HandleResponse(cr, this.IsCashier);
                 Utilities.Toggle_Loading_Button(NewTransaction.PayNowCashierButton, false);
+                // need to reset the form and transaction / payment objects
             }, function (e) {
                 // We should show an error in the same spot we'd show a client response error.
                 Utilities.Error_Show(clayPay.ClientResponse.CashierErrorTarget, e);
@@ -204,11 +203,11 @@ var clayPay;
             });
         }
         SaveCC() {
-            console.log('putting this object', this);
             Utilities.Put("../API/Payments/Pay/", this)
                 .then(function (cr) {
                 clayPay.ClientResponse.HandleResponse(cr, this.IsCashier);
                 Utilities.Toggle_Loading_Button(NewTransaction.PayNowPublicButton, false);
+                // need to reset the form and transaction / payment objects
             }, function (e) {
                 // We should show an error in the same spot we'd show a client response error.
                 Utilities.Error_Show(clayPay.ClientResponse.PublicErrorTarget, e);
@@ -242,4 +241,4 @@ var clayPay;
     NewTransaction.paymentError = "paymentError";
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=newtransaction.js.map
+//# sourceMappingURL=NewTransaction.js.map

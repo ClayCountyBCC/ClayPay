@@ -100,6 +100,24 @@ namespace ClayPay.Models
       }
     }
 
+    public static int Exec_Query<T>(string query,T item)
+    {
+      try
+      {
+        using (IDbConnection db =
+          new SqlConnection(
+            Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
+        {
+          return db.Execute(query, item);
+        }
+      }
+      catch (Exception ex)
+      {
+        Log(ex, query);
+        return -1;
+      }
+    }
+
     public static int Exec_Query(string query, DynamicParameters dbA)
     {
       try
