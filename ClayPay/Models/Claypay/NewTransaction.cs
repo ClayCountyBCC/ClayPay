@@ -413,12 +413,12 @@ namespace ClayPay.Models.Claypay
 
     public bool SaveTransaction()
     {
-      if(!GetNextCashierId())
+      if (!GetNextCashierId())
       {
         rollbackTransaction();
         return false;
       }
-      
+
       if (!GetNextCashierId())
       {
         rollbackTransaction();
@@ -439,26 +439,32 @@ namespace ClayPay.Models.Claypay
         rollbackTransaction();
         return false;
       }
-      
-      if (!InsertGURows())
+      var updateGU = (from p in Payments
+                      where p.PaymentType == Payment.payment_type.cash ||
+                            p.PaymentType == Payment.payment_type.check ||
+                            p.PaymentType == Payment.payment_type.credit_card_cashier ||
+                            p.PaymentType == Payment.payment_type.credit_card_public
+                      select p).ToList().Count() > 0;
+      if (updateGU)
       {
-        rollbackTransaction();
-        return false;
-      }
-      if (!InsertGUItemRowsd())
-      {
-        rollbackTransaction();
-        return false;
+
+        if (!InsertGURows())
+        {
+          rollbackTransaction();
+          return false;
+        }
+        if (!InsertGUItemRowsd())
+        {
+          rollbackTransaction();
+          return false;
+        }
       }
 
       FinalizeTransaction();
       UnlockChargeItems();
       return true;
-      
+
     }
-
-
-
 
     public bool GetNextCashierId()
     {
@@ -813,29 +819,37 @@ namespace ClayPay.Models.Claypay
         UnlockChargeItems();
       }
     }
-
-
+    
+    public bool UpdateContractorIssueDate()
+    {
+      
+    }
     public bool rollbackTransaction()
     {
-      var transactionIsRolledBack = false;
       /**
        * 1. delete ccGUItem where guid in (select guid from ccGU where otid = @TransactionOTId)
        * 2. delete ccGU where OTID = @TransactionOTId
        * 3. delete ccCashierPayment where OTID = @TransactionOTId
        * 4. delete ccCashier where OTID = @TransactionOTId
        * 5. update ccCashierItem set OTID = 0 or null, set CashierId = null
-
+       * 
+       * We do not care if FinalizeTransaction fails. Those rows can be updated manually
        * */
       var param = new DynamicParameters();
       param.Add("@otid", TransactionOTid);
       var query = $@"
-        BE
-        DELETE ccGUItem WHERE guid IN (SELECT guid FROM ccGU WHERE otid = @otid);
-        DELETE ccGU where OTID = @otid;
-        DELETE ccCashierPayment where OTID = @otid
-        DELETE ccCashier where OTID = @otid
-        UPDATE ccCashierItem set OTID = 0 or null, set CashierId = null where OTId = @otid;
-        ";
+        USE WATSC;
+        BEGIN TRAN
+            BEGIN TRY
+            DELETE ccGUItem WHERE guid IN (SELECT guid FROM ccGU WHERE otid = @otid)
+            DELETE ccGU where OTID = @otid
+            DELETE ccCashierPayment where OTID = @otid
+            DELETE ccCashier where OTID = @otid
+            UPDATE ccCashierItem set OTID = 0,CashierId = null where OTId = @otid
+          END TRY
+        BEGIN CATCH
+          ROLLBACK
+        END CATCH";
       try
       {
         var i = Constants.Exec_Query(query, param);
@@ -850,7 +864,6 @@ namespace ClayPay.Models.Claypay
       {
         UnlockChargeItems();
       }
-      return transactionIsRolledBack;
     }
 
     public string CreateEmailBody()
@@ -885,4 +898,3 @@ namespace ClayPay.Models.Claypay
 
   }
 }
-// email
