@@ -763,6 +763,16 @@ namespace ClayPay.Models.Claypay
                        Reference receipt number {TransactionCashierId}.");
         return false;
       }
+      if (!UpdateContractorDates())
+      {
+        Constants.Log($"There was a problem updating the contractors expiraction date. OTID: {TransactionOTid}",
+                      $"Need to update contractor based on paid charges with OTID: {TransactionOTid}.",
+                      "", "", "");
+        Errors.Add($@"There was a problem updating the contractors expiraction date. 
+                      Please contact the building department for assistance.
+                       Reference receipt number {TransactionCashierId}.");
+        return false;
+      }
       return true;
     }
 
@@ -820,9 +830,24 @@ namespace ClayPay.Models.Claypay
       }
     }
     
-    public bool UpdateContractorIssueDate()
+    public bool UpdateContractorDates()
     {
-      
+      var query = @"UPDATE clContractor
+          SET IssueDt=GETDATE(), ExpDt=@ExpDt, BlkCrdExpDt=@ExpDt
+          WHERE ContractorCd NOT LIKE 'AP%' AND 
+            ContractorCd IN 
+            (SELECT DISTINCT AssocKey 
+              FROM ccCashierItem 
+              WHERE OTId=@otId AND
+                Assoc='CL' AND
+                CatCode IN ('CLLTF', 'CLFE', 'CIAC', 'LFE') AND
+              (SELECT ISNULL(SUM(Total), 0) AS Total 
+                FROM ccCashierItem
+                WHERE AssocKey IN (SELECT DISTINCT AssocKey 
+                                  FROM ccCashierItem 
+                                  WHERE OTId=@OTId) AND
+                CashierId IS NULL AND Total > 0) = 0);";
+      return false;
     }
     public bool rollbackTransaction()
     {
