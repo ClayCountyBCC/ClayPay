@@ -64,15 +64,21 @@ namespace ClayPay.Models.Claypay
       }
     }
     public decimal AmountApplied { get; set; } = 0;
-    public string Info { get; set; }
+    public string Info { get; set; } = "";
     public string CheckNumber { get; set; } = "";
     public string TransactionId { get; set; } = "";
     public bool Validated { get; set; } = false;
     public string Error { get; set; } = "";
 
     public Payment()
-    { 
+    {
+
     }
+
+    public Payment(payment_type pt)
+    {
+      this.PaymentType = pt;
+    }   
 
     public Payment(CCPayment ccpayment, UserAccess ua)
     {

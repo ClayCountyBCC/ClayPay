@@ -38,7 +38,7 @@ namespace ClayPay.Models.Claypay
     public CCPayment CCData { get; set; }
     public Payment CashPayment { get; set; }
     public Payment CheckPayment { get; set; }
-    public Payment OtherPayment { get; set; } = new Payment(); // for waivers / credits / etc.
+    public Payment OtherPayment { get; set; } = new Payment(Payment.payment_type.impact_fee_credit); // for waivers / credits / etc.
     public List<Payment> Payments { get; set; } = new List<Payment>();
     public List<string> Errors { get; set; } = new List<string>();
     public List<string> ProcessingErrors { get; set; } = new List<string>();
@@ -155,6 +155,16 @@ namespace ClayPay.Models.Claypay
           }
         }
       }
+
+      // Since we're ready to save, let's take the valid payments 
+      // and add them to the payments list.
+      if (CashPayment.Validated) Payments.Add(CashPayment);
+      if (CCData.Validated) Payments.Add(new Payment(CCData, CurrentUser));
+      if (CheckPayment.Validated) Payments.Add(CheckPayment);
+      // OtherPayment will probably only be used in this process to apply
+      // the partial impact fee credit when the rest of the fee is paid.
+      if (OtherPayment.Validated) Payments.Add(OtherPayment);
+
 
       if (SaveTransaction()) // Unlock IDs at the end of this function
       {
@@ -470,15 +480,24 @@ namespace ClayPay.Models.Claypay
             @NTUser
 
 
-          INSERT INTO ccCashierPayment (OTid, PmtType, AmtApplied, AmtTendered, Info, CkNo)
-          VALUES (@Payments)
+          INSERT INTO ccCashierPayment 
+            (OTid, PmtType, AmtApplied, AmtTendered, Info, CkNo, TransactionId)
+          VALUES (
+            @otId, 
+            @PaymentTypeValue, 
+            @AmountApplied, 
+            @Amount, 
+            @PayerFirstName + ' ' + @PayerLastName, 
+            @CheckNumber, 
+            @TransactionId
+          )
           
           -- EXEC dbo.prc_ins_ClayPay_ccCashierPayment_NewPayment
           --  @OTId = @otId, 
           --  @PmtType = @PaymentTypeString,
-          --  @AmtApplied = @Amount,
+          --  @AmtApplied = @AmountApplied,
           --  @AmtTendered = @Amount, 
-          --  @PmtInfo = @PayerName,
+          --  @PmtInfo = @PayerFirstName + ' ' + @PayerLastName,
           --  @CkNo = @CheckNo,
           --  @TransId = @TransactionId
 
@@ -657,7 +676,6 @@ namespace ClayPay.Models.Claypay
         return false;
       }
     }
-
 
     public string CreateEmailBody()
     {
