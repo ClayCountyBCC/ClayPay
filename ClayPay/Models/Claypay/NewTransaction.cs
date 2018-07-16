@@ -434,18 +434,8 @@ namespace ClayPay.Models.Claypay
 
     public bool SaveTransaction()
     {
-      //var transId = (from p in Payments 
-      //               where p.GetPaymentTypeString() != "CA" 
-      //                  && p.GetPaymentTypeString() != "CK" 
-      //               select p.TransactionId).FirstOrDefault();
-      var dbArgs = new DynamicParameters();
-      //dbArgs.Add("@Payments", Payments);
-      //dbArgs.Add("@PayerName", PayerName);
-      //dbArgs.Add("@Total", CCPayment.Total);
-      //dbArgs.Add("@TransactionId", CCPayment.TransactionId);
-      //dbArgs.Add("@ItemIds", ItemIds);
-      //dbArgs.Add("@TransDt", DateTime.Now);
 
+      var dbArgs = new DynamicParameters();
       
       string query = @"
         USE WATSC;
@@ -482,16 +472,6 @@ namespace ClayPay.Models.Claypay
             @CheckNumber, 
             @TransactionId
           )
-          
-          -- EXEC dbo.prc_ins_ClayPay_ccCashierPayment_NewPayment
-          --  @OTId = @otId, 
-          --  @PmtType = @PaymentTypeString,
-          --  @AmtApplied = @AmountApplied,
-          --  @AmtTendered = @Amount, 
-          --  @PmtInfo = @PayerFirstName + ' ' + @PayerLastName,
-          --  @CkNo = @CheckNo,
-          --  @TransId = @TransactionId
-
 
           UPDATE ccCashierItem 
             SET OTId = @otId, CashierId = @CashierId
