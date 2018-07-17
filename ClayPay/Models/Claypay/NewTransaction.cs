@@ -505,10 +505,6 @@ namespace ClayPay.Models.Claypay
         return false;
         //TODO: add rollback in SaveTransaction function
       }
-      finally
-      {
-        UnlockChargeItems(); //always runs
-      }
     }
 
     public bool SaveCashierRow()
@@ -557,10 +553,7 @@ namespace ClayPay.Models.Claypay
         return false;
         //TODO: add rollback in SaveTransaction function
       }
-      finally
-      {
-        UnlockChargeItems(); //always runs
-      }
+
     }
 
     public bool SaveCashierPaymentRows()
@@ -587,7 +580,6 @@ namespace ClayPay.Models.Claypay
           ";
       try
       {
-      
         var i = Constants.Exec_Query(query, Payments);
         if (i > 0)
         {
@@ -606,10 +598,6 @@ namespace ClayPay.Models.Claypay
         //TODO: add rollback in SaveTransaction function
         return false;
       }
-      finally
-      {
-        UnlockChargeItems(); //always runs
-      }
     }
 
     public bool UpdateCashierItemRows_OTid_CashierId()
@@ -618,28 +606,19 @@ namespace ClayPay.Models.Claypay
       
       var query =$@"
         USE WATSC;
-        DECLARE @otid INT = {TransactionOTid};
-        DECLARE @cashierId = {TransactionCashierId};
 
         UPDATE ccCashierItem 
-        SET OTId = @otId, CashierId = @CashierId
-        WHERE itemId IN (@ItemId)
-
-      ";
-
-
+        SET OTId = @OTID, CashierId = @CASHIERID
+        WHERE itemId IN (@ITEMIDS)";
       try
       {
-        var i = Constants.Exec_Query(query, Charges );
-        if (i > 0)
+        var i = Constants.Exec_Query(query, new
         {
-          return true;
-        }
-        else
-        {
-          return false;
-        }
-
+          ITEMIDS = ItemIds,
+          OTID = TransactionOTid,
+          CASHIERID = TransactionCashierId
+        });
+        return i > 0;
       }
       catch (Exception ex)
       {
@@ -647,10 +626,6 @@ namespace ClayPay.Models.Claypay
         TransactionOTid = -1;
         //TODO: add rollback in SaveTransaction function
         return false;
-      }
-      finally
-      {
-        UnlockChargeItems(); //always runs
       }
 
     }
@@ -675,25 +650,13 @@ namespace ClayPay.Models.Claypay
       try
       {
         var i = Constants.Exec_Query(query, param);
-        if (i > 0)
-        {
-          return true;
-        }
-        else
-        {
-          return false;
-        }
-
+        return i > 0;
       }
       catch (Exception ex)
       {
         Constants.Log(ex, query);
         //TODO: add rollback in SaveTransaction function
         return false;
-      }
-      finally
-      {
-        UnlockChargeItems(); //always runs
       }
     }
 
@@ -710,32 +673,17 @@ namespace ClayPay.Models.Claypay
           USE WATSC;
           DECLARE @now = GETDATE();
           EXEC dbo.prc_ins_ClayPay_ccGUItem_NewGUItemAccountRows
-            @otid OUTPUT
-
-      ";
-
+            @otid OUTPUT";
       try
       {
         var i = Constants.Exec_Query(query, param);
-        if (i > 0)
-        {
-          return true;
-        }
-        else
-        {
-          return false;
-        }
-
+        return i > 0;
       }
       catch (Exception ex)
       {
         Constants.Log(ex, query);
         //TODO: add rollback in SaveTransaction function
         return false;
-      }
-      finally
-      {
-        UnlockChargeItems(); //always runs
       }
     }
 
@@ -778,24 +726,28 @@ namespace ClayPay.Models.Claypay
 
     public bool IssueAssociatedPermits()
     {
+      var dp = new DynamicParameters();
+      dp.Add("@otid", TransactionOTid);
       var query = $@"
       USE WATSC;
-      DECLARE @otid INT = {TransactionOTid};
-
-      WITH PermitsToIssue (AssocKey, TOTAL) AS (
-      SELECT DISTINCT AssocKey, ISNULL(SUM(TOTAL), 0)  FROM ccCashierItem CI
-      INNER JOIN bpASSOC_PERMIT A ON A.PermitNo = CI.AssocKey
-      WHERE OTId = @otid
-        AND IssueDate IS NULL
-        --AND ASSOC NOT IN ('AP','CL')
-        --AND Total > 0
-      GROUP BY AssocKey)
 
       UPDATE bpASSOC_PERMIT
       SET IssueDate = GETDATE()
-      WHERE PermitNo IN (SELECT Assockey FROM PermitsToIssue)";
+      WHERE IssueDate IS NULL AND
+        PermitNo IN
+        (SELECT DISTINCT AssocKey
+          FROM ccCashierItem
+          WHERE OTId = @otId AND
+          Assoc NOT IN('AP', 'CL') AND
+          LEFT(AssocKey, 1) NOT IN('1', '7') AND
+          (SELECT ISNULL(SUM(Total), 0) AS Total
+            FROM ccCashierItem
+            WHERE AssocKey IN(SELECT DISTINCT AssocKey
+                              FROM ccCashierItem
+                              WHERE OTId = @otid) AND
+            CashierId IS NULL AND Total > 0) = 0);";
 
-      return Constants.Exec_Query(query, Charges) > 0;
+      return Constants.Exec_Query(query, dp) != -1;
     }
 
     public bool HandleHolds()
@@ -814,27 +766,19 @@ namespace ClayPay.Models.Claypay
           INNER JOIN ccCashierItem CI ON CI.HoldID = H.HoldID
           WHERE OTId = @TransactionOTid";
 
-      try
-      {
-        var i = Constants.Exec_Query(query, param);
-        return (i != -1);
-      }
-      catch (Exception ex)
-      {
-        Constants.Log(ex, query);
-        return false;
-      }
-      finally
-      {
-        UnlockChargeItems();
-      }
+      return Constants.Exec_Query(query, param) != -1;
     }
     
     public bool UpdateContractorDates()
     {
-      var query = @"UPDATE clContractor
-          SET IssueDt=GETDATE(), ExpDt=@ExpDt, BlkCrdExpDt=@ExpDt
-          WHERE ContractorCd NOT LIKE 'AP%' AND 
+
+      var query = @"
+      DECLARE @ExpDt VARCHAR(20) = (SELECT TOP 1 Description
+          FROM clCategory_Codes WHERE Code = 'dt' AND Type_Code = '9');
+
+      UPDATE clContractor
+        SET IssueDt=GETDATE(), ExpDt=@ExpDt, BlkCrdExpDt=@ExpDt
+      WHERE ContractorCd NOT LIKE 'AP%' AND 
             ContractorCd IN 
             (SELECT DISTINCT AssocKey 
               FROM ccCashierItem 
@@ -845,9 +789,11 @@ namespace ClayPay.Models.Claypay
                 FROM ccCashierItem
                 WHERE AssocKey IN (SELECT DISTINCT AssocKey 
                                   FROM ccCashierItem 
-                                  WHERE OTId=@OTId) AND
+                                  WHERE OTId=@otid) AND
                 CashierId IS NULL AND Total > 0) = 0);";
-      return false;
+      return Constants.Exec_Query(query, new { otid = TransactionOTid }) != -1;
+
+      
     }
     public bool rollbackTransaction()
     {
@@ -884,10 +830,6 @@ namespace ClayPay.Models.Claypay
       {
         Constants.Log(ex, query);
         return false;
-      }
-      finally
-      {
-        UnlockChargeItems();
       }
     }
 
