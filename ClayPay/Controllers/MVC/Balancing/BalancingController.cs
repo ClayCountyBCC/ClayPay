@@ -13,6 +13,7 @@ namespace ClayPay.Controllers.MVC.Balancing
     {
       var ua = Models.UserAccess.GetUserAccess(User.Identity.Name);
       ViewBag.Page = "balancing";
+      ViewBag.Development = ClayPay.Models.Constants.UseProduction() ? "" : "DEVELOPMENT";
       return View(ua);
     }
   }

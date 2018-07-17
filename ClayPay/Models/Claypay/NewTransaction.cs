@@ -418,12 +418,6 @@ namespace ClayPay.Models.Claypay
         rollbackTransaction();
         return false;
       }
-
-      if (!GetNextCashierId())
-      {
-        rollbackTransaction();
-        return false;
-      }
       if (!SaveCashierRow())
       {
         rollbackTransaction();
@@ -468,15 +462,15 @@ namespace ClayPay.Models.Claypay
 
     public bool GetNextCashierId()
     {
-      var param = new DynamicParameters();
-        
-
       // I don't know if the year is supposed to be the fiscal year.
       // the code in  prc_upd_ccNextCashierId sets FY = the @Yr var
       // code for @Yr checks the current year against the FY field and if it is not equal,
       // it updates the FY and next avail fieldfield
+      var dp = new DynamicParameters();
+      dp.Add("@CashierId", value: "", dbType: DbType.String, direction: ParameterDirection.Output);
       var query = @"
           USE WATSC;
+          DECLARE @YR CHAR(2) = RIGHT(CAST(YEAR(GETDATE()) AS CHAR(4)), 2);
 
           EXEC dbo.prc_upd_ClayPay_ccNextAvail_GetNextCashierId 
             @CashierId OUTPUT,
@@ -485,10 +479,10 @@ namespace ClayPay.Models.Claypay
 
       try
       {
-        var i = Constants.Exec_Query(query,param);
+        var i = Constants.Exec_Query(query,dp);
         if(i > 0)
         {
-          TransactionCashierId = param.Get<string>("@CashierId");
+          TransactionCashierId = dp.Get<string>("@CashierId");
           return true;
         }
         else
@@ -509,34 +503,44 @@ namespace ClayPay.Models.Claypay
 
     public bool SaveCashierRow()
     {
-      var param = new DynamicParameters();
-      param.Add("@usernamer", CurrentUser.user_name);
+      var dp = new DynamicParameters();
+      dp.Add("@otId", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
-      if(CurrentUser.authenticated)
-      {
-        param.Add("StationId", 1);
-      }
+      //if(CurrentUser.authenticated) // Wha'ts the point of hardcoding a station number?
+      //{
+      //  dp.Add("@StationId", 1);
+      //}
+      dp.Add("@PayerCompanyName", PayerCompanyName);
+      dp.Add("@CashierId", TransactionCashierId);
+      dp.Add("@PayerName", PayerFirstName + " " + PayerLastName);
+      dp.Add("@UserName", CurrentUser.user_name);
+      dp.Add("@TransactionDate", TransactionDate);
+      dp.Add("@PayerPhoneNumber", PayerPhoneNumber);
+      dp.Add("@PayerStreetAddress", PayerStreetAddress);
+      dp.Add("@PayerStreet2", PayerCity + " " + PayerState + ", " + PayerZip);
+      dp.Add("@IPAddress", ipAddress);
+
 
       string query = @"
           USE WATSC;
 
           EXEC dbo.prc_ins_ClayPay_ccCashier_NewOTid 
             @otId int output, 
-            @PayerCompanyName,
-            @TransactionCashierId,
-            @PayerFirstName + ' ' + @PayerLastName,
-            @username,
-            @TransactionDate,
-            @PayerPhoneNumber,
-            @PayerStreetAddress,
-            @PayerCity + ' ' + @PayerState + ', ' + @PayerZip,
-            @username";
+            @CoName = @PayerCompanyName,
+            @CashierId = @CashierId,
+            @Name = @PayerName,            
+            @TransDt = @TransactionDate,
+            @Phone = @PayerPhoneNumber,
+            @Addr1 = @PayerStreetAddress,
+            @Addr2 = @PayerCity + ' ' + @PayerState + ', ' + @PayerZip,
+            @NTUser = @UserName, 
+            @IPAddress = @IPAddress";
       try
       {
-        var i = Constants.Exec_Query(query, this);
+        var i = Constants.Exec_Query(query, dp);
         if (i > 0)
         {
-           TransactionOTid = param.Get<int>("@otId");
+           TransactionOTid = dp.Get<int>("@otId");
            return true;
         }
         else
@@ -573,23 +577,20 @@ namespace ClayPay.Models.Claypay
             @PaymentTypeValue, 
             @AmountApplied, 
             @Amount, 
-            @PayerFirstName + ' ' + @PayerLastName, 
+            @PayerName, 
             @CheckNumber, 
             @TransactionId
           )
           ";
       try
       {
-        var i = Constants.Exec_Query(query, Payments);
-        if (i > 0)
+        var i = Constants.Exec_Query(query, new
         {
-          return true;
-        }
-        else
-        {
-          return false;
-        }
-
+          payments = this.Payments,
+          PayerName = PayerFirstName + " " + PayerLastName,
+          otid = TransactionOTid
+        });
+        return i > 0;
       }
       catch (Exception ex)
       {

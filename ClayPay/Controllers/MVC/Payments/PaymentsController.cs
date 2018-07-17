@@ -13,6 +13,7 @@ namespace ClayPay.Controllers.MVC.Payments
     {
       var ua = Models.UserAccess.GetUserAccess(User.Identity.Name);
       ViewBag.Page = "payments";
+      ViewBag.Development = ClayPay.Models.Constants.UseProduction() ? "" : "DEVELOPMENT";
       return View(ua);
     }
   }
