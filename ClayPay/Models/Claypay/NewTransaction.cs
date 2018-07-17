@@ -302,11 +302,7 @@ namespace ClayPay.Models.Claypay
           Errors.Add("The amount returned to the customer cannot be greater than the amount of cash tendered.");
           return false;
         }
-        if(ChangeDue > 0)
-        {
-          CashPayment.AmountApplied = CashPayment.Amount - ChangeDue;
-        }
-
+        CashPayment.AmountApplied = CashPayment.Amount - ChangeDue;
       }
       else
       {
@@ -413,12 +409,17 @@ namespace ClayPay.Models.Claypay
 
     public bool SaveTransaction()
     {
-      if (!GetNextCashierId())
-      {
-        rollbackTransaction();
-        return false;
-      }
-      if (!SaveCashierRow())
+      //if (!GetNextCashierId())
+      //{
+      //  rollbackTransaction();
+      //  return false;
+      //}
+      //if (!SaveCashierRow())
+      //{
+      //  rollbackTransaction();
+      //  return false;
+      //}
+      if (!StartTransaction())
       {
         rollbackTransaction();
         return false;
@@ -458,6 +459,67 @@ namespace ClayPay.Models.Claypay
       UnlockChargeItems();
       return true;
 
+    }
+
+    public bool StartTransaction()
+    {
+      var dp = new DynamicParameters();
+      dp.Add("@CashierId", size: 12, dbType: DbType.String, direction: ParameterDirection.Output);
+      dp.Add("@otId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+      dp.Add("@PayerCompanyName", PayerCompanyName);
+      dp.Add("@PayerName", PayerFirstName + " " + PayerLastName);
+      dp.Add("@UserName", CurrentUser.user_name);
+      dp.Add("@TransactionDate", TransactionDate);
+      dp.Add("@PayerPhoneNumber", PayerPhoneNumber);
+      dp.Add("@PayerStreetAddress", PayerStreetAddress);
+      dp.Add("@PayerStreet2", PayerCity + " " + PayerState + ", " + PayerZip);
+      dp.Add("@IPAddress", ipAddress);
+
+      string sql = @"
+        USE WATSC;
+        DECLARE @YR CHAR(2) = RIGHT(CAST(YEAR(GETDATE()) AS CHAR(4)), 2);
+
+        EXEC dbo.prc_upd_ClayPay_ccNextAvail_GetNextCashierId 
+          @CashierId OUTPUT,
+          @YR;
+
+        INSERT INTO ccCashier
+          (CoName,CashierId,LstUpdt,[Name],TransDt,Phone,Addr1,Addr2,NTUser, PayerIPAddress)
+        VALUES
+          (
+            @PayerCompanyName,
+            @CashierId,
+            @TransactionDate,
+            @PayerName,
+            @TransactionDate,
+            @PayerPhoneNumber,
+            @PayerStreetAddress,
+            @PayerStreet2,
+            @UserName, 
+            @IPAddress
+          );
+
+        SET @otId = @@IDENTITY;";
+      try
+      {
+        TransactionCashierId = "-1";
+        TransactionOTid = -1;
+
+        int i = Constants.Exec_Query(sql, dp);
+        if(i != -1)
+        {
+          TransactionOTid = dp.Get<int>("@otId");
+          TransactionCashierId = dp.Get<string>("@CashierId");
+          return true;
+        }
+        return false;
+      }
+      catch (Exception ex)
+      {
+        Constants.Log(ex, sql);
+        return false;
+        //TODO: add rollback in SaveTransaction function
+      }
     }
 
     public bool GetNextCashierId()
@@ -560,43 +622,60 @@ namespace ClayPay.Models.Claypay
 
     }
 
+
+    private static DataTable CreateCashierPaymentDataTable()
+    {
+      var dt = new DataTable("CashierPayment");
+      dt.Columns.Add("PaymentType", typeof(string));
+      dt.Columns.Add("OTid", typeof(int));
+      dt.Columns.Add("AmountApplied", typeof(decimal));
+      dt.Columns.Add("AmountTendered", typeof(decimal));
+      dt.Columns.Add("CheckNumber", typeof(string));
+      dt.Columns.Add("TransactionId", typeof(string));
+      dt.Columns.Add("Info", typeof(string));
+      return dt;
+    }
+
     public bool SaveCashierPaymentRows()
     {
-      var param = new DynamicParameters();
-   
+      var dt = CreateCashierPaymentDataTable();
+      foreach(Payment p in Payments)
+      {
+        dt.Rows.Add(
+          p.PaymentTypeValue,
+          TransactionOTid,
+          p.AmountApplied,
+          p.AmountTendered,
+          p.CheckNumber,
+          p.TransactionId, 
+          PayerFirstName + " " + PayerLastName);
+      }
 
       string query = $@"
           USE WATSC;
-
-          DECLARE @otid INT = {TransactionOTid};
-
           INSERT INTO ccCashierPayment 
-            (otid, PmtType, AmtApplied, AmtTendered, Info, CkNo, TransactionId)
-          VALUES (
-            @otid, 
-            @PaymentTypeValue, 
-            @AmountApplied, 
-            @Amount, 
-            @PayerName, 
-            @CheckNumber, 
-            @TransactionId
-          )
-          ";
+            (OTid, PmtType, AmtApplied, AmtTendered, Info, CkNo, TransactionId)
+          SELECT
+            OTid,
+            PaymentType,
+            AmountApplied,
+            AmountTendered,
+            Info,
+            CheckNumber,
+            TransactionId
+          FROM @CashierPayment;";
       try
       {
-        var i = Constants.Exec_Query(query, new
+        using (IDbConnection db = new SqlConnection(
+          Constants.Get_ConnStr("WATSC" + (Constants.UseProduction() ? "Prod" : "QA"))))
         {
-          payments = this.Payments,
-          PayerName = PayerFirstName + " " + PayerLastName,
-          otid = TransactionOTid
-        });
-        return i > 0;
+          int i = db.Execute(query, new { CashierPayment = dt.AsTableValuedParameter("CashierPayment") }, commandTimeout: 60);
+          return i > 0;
+        }
       }
       catch (Exception ex)
       {
         Constants.Log(ex, query);
-        TransactionOTid = -1;
-        //TODO: add rollback in SaveTransaction function
         return false;
       }
     }
@@ -610,7 +689,7 @@ namespace ClayPay.Models.Claypay
 
         UPDATE ccCashierItem 
         SET OTId = @OTID, CashierId = @CASHIERID
-        WHERE itemId IN (@ITEMIDS)";
+        WHERE itemId IN @ITEMIDS";
       try
       {
         var i = Constants.Exec_Query(query, new

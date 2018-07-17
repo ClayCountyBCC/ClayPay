@@ -191,7 +191,7 @@
       b.Allocation_Amount = Amount;
       b.Id = builderId;
       //XHR.SaveObject<BuilderAllocation>("./.API/ImpactFees/SaveBuilderAllocation", b)
-      Utilities.Post<Array<string>>("./.API/ImpactFees/SaveBuilderAllocation", b)
+      Utilities.Post<Array<string>>("../API/ImpactFees/SaveBuilderAllocation", b)
         .then(function (a)
         {
           console.log('response', a);
