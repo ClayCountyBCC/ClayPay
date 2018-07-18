@@ -40,7 +40,7 @@ var Utilities;
         e.classList.remove("show");
     }
     Utilities.Show_Flex = Show_Flex;
-    function Error_Show(e, errorText) {
+    function Error_Show(e, errorText, timeout) {
         if (typeof e == "string") {
             e = document.getElementById(e);
         }
@@ -72,9 +72,11 @@ var Utilities;
             e.appendChild(notification);
         }
         Show(e);
-        window.setTimeout(function (j) {
-            Hide(e);
-        }, 10000);
+        if (timeout == undefined || timeout === true) {
+            window.setTimeout(function (j) {
+                Hide(e);
+            }, 10000);
+        }
     }
     Utilities.Error_Show = Error_Show;
     function Clear_Element(node) {

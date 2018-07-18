@@ -89,6 +89,7 @@ namespace ClayPay.Models.Claypay
     {
       PaymentType = pt;
       Amount = ccpayment.Amount;
+      AmountApplied = Amount;
       TransactionId = ccpayment.TransactionId;
     }
 
@@ -103,7 +104,9 @@ namespace ClayPay.Models.Claypay
       // we should just return false.
       // We will not be updating the Validated property as that is meant to be an indicator
       // from the client to the backend to mean that this payment type should be processed.
-      if (!this.Validated) return false;
+      if (Amount == 0) this.Validated = false;
+      if (!this.Validated || Amount == 0) return false;
+      if (AmountApplied == 0 && Amount > 0) AmountApplied = Amount;
       if (Amount <= 0) // Payment amount should never be 0 or less
       {
         Error = "The Amount Paid cannot be less than or equal to zero.";

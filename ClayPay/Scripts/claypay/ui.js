@@ -9,12 +9,6 @@ var clayPay;
     var UI;
     (function (UI) {
         "use strict";
-        // CurrentCharges are the search results (charges) returned and displayed
-        // in the results container.
-        let CurrentCharges = [];
-        // Cart are the charges that the user chose from the CurrentCharges to
-        // pay for in this session.
-        UI.Cart = [];
         UI.ExpMonths = ['01', '02', '03', '04', '05',
             '06', '07', '08', '09', '10', '11', '12'];
         UI.AllStates = [
@@ -282,7 +276,7 @@ var clayPay;
             }
             if (k.length > 0) {
                 Utilities.Get("../API/Payments/Query/?key=" + k).then(function (charges) {
-                    CurrentCharges = charges;
+                    clayPay.CurrentTransaction.CurrentCharges = charges;
                     if (charges.length > 0) {
                         ProcessResults(charges, k);
                         Utilities.Show("searchResults");
@@ -356,20 +350,20 @@ var clayPay;
             return tr;
         }
         function AddItemToCart(ev, itemId) {
-            let item = CurrentCharges.filter((c) => {
+            let item = clayPay.CurrentTransaction.CurrentCharges.filter((c) => {
                 return c.ItemId == itemId;
             });
-            if (item.length === 1 && UI.Cart.indexOf(item[0]) === -1) {
-                UI.Cart.push(item[0]);
+            if (item.length === 1 && clayPay.CurrentTransaction.Cart.indexOf(item[0]) === -1) {
+                clayPay.CurrentTransaction.Cart.push(item[0]);
             }
             ToggleAddRemoveButtons(itemId);
             updateCart();
         }
         function RemoveItemFromCart(ev, itemId, toggle) {
-            let newCart = UI.Cart.filter((c) => {
+            let newCart = clayPay.CurrentTransaction.Cart.filter((c) => {
                 return c.ItemId !== itemId;
             });
-            UI.Cart = newCart;
+            clayPay.CurrentTransaction.Cart = newCart;
             if (toggle)
                 ToggleAddRemoveButtons(itemId);
             updateCart();
@@ -382,21 +376,21 @@ var clayPay;
             btnRem.style.display = showAdd ? "inline-block" : "none";
         }
         function IsItemInCart(itemId) {
-            let item = UI.Cart.filter((c) => {
+            let item = clayPay.CurrentTransaction.Cart.filter((c) => {
                 return c.ItemId == itemId;
             });
             return item.length !== 0;
         }
         function AddAllItemsToCart() {
-            for (let charge of CurrentCharges) {
+            for (let charge of clayPay.CurrentTransaction.CurrentCharges) {
                 if (!IsItemInCart(charge.ItemId)) {
-                    UI.Cart.push(charge);
+                    clayPay.CurrentTransaction.Cart.push(charge);
                 }
             }
             updateCart();
             // we're going to rerun the "Create Table" so that it'll 
             // update each row
-            AddCharges(CurrentCharges);
+            AddCharges(clayPay.CurrentTransaction.CurrentCharges);
         }
         function createTableElement(value, className, colspan) {
             let d = document.createElement("td");
@@ -485,12 +479,13 @@ var clayPay;
             //Utilities.Hide(paymentData);
             //Utilities.Show()
             Utilities.Clear_Element(CartNav);
-            if (UI.Cart.length === 0) {
+            if (clayPay.CurrentTransaction.Cart.length === 0) {
                 CartNav.appendChild(document.createTextNode("(empty)"));
                 Utilities.Show(emptyCart);
             }
             else {
-                CartNav.appendChild(document.createTextNode(+UI.Cart.length.toString() + (UI.Cart.length === 1 ? ' item' : ' items')));
+                let cartLength = clayPay.CurrentTransaction.Cart.length;
+                CartNav.appendChild(document.createTextNode(+cartLength.toString() + (cartLength === 1 ? ' item' : ' items')));
                 Utilities.Show(fullCart);
                 Utilities.Show(payerData);
                 //Utilities.Show(paymentData);
@@ -500,7 +495,7 @@ var clayPay;
             let CartCharges = document.getElementById('CartCharges');
             let df = document.createDocumentFragment();
             Utilities.Clear_Element(CartCharges);
-            for (let charge of UI.Cart) {
+            for (let charge of clayPay.CurrentTransaction.Cart) {
                 df.appendChild(buildCartRow(charge));
             }
             df.appendChild(buildCartFooterRow());
@@ -508,12 +503,13 @@ var clayPay;
             CartCharges.appendChild(df);
             updateCartNav();
         }
+        UI.updateCart = updateCart;
         function buildCartFooterRow() {
             let tr = document.createElement("tr");
             tr.style.fontWeight = "bolder";
             tr.appendChild(createTableElement("", "", 2));
             tr.appendChild(createTableElement("Total", "center", 1));
-            let TotalAmount = UI.Cart.reduce((total, b) => {
+            let TotalAmount = clayPay.CurrentTransaction.Cart.reduce((total, b) => {
                 return total + b.Total;
             }, 0);
             clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
@@ -525,7 +521,7 @@ var clayPay;
         function buildCartConvFeeFooterRow() {
             let tr = document.createElement("tr");
             tr.style.fontWeight = "bolder";
-            tr.appendChild(createTableElement("Please Note: There is a nonrefundable transaction fee charged by our payment provider. This is charged in addition to the total above.", "", 2));
+            tr.appendChild(createTableElement("Please Note: There is a nonrefundable transaction fee charged for Credit Card Payments by our payment provider. This is charged in addition to the total above.", "", 2));
             tr.appendChild(createTableElement("Conv. Fee", "center", 1));
             tr.appendChild(createTableElement(clayPay.ConvenienceFee, "", 1));
             tr.appendChild(createTableElement("", "", 1));

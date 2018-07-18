@@ -6,12 +6,7 @@ namespace clayPay.UI
 {
   "use strict"
 
-  // CurrentCharges are the search results (charges) returned and displayed
-  // in the results container.
-  let CurrentCharges: Array<Charge> = [];  
-  // Cart are the charges that the user chose from the CurrentCharges to
-  // pay for in this session.
-  export let Cart: Array<Charge> = [];
+
   
   export const ExpMonths: Array<string> = ['01', '02', '03', '04', '05',
     '06', '07', '08', '09', '10', '11', '12'];
@@ -315,7 +310,7 @@ namespace clayPay.UI
     {
       Utilities.Get("../API/Payments/Query/?key=" + k).then(function (charges: Array<Charge>)
       {
-        CurrentCharges = charges;
+        clayPay.CurrentTransaction.CurrentCharges = charges;
         if (charges.length > 0)
         {
           ProcessResults(charges, k);
@@ -416,13 +411,13 @@ namespace clayPay.UI
 
   function AddItemToCart(ev: Event, itemId: number): void
   {    
-    let item: Array<Charge> = CurrentCharges.filter((c: Charge) =>
+    let item: Array<Charge> = clayPay.CurrentTransaction.CurrentCharges.filter((c: Charge) =>
     {
       return c.ItemId == itemId;
     });
-    if (item.length === 1 && Cart.indexOf(item[0]) === -1)
+    if (item.length === 1 && clayPay.CurrentTransaction.Cart.indexOf(item[0]) === -1)
     {
-      Cart.push(item[0]);
+      clayPay.CurrentTransaction.Cart.push(item[0]);
     }
     ToggleAddRemoveButtons(itemId);
     updateCart();
@@ -430,11 +425,11 @@ namespace clayPay.UI
 
   function RemoveItemFromCart(ev: Event, itemId: number, toggle: boolean): void
   {
-    let newCart: Array<Charge> = Cart.filter((c: Charge) =>
+    let newCart: Array<Charge> = clayPay.CurrentTransaction.Cart.filter((c: Charge) =>
     {
       return c.ItemId !== itemId;
     });
-    Cart = newCart;
+    clayPay.CurrentTransaction.Cart = newCart;
     if(toggle) ToggleAddRemoveButtons(itemId);
     updateCart();
   }
@@ -451,7 +446,7 @@ namespace clayPay.UI
 
   function IsItemInCart(itemId: number): boolean
   {
-    let item: Array<Charge> = Cart.filter((c: Charge) =>
+    let item: Array<Charge> = clayPay.CurrentTransaction.Cart.filter((c: Charge) =>
     {
       return c.ItemId == itemId;
     });
@@ -460,17 +455,17 @@ namespace clayPay.UI
 
   function AddAllItemsToCart(): void
   {
-    for (let charge of CurrentCharges)
+    for (let charge of clayPay.CurrentTransaction.CurrentCharges)
     {
       if (!IsItemInCart(charge.ItemId))
       {
-        Cart.push(charge);
+        clayPay.CurrentTransaction.Cart.push(charge);
       }
     }
     updateCart();
     // we're going to rerun the "Create Table" so that it'll 
     // update each row
-    AddCharges(CurrentCharges);
+    AddCharges(clayPay.CurrentTransaction.CurrentCharges);
   }
 
   function createTableElement(
@@ -591,25 +586,26 @@ namespace clayPay.UI
     //Utilities.Hide(paymentData);
     //Utilities.Show()
     Utilities.Clear_Element(CartNav);
-    if (Cart.length === 0)
+    if (clayPay.CurrentTransaction.Cart.length === 0)
     {
       CartNav.appendChild(document.createTextNode("(empty)"));
       Utilities.Show(emptyCart);
     } else
     {
-      CartNav.appendChild(document.createTextNode(+ Cart.length.toString() + (Cart.length === 1 ? ' item' : ' items')));
+      let cartLength = clayPay.CurrentTransaction.Cart.length;
+      CartNav.appendChild(document.createTextNode(+ cartLength.toString() + (cartLength === 1 ? ' item' : ' items')));
       Utilities.Show(fullCart);
       Utilities.Show(payerData);
       //Utilities.Show(paymentData);
     }
   }
 
-  function updateCart(): void
+  export function updateCart(): void
   {
     let CartCharges: HTMLElement = document.getElementById('CartCharges');
     let df = document.createDocumentFragment();
     Utilities.Clear_Element(CartCharges);
-    for (let charge of Cart)
+    for (let charge of clayPay.CurrentTransaction.Cart)
     {
       df.appendChild(buildCartRow(charge));
     }
@@ -625,7 +621,7 @@ namespace clayPay.UI
     tr.style.fontWeight = "bolder";
     tr.appendChild(createTableElement("", "", 2));
     tr.appendChild(createTableElement("Total", "center", 1));
-    let TotalAmount: number = Cart.reduce((total:number, b: Charge) =>
+    let TotalAmount: number = clayPay.CurrentTransaction.Cart.reduce((total:number, b: Charge) =>
     {
       return total + b.Total;
     }, 0);
@@ -640,7 +636,7 @@ namespace clayPay.UI
   {
     let tr = document.createElement("tr");
     tr.style.fontWeight = "bolder";
-    tr.appendChild(createTableElement("Please Note: There is a nonrefundable transaction fee charged by our payment provider. This is charged in addition to the total above.", "", 2));
+    tr.appendChild(createTableElement("Please Note: There is a nonrefundable transaction fee charged for Credit Card Payments by our payment provider. This is charged in addition to the total above.", "", 2));
     tr.appendChild(createTableElement("Conv. Fee", "center", 1));
     tr.appendChild(createTableElement(clayPay.ConvenienceFee, "", 1));
     tr.appendChild(createTableElement("", "", 1));

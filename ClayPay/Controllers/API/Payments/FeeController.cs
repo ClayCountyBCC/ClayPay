@@ -14,17 +14,25 @@ namespace ClayPay.Controllers
     // GET: api/Fee
     [HttpGet]
     [Route("Fee")]
-    public IHttpActionResult Get()
+    public IHttpActionResult Get(decimal Amount = 0)
     {
-      string fee = (string)MyCache.GetItem("fee");
-      if (fee == null || fee.Length == 0)
+      if(Amount == 0)
       {
-        return InternalServerError();
+        string fee = (string)MyCache.GetItem("fee");
+        if (fee == null || fee.Length == 0)
+        {
+          return InternalServerError();
+        }
+        else
+        {
+          return Ok(fee);
+        }
       }
       else
       {
-        return Ok(fee);
+        return Ok(PaymentResponse.GetFee(Amount));
       }
+
     }
 
 

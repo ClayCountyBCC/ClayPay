@@ -232,7 +232,7 @@ namespace ClayPay.Models.Claypay
 
       if (this.CCData.Validated)
       { // validate credit card data if exists
-        Errors = this.CCData.ValidateCCData();
+        Errors = this.CCData.Validate();
 
         if (Errors.Count() > 0) return false;
 
@@ -700,8 +700,9 @@ namespace ClayPay.Models.Claypay
 
     public bool InsertGURows()
     {
-      var param = new DynamicParameters();
-      param.Add("@otid", TransactionOTid);
+      var dp = new DynamicParameters();
+      dp.Add("@otid", TransactionOTid);
+      dp.Add("@TransactionDate", this.TransactionDate);
 
       // I don't know if the year is supposed to be the fiscal year.
       // the code in  prc_upd_ccNextCashierId sets FY = the @Yr var
@@ -711,7 +712,7 @@ namespace ClayPay.Models.Claypay
         USE WATSC;
         INSERT INTO ccGU 
           (OTId, CashierId, ItemId, PayID, CatCode, TransDt)
-        SELECT DISTINCT CCI.OTId, CCI.CashierId, CCI.ItemId, NULL, CCI.CatCode, @TransDt
+        SELECT DISTINCT CCI.OTId, CCI.CashierId, CCI.ItemId, NULL, CCI.CatCode, @TransactionDate
           FROM ccCashierItem CCI
           INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
         WHERE CCI.OTId = @otid;
@@ -756,7 +757,7 @@ namespace ClayPay.Models.Claypay
 
       try
       {
-        var i = Constants.Exec_Query(query, param);
+        var i = Constants.Exec_Query(query, dp);
         return i > 0;
       }
       catch (Exception ex)
@@ -777,7 +778,7 @@ namespace ClayPay.Models.Claypay
         SET HldDate = GETDATE(), 
         HldIntl = @UserName, 
         HldInput = @cashierId
-          FROM bpHold H H
+          FROM bpHold H
           INNER JOIN ccCashierItem CI ON CI.HoldID = H.HoldID
           WHERE OTId = @otid
 
@@ -897,35 +898,35 @@ namespace ClayPay.Models.Claypay
       }
     }
 
-    public string CreateEmailBody()
-    {
-      var AssocKeys = GetAssocKeys(ItemIds);
-      var chargeItems = new List<Charge>();
+    //public string CreateEmailBody()
+    //{
+    //  var AssocKeys = GetAssocKeys(ItemIds);
+    //  var chargeItems = new List<Charge>();
 
-      foreach (var k in AssocKeys)
-      {
-        chargeItems.AddRange(Charge.Get(k));
-      }
+    //  foreach (var k in AssocKeys)
+    //  {
+    //    chargeItems.AddRange(Charge.Get(k));
+    //  }
 
-      var keys = String.Join(", \n", AssocKeys);
-      string body = $"An online credit card payment of {this.CCData.Amount.ToString("C")}.\n";
-      body += $"The Charges paid include:\n";
-      foreach (var c in chargeItems)
-      {
-        body += $"{c.Description}\t\t{c.TotalDisplay}\n{keys}";
-      }
-      body += "\nThis payment is asoociated with the following items: \n" + keys;
+    //  var keys = String.Join(", \n", AssocKeys);
+    //  string body = $"An online credit card payment of {this.CCData.Amount.ToString("C")}.\n";
+    //  body += $"The Charges paid include:\n";
+    //  foreach (var c in chargeItems)
+    //  {
+    //    body += $"{c.Description}\t\t{c.TotalDisplay}\n{keys}";
+    //  }
+    //  body += "\nThis payment is associated with the following items: \n" + keys;
 
-      return body;
-    }
+    //  return body;
+    //}
 
-    public List<string> GetAssocKeys(List<int> ItemIds)
-    {
-      string query = @"
-        SELECT DISTINCT LTRIM(RTRIM(AssocKey)) AS AssocKey FROM ccCashierItem
-        WHERE ItemId IN @ids;";
-      return Constants.Get_Data<string>(query, ItemIds);
-    }
+    //public List<string> GetAssocKeys(List<int> ItemIds)
+    //{
+    //  string query = @"
+    //    SELECT DISTINCT LTRIM(RTRIM(AssocKey)) AS AssocKey FROM ccCashierItem
+    //    WHERE ItemId IN @ids;";
+    //  return Constants.Get_Data<string>(query, ItemIds);
+    //}
 
   }
 }

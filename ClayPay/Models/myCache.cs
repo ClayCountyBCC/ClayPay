@@ -67,7 +67,7 @@ namespace ClayPay.Models
       switch (key)
       {
         case "fee":
-          return PaymentResponse.GetFee();
+          return PaymentResponse.GetFee(100);
 
         case "apptypes":
           return AppType.Get();

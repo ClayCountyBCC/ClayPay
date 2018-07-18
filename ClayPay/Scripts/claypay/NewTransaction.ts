@@ -28,6 +28,13 @@ namespace clayPay
 
   export class NewTransaction implements INewTransaction
   {
+    // CurrentCharges are the search results (charges) returned and displayed
+    // in the results container.
+    public CurrentCharges: Array<Charge> = [];
+    // Cart are the charges that the user chose from the CurrentCharges to
+    // pay for in this session.
+    public Cart: Array<Charge> = [];
+
     public OTid: number = 0; // used after the transaction is saved
     public CashierId: string = ""; // used after the transaction is saved
     public ItemIds: Array<number> = [];
@@ -265,60 +272,44 @@ namespace clayPay
         Utilities.Toggle_Loading_Button(NewTransaction.PayNowPublicButton, true);
       }
 
-      this.ItemIds = clayPay.UI.Cart.map((c) =>
+      this.ItemIds = clayPay.CurrentTransaction.Cart.map((c) =>
       {
         return c.ItemId;
       });
 
       this.Payments = [];
 
-      if (this.IsCashier)
-      {
-        this.SaveAll();
-
-      }
-      else
-      {
-        this.SaveCC();
-      }
-    }
-
-    SaveAll(): void
-    {
-      // we're going to be doing this on the backend now.
-      //if (this.CashPayment.Validated) this.Payments.push(this.CashPayment);
-      //if (this.CheckPayment.Validated) this.Payments.push(this.CheckPayment);      
+      let IsCashier = this.IsCashier;
+      let toggleButton = IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
+      let errorTarget = IsCashier ? ClientResponse.CashierErrorTarget : ClientResponse.PublicErrorTarget;
       Utilities.Put<ClientResponse>("../API/Payments/Pay/", this)
         .then(function (cr)
         {
+          if (cr.Errors.length > 0) // Errors occurred, payment was unsuccessful.
+          {
+            Utilities.Error_Show(errorTarget, cr.Errors);
+          }
+          else
+          {
+            
+            clayPay.CurrentTransaction.ResetPayerForm();
+            clayPay.CurrentTransaction.CCData.ResetForm();
+            Payment.ResetAll();
+            clayPay.CurrentTransaction = new NewTransaction(); // this will reset the entire object back to default.
+            clayPay.UI.updateCart();
+          }
+
+
           ClientResponse.HandleResponse(cr, true);
-          Utilities.Toggle_Loading_Button(NewTransaction.PayNowCashierButton, false);
+          Utilities.Toggle_Loading_Button(toggleButton, false);
           // need to reset the form and transaction / payment objects
         },
           function (e)
           {
             // We should show an error in the same spot we'd show a client response error.
-            Utilities.Error_Show(ClientResponse.CashierErrorTarget, e);
-            Utilities.Toggle_Loading_Button(NewTransaction.PayNowCashierButton, false);
+            Utilities.Error_Show(errorTarget, e);
+            Utilities.Toggle_Loading_Button(toggleButton, false);
           });
     }
-
-    SaveCC(): void
-    {
-      Utilities.Put<ClientResponse>("../API/Payments/Pay/", this)
-        .then(function (cr)
-        {
-          ClientResponse.HandleResponse(cr, false);
-          Utilities.Toggle_Loading_Button(NewTransaction.PayNowPublicButton, false);
-          // need to reset the form and transaction / payment objects
-        },
-          function (e)
-          {
-            // We should show an error in the same spot we'd show a client response error.
-            Utilities.Error_Show(ClientResponse.PublicErrorTarget, e);
-            Utilities.Toggle_Loading_Button(NewTransaction.PayNowPublicButton, false);
-          });
-    }
-
   }
 }

@@ -99,6 +99,11 @@ namespace clayPay
         return false;
       }
 
+      if (this.Amount === 0)
+      {
+        Payment.ResetCash();
+        return false;
+      }
       this.Validated = true;
       Utilities.Set_Text(Payment.cashPaymentTotalMenu, Utilities.Format_Amount(this.Amount));
       Utilities.Hide(Payment.cashPaymentContainer);
@@ -148,6 +153,12 @@ namespace clayPay
       this.CheckNumber = Utilities.Validate_Text(Payment.checkNumberInput, Payment.checkErrorElement, "You must enter the check number to continue.");
       if (this.CheckNumber.length === 0) return;
 
+      if (this.Amount === 0)
+      {
+        Payment.ResetCheck();
+        return false;
+      }
+
       this.Validated = true;
       Utilities.Set_Text(Payment.checkPaymentTotalMenu, Utilities.Format_Amount(this.Amount));
       Utilities.Hide(Payment.checkPaymentContainer);
@@ -157,7 +168,7 @@ namespace clayPay
       return this.Validated;
     }
 
-    static ResetAll(): void
+    public static ResetAll(): void
     {
       Payment.ResetCash();
       Payment.ResetCheck();

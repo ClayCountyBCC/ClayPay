@@ -61,11 +61,11 @@ namespace Utilities
     e.classList.remove("show");
   }
 
-  export function Error_Show(e: string, errorText?: Array<string>): void
-  export function Error_Show(e: string, errorText?: string): void
-  export function Error_Show(e: HTMLElement, errorText?: string ): void
-  export function Error_Show(e: Element, errorText?: string): void
-  export function Error_Show(e: any, errorText?: any): void
+  export function Error_Show(e: string, errorText?: Array<string>, timeout?: boolean): void
+  export function Error_Show(e: string, errorText?: string, timeout?: boolean): void
+  export function Error_Show(e: HTMLElement, errorText?: string, timeout?: boolean): void
+  export function Error_Show(e: Element, errorText?: string, timeout?: boolean): void
+  export function Error_Show(e: any, errorText?: any, timeout?: boolean): void
   {
     if (typeof e == "string")
     {
@@ -106,10 +106,13 @@ namespace Utilities
 
     }
     Show(e);
-    window.setTimeout(function (j)
+    if (timeout == undefined || timeout === true)
     {
-      Hide(e);
-    }, 10000)
+      window.setTimeout(function (j)
+      {
+        Hide(e);
+      }, 10000)
+    }
   }
 
   export function Clear_Element(node: HTMLElement): void

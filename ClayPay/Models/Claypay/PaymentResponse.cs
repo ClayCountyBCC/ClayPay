@@ -20,7 +20,7 @@ namespace ClayPay.Models
     public Constants.PaymentTypes PaymentType { get; set; }
     public string ErrorText { get; set; } = ""; //
     public string ConvFee { get; set; } // function GetConvenienceFee();
-    public decimal ConvFeeAmount => Convert.ToDecimal(ConvFee) * Amount;
+    public decimal ConvFeeAmount { get; set; }
     public bool UseProduction { get; set; } //
     public DateTime TimeStamp { get; set; } //
     public string CashierId { get; set; } //
@@ -41,17 +41,17 @@ namespace ClayPay.Models
       this.UseProduction = UseProduction;
     }
 
-    public static string GetFee()
+    public static string GetFee(decimal Amount)
     {
-      var pr = new PaymentResponse(100, Constants.PaymentTypes.Building, true);
-      return pr.CalcFee();
+      var pr = new PaymentResponse(Amount, Constants.PaymentTypes.Building, true);
+      return pr.CalcFee(Amount);
     }
 
-    private string CalcFee()
+    private string CalcFee(decimal Amount)
     {
       try
       {
-        string result = PostToMFC(BuildFeeURL());
+        string result = PostToMFC(BuildFeeURL(Amount));
         ProcessResults(result);
         return ConvFee;
       }catch(Exception ex)
@@ -68,6 +68,7 @@ namespace ClayPay.Models
         var pr = new PaymentResponse(ccd.Amount, Constants.PaymentTypes.Building, Constants.UseProduction());
         if (pr.Post(ccd, ipAddress))
         {
+          pr.ConvFeeAmount = Decimal.Parse(PaymentResponse.GetFee(ccd.Amount));
           return pr;
         }
         else
@@ -204,11 +205,12 @@ namespace ClayPay.Models
     //  return sb.ToString();
     //}
 
-    private string BuildFeeURL()
+    private string BuildFeeURL(decimal Amount)
     {
       var sb = new StringBuilder();
       sb.Append(BuildProdURL())
-        .Append("&PAYMENT_AMOUNT=100")
+        .Append("&PAYMENT_AMOUNT=")
+        .Append(Amount.ToString("F2"))
         .Append("&mode=CF");
       return sb.ToString();
     }
