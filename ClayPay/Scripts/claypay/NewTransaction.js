@@ -241,4 +241,4 @@ var clayPay;
     NewTransaction.paymentError = "paymentError";
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=NewTransaction.js.map
+//# sourceMappingURL=newtransaction.js.map

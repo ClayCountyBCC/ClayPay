@@ -409,16 +409,7 @@ namespace ClayPay.Models.Claypay
 
     public bool SaveTransaction()
     {
-      //if (!GetNextCashierId())
-      //{
-      //  rollbackTransaction();
-      //  return false;
-      //}
-      //if (!SaveCashierRow())
-      //{
-      //  rollbackTransaction();
-      //  return false;
-      //}
+
       if (!StartTransaction())
       {
         rollbackTransaction();
@@ -444,11 +435,6 @@ namespace ClayPay.Models.Claypay
       {
 
         if (!InsertGURows())
-        {
-          rollbackTransaction();
-          return false;
-        }
-        if (!InsertGUItemRowsd())
         {
           rollbackTransaction();
           return false;
@@ -720,12 +706,51 @@ namespace ClayPay.Models.Claypay
       // code for @Yr checks the current year against the FY field and if it is not equal,
       // it updates the FY and next avail fieldfield
       var query = @"
-          USE WATSC;
-          DECLARE @now = GETDATE();
-          EXEC dbo.prc_ins_ClayPay_ccGU_NewGU 
-            @otid OUTPUT,
-            @now
-      ";
+        USE WATSC;
+        INSERT INTO ccGU 
+          (OTId, CashierId, ItemId, PayID, CatCode, TransDt)
+        SELECT DISTINCT CCI.OTId, CCI.CashierId, CCI.ItemId, NULL, CCI.CatCode, @TransDt
+          FROM ccCashierItem CCI
+          INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
+        WHERE CCI.OTId = @otid;
+
+        INSERT INTO ccGUItem (GUID, Account, Amount, Type)
+          SELECT 
+            GU.GUId,
+            GL.Fund + '*' + GL.Account + '**' AS Account,
+          FORMAT(
+          CASE GL.[Percent] 
+            WHEN 0.05 THEN
+              CASE WHEN CAST(ROUND((Total * 99.9) / 100, 2) + (ROUND((Total * 0.05) / 100, 2)*2) AS MONEY) > CCI.Total THEN
+                CASE WHEN Fund <> '001' THEN 
+                    ROUND((Total * GL.[Percent]) / 100, 2) - .01
+                  ELSE 
+                    ROUND((Total * GL.[Percent]) / 100, 2) 
+                END
+              ELSE
+                ROUND((Total * GL.[Percent]) / 100, 2) 
+              END
+            WHEN 50 THEN
+              CASE WHEN (ROUND((Total * GL.[Percent]) / 100, 2)*2) <> CCI.Total THEN
+                CASE WHEN GL.Account = '322100' THEN
+                    ROUND((Total * GL.[Percent]) / 100, 2) + (CCI.Total -  (ROUND((Total * GL.[Percent]) / 100, 2)*2))
+                ELSE
+                  ROUND((Total * GL.[Percent]) / 100, 2) 
+                END
+              ELSE
+                ROUND((Total * GL.[Percent]) / 100, 2) 
+              END
+            ELSE
+              ROUND(Total / (100 / GL.[Percent]), 2) 
+            END
+          , 'N2') AS Amount,
+            GL.Type
+          FROM ccCashierItem CCI
+          INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
+          INNER JOIN ccGU GU ON CCI.OTId = GU.OTId AND CCI.ItemId = GU.ItemId
+          INNER JOIN ccCashierPayment CP ON CCI.OTId = CP.OTid
+          WHERE CCI.OTId = @otid
+          ORDER BY CCI.ItemId, GL.Type";
 
       try
       {
@@ -735,81 +760,26 @@ namespace ClayPay.Models.Claypay
       catch (Exception ex)
       {
         Constants.Log(ex, query);
-        //TODO: add rollback in SaveTransaction function
-        return false;
-      }
-    }
-
-    public bool InsertGUItemRowsd()
-    {
-      var param = new DynamicParameters();
-      param.Add("@otid", TransactionOTid);
-
-      // I don't know if the year is supposed to be the fiscal year.
-      // the code in  prc_upd_ccNextCashierId sets FY = the @Yr var
-      // code for @Yr checks the current year against the FY field and if it is not equal,
-      // it updates the FY and next avail fieldfield
-      var query = @"
-          USE WATSC;
-          DECLARE @now = GETDATE();
-          EXEC dbo.prc_ins_ClayPay_ccGUItem_NewGUItemAccountRows
-            @otid OUTPUT";
-      try
-      {
-        var i = Constants.Exec_Query(query, param);
-        return i > 0;
-      }
-      catch (Exception ex)
-      {
-        Constants.Log(ex, query);
-        //TODO: add rollback in SaveTransaction function
         return false;
       }
     }
 
     public bool FinalizeTransaction()
     {
-
-      if(IssueAssociatedPermits())
-      {
-        Constants.Log($"There was a problem seeting the permit issue dates for OTID: {TransactionOTid}",
-                      $"Need to set Issue Date for permits based on charges with OTID: {TransactionOTid}.",
-                      "", "", "");
-
-        Errors.Add($@"Problem Issuing Permits. Please contact Building department for assistance. Reference 
-                              Receipt number {TransactionCashierId}.");
-
-        return false;
-      }
-      if(!HandleHolds())
-      {
-        Constants.Log($"There was a problem signing off holds for charges associated with OTID: {TransactionOTid}",
-                      $"Need to sign of holds based on charges with OTID: {TransactionOTid}.",
-                      "", "", "");
-        Errors.Add($@"There was an issue signing of holds associated with the payment. 
-                      Please contact the building department for assistance.
-                       Reference receipt number {TransactionCashierId}.");
-        return false;
-      }
-      if (!UpdateContractorDates())
-      {
-        Constants.Log($"There was a problem updating the contractors expiraction date. OTID: {TransactionOTid}",
-                      $"Need to update contractor based on paid charges with OTID: {TransactionOTid}.",
-                      "", "", "");
-        Errors.Add($@"There was a problem updating the contractors expiraction date. 
-                      Please contact the building department for assistance.
-                       Reference receipt number {TransactionCashierId}.");
-        return false;
-      }
-      return true;
-    }
-
-    public bool IssueAssociatedPermits()
-    {
-      var dp = new DynamicParameters();
-      dp.Add("@otid", TransactionOTid);
-      var query = $@"
+      var query = @"
       USE WATSC;
+        USE WATSC;
+
+      --Handle HoldIds
+      UPDATE H
+        SET HldDate = GETDATE(), 
+        HldIntl = @UserName, 
+        HldInput = @cashierId
+          FROM bpHold H H
+          INNER JOIN ccCashierItem CI ON CI.HoldID = H.HoldID
+          WHERE OTId = @otid
+
+
 
       UPDATE bpASSOC_PERMIT
       SET IssueDate = GETDATE()
@@ -817,7 +787,7 @@ namespace ClayPay.Models.Claypay
         PermitNo IN
         (SELECT DISTINCT AssocKey
           FROM ccCashierItem
-          WHERE OTId = @otId AND
+          WHERE OTId = @otid AND
           Assoc NOT IN('AP', 'CL') AND
           LEFT(AssocKey, 1) NOT IN('1', '7') AND
           (SELECT ISNULL(SUM(Total), 0) AS Total
@@ -825,34 +795,9 @@ namespace ClayPay.Models.Claypay
             WHERE AssocKey IN(SELECT DISTINCT AssocKey
                               FROM ccCashierItem
                               WHERE OTId = @otid) AND
-            CashierId IS NULL AND Total > 0) = 0);";
+            CashierId IS NULL AND Total > 0) = 0);
 
-      return Constants.Exec_Query(query, dp) != -1;
-    }
 
-    public bool HandleHolds()
-    {
-      var param = new { TransactionCashierId, TransactionOTid, username = CurrentUser.user_name  };
-      var query = @"
-
-        USE WATSC;
-
-      --Handle HoldIds
-      UPDATE H
-        SET HldDate = GETDATE(), 
-        HldIntl = @username, 
-        HldInput = @TransactionCashierId
-          FROM bpHold H H
-          INNER JOIN ccCashierItem CI ON CI.HoldID = H.HoldID
-          WHERE OTId = @TransactionOTid";
-
-      return Constants.Exec_Query(query, param) != -1;
-    }
-    
-    public bool UpdateContractorDates()
-    {
-
-      var query = @"
       DECLARE @ExpDt VARCHAR(20) = (SELECT TOP 1 Description
           FROM clCategory_Codes WHERE Code = 'dt' AND Type_Code = '9');
 
@@ -862,7 +807,7 @@ namespace ClayPay.Models.Claypay
             ContractorCd IN 
             (SELECT DISTINCT AssocKey 
               FROM ccCashierItem 
-              WHERE OTId=@otId AND
+              WHERE OTId=@otid AND
                 Assoc='CL' AND
                 CatCode IN ('CLLTF', 'CLFE', 'CIAC', 'LFE') AND
               (SELECT ISNULL(SUM(Total), 0) AS Total 
@@ -871,10 +816,46 @@ namespace ClayPay.Models.Claypay
                                   FROM ccCashierItem 
                                   WHERE OTId=@otid) AND
                 CashierId IS NULL AND Total > 0) = 0);";
-      return Constants.Exec_Query(query, new { otid = TransactionOTid }) != -1;
+      return Constants.Exec_Query(query, new
+      {
+        otid = TransactionOTid,
+        cashierId = TransactionCashierId,
+        UserName = CurrentUser.user_name
+      }) != -1;
+      //if(IssueAssociatedPermits())
+      //{
+      //  Constants.Log($"There was a problem seeting the permit issue dates for OTID: {TransactionOTid}",
+      //                $"Need to set Issue Date for permits based on charges with OTID: {TransactionOTid}.",
+      //                "", "", "");
 
-      
+      //  Errors.Add($@"Problem Issuing Permits. Please contact Building department for assistance. Reference 
+      //                        Receipt number {TransactionCashierId}.");
+
+      //  return false;
+      //}
+      //if(!HandleHolds())
+      //{
+      //  Constants.Log($"There was a problem signing off holds for charges associated with OTID: {TransactionOTid}",
+      //                $"Need to sign of holds based on charges with OTID: {TransactionOTid}.",
+      //                "", "", "");
+      //  Errors.Add($@"There was an issue signing of holds associated with the payment. 
+      //                Please contact the building department for assistance.
+      //                 Reference receipt number {TransactionCashierId}.");
+      //  return false;
+      //}
+      //if (!UpdateContractorDates())
+      //{
+      //  Constants.Log($"There was a problem updating the contractors expiraction date. OTID: {TransactionOTid}",
+      //                $"Need to update contractor based on paid charges with OTID: {TransactionOTid}.",
+      //                "", "", "");
+      //  Errors.Add($@"There was a problem updating the contractors expiraction date. 
+      //                Please contact the building department for assistance.
+      //                 Reference receipt number {TransactionCashierId}.");
+      //  return false;
+      //}
+      //return true;
     }
+
     public bool rollbackTransaction()
     {
       /**
@@ -897,6 +878,7 @@ namespace ClayPay.Models.Claypay
             DELETE ccCashierPayment where OTID = @otid
             DELETE ccCashier where OTID = @otid
             UPDATE ccCashierItem set OTID = 0,CashierId = null where OTId = @otid
+            COMMIT;
           END TRY
         BEGIN CATCH
           ROLLBACK
