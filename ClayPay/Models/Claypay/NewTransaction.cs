@@ -220,7 +220,9 @@ namespace ClayPay.Models.Claypay
       if (this.CashPayment.PaymentType != Payment.payment_type.cash ||
         this.CheckPayment.PaymentType != Payment.payment_type.check ||
         this.OtherPayment.PaymentType == Payment.payment_type.cash ||
-        this.OtherPayment.PaymentType == Payment.payment_type.check)
+        this.OtherPayment.PaymentType == Payment.payment_type.check || 
+        this.OtherPayment.PaymentType == Payment.payment_type.credit_card_cashier ||
+        this.OtherPayment.PaymentType == Payment.payment_type.credit_card_public)
       {
         this.Errors.Add("There is an issue with the chosen payment types.  Please refresh this page and try again.");
         return false;
