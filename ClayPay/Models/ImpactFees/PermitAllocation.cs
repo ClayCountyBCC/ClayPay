@@ -99,7 +99,7 @@ namespace ClayPay.Models.ImpactFees
       return errors;
     }
 
-    public bool Update(string Username)
+    public bool Update(Models.UserAccess ua, string IpAddress)
     {
       var current = PermitAllocation.Get(Permit_Number);
       if (current == null) return false; // some kind of error occurred while getting the current permit data.
@@ -112,7 +112,7 @@ namespace ClayPay.Models.ImpactFees
         {
           // If the amount changes, we will also need to reapply the credit 
           // to the ccCashierItem table.
-          s = Constants.Create_Audit_Log(Username, "Amount Allocated", current.Amount_Allocated_Formatted, Amount_Allocated_Formatted);
+          s = Constants.Create_Audit_Log(ua.user_name, "Amount Allocated", current.Amount_Allocated_Formatted, Amount_Allocated_Formatted);
           Audit_Log = s + '\n' + current.Audit_Log;
         }
 
@@ -131,13 +131,13 @@ namespace ClayPay.Models.ImpactFees
           // check to see if the builder name changed here
           var currentBuilderName = currentBuilder.Builder_Name + " (" + currentBuilder.Builder_Id + ")";
           var newBuilderName = newBuilder.Builder_Name + " (" + newBuilder.Builder_Id + ")";
-          s = Constants.Create_Audit_Log(Username, "Builder", currentBuilderName, newBuilderName);
+          s = Constants.Create_Audit_Log(ua.user_name, "Builder", currentBuilderName, newBuilderName);
           Audit_Log = s + '\n' + current.Audit_Log;
 
           // check to see if the agreement changed
           if(currentBuilder.Agreement_Number != newBuilder.Agreement_Number)
           {
-            s = Constants.Create_Audit_Log(Username, "Agreement Number", currentBuilder.Agreement_Number, newBuilder.Agreement_Number);
+            s = Constants.Create_Audit_Log(ua.user_name, "Agreement Number", currentBuilder.Agreement_Number, newBuilder.Agreement_Number);
             Audit_Log = s + '\n' + current.Audit_Log;
           }
 
@@ -146,9 +146,44 @@ namespace ClayPay.Models.ImpactFees
       else // this is a new permit number
       {
         
-        Audit_Log = Constants.Create_Audit_Log(Username, "Record Created");
+        Audit_Log = Constants.Create_Audit_Log(ua.user_name, "Record Created");
         // will also need to apply the credit.
       }
+      if (!SaveAllocation()) return false;
+      var permit = PermitImpactFee.Get(Permit_Number);
+      
+      if (!permit.ItemId.HasValue) return false;
+      if(permit.ImpactFee_Amount < this.Amount_Allocated)
+      {
+        // This is a partial impact fee credit.
+        // Those credits are applied when the remainder is paid.
+        return true;
+      }
+      return ApplyCreditPayment(permit, IpAddress, ua);
+
+
+      
+    }
+
+    public bool ApplyCreditPayment(PermitImpactFee permit, string IpAddress, Models.UserAccess ua)
+    {
+      var nt = new Claypay.NewTransaction();
+      nt.ItemIds.Add(permit.ItemId.Value);
+      var ifPayment = new Claypay.Payment(Claypay.Payment.payment_type.impact_fee_credit)
+      {
+        Amount = Amount_Allocated,
+        AmountApplied = Amount_Allocated,
+        Validated = true
+      };
+
+      nt.Payments.Add(ifPayment);
+      nt.ipAddress = IpAddress;
+      nt.CurrentUser = ua;
+      return nt.SaveTransaction();
+    }
+
+    public bool SaveAllocation()
+    {
       string query = @"
         MERGE ImpactFees_Permit_Allocations WITH (HOLDLOCK) PA
         USING (SELECT @Permit_Number, @Builder_Id, @Amount_Allocated, @Audit_Log) AS P 

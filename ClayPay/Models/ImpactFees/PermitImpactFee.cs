@@ -13,6 +13,7 @@ namespace ClayPay.Models.ImpactFees
     public string Permit_Number { get; set; } = "";
     private DateTime? Issue_Date { get; set; }
     private DateTime? Void_Date { get; set; }
+    public int? ItemId { get; set; }
     public decimal? ImpactFee_Amount { get; set; }
     public string ImpactFee_Amount_Formatted
     {
@@ -48,7 +49,6 @@ namespace ClayPay.Models.ImpactFees
         DECLARE @Point geometry = geometry::STPointFromText('POINT (' + 
           CONVERT(VARCHAR(20), @X) + ' ' + 
           CONVERT(VARCHAR(20), @Y) + ')', 2881);
-
         SELECT 
           SHAPE.STIntersects(@Point) Inside
         FROM IMS_APPLICATIONS
@@ -84,6 +84,7 @@ namespace ClayPay.Models.ImpactFees
           ISNULL(LTRIM(RTRIM(C.CompanyName)), '') Contractor_Name,
           B.X,
           B.Y,
+          CI.ItemId ItemId,
           CI.Total ImpactFee_Amount,
           LTRIM(RTRIM(CI.CashierId)) Cashier_Id,
           PA.Amount_Allocated
