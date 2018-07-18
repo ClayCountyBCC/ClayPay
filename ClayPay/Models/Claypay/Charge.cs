@@ -34,40 +34,21 @@ namespace ClayPay.Models
 
     }
 
-    public static List<Charge> Get(string AssocKey)
+    public static List<Charge> GetChargesByAssocKey(string AssocKey)
     {
       var dbArgs = new Dapper.DynamicParameters( );
       dbArgs.Add("@AK", AssocKey);
       string sql = @"
         USE WATSC;
-        SELECT 
-	        ItemId,
-	        Description,
-	        TimeStamp,
-	        Assoc,
-	        AssocKey,
-	        Total,	
-	        UPPER(LTRIM(RTRIM(ISNULL(COALESCE(Address, CustomerName, ProjName), '')))) AS Detail
-        FROM (
-	        SELECT
-		        CCI.ItemId,
-		        CCC.Description, 
-		        CCI.TimeStamp,
-		        CCI.Assoc,
-		        LTRIM(RTRIM(CCI.AssocKey)) AS AssocKey,	
-		        CCI.Total,		        
-		        COALESCE(BM.ProjAddrCombined, BA.ProjAddrCombined) Address,	
-		        C.CustomerName,
-		        A.ProjName
-	        FROM ccCashierItem CCI
-	        LEFT OUTER JOIN ccCatCd CCC ON CCI.CatCode = CCC.CatCode
-	        LEFT OUTER JOIN bpMASTER_PERMIT M ON CCI.AssocKey = M.PermitNo AND CCI.Assoc NOT IN ('AP', 'CL')
-	        LEFT OUTER JOIN bpBASE_PERMIT BM ON M.BaseID = BM.BaseID AND CCI.Assoc NOT IN ('AP', 'CL')
-	        LEFT OUTER JOIN bpAssoc_PERMIT ASSOC ON CCI.AssocKey = ASSOC.PermitNo AND CCI.Assoc NOT IN ('AP', 'CL')
-	        LEFT OUTER JOIN bpBASE_PERMIT BA ON ASSOC.BaseID = BA.BaseID AND CCI.Assoc NOT IN ('AP', 'CL')
-	        LEFT OUTER JOIN clContractor CO ON CCI.AssocKey = CO.ContractorCd AND CCI.Assoc='CL'
-	        LEFT OUTER JOIN clCustomer C ON CCI.AssocKey = C.ContractorCd AND CCI.Assoc = 'CL'
-	        LEFT OUTER JOIN apApplication A ON CCI.AssocKey = A.apAssocKey AND CCI.Assoc = 'AP'
+          SELECT 
+	          ItemId,
+	          Description,
+	          TimeStamp,
+	          Assoc,
+	          AssocKey,
+	          Total,	
+	          UPPER(LTRIM(RTRIM(ISNULL(COALESCE(Address, CustomerName, ProjName), '')))) AS Detail
+          FROM vwClaypayCharges 
 	        WHERE AssocKey IS NOT NULL 
             AND Total > 0 
             AND CashierId IS NULL 
@@ -79,7 +60,31 @@ namespace ClayPay.Models
       return lc;
     }
 
-    public static List<Charge> Get(List<int> itemIds)
+    public static List<Charge> GetChargesByCashierId(string CashierId = "")
+    {
+      var dbArgs = new Dapper.DynamicParameters();
+      dbArgs.Add("@CashierId", CashierId);
+      string sql = @"
+ 
+           USE WATSC;
+           SELECT 
+	          ItemId,
+	          Description,
+	          TimeStamp,
+	          Assoc,
+	          AssocKey,
+	          Total,	
+	          Detail
+          FROM vwClaypayCharges vC
+          INNER JOIN ccCashierItem CI ON CI.ItemId = vC.ItemId
+          WHERE CashierId = @CashierId
+        ) AS TMP        
+        ORDER BY TimeStamp ASC";
+      var lc = Constants.Get_Data<Charge>(sql, dbArgs);
+      return lc;
+    }
+
+    public static List<Charge> GetChargesByItemIds(List<int> itemIds)
     {
       string sql = @"
         USE WATSC;
@@ -90,32 +95,9 @@ namespace ClayPay.Models
 	        Assoc,
 	        AssocKey,
 	        Total,	
-	        UPPER(LTRIM(RTRIM(ISNULL(COALESCE(Address, CustomerName, ProjName), '')))) AS Detail
-        FROM (
-	        SELECT
-		        CCI.ItemId,
-		        CCC.Description, 
-		        CCI.TimeStamp,
-		        CCI.Assoc,
-		        LTRIM(RTRIM(CCI.AssocKey)) AS AssocKey,	
-		        CCI.Total,		        
-		        COALESCE(BM.ProjAddrCombined, BA.ProjAddrCombined) Address,	
-		        C.CustomerName,
-		        A.ProjName
-	        FROM ccCashierItem CCI
-	        LEFT OUTER JOIN ccCatCd CCC ON CCI.CatCode = CCC.CatCode
-	        LEFT OUTER JOIN bpMASTER_PERMIT M ON CCI.AssocKey = M.PermitNo AND CCI.Assoc NOT IN ('AP', 'CL')
-	        LEFT OUTER JOIN bpBASE_PERMIT BM ON M.BaseID = BM.BaseID AND CCI.Assoc NOT IN ('AP', 'CL')
-	        LEFT OUTER JOIN bpAssoc_PERMIT ASSOC ON CCI.AssocKey = ASSOC.PermitNo AND CCI.Assoc NOT IN ('AP', 'CL')
-	        LEFT OUTER JOIN bpBASE_PERMIT BA ON ASSOC.BaseID = BA.BaseID AND CCI.Assoc NOT IN ('AP', 'CL')
-	        LEFT OUTER JOIN clContractor CO ON CCI.AssocKey = CO.ContractorCd AND CCI.Assoc='CL'
-	        LEFT OUTER JOIN clCustomer C ON CCI.AssocKey = C.ContractorCd AND CCI.Assoc = 'CL'
-	        LEFT OUTER JOIN apApplication A ON CCI.AssocKey = A.apAssocKey AND CCI.Assoc = 'AP'
-	        WHERE AssocKey IS NOT NULL 
-            AND Total > 0 
-            AND CashierId IS NULL 
-            AND UnCollectable = 0
-            AND CCI.ItemId IN @ids
+	        Detail
+        FROM vwClaypayCharges
+            AND CCI.ItemId IN @itemIds
         ) AS TMP        
         ORDER BY TimeStamp ASC";
       var lc = Constants.Get_Data<Charge>(sql, itemIds);

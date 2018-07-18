@@ -272,7 +272,7 @@ namespace ClayPay.Models.Claypay
         return false;
       }
 
-      this.Charges = Charge.Get(ItemIds);
+      this.Charges = Charge.GetChargesByItemIds(ItemIds);
       var totalCharges = (from c in this.Charges
                           select c.Total).Sum();
 
