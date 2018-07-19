@@ -20,7 +20,10 @@ namespace ClayPay.Models.Claypay
 
     public ClientResponse(string cashierid, List<Charge> charges = null)
     {
-      ResponseCashierData = new CashierData(cashierid);
+      
+      ResponseCashierData = ResponseCashierData.CashierId == "" ? 
+                            CashierData.Get(cashierid) : ResponseCashierData;
+
       ChargeList = charges == null || charges.Count() == 0 ? 
                    Charge.GetChargesByCashierId(cashierid) : charges;
 

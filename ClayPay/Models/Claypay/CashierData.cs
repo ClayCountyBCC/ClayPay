@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Dapper;
 
 namespace ClayPay.Models.Claypay
 {
@@ -10,15 +11,15 @@ namespace ClayPay.Models.Claypay
     public UserAccess CurrentUser { get; set; }
     public int OTId { get; set; }
     public string CashierId { get; set; }
-    
+    public DateTime TransactionDate { get; set; } = DateTime.Now;
     public string PayerCompanyName { get; set; } = "";
     public string PayerFirstName { get; set; } = ""; // Required
     public string PayerLastName { get; set; } = "";// Required
     public string PayerPhoneNumber { get; set; } = "";// Required
     public string PayerEmailAddress { get; set; } = "";
     public string ipAddress { get; set; } = "";
-    public string PayerStreet1 { get; set; }
-    public string PayerStreet2 { get; set; }
+    public string PayerStreet1 { get; set; } = "";
+    public string PayerStreet2 { get; set; } = "";
     public string PayerStreetAddress { get; set; } = ""; // Required
     public string PayerAddress2 // Required, but this is a combination of City State, Zip
     {
@@ -35,10 +36,29 @@ namespace ClayPay.Models.Claypay
     {
       
     }
-
-    public CashierData(string cashierId)
+    
+    public static CashierData Get(string cashierid)
     {
+
+      var param = new DynamicParameters();
+      param.Add("@CashierId", cashierid);
       
+      var query = @"
+        USE WATSC;
+        
+        SELECT
+          OTId,
+          CashierId,
+          TransDt TransactionDate,
+          CoName PayerCompanyName,
+          Phone PayerPhoneNumber,
+          EmailAddress PayerEmailAddress,
+          Addr1 PayerStreet1,
+          Addr2 PayerStreet2
+        FROM ccCashier
+        WHERE CashierId = @CashierId";
+
+      return Constants.Get_Data<CashierData>(query, param).FirstOrDefault();
     }
 
     public List<string> ValidatePayerData()

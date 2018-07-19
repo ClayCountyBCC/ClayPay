@@ -75,20 +75,31 @@ namespace ClayPay.Models.Claypay
       param.Add("@cashierId", CashierId);
       var query = @"
         USE WATSC;
+
         WITH VOID_CASHEIRIDS(CashierId) AS (
         SELECT DISTINCT LEFT(CASHIERID,9)
         FROM ccCashier
         WHERE RIGHT(CashierId,1) = 'V')
 
-        SELECT DISTINCT PayId, PmtType, AmtTendered, AmtApplied,
-        C.Name, C.TransDt, C.CoName
+        SELECT DISTINCT
+          C.CashierId,
+          CP.OTId,
+          PayId, 
+          TRANSDT [TransactionDate], 
+          INFO,
+          L.CODE [PaymentType],
+          AmtTendered [AmountTendered], 
+          AmtApplied [AmountAplied], 
+          (AmtTendered - AmtApplied) ChangeDue, 
+          CkNo [CheckNumber],
+          TransactionId
         FROM ccCashierPayment CP
         INNER JOIN ccCashier C ON C.OTId = CP.OTid
-        INNER JOIN ccCashierItem CI ON CI.CashierId = C.CashierId
-
-        WHERE LEFT(C.CashierId,9) = @cashierId
-            AND LEFT(C.CashierId,9) NOT IN (SELECT CashierId FROM VOID_CASHEIRIDS)";
-
+        INNER JOIN ccCashierItem CI ON CP.OTid = CI.OTId AND C.CashierId = CI.CashierId
+        INNER JOIN ccLookUp L ON LEFT(L.CODE,5) = LEFT(CP.PmtType,5)
+        WHERE LEFT(C.CashierId,9) NOT IN (SELECT CashierId FROM VOID_CASHEIRIDS)
+         AND C.CashierId = @cashierId
+        ORDER BY CashierId DESC";
 
       return Constants.Get_Data<ReceiptPayment>(query, param);
 
