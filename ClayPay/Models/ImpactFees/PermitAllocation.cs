@@ -172,10 +172,10 @@ namespace ClayPay.Models.ImpactFees
       var ifPayment = new Claypay.Payment(Claypay.Payment.payment_type.impact_fee_credit)
       {
         Amount = Amount_Allocated,
-        AmountApplied = Amount_Allocated,
+        AmountApplied = Amount_Allocated,        
         Validated = true
       };
-
+      nt.PayerCompanyName = permit.Contractor_Name;
       nt.Payments.Add(ifPayment);
       nt.ipAddress = IpAddress;
       nt.CurrentUser = ua;

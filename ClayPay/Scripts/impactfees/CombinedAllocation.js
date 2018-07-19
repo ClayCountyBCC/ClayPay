@@ -22,7 +22,7 @@ var ImpactFees;
             if (qs.length > 0) {
                 qs = "?" + qs.substr(1); // no matter which arguments we used, we'll always remove the leading & and add a ?
             } //"../API/Payments/Fee/"
-            return Utilities.Get(path + "/API/ImpactFees/GetAgreements" + qs);
+            return Utilities.Get(path + "API/ImpactFees/GetAgreements" + qs);
             //return fetch("./API/ImpactFees/GetAgreements" + qs) : Promise<Array<CombinedAllocation>>;
             //return XHR.GetArray<CombinedAllocation>("./API/ImpactFees/GetAgreements", qs);
         }

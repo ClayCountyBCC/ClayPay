@@ -326,6 +326,7 @@ namespace ClayPay.Models.Claypay
 
     public bool LockChargeItems()
     {
+      if (Charges.Count == 0) return false;
       var sql = @"
         USE WATSC;
         BEGIN TRAN
@@ -386,6 +387,7 @@ namespace ClayPay.Models.Claypay
 
     public void UnlockChargeItems()
     {
+      if (Charges.Count == 0) return;
       var sql = @"
         USE WATSC;
 
@@ -427,7 +429,7 @@ namespace ClayPay.Models.Claypay
         rollbackTransaction();
         return false;
       }
-      var updateGU = (from p in Payments
+      bool updateGU = (from p in Payments
                       where p.PaymentType == Payment.payment_type.cash ||
                             p.PaymentType == Payment.payment_type.check ||
                             p.PaymentType == Payment.payment_type.credit_card_cashier ||
@@ -636,7 +638,7 @@ namespace ClayPay.Models.Claypay
           p.AmountTendered,
           p.CheckNumber,
           p.TransactionId, 
-          PayerFirstName + " " + PayerLastName);
+          PayerCompanyName.Length > 0 ? PayerCompanyName : PayerFirstName + " " + PayerLastName);
       }
 
       string query = $@"
