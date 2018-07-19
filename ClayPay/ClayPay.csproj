@@ -288,6 +288,7 @@
     <Compile Include="Controllers\API\Payments\FeeController.cs" />
     <Compile Include="Controllers\API\Payments\PayController.cs" />
     <Compile Include="Controllers\API\Payments\QueryController.cs" />
+    <Compile Include="Controllers\API\Payments\ReceiptController.cs" />
     <Compile Include="Controllers\MVC\Balancing\BalancingController.cs" />
     <Compile Include="Controllers\MVC\ImpactFees\ImpactFeesController.cs" />
     <Compile Include="Controllers\MVC\Payments\PaymentsController.cs" />
@@ -301,11 +302,13 @@
     <Compile Include="Models\Balancing\Payment.cs" />
     <Compile Include="Models\Claypay\ActiveTransactions.cs" />
     <Compile Include="Models\Claypay\AppType.cs" />
+    <Compile Include="Models\Claypay\CashierData.cs" />
     <Compile Include="Models\Claypay\ClientResponse.cs" />
     <Compile Include="Models\Claypay\Payment.cs" />
     <Compile Include="Models\Claypay\CCPayment.cs" />
     <Compile Include="Models\Claypay\Charge.cs" />
     <Compile Include="Models\Claypay\NewTransaction.cs" />
+    <Compile Include="Models\Claypay\ReceiptPayment.cs" />
     <Compile Include="Models\Constants.cs" />
     <Compile Include="Models\ErrorLog.cs" />
     <Compile Include="Models\ImpactFees\BuilderAllocation.cs" />
@@ -350,6 +353,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Scripts\app\typings\" />
+    <Folder Include="Views\Receipt\" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\claypay\ClientResponse.ts" />

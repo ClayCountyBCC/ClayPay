@@ -16,7 +16,7 @@ namespace ClayPay.Controllers
     [Route("Query")]
     public IHttpActionResult Get(string Key)
     {
-      List<Charge> lc = Charge.Get(Key);
+      List<Charge> lc = Charge.GetChargesByAssocKey(Key);
       if (lc == null)
       {        
         return InternalServerError();

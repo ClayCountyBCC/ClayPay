@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Dapper;
 
 namespace ClayPay.Models.Claypay
 {
@@ -33,16 +34,6 @@ namespace ClayPay.Models.Claypay
             return "cc_cashier";
           case payment_type.credit_card_public:
             return "cc_online";
-
-          //case payment_type.credit_card:
-          //  switch (Environment.MachineName.ToUpper())
-          //  {
-          //    case "CLAYBCCIIS01":
-          //      return "cc_cashier";
-          //    case "CLAYBCCDMZIIS01":
-          //      return "cc_online";
-          //  }
-          //  return "cc_test";
           case payment_type.check:
             return "CK";
           case payment_type.cash:
@@ -55,6 +46,33 @@ namespace ClayPay.Models.Claypay
             return "IFWS";
           case payment_type.impact_waiver_road:
             return "IFWR";
+          default:
+            return ""; // this should not ever be the case.
+        }
+      }
+    }
+    public string PaymentTypeDisplayString
+    {
+      get
+      {
+        switch (PaymentType)
+        {
+          case payment_type.credit_card_cashier:
+          case payment_type.credit_card_public:
+            return "cc_online";
+
+          case payment_type.check:
+            return "Check";
+          case payment_type.cash:
+            return "Cash";
+          case payment_type.impact_fee_credit:
+            return "Impact Fee Credit";
+          case payment_type.impact_fee_exemption:
+            return "Impact Fee Exemption";
+          case payment_type.impact_waiver_school:
+            return "School Impact Fee Waiver";
+          case payment_type.impact_waiver_road:
+            return "Road Impact Fee Waiver";
           default:
             return ""; // this should not ever be the case.
         }
@@ -125,6 +143,22 @@ namespace ClayPay.Models.Claypay
       return true;
     }
 
-  }
+    public static List<Payment> GetPaymentList(int payid, int otid, string cashierId)
+    {
+      var param = new DynamicParameters();
+      param.Add("@otid", otid);
+      param.Add("@payid", payid);
+      param.Add("@casheirId", cashierId);
 
+      var query = @"
+       USE WATSC;
+
+
+       SELECT 
+      ;";
+
+      return Constants.Get_Data<Payment>(query, param);
+    }
+  }
+  
 }

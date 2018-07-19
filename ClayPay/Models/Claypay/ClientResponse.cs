@@ -2,36 +2,46 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Dapper;
 
 namespace ClayPay.Models.Claypay
 {
   public class ClientResponse
   {
-
-    public string TimeStamp { get; set; } = DateTime.Now.ToString();
-    public string CashierId { get; set; } = "";
-    public string TransactionId { get; set; } = "";
+    public CashierData ResponseCashierData { get; set; }
+    public List<Charge> ChargeList { get; set; } = new List<Charge>();
+    public List<ReceiptPayment> ReceiptPayments { get; set; }
     public List<string> Errors { get; set; } = new List<string>();
-    public List<string> PartialErrors { get; set; } = new List<string>();
-    public decimal AmountPaid { get; set; } = 0;
-    private decimal ConvenienceFeeAmount { get; set; } = 0;
-    public decimal ChangeDue { get; set; } = 0; // only applicable in Cash payments.
 
-    public ClientResponse(string cashierid, string transId, List<string> partErr, decimal AmtApplied, decimal change, decimal convFeeAmount = 0)
+    // These two are used only when there is an issue saving payments AFTER 
+    // the credit card was charged for the amount. Very Bad
+    public string TransactionId { get; set; } = "";
+    public List<string> PartialErrors { get; set; } = new List<string>();
+
+    public ClientResponse(string cashierid, List<Charge> charges = null)
     {
-      CashierId = cashierid;
-      TransactionId = transId;
-      PartialErrors = partErr;
-      AmountPaid = AmtApplied;
-      ChangeDue = change;
-      ConvenienceFeeAmount = convFeeAmount;
+      ResponseCashierData = new CashierData(cashierid);
+      ChargeList = charges == null || charges.Count() == 0 ? 
+                   Charge.GetChargesByCashierId(cashierid) : charges;
+
+      ReceiptPayments = ReceiptPayment.Get(cashierid);
+
+      var payments = new List<ReceiptPayment>();
+      
     }
 
-    // If you've got any errors, you won't need anything else.
     public ClientResponse(List<string> errors)
     {
       Errors = errors;
     }
+
+    public ClientResponse(List<string> partialErrors, string transId)
+    {
+      TransactionId = transId;
+      PartialErrors = partialErrors;
+    }
+
+
 
   }
 }

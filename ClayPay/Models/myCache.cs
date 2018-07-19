@@ -70,7 +70,6 @@ namespace ClayPay.Models
           return UserAccess.GetAllUserAccess();
         case "fee":
           return PaymentResponse.GetFee(100);
-
         case "apptypes":
           return AppType.Get();
 

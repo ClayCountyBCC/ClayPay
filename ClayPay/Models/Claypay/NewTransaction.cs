@@ -13,26 +13,9 @@ namespace ClayPay.Models.Claypay
 {
   public class NewTransaction
   {
-    public UserAccess CurrentUser { get; set; }
-    public string PayerCompanyName { get; set; } = "";
-    public string PayerFirstName { get; set; } = ""; // Required
-    public string PayerLastName { get; set; } = "";// Required
-    public string PayerPhoneNumber { get; set; } = "";// Required
-    public string PayerEmailAddress { get; set; } = "";
-    public string ipAddress { get; set; } = "";
-    public string PayerStreetAddress { get; set; } = ""; // Required
-    public string PayerAddress2 // Required, but this is a combination of City State, Zip
-    {
-      get
-      {
-        return PayerCity + " " + PayerState + ", " + PayerZip;
-      }
-    }
-    public string PayerCity { get; set; } = "";// Required
-    public string PayerState { get; set; } = "";// Required
-    public string PayerZip { get; set; } = "";// Required
-    public int TransactionOTid { get; set; }
-    public string TransactionCashierId { get; set; }
+
+
+    public CashierData TransactionCashierData { get; set; }
     public List<int> ItemIds { get; set; } = new List<int>();
     public List<Charge> Charges { get; set; }
     public CCPayment CCData { get; set; }
@@ -49,85 +32,14 @@ namespace ClayPay.Models.Claypay
     {
     }
 
-    public bool ValidatePayerData()
-    {
-      // Required fields:
-      // PayerFirstName
-      // PayerLastName
-      // PayerPhoneNumber
-      // PayerStreetAddress
-      // PayerCity
-      // PayerState
-      // PayerZip
-      PayerCity = PayerCity.Trim();
-      PayerFirstName = PayerFirstName.Trim();
-      PayerLastName = PayerLastName.Trim();
-      PayerCity = PayerCity.Trim();
-      PayerState = PayerState.Trim();
-      PayerZip = PayerZip.Trim();
-      PayerPhoneNumber = PayerPhoneNumber.Trim();
-      PayerEmailAddress = PayerEmailAddress.Trim();
-      PayerCompanyName = PayerCompanyName.Trim();
-
-      if(PayerFirstName.Length == 0)
-      {
-        Errors.Add("The Payer's First name is a required field.");
-        return false;
-      }
-      if (PayerLastName.Length == 0)
-      {
-        Errors.Add("The Payer's Last name is a required field.");
-        return false;
-      }
-      if (PayerPhoneNumber.Length == 0)
-      {
-        Errors.Add("The Payer's phone number is a required field.");
-        return false;
-      }
-      if(PayerEmailAddress.Length > 0)
-      {
-        try
-        {
-          var email = new System.Net.Mail.MailAddress(PayerEmailAddress);
-        }
-        catch(FormatException fe)
-        {
-          Errors.Add("The email address provided does not appear to be in a valid format.");
-          return false;
-        }
-      }
-      if(PayerStreetAddress.Length == 0)
-      {
-        Errors.Add("The Payer's Street Address must be provided.");
-        return false;
-      }
-
-      if(PayerCity.Length == 0)
-      {
-        Errors.Add("The Payer's City must be provided.");
-        return false;
-      }
-      if (PayerState.Length == 0)
-      {
-        Errors.Add("The Payer's State must be provided.");
-        return false;
-      }
-      if(PayerZip.Length == 0)
-      {
-        Errors.Add("The Payer's Zip Code must be provided.");
-        return false;
-      }
-
-      return true;
-    }
-
+  
     public ClientResponse ProcessPaymentTransaction()
     {
       // Process credit card payment if there is one. this will be moved to a separate function
       if (CCData.Validated)
       {
 
-        var pr = PaymentResponse.PostPayment(this.CCData, ipAddress);
+        var pr = PaymentResponse.PostPayment(this.CCData, TransactionCashierData.ipAddress);
 
         if (pr == null)
         {
@@ -146,7 +58,6 @@ namespace ClayPay.Models.Claypay
           else
           {
             CCData.TransactionId = pr.UniqueId;
-            CCData.ConvenienceFeeAmount = pr.ConvFeeAmount;
           }
         }
       }
@@ -172,12 +83,7 @@ namespace ClayPay.Models.Claypay
       {
         var amountPaid = (from payment in Payments select payment.AmountApplied).Sum();
 
-        return new ClientResponse(TransactionCashierId, 
-                                  this.CCData.TransactionId, 
-                                  ProcessingErrors, 
-                                  amountPaid, 
-                                  ChangeDue, 
-                                  CCData.Validated ? CCData.ConvenienceFeeAmount : 0);
+        return new ClientResponse(TransactionCashierData.CashierId, Charges);
       }
       else
       {
@@ -186,7 +92,7 @@ namespace ClayPay.Models.Claypay
           // getting here is bad
           ProcessingErrors.Add($@"\nPlease do not attempt the transaction again and contact the building department.
                                  Reference Credit Card Transaction Id: {this.CCData.TransactionId}");
-          return new ClientResponse("", this.CCData.TransactionId, ProcessingErrors, 0, 0);
+          return new ClientResponse(ProcessingErrors, this.CCData.TransactionId);
         }
         else
         {
@@ -198,6 +104,12 @@ namespace ClayPay.Models.Claypay
 
     public bool ValidatePaymentTransaction()
     {
+      Errors = TransactionCashierData.ValidatePayerData();
+      if (Errors.Count() > 0) // Lock IDs at the end of this function
+      {
+        return false;
+      }
+
       // These rules do not include fields / forms, just how we validate the amount.
       // Payment Items to validate:      
       // 1. The Total charges must match the amount sent from the client.
@@ -206,12 +118,7 @@ namespace ClayPay.Models.Claypay
       //  2b. The difference between the total amount paid and the total charges cannot be greater
       //      than the amount of cash paid. (TotalAmountPaid - TotalCharges) <= TotalCashPaid
 
-      if (!ValidatePayerData()) // Lock IDs at the end of this function
-      {
-        return false;
-      }
-
-      if(ItemIds.Count() == 0)
+      if (ItemIds.Count() == 0)
       {
         Errors.Add("No charges were found, please refresh this page and add your charges again.");
         return false;
@@ -264,15 +171,15 @@ namespace ClayPay.Models.Claypay
       }
 
       // If not cashier and cash || check, return error
-      if (!this.CurrentUser.djournal_access &&
-        (this.CashPayment.Validated ||
-        this.CheckPayment.Validated))
+      if (!TransactionCashierData.CurrentUser.djournal_access &&
+         (CashPayment.Validated ||
+          CheckPayment.Validated))
       {
         Errors.Add("Only cashier can accept cash and check payments");
         return false;
       }
 
-      this.Charges = Charge.Get(ItemIds);
+      this.Charges = Charge.GetChargesByItemIds(ItemIds);
       var totalCharges = (from c in this.Charges
                           select c.Total).Sum();
 
@@ -430,11 +337,11 @@ namespace ClayPay.Models.Claypay
         return false;
       }
       bool updateGU = (from p in Payments
-                      where p.PaymentType == Payment.payment_type.cash ||
-                            p.PaymentType == Payment.payment_type.check ||
-                            p.PaymentType == Payment.payment_type.credit_card_cashier ||
-                            p.PaymentType == Payment.payment_type.credit_card_public
-                      select p).ToList().Count() > 0;
+                       where p.PaymentType == Payment.payment_type.cash ||
+                             p.PaymentType == Payment.payment_type.check ||
+                             p.PaymentType == Payment.payment_type.credit_card_cashier ||
+                             p.PaymentType == Payment.payment_type.credit_card_public
+                       select p).ToList().Count() > 0;
       if (updateGU)
       {
 
@@ -456,14 +363,14 @@ namespace ClayPay.Models.Claypay
       var dp = new DynamicParameters();
       dp.Add("@CashierId", size: 12, dbType: DbType.String, direction: ParameterDirection.Output);
       dp.Add("@otId", dbType: DbType.Int32, direction: ParameterDirection.Output);
-      dp.Add("@PayerCompanyName", PayerCompanyName);
-      dp.Add("@PayerName", PayerFirstName + " " + PayerLastName);
-      dp.Add("@UserName", CurrentUser.user_name);
+      dp.Add("@PayerCompanyName", TransactionCashierData.PayerCompanyName);
+      dp.Add("@PayerName", TransactionCashierData.PayerFirstName + " " + TransactionCashierData.PayerLastName);
+      dp.Add("@UserName", TransactionCashierData.CurrentUser.user_name);
       dp.Add("@TransactionDate", TransactionDate);
-      dp.Add("@PayerPhoneNumber", PayerPhoneNumber);
-      dp.Add("@PayerStreetAddress", PayerStreetAddress);
-      dp.Add("@PayerStreet2", PayerCity + " " + PayerState + ", " + PayerZip);
-      dp.Add("@IPAddress", ipAddress);
+      dp.Add("@PayerPhoneNumber", TransactionCashierData.PayerPhoneNumber);
+      dp.Add("@PayerStreetAddress", TransactionCashierData.PayerStreetAddress);
+      dp.Add("@PayerStreet2", TransactionCashierData.PayerCity + " " + TransactionCashierData.PayerState + ", " + TransactionCashierData.PayerZip);
+      dp.Add("@IPAddress", TransactionCashierData.ipAddress);
 
       string sql = @"
         USE WATSC;
@@ -492,14 +399,14 @@ namespace ClayPay.Models.Claypay
         SET @otId = @@IDENTITY;";
       try
       {
-        TransactionCashierId = "-1";
-        TransactionOTid = -1;
+        TransactionCashierData.CashierId = "-1";
+        TransactionCashierData.OTId      = -1;
 
         int i = Constants.Exec_Query(sql, dp);
         if(i != -1)
         {
-          TransactionOTid = dp.Get<int>("@otId");
-          TransactionCashierId = dp.Get<string>("@CashierId");
+          TransactionCashierData.OTId = dp.Get<int>("@otId");
+          TransactionCashierData.CashierId= dp.Get<string>("@CashierId");
           return true;
         }
         return false;
@@ -534,12 +441,12 @@ namespace ClayPay.Models.Claypay
         var i = Constants.Exec_Query(query,dp);
         if(i > 0)
         {
-          TransactionCashierId = dp.Get<string>("@CashierId");
+          TransactionCashierData.CashierId = dp.Get<string>("@CashierId");
           return true;
         }
         else
         {
-          TransactionCashierId = "-1";
+          TransactionCashierData.CashierId = "-1";
           return false;
         }
 
@@ -547,7 +454,7 @@ namespace ClayPay.Models.Claypay
       catch (Exception ex)
       {
         Constants.Log(ex, query);
-        TransactionCashierId = "-1";
+        TransactionCashierData.CashierId = "-1";
         return false;
         //TODO: add rollback in SaveTransaction function
       }
@@ -562,15 +469,18 @@ namespace ClayPay.Models.Claypay
       //{
       //  dp.Add("@StationId", 1);
       //}
-      dp.Add("@PayerCompanyName", PayerCompanyName);
-      dp.Add("@CashierId", TransactionCashierId);
-      dp.Add("@PayerName", PayerFirstName + " " + PayerLastName);
-      dp.Add("@UserName", CurrentUser.user_name);
+      dp.Add("@PayerCompanyName", TransactionCashierData.PayerCompanyName);
+      dp.Add("@CashierId", TransactionCashierData.CashierId);
+      dp.Add("@PayerName", TransactionCashierData.PayerFirstName + " " + 
+                           TransactionCashierData.PayerLastName);
+      dp.Add("@UserName", TransactionCashierData.CurrentUser.user_name);
       dp.Add("@TransactionDate", TransactionDate);
-      dp.Add("@PayerPhoneNumber", PayerPhoneNumber);
-      dp.Add("@PayerStreetAddress", PayerStreetAddress);
-      dp.Add("@PayerStreet2", PayerCity + " " + PayerState + ", " + PayerZip);
-      dp.Add("@IPAddress", ipAddress);
+      dp.Add("@PayerPhoneNumber", TransactionCashierData.PayerPhoneNumber);
+      dp.Add("@PayerStreetAddress", TransactionCashierData.PayerStreetAddress);
+      dp.Add("@PayerStreet2", TransactionCashierData.PayerCity + " " + 
+                              TransactionCashierData.PayerState + ", " + 
+                              TransactionCashierData.PayerZip);
+      dp.Add("@IPAddress", TransactionCashierData.ipAddress);
 
 
       string query = @"
@@ -592,12 +502,12 @@ namespace ClayPay.Models.Claypay
         var i = Constants.Exec_Query(query, dp);
         if (i > 0)
         {
-           TransactionOTid = dp.Get<int>("@otId");
+           TransactionCashierData.OTId = dp.Get<int>("@otId");
            return true;
         }
         else
         {
-          TransactionOTid = -1;
+          TransactionCashierData.OTId = -1;
           return false;
         }
 
@@ -605,7 +515,7 @@ namespace ClayPay.Models.Claypay
       catch (Exception ex)
       {
         Constants.Log(ex, query);
-        TransactionOTid = -1;
+        TransactionCashierData.OTId = -1;
         return false;
         //TODO: add rollback in SaveTransaction function
       }
@@ -633,12 +543,12 @@ namespace ClayPay.Models.Claypay
       {
         dt.Rows.Add(
           p.PaymentTypeValue,
-          TransactionOTid,
+          TransactionCashierData.OTId,
           p.AmountApplied,
           p.AmountTendered,
           p.CheckNumber,
-          p.TransactionId, 
-          PayerCompanyName.Length > 0 ? PayerCompanyName : PayerFirstName + " " + PayerLastName);
+          p.TransactionId,
+          TransactionCashierData.PayerFirstName + " " + TransactionCashierData.PayerLastName);
       }
 
       string query = $@"
@@ -685,15 +595,15 @@ namespace ClayPay.Models.Claypay
         var i = Constants.Exec_Query(query, new
         {
           ITEMIDS = ItemIds,
-          OTID = TransactionOTid,
-          CASHIERID = TransactionCashierId
+          OTID = TransactionCashierData.OTId,
+          CASHIERID = TransactionCashierData.CashierId
         });
         return i > 0;
       }
       catch (Exception ex)
       {
         Constants.Log(ex, query);
-        TransactionOTid = -1;
+        TransactionCashierData.OTId = -1;
         //TODO: add rollback in SaveTransaction function
         return false;
       }
@@ -703,7 +613,7 @@ namespace ClayPay.Models.Claypay
     public bool InsertGURows()
     {
       var dp = new DynamicParameters();
-      dp.Add("@otid", TransactionOTid);
+      dp.Add("@otid", TransactionCashierData.OTId);
       dp.Add("@TransactionDate", this.TransactionDate);
 
       // I don't know if the year is supposed to be the fiscal year.
@@ -823,9 +733,9 @@ namespace ClayPay.Models.Claypay
                 CashierId IS NULL AND Total > 0) = 0);";
       return Constants.Exec_Query(query, new
       {
-        otid = TransactionOTid,
-        cashierId = TransactionCashierId,
-        UserName = CurrentUser.user_name
+        otid = TransactionCashierData.OTId,
+        cashierId = TransactionCashierData.CashierId,
+        UserName = TransactionCashierData.CurrentUser.user_name
       }) != -1;
       //if(IssueAssociatedPermits())
       //{
@@ -873,7 +783,7 @@ namespace ClayPay.Models.Claypay
        * We do not care if FinalizeTransaction fails. Those rows can be updated manually
        * */
       var param = new DynamicParameters();
-      param.Add("@otid", TransactionOTid);
+      param.Add("@otid", TransactionCashierData.OTId);
       var query = $@"
         USE WATSC;
         BEGIN TRAN
