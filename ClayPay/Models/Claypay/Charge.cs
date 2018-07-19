@@ -49,8 +49,7 @@ namespace ClayPay.Models
 	          Total,	
 	          Detail
           FROM vwClaypayCharges 
-	        WHERE AssocKey IS NOT NULL 
-            AND Total > 0 
+	        WHERE Total > 0 
             AND CashierId IS NULL 
             AND UPPER(AssocKey)=@AK
         ORDER BY TimeStamp ASC";
