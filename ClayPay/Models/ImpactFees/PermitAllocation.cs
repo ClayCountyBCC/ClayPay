@@ -175,10 +175,10 @@ namespace ClayPay.Models.ImpactFees
         AmountApplied = Amount_Allocated,        
         Validated = true
       };
-      nt.PayerCompanyName = permit.Contractor_Name;
+      nt.TransactionCashierData.PayerCompanyName = permit.Contractor_Name;
       nt.Payments.Add(ifPayment);
-      nt.ipAddress = IpAddress;
-      nt.CurrentUser = ua;
+      nt.TransactionCashierData.ipAddress = IpAddress;
+      nt.TransactionCashierData.CurrentUser = ua;
       return nt.SaveTransaction();
     }
 
