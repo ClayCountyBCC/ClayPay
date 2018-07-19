@@ -52,14 +52,13 @@ namespace ClayPay.Models
 	        WHERE AssocKey IS NOT NULL 
             AND Total > 0 
             AND CashierId IS NULL 
-            AND UnCollectable = 0
             AND UPPER(AssocKey)=@AK
         ORDER BY TimeStamp ASC";
       var lc = Constants.Get_Data<Charge>(sql, dbArgs);
       return lc;
     }
 
-    public static List<Charge> GetChargesByCashierId(string CashierId = "")
+    public static List<Charge> GetChargesByCashierId(string CashierId)
     {
       var dbArgs = new Dapper.DynamicParameters();
       dbArgs.Add("@CashierId", CashierId);
@@ -75,7 +74,7 @@ namespace ClayPay.Models
 	          Total,	
 	          Detail
           FROM vwClaypayCharges vC
-          INNER JOIN ccCashierItem CI ON CI.ItemId = vC.ItemId
+          --INNER JOIN ccCashierItem CI ON CI.ItemId = vC.ItemId
           WHERE CashierId = @CashierId
         ORDER BY TimeStamp ASC";
       var lc = Constants.Get_Data<Charge>(sql, dbArgs);
@@ -95,7 +94,7 @@ namespace ClayPay.Models
 	        Total,	
 	        Detail
         FROM vwClaypayCharges
-            AND CCI.ItemId IN @itemIds
+           WHERE CCI.ItemId IN @itemIds
         ORDER BY TimeStamp ASC";
       var lc = Constants.Get_Data<Charge>(sql, itemIds);
       return lc;
