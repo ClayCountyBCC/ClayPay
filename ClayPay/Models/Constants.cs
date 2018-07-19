@@ -82,6 +82,24 @@ namespace ClayPay.Models
       }
     }
 
+    public static T Get_Data<T>(string query, DynamicParameters dp)
+    {
+      try
+      {
+        using (IDbConnection db =
+          new SqlConnection(
+            Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
+        {
+          return (T)db.Query(query, dp);
+        }
+      }
+      catch (Exception ex)
+      {
+        Log(ex, query);
+        return default(T);
+      }
+    }
+
     public static List<T> Get_Data<T>(string query, DynamicParameters dbA)
     {
       try
