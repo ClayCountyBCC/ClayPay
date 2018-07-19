@@ -191,7 +191,13 @@
       b.Allocation_Amount = Amount;
       b.Id = builderId;
       //XHR.SaveObject<BuilderAllocation>("./.API/ImpactFees/SaveBuilderAllocation", b)
-      Utilities.Post<Array<string>>("../API/ImpactFees/SaveBuilderAllocation", b)
+      let path = "/";
+      let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+      if (i == 0)
+      {
+        path = "/claypay/";
+      }
+      Utilities.Post<Array<string>>(path + "API/ImpactFees/SaveBuilderAllocation", b)
         .then(function (a)
         {
           console.log('response', a);

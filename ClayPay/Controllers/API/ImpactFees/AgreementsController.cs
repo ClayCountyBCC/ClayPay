@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web;
 using ClayPay.Models.ImpactFees;
 
 namespace ClayPay.Controllers.ImpactFees
@@ -75,8 +76,9 @@ namespace ClayPay.Controllers.ImpactFees
       }
       else
       {
-        var Username = User.Identity.Name.Replace(@"CLAYBCC\", "").ToUpper();
-        if (!pa.Update(Username))
+        //var Username = User.Identity.Name.Replace(@"CLAYBCC\", "").ToUpper();
+        string IpAddress = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+        if (!pa.Update(new Models.UserAccess(User.Identity.Name), IpAddress))
         {
           errors.Add("An error occurred while saving this permit's allocation, please try again.  If the error persists, please contact MIS.");
           return Ok(errors);

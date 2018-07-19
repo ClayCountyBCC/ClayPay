@@ -60,7 +60,12 @@ var ImpactFees;
                 d.Agreement_Amount = Amount;
                 d.Agreement_Number = agreementNumber;
                 //XHR.SaveObject<DeveloperAgreement>("../API/ImpactFees/SaveDeveloperAgreement", d)
-                Utilities.Post("../API/ImpactFees/SaveDeveloperAgreement", d)
+                let path = "/";
+                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                if (i == 0) {
+                    path = "/claypay/";
+                }
+                Utilities.Post(path + "API/ImpactFees/SaveDeveloperAgreement", d)
                     .then(function (a) {
                     console.log('response', a);
                     if (a.length > 0) {

@@ -66,6 +66,8 @@ namespace ClayPay.Models
     {
       switch (key)
       {
+        case "useraccess":
+          return UserAccess.GetAllUserAccess();
         case "fee":
           return PaymentResponse.GetFee(100);
         case "apptypes":

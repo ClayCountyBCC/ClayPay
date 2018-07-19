@@ -4,11 +4,16 @@ var ImpactFees;
         constructor() {
         }
         static Get(Permit_Number, Agreement_Number = "") {
+            let path = "/";
+            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            if (i == 0) {
+                path = "/claypay/";
+            }
             let qs = "?permit_number=" + Permit_Number.trim();
             if (Agreement_Number.length > 0) {
                 qs += "&agreement_number=" + Agreement_Number;
             }
-            return Utilities.Get("../API/ImpactFees/GetPermit" + qs);
+            return Utilities.Get(path + "API/ImpactFees/GetPermit" + qs);
         }
     }
     ImpactFees.PermitImpactFee = PermitImpactFee;

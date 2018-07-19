@@ -104,8 +104,13 @@ namespace clayPay
 
   function loadCreditCardFee(): void
   {
-    //"./API/Fee/"
-    Utilities.Get<string>("../API/Payments/Fee/")
+    let path = "/";
+    let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+    if (i == 0)
+    {
+      path = "/claypay/";
+    }
+    Utilities.Get<string>(path + "API/Payments/Fee/")
       .then(function (fee: string)
       {
         ConvenienceFee = fee;
@@ -120,7 +125,13 @@ namespace clayPay
 
   function loadApplicationTypes(): void
   {
-    Utilities.Get<Array<AppType>>("../API/Payments/Apptypes/")
+    let path = "/";
+    let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+    if (i == 0)
+    {
+      path = "/claypay/";
+    }
+    Utilities.Get<Array<AppType>>(path + "API/Payments/Apptypes/")
       .then(function (appTypes: Array<AppType>)
       {
         UI.BuildAppTypes(appTypes);

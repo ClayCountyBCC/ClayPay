@@ -308,7 +308,13 @@ namespace clayPay.UI
     }
     if (k.length > 0)
     {
-      Utilities.Get("../API/Payments/Query/?key=" + k).then(function (charges: Array<Charge>)
+      let path = "/";
+      let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+      if (i == 0)
+      {
+        path = "/claypay/";
+      }
+      Utilities.Get(path + "API/Payments/Query/?key=" + k).then(function (charges: Array<Charge>)
       {
         clayPay.CurrentTransaction.CurrentCharges = charges;
         if (charges.length > 0)
@@ -356,10 +362,10 @@ namespace clayPay.UI
     let container: HTMLElement = (<HTMLElement>document.getElementById('Charges'));
     let df = document.createDocumentFragment();
     Utilities.Clear_Element(container);    
-    for (let charge of charges)
-    {      
+    charges.forEach(function (charge)
+    {
       df.appendChild(buildChargeRow(charge));
-    }
+    });
     df.appendChild(buildChargeFooterRow());
     container.appendChild(df);
   }

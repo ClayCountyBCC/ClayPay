@@ -263,7 +263,13 @@
       let permitAllocationErrorContainer = document.getElementById("permitAllocationError");
       let permitAllocationError = <HTMLTextAreaElement>document.getElementById("permitAllocationErrorList");
       //XHR.SaveObject<PermitAllocation>("./API/ImpactFees/SavePermitAllocation", this)
-      Utilities.Post<Array<string>>("./API/ImpactFees/SavePermitAllocation", this)
+      let path = "/";
+      let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+      if (i == 0)
+      {
+        path = "/claypay/";
+      }
+      Utilities.Post<Array<string>>(path + "API/ImpactFees/SavePermitAllocation", this)
         .then(
         function (a)
         {

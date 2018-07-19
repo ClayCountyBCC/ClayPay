@@ -1,8 +1,6 @@
 /// <reference path="payment.ts" />
 /// <reference path="clientresponse.ts" />
 var clayPay;
-/// <reference path="payment.ts" />
-/// <reference path="clientresponse.ts" />
 (function (clayPay) {
     class NewTransaction {
         constructor() {
@@ -189,7 +187,12 @@ var clayPay;
             let IsCashier = this.IsCashier;
             let toggleButton = IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
             let errorTarget = IsCashier ? clayPay.ClientResponse.CashierErrorTarget : clayPay.ClientResponse.PublicErrorTarget;
-            Utilities.Put("../API/Payments/Pay/", this)
+            let path = "/";
+            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            if (i == 0) {
+                path = "/claypay/";
+            }
+            Utilities.Put(path + "API/Payments/Pay/", this)
                 .then(function (cr) {
                 if (cr.Errors.length > 0) // Errors occurred, payment was unsuccessful.
                  {

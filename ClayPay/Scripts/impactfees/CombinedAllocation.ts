@@ -51,6 +51,12 @@ namespace ImpactFees
 
     public static GetAll(agreementNumber: string, builderId: number, permitNumber: string): Promise<Array<CombinedAllocation>>
     {
+      let path = "/";
+      let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+      if (i == 0)
+      {
+        path = "/claypay/";
+      }
       let qs: string = "";
       if (agreementNumber.length > 0)
       {
@@ -68,7 +74,7 @@ namespace ImpactFees
       {
         qs = "?" + qs.substr(1); // no matter which arguments we used, we'll always remove the leading & and add a ?
       }//"../API/Payments/Fee/"
-      return Utilities.Get("../API/ImpactFees/GetAgreements" + qs);
+      return Utilities.Get(path + "API/ImpactFees/GetAgreements" + qs);
       //return fetch("./API/ImpactFees/GetAgreements" + qs) : Promise<Array<CombinedAllocation>>;
       //return XHR.GetArray<CombinedAllocation>("./API/ImpactFees/GetAgreements", qs);
     }
