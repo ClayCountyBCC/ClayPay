@@ -19,8 +19,8 @@ namespace ClayPay.Controllers
     [Route("Pay")]
     public IHttpActionResult Put(NewTransaction thisTransaction)
     {
-      thisTransaction.ipAddress = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
-      thisTransaction.CurrentUser = new UserAccess(User.Identity.Name);
+      thisTransaction.TransactionCashierData.ipAddress = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+      thisTransaction.TransactionCashierData.CurrentUser = new UserAccess(User.Identity.Name);
       if (thisTransaction.ValidatePaymentTransaction())
       {
         var response = thisTransaction.ProcessPaymentTransaction(); 

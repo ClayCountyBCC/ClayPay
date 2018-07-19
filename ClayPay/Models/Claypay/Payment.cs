@@ -34,16 +34,6 @@ namespace ClayPay.Models.Claypay
             return "cc_cashier";
           case payment_type.credit_card_public:
             return "cc_online";
-
-          //case payment_type.credit_card:
-          //  switch (Environment.MachineName.ToUpper())
-          //  {
-          //    case "CLAYBCCIIS01":
-          //      return "cc_cashier";
-          //    case "CLAYBCCDMZIIS01":
-          //      return "cc_online";
-          //  }
-          //  return "cc_test";
           case payment_type.check:
             return "CK";
           case payment_type.cash:
