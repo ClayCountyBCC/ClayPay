@@ -58,7 +58,7 @@ namespace ClayPay.Models.Claypay
         FROM ccCashier
         WHERE CashierId = @CashierId";
 
-      return Constants.Get_Data<CashierData>(query, param).FirstOrDefault();
+      return Constants.Get_Data<CashierData>(query, param).DefaultIfEmpty(new CashierData()).First();
     }
 
     public List<string> ValidatePayerData()
