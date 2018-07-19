@@ -47,14 +47,13 @@ namespace ClayPay.Models
 	          Assoc,
 	          AssocKey,
 	          Total,	
-	          UPPER(LTRIM(RTRIM(ISNULL(COALESCE(Address, CustomerName, ProjName), '')))) AS Detail
+	          Detail
           FROM vwClaypayCharges 
 	        WHERE AssocKey IS NOT NULL 
             AND Total > 0 
             AND CashierId IS NULL 
             AND UnCollectable = 0
             AND UPPER(AssocKey)=@AK
-        ) AS TMP        
         ORDER BY TimeStamp ASC";
       var lc = Constants.Get_Data<Charge>(sql, dbArgs);
       return lc;
@@ -78,7 +77,6 @@ namespace ClayPay.Models
           FROM vwClaypayCharges vC
           INNER JOIN ccCashierItem CI ON CI.ItemId = vC.ItemId
           WHERE CashierId = @CashierId
-        ) AS TMP        
         ORDER BY TimeStamp ASC";
       var lc = Constants.Get_Data<Charge>(sql, dbArgs);
       return lc;
@@ -98,7 +96,6 @@ namespace ClayPay.Models
 	        Detail
         FROM vwClaypayCharges
             AND CCI.ItemId IN @itemIds
-        ) AS TMP        
         ORDER BY TimeStamp ASC";
       var lc = Constants.Get_Data<Charge>(sql, itemIds);
       return lc;
