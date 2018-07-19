@@ -282,7 +282,13 @@ namespace clayPay
       let IsCashier = this.IsCashier;
       let toggleButton = IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
       let errorTarget = IsCashier ? ClientResponse.CashierErrorTarget : ClientResponse.PublicErrorTarget;
-      Utilities.Put<ClientResponse>("../API/Payments/Pay/", this)
+      let path = "/";
+      let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+      if (i == 0)
+      {
+        path = "/claypay/";
+      }
+      Utilities.Put<ClientResponse>(path + "API/Payments/Pay/", this)
         .then(function (cr)
         {
           if (cr.Errors.length > 0) // Errors occurred, payment was unsuccessful.

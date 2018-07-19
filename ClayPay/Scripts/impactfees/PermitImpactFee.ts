@@ -29,12 +29,19 @@ namespace ImpactFees
 
     public static Get(Permit_Number: string, Agreement_Number: string = ""): Promise<PermitImpactFee>
     {
+      let path = "/";
+      let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+      if (i == 0)
+      {
+        path = "/claypay/";
+      }
+
       let qs = "?permit_number=" + Permit_Number.trim();
       if (Agreement_Number.length > 0)
       {
         qs += "&agreement_number=" + Agreement_Number;
       }
-      return Utilities.Get<PermitImpactFee>("../API/ImpactFees/GetPermit" + qs);
+      return Utilities.Get<PermitImpactFee>(path + "API/ImpactFees/GetPermit" + qs);
     }
 
   }

@@ -9,16 +9,6 @@
 //let Card: any;
 //let CurrentCard: any;
 var clayPay;
-/// <reference path="transport.ts" />
-/// <reference path="apptypes.ts" />
-/// <reference path="charge.ts" />
-/// <reference path="ui.ts" />
-/// <reference path="CCPayment.ts" />
-/// <reference path="newtransaction.ts" />
-/// <reference path="payment.ts" />
-/// <reference path="clientresponse.ts" />
-//let Card: any;
-//let CurrentCard: any;
 (function (clayPay) {
     "use strict";
     clayPay.CurrentTransaction = new clayPay.NewTransaction();
@@ -85,8 +75,12 @@ var clayPay;
         clayPay.UI.BuildExpYears("creditCardYear");
     }
     function loadCreditCardFee() {
-        //"./API/Fee/"
-        Utilities.Get("../API/Payments/Fee/")
+        let path = "/";
+        let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        if (i == 0) {
+            path = "/claypay/";
+        }
+        Utilities.Get(path + "API/Payments/Fee/")
             .then(function (fee) {
             clayPay.ConvenienceFee = fee;
             console.log('conv fee is', fee);
@@ -96,7 +90,12 @@ var clayPay;
         });
     }
     function loadApplicationTypes() {
-        Utilities.Get("../API/Payments/Apptypes/")
+        let path = "/";
+        let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        if (i == 0) {
+            path = "/claypay/";
+        }
+        Utilities.Get(path + "API/Payments/Apptypes/")
             .then(function (appTypes) {
             clayPay.UI.BuildAppTypes(appTypes);
         }, function () {

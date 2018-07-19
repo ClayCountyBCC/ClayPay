@@ -4,11 +4,6 @@
  *
  */
 var XHR;
-/*  This code was written by macromaniac
- *  Originally pulled from: https://gist.github.com/macromaniac/e62ed27781842b6c8611 on 7/14/2016
- *  and from https://gist.github.com/takanori-ugai/8262008944769419e614
- *
- */
 (function (XHR) {
     class Header {
         constructor(header, data) {

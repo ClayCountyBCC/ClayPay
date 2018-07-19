@@ -2,9 +2,6 @@
 /// <reference path="charge.ts" />
 /// <reference path="claypay.ts" />
 var clayPay;
-/// <reference path="apptypes.ts" />
-/// <reference path="charge.ts" />
-/// <reference path="claypay.ts" />
 (function (clayPay) {
     var UI;
     (function (UI) {
@@ -275,7 +272,12 @@ var clayPay;
                 k = appType.toUpperCase() + "-" + input.value.trim().toUpperCase();
             }
             if (k.length > 0) {
-                Utilities.Get("../API/Payments/Query/?key=" + k).then(function (charges) {
+                let path = "/";
+                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                if (i == 0) {
+                    path = "/claypay/";
+                }
+                Utilities.Get(path + "API/Payments/Query/?key=" + k).then(function (charges) {
                     clayPay.CurrentTransaction.CurrentCharges = charges;
                     if (charges.length > 0) {
                         ProcessResults(charges, k);
@@ -313,9 +315,9 @@ var clayPay;
             let container = document.getElementById('Charges');
             let df = document.createDocumentFragment();
             Utilities.Clear_Element(container);
-            for (let charge of charges) {
+            charges.forEach(function (charge) {
                 df.appendChild(buildChargeRow(charge));
-            }
+            });
             df.appendChild(buildChargeFooterRow());
             container.appendChild(df);
         }

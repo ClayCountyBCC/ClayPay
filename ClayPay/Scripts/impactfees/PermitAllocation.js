@@ -188,7 +188,12 @@ var ImpactFees;
             let permitAllocationErrorContainer = document.getElementById("permitAllocationError");
             let permitAllocationError = document.getElementById("permitAllocationErrorList");
             //XHR.SaveObject<PermitAllocation>("./API/ImpactFees/SavePermitAllocation", this)
-            Utilities.Post("./API/ImpactFees/SavePermitAllocation", this)
+            let path = "/";
+            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            if (i == 0) {
+                path = "/claypay/";
+            }
+            Utilities.Post(path + "API/ImpactFees/SavePermitAllocation", this)
                 .then(function (a) {
                 console.log('response', a);
                 if (a.length > 0) {

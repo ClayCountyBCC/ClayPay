@@ -1,32 +1,34 @@
-//[
-//  {
-//    "outputFileName": "Scripts/claypay/bundle.js",
-//    "inputFiles": [
-//      "Scripts/app/xhr.js",
-//      "Scripts/claypay/claypay.js",
-//      "Scripts/claypay/transport.js",
-//      "Scripts/claypay/ui.js",
-//      "Scripts/claypay/ccdata.js",
-//      "Scripts/claypay/charge.js"
-//    ]
-//  },
-//  {
-//    "outputFileName": "Scripts/default-bundle.js",
-//    "inputFiles": [
-//      "Scripts/app/Utilities.js",
-//      "bower_components/fetch/fetch.js",
-//      "bower_components/promise-polyfill/dist/polyfill.min.js"
-//    ]
-//  },
-//  {
-//    "outputFileName": "Scripts/impactfees/impactfees-bundle.js",
-//    "inputFiles": [
-//      "Scripts/impactfees/PermitImpactFee.js",
-//      "Scripts/impactfees/PermitAllocation.js",
-//      "Scripts/impactfees/impactfees.js",
-//      "Scripts/impactfees/DeveloperAgreement.js",
-//      "Scripts/impactfees/CombinedAllocation.js",
-//      "Scripts/impactfees/BuilderAllocation.js"
-//    ]
-//  }
-//]
+[
+  {
+    "outputFileName": "Scripts/claypay/bundle.js",
+    "inputFiles": [
+      "bower_components/promise-polyfill/dist/polyfill.js",
+      "bower_components/fetch/fetch.js",
+      "Scripts/app/Utilities.js",
+      //"Scripts/claypay/charge.js",
+      "Scripts/claypay/Payment.js",
+      "Scripts/claypay/CCPayment.js",
+      "Scripts/claypay/ClientResponse.js",
+      "Scripts/claypay/NewTransaction.js",
+      "Scripts/claypay/AppTypes.js",
+      "Scripts/claypay/claypay.js",
+      "Scripts/claypay/UI.js"
+    ]
+  },
+  {
+    "outputFileName": "Scripts/impactfees/bundle.js",
+    "inputFiles": [
+      "bower_components/promise-polyfill/dist/polyfill.js",
+      "bower_components/fetch/fetch.js",
+      "Scripts/app/Utilities.js",
+      "Scripts/impactfees/PermitImpactFee.js",
+      "Scripts/impactfees/PermitAllocation.js",
+      "Scripts/impactfees/impactfees.js",
+      "Scripts/impactfees/DeveloperAgreement.js",
+      "Scripts/impactfees/CombinedAllocation.js",
+      "Scripts/impactfees/BuilderAllocation.js"
+    ]
+  }
+]
+
+

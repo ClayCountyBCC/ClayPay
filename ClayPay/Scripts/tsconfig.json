@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "noImplicitAny": false,
+    "module": "None",
     "noEmitOnError": true,
+    "noImplicitAny": false,
     "removeComments": false,
-    "sourceMap": true,
-    "target": "es6",
     "skipLibCheck": true,
-    "module": "system"
+    "sourceMap": true,
+    "target": "es6"
   },
   "compileOnSave": true,  
   "exclude": []

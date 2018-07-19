@@ -2,9 +2,6 @@
 /// <reference path="apptypes.ts" />
 /// <reference path="charge.ts" />
 var clayPay;
-/// <reference path="../app/xhr.ts" />
-/// <reference path="apptypes.ts" />
-/// <reference path="charge.ts" />
 (function (clayPay) {
     var transport;
     (function (transport) {
