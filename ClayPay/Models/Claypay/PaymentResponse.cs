@@ -20,7 +20,6 @@ namespace ClayPay.Models
     public Constants.PaymentTypes PaymentType { get; set; }
     public string ErrorText { get; set; } = ""; //
     public string ConvFee { get; set; } // function GetConvenienceFee();
-    public decimal ConvFeeAmount { get; set; }
     public bool UseProduction { get; set; } //
     public DateTime TimeStamp { get; set; } //
     public string CashierId { get; set; } //
@@ -68,7 +67,7 @@ namespace ClayPay.Models
         var pr = new PaymentResponse(ccd.Amount, Constants.PaymentTypes.Building, Constants.UseProduction());
         if (pr.Post(ccd, ipAddress))
         {
-          pr.ConvFeeAmount = Decimal.Parse(PaymentResponse.GetFee(ccd.Amount));
+          //pr.ConvFeeAmount = Decimal.Parse(PaymentResponse.GetFee(ccd.Amount));
           return pr;
         }
         else

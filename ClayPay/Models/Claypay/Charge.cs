@@ -93,7 +93,7 @@ namespace ClayPay.Models
 	        Total,	
 	        Detail
         FROM vwClaypayCharges
-        WHERE CCI.ItemId IN @ids
+        WHERE ItemId IN @ids
         ORDER BY TimeStamp ASC";
       var lc = Constants.Get_Data<Charge>(sql, itemIds);
       return lc;
