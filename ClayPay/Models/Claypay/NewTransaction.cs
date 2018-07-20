@@ -13,8 +13,6 @@ namespace ClayPay.Models.Claypay
 {
   public class NewTransaction
   {
-
-
     public CashierData TransactionCashierData { get; set; } = new CashierData();
     public List<int> ItemIds { get; set; } = new List<int>();
     public List<Charge> Charges { get; set; }

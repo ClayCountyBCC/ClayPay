@@ -89,7 +89,7 @@ namespace ClayPay.Models.Claypay
           INFO,
           L.CODE [PaymentType],
           AmtTendered [AmountTendered], 
-          AmtApplied [AmountAplied], 
+          AmtApplied [AmountApplied], 
           (AmtTendered - AmtApplied) ChangeDue, 
           CkNo [CheckNumber],
           TransactionId
