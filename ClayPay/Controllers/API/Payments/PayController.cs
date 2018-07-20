@@ -32,7 +32,29 @@ namespace ClayPay.Controllers
         return Ok(new ClientResponse(thisTransaction.Errors));
       }
     }
-    
+
+    [HttpPut]
+    [Route("AssignOnlinePayment")]
+    public IHttpActionResult Put(string CashierId)
+    {
+      return Ok(AssignedOnlinePayment.AssignPaymentToUser(CashierId, User.Identity.Name));
+    }
+
+    [HttpGet]
+    [Route("GetOnlinePaymentsToAssign")]
+    public IHttpActionResult Get()
+    {
+      var p = AssignedOnlinePayment.Get();
+      if(p != null)
+      {
+        return Ok(p);
+      }
+      else
+      {
+
+        return Ok(p);
+      }
+    }
 
     private IHttpActionResult CreateError(string message, HttpStatusCode codeToUse)
     {

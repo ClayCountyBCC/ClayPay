@@ -50,6 +50,10 @@ namespace ClayPay.Models.Claypay
             return ""; // this should not ever be the case.
         }
       }
+      set
+      {
+        
+      }
     }
     public string PaymentTypeDisplayString
     {
@@ -143,21 +147,35 @@ namespace ClayPay.Models.Claypay
       return true;
     }
 
-    public static List<Payment> GetPaymentList(int payid, int otid, string cashierId)
+
+    
+    public static bool SaveOnlinePaymentToBeProcessed(string CashierId, string username)
     {
+
       var param = new DynamicParameters();
-      param.Add("@otid", otid);
-      param.Add("@payid", payid);
-      param.Add("@casheirId", cashierId);
+      param.Add("@CashierId", CashierId);
 
       var query = @"
-       USE WATSC;
+          USE WATSC;
+          INSERT INTO
+          SELECT CP.PayID, C.CashierId, LTRIM(RTRIM(CI.AssocKey))
+          FROM ccCashierPayment CP
+          INNER JOIN ccCashier C ON CP.OTid = C.OTId
+          INNER JOIN ccCashierItem CI ON CP.OTid = CI.OTId AND CI.CashierId = C.CashierId 
+          INNER JOIN ccOnlineCCPaymentsToProcess CCO ON CCO.CashierId = C.CashierId
+          WHERE UPPER(PmtType) IN ('CC ON', 'CC_ONLINE')
+            AND CI.AssocKey IS NOT NULL
+            AND C.CashierId = @CashierId
 
+          ";
+      return false;
+    }
 
-       SELECT 
-      ;";
-
-      return Constants.Get_Data<Payment>(query, param);
+    public static bool AssignOnlinePaymentForProcessing(string CashierId, int PayId)
+    {
+    
+    
+      return false;
     }
   }
   
