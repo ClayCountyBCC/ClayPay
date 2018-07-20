@@ -41,7 +41,6 @@ namespace ClayPay.Models.ImpactFees
 
     private bool Validate_Permit_Agreement_Boundary(string Agreement_Number)
     {
-      return true;
       if (Agreement_Number.Length == 0) return true;
       // 2881 is the SRID for our local state plane projection
       var dp = new DynamicParameters();

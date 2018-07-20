@@ -288,7 +288,7 @@ namespace clayPay
       {
         path = "/claypay/";
       }
-      Utilities.Put<ClientResponse>(path + "API/Payments/Pay/", this)
+      Utilities.Post<ClientResponse>(path + "API/Payments/Pay/", this)
         .then(function (cr)
         {
           if (cr.Errors.length > 0) // Errors occurred, payment was unsuccessful.

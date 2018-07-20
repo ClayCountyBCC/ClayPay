@@ -192,7 +192,7 @@ var clayPay;
             if (i == 0) {
                 path = "/claypay/";
             }
-            Utilities.Put(path + "API/Payments/Pay/", this)
+            Utilities.Post(path + "API/Payments/Pay/", this)
                 .then(function (cr) {
                 if (cr.Errors.length > 0) // Errors occurred, payment was unsuccessful.
                  {
