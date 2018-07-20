@@ -357,6 +357,7 @@
     <Folder Include="Views\Receipt\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\claypay\CashierData.ts" />
     <TypeScriptCompile Include="Scripts\claypay\ClientResponse.ts" />
     <TypeScriptCompile Include="Scripts\app\Utilities.ts" />
     <TypeScriptCompile Include="Scripts\claypay\claypay.ts" />

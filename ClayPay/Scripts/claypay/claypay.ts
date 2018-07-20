@@ -116,9 +116,9 @@ namespace clayPay
         ConvenienceFee = fee;
         console.log('conv fee is', fee);
 
-      }, function ()
+      }, function (e)
         {
-          console.log('error getting convenience fee');
+          console.log('error getting convenience fee', e);
           // do something with the error here
         });
   }
@@ -135,9 +135,9 @@ namespace clayPay
       .then(function (appTypes: Array<AppType>)
       {
         UI.BuildAppTypes(appTypes);
-      }, function ()
+      }, function (e)
         {
-          console.log('error getting application types');
+          console.log('error getting application types', e);
           // do something with the error here
         });
   }

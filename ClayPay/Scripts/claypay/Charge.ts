@@ -1,6 +1,8 @@
-﻿namespace clayPay {
-  
-  interface ICharge {
+﻿namespace clayPay
+{
+
+  interface ICharge
+  {
     ItemId: number;
     Description: string;
     TimeStamp: Date;
@@ -11,7 +13,8 @@
     Detail: string;
   }
 
-  export class Charge implements ICharge {
+  export class Charge implements ICharge
+  {
     public ItemId: number = 0;
     public Description: string = "";
     public TimeStamp: Date;

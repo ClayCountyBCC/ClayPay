@@ -15,9 +15,9 @@ namespace ClayPay.Controllers
   public class PayController : ApiController
   {
     // PUT: api/Pay
-    [HttpPut]
+    [HttpPost]
     [Route("Pay")]
-    public IHttpActionResult Put(NewTransaction thisTransaction)
+    public IHttpActionResult Post(NewTransaction thisTransaction)
     {
       thisTransaction.TransactionCashierData.ipAddress = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
       thisTransaction.TransactionCashierData.CurrentUser = new UserAccess(User.Identity.Name);

@@ -18,19 +18,19 @@ namespace ClayPay.Models.Claypay
     public string TransactionId { get; set; } = "";
     public List<string> PartialErrors { get; set; } = new List<string>();
 
-    public ClientResponse(string cashierid, List<Charge> charges = null)
+    public ClientResponse(string cashierid, List<Charge> charges)
     {
-      
-      ResponseCashierData = ResponseCashierData.CashierId == "" ? 
-                            CashierData.Get(cashierid) : ResponseCashierData;
-
-      ChargeList = charges == null || charges.Count() == 0 ? 
-                   Charge.GetChargesByCashierId(cashierid) : charges;
-
+      ResponseCashierData = CashierData.Get(cashierid);
+      ChargeList = charges;
       ReceiptPayments = ReceiptPayment.Get(cashierid);
-
-      var payments = new List<ReceiptPayment>();
       
+    }
+
+    public ClientResponse(string cashierid)
+    {
+      ResponseCashierData = CashierData.Get(cashierid);
+      ChargeList = Charge.GetChargesByCashierId(cashierid);
+      ReceiptPayments = ReceiptPayment.Get(cashierid);
     }
 
     public ClientResponse(List<string> errors)

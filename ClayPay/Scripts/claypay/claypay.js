@@ -84,8 +84,8 @@ var clayPay;
             .then(function (fee) {
             clayPay.ConvenienceFee = fee;
             console.log('conv fee is', fee);
-        }, function () {
-            console.log('error getting convenience fee');
+        }, function (e) {
+            console.log('error getting convenience fee', e);
             // do something with the error here
         });
     }
@@ -98,8 +98,8 @@ var clayPay;
         Utilities.Get(path + "API/Payments/Apptypes/")
             .then(function (appTypes) {
             clayPay.UI.BuildAppTypes(appTypes);
-        }, function () {
-            console.log('error getting application types');
+        }, function (e) {
+            console.log('error getting application types', e);
             // do something with the error here
         });
     }
