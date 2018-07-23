@@ -520,7 +520,6 @@ namespace ClayPay.Models.Claypay
 
     }
 
-
     private static DataTable CreateCashierPaymentDataTable()
     {
       var dt = new DataTable("CashierPayment");
@@ -561,13 +560,18 @@ namespace ClayPay.Models.Claypay
             Info,
             CheckNumber,
             TransactionId
-          FROM @CashierPayment;";
+          FROM @CashierPayment
+          ";
       try
       {
         using (IDbConnection db = new SqlConnection(
           Constants.Get_ConnStr("WATSC" + (Constants.UseProduction() ? "Prod" : "QA"))))
         {
           int i = db.Execute(query, new { CashierPayment = dt.AsTableValuedParameter("CashierPayment") }, commandTimeout: 60);
+          if(i > 0 && CCData.Validated)
+          {
+            SaveCashierIdToProcessTable(TransactionCashierData.CashierId);
+          }
           return i > 0;
         }
       }
@@ -806,6 +810,18 @@ namespace ClayPay.Models.Claypay
         Constants.Log(ex, query);
         return false;
       }
+    }
+
+    public void SaveCashierIdToProcessTable(string CashierId)
+    {
+      var query = @"
+      
+          INSERT INTO ccOnlinePaymentsToProcess
+          (CashierId)
+          VALUES
+          (@CashierId)";
+
+      Constants.Save_Data(query, CashierId);
     }
 
     //public string CreateEmailBody()
