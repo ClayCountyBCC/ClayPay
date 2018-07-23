@@ -365,6 +365,7 @@
     <TypeScriptCompile Include="Scripts\claypay\Charge.ts" />
     <TypeScriptCompile Include="Scripts\claypay\NewTransaction.ts" />
     <TypeScriptCompile Include="Scripts\claypay\Payment.ts" />
+    <TypeScriptCompile Include="Scripts\claypay\ReceiptPayment.ts" />
     <TypeScriptCompile Include="Scripts\claypay\UI.ts" />
     <TypeScriptCompile Include="Scripts\impactfees\BuilderAllocation.ts" />
     <TypeScriptCompile Include="Scripts\impactfees\CombinedAllocation.ts" />

@@ -95,10 +95,11 @@ namespace ClayPay.Models.Claypay
         {
           var email = new System.Net.Mail.MailAddress(PayerEmailAddress);
         }
+#pragma warning disable CS0168 // Variable is declared but never used
         catch (FormatException fe)
+#pragma warning restore CS0168 // Variable is declared but never used
         {
           errors.Add("The email address provided does not appear to be in a valid format.");
-
         }
       }
       if (PayerStreetAddress.Length == 0)

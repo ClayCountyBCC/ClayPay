@@ -1,22 +1,23 @@
-﻿namespace clayPay
+﻿
+namespace clayPay
 {
   interface IClientResponse
   {
-    TimeStamp: string;
-    CashierId: string;
-    TransactionId: string;
-    AmountPaid: number;
-    ChangeDue: number;
+    ResponseCashierData: CashierData;
+    Charges: Array<Charge>;
+    ReceiptPayments: Array<ReceiptPayment>;
     Errors: Array<string>;
+    TransactionId: string;
+    PartialErrors: Array<string>;
   }
 
   export class ClientResponse implements IClientResponse
   {
-    public TimeStamp: string = "";
-    public CashierId: string = "";
+    public ResponseCashierData: CashierData = new CashierData();
+    public Charges: Array<Charge> = [];
+    public ReceiptPayments: Array<ReceiptPayment> = [];
     public TransactionId: string = "";
-    public AmountPaid: number = 0;
-    public ChangeDue: number = 0;
+
     public Errors: Array<string> = []; // Errors are full stop, meaning the payment did not process.
     public PartialErrors: Array<string> = []; // Partial errors mean part of the transaction was completed, but something wasn't.
 
@@ -50,22 +51,22 @@
         }        
         return;
       }
-      if (cr.PartialErrors.length > 0)
-      {
-        Utilities.Error_Show(ClientResponse.ReceiptErrorContainer, cr.PartialErrors, false);
-      }
-      if (cr.TransactionId.trim().length > 0)
-      {
-        Utilities.Show(ClientResponse.TransactionIdContainer);
-      } else
-      {
-        Utilities.Hide(ClientResponse.TransactionIdContainer);
-      }
-      Utilities.Set_Value(ClientResponse.TransactionId, cr.TransactionId);
-      Utilities.Set_Text(ClientResponse.TimeStampInput, cr.TimeStamp);
-      Utilities.Set_Value(ClientResponse.CashierIdInput, cr.CashierId);
-      Utilities.Set_Value(ClientResponse.AmountPaidInput, Utilities.Format_Amount(cr.AmountPaid));
-      Utilities.Set_Value(ClientResponse.ChangeDueInput, Utilities.Format_Amount(cr.ChangeDue));
+      //if (cr.PartialErrors.length > 0)
+      //{
+      //  Utilities.Error_Show(ClientResponse.ReceiptErrorContainer, cr.PartialErrors, false);
+      //}
+      //if (cr.TransactionId.trim().length > 0)
+      //{
+      //  Utilities.Show(ClientResponse.TransactionIdContainer);
+      //} else
+      //{
+      //  Utilities.Hide(ClientResponse.TransactionIdContainer);
+      //}
+      //Utilities.Set_Value(ClientResponse.TransactionId, cr.TransactionId);
+      //Utilities.Set_Text(ClientResponse.TimeStampInput, cr.TimeStamp);
+      //Utilities.Set_Value(ClientResponse.CashierIdInput, cr.CashierId);
+      //Utilities.Set_Value(ClientResponse.AmountPaidInput, Utilities.Format_Amount(cr.AmountPaid));
+      //Utilities.Set_Value(ClientResponse.ChangeDueInput, Utilities.Format_Amount(cr.ChangeDue));
       // this needs to hide all of the other sections and just show the receipt.
       Utilities.Show_Hide_Selector("#views > section", ClientResponse.ReceiptContainer);
     }

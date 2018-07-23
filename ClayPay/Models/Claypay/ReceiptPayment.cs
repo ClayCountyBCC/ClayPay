@@ -14,7 +14,7 @@ namespace ClayPay.Models.Claypay
     public string Info { get; set; }
     public DateTime TransactionDate { get; set; }
     public string PaymentType { get; set; }
-    public string PaymentTypeString
+    public string PaymentTypeDescription
     {
       get
       {
@@ -50,7 +50,7 @@ namespace ClayPay.Models.Claypay
     {
       get
       {
-        switch(PaymentTypeString.Trim().ToLower())
+        switch(PaymentType.Trim().ToLower())
         {
           case "cc_online":
           case "cc_cashier":
@@ -103,11 +103,6 @@ namespace ClayPay.Models.Claypay
 
       return Constants.Get_Data<ReceiptPayment>(query, param);
 
-    }
-
-    public void SetConvenienceFeeAmount()
-    {
-      
     }
   }
 }

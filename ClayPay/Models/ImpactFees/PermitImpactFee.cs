@@ -108,8 +108,10 @@ namespace ClayPay.Models.ImpactFees
         permit.Validate(Agreement_Number);
         return permit;
       }
-      var p = new PermitImpactFee();
-      p.Error_Text = $"Permit Number {Permit_Number} was not found.";
+      var p = new PermitImpactFee
+      {
+        Error_Text = $"Permit Number {Permit_Number} was not found."
+      };
       return p;
     }
 

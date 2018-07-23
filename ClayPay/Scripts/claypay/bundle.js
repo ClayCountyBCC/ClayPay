@@ -1059,6 +1059,206 @@ var clayPay;
     clayPay.CashierData = CashierData;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=CashierData.js.map
+var clayPay;
+(function (clayPay) {
+    let ChargeView;
+    (function (ChargeView) {
+        ChargeView[ChargeView["search_results"] = 0] = "search_results";
+        ChargeView[ChargeView["cart"] = 1] = "cart";
+        ChargeView[ChargeView["receipt"] = 2] = "receipt";
+    })(ChargeView = clayPay.ChargeView || (clayPay.ChargeView = {}));
+    class Charge {
+        constructor() {
+            this.ItemId = 0;
+            this.Description = "";
+            this.TimeStampDisplay = "";
+        }
+        static CreateTable(view) {
+            let table = document.createElement("table");
+            table.classList.add("table");
+            table.classList.add("table");
+            table.classList.add("is-fullwidth");
+            let thead = document.createElement("THEAD");
+            let tr = document.createElement("tr");
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Key", "20%"));
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "40%"));
+            if (view !== ChargeView.receipt) {
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Date", "15%"));
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Amount", "15%"));
+                tr.appendChild(clayPay.UI.createTableHeaderElement("", "10%"));
+            }
+            else {
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Date", "20%"));
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Amount", "20%"));
+            }
+            thead.appendChild(tr);
+            table.appendChild(thead);
+            return table;
+        }
+        static CreateChargesTable(charges, view) {
+            let df = document.createDocumentFragment();
+            let table = Charge.CreateTable(view);
+            let tbody = document.createElement("TBODY");
+            charges.forEach(function (charge) {
+                tbody.appendChild(Charge.buildChargeRow(charge, view));
+            });
+            let tfoot = document.createElement("TFOOT");
+            tfoot.appendChild(Charge.buildChargeFooterRow(charges, view));
+            table.appendChild(tbody);
+            table.appendChild(tfoot);
+            df.appendChild(table);
+            return df;
+        }
+        static buildChargeFooterRow(charges, view) {
+            // Based on ChargeView:
+            // Search Results Footer should show: 
+            //  1. Total Charges
+            //  2. Add All Charges To Cart
+            //  3. View Cart
+            // Cart Footer should show:
+            //  1. Total Charges
+            //  2. Convenience Fee
+            // Receipt Footer should show:
+            //  1. Total Charges
+            let df = document.createDocumentFragment();
+            let trTotal = document.createElement("tr");
+            trTotal.appendChild(clayPay.UI.createTableElement("", "", 2));
+            trTotal.appendChild(clayPay.UI.createTableElement("Total", "has-text-weight-bold", 1));
+            let TotalAmount = charges.reduce((total, b) => {
+                return total + b.Total;
+            }, 0);
+            trTotal.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(TotalAmount), ""));
+            if (view === ChargeView.search_results) {
+                trTotal.appendChild(Charge.createAddAllChargesToCartButton());
+            }
+            else {
+                trTotal.appendChild(clayPay.UI.createTableElement("", "", 1));
+            }
+            df.appendChild(trTotal);
+            switch (view) {
+                case ChargeView.search_results:
+                    // Add View Cart button
+                    df.appendChild(Charge.createViewCartFooterRow());
+                    break;
+                case ChargeView.cart:
+                    // Show Convenience Fee
+                    df.appendChild(Charge.buildConvFeeFooterRow());
+                    break;
+            }
+            return df;
+        }
+        static buildConvFeeFooterRow() {
+            let tr = document.createElement("tr");
+            tr.style.fontWeight = "bolder";
+            tr.appendChild(clayPay.UI.createTableElement("There is a nonrefundable transaction fee charged for Credit Card Payments by our payment provider. This is charged in addition to the total above.", "", 2));
+            tr.appendChild(clayPay.UI.createTableElement("Conv. Fee", "center", 1));
+            tr.appendChild(clayPay.UI.createTableElement(clayPay.ConvenienceFee, "", 1));
+            tr.appendChild(clayPay.UI.createTableElement("", "", 1));
+            return tr;
+        }
+        static buildChargeRow(charge, view) {
+            let tr = document.createElement("tr");
+            tr.appendChild(clayPay.UI.createTableElement(charge.AssocKey));
+            tr.appendChild(clayPay.UI.createTableElement(charge.Description, "left"));
+            tr.appendChild(clayPay.UI.createTableElement(charge.TimeStampDisplay, "center"));
+            tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(charge.Total), "center"));
+            if (view !== ChargeView.receipt) {
+                tr.appendChild(Charge.createChargeCartButtonToggle("Add to Cart", charge.ItemId, "center", true));
+            }
+            return tr;
+        }
+        static createAddAllChargesToCartButton() {
+            let td = document.createElement("td");
+            let button = document.createElement("button");
+            button.type = "button";
+            button.classList.add("button");
+            button.classList.add("is-primary");
+            button.appendChild(document.createTextNode("Add All To Cart"));
+            button.onclick = (ev) => {
+                for (let charge of clayPay.CurrentTransaction.CurrentCharges) {
+                    if (!clayPay.UI.IsItemInCart(charge.ItemId)) {
+                        clayPay.CurrentTransaction.Cart.push(charge);
+                    }
+                }
+                clayPay.UI.updateCart();
+                // we're going to rerun the "Create Table" so that it'll 
+                // update each row
+                clayPay.UI.ProcessSearchResults(clayPay.CurrentTransaction.CurrentCharges);
+                //AddCharges(clayPay.CurrentTransaction.CurrentCharges);
+            };
+            td.appendChild(button);
+            return td;
+        }
+        static createChargeCartButtonToggle(value, itemId, className, toggle) {
+            let removeButton = document.createElement("a");
+            let remove = document.createElement("div");
+            let addButton = document.createElement("button");
+            let IsInCart = clayPay.UI.IsItemInCart(itemId);
+            let d = document.createElement("td");
+            d.className = className;
+            addButton.style.display = IsInCart ? "none" : "inline-block";
+            addButton.type = "button";
+            addButton.className = "button is-primary";
+            addButton.onclick = (ev) => {
+                let item = clayPay.CurrentTransaction.CurrentCharges.filter((c) => {
+                    return c.ItemId == itemId;
+                });
+                if (item.length === 1 && clayPay.CurrentTransaction.Cart.indexOf(item[0]) === -1) {
+                    clayPay.CurrentTransaction.Cart.push(item[0]);
+                }
+                remove.style.display = "inline-block";
+                addButton.style.display = "none";
+                clayPay.UI.updateCart();
+            };
+            remove.style.display = IsInCart ? "inline-block" : "none";
+            remove.appendChild(document.createTextNode('Added ('));
+            removeButton.classList.add("is-warning");
+            removeButton.style.cursor = "pointer";
+            removeButton.appendChild(document.createTextNode('remove'));
+            removeButton.onclick = (ev) => {
+                let newCart = clayPay.CurrentTransaction.Cart.filter((c) => {
+                    return c.ItemId !== itemId;
+                });
+                clayPay.CurrentTransaction.Cart = newCart;
+                clayPay.UI.updateCart();
+                remove.style.display = "none";
+                addButton.style.display = "inline-block";
+            };
+            remove.appendChild(removeButton);
+            remove.appendChild(document.createTextNode(')'));
+            addButton.appendChild(document.createTextNode(value));
+            d.appendChild(addButton);
+            d.appendChild(remove);
+            return d;
+        }
+        static createViewCartFooterRow() {
+            let tr = document.createElement("tr");
+            tr.appendChild(clayPay.UI.createTableElement("", "", 4));
+            let td = document.createElement("td");
+            let button = document.createElement("button");
+            button.type = "button";
+            button.classList.add("button");
+            button.classList.add("is-success");
+            button.onclick = (ev) => {
+                let menulist = clayPay.UI.Menus.filter(function (j) { return j.id === "nav-cart"; });
+                let cartMenu = menulist[0];
+                let title = document.getElementById("menuTitle");
+                let subTitle = document.getElementById("menuSubTitle");
+                Utilities.Clear_Element(title);
+                Utilities.Clear_Element(subTitle);
+                title.appendChild(document.createTextNode(cartMenu.title));
+                subTitle.appendChild(document.createTextNode(cartMenu.subTitle));
+                Utilities.Show_Menu(cartMenu.id);
+            };
+            button.appendChild(document.createTextNode("View Cart"));
+            td.appendChild(button);
+            tr.appendChild(td);
+            return tr;
+        }
+    }
+    clayPay.Charge = Charge;
+})(clayPay || (clayPay = {}));
+//# sourceMappingURL=Charge.js.map
 Number.isNaN = Number.isNaN || function (value) {
     return value !== value;
 };
@@ -1422,13 +1622,32 @@ var clayPay;
 //# sourceMappingURL=CCPayment.js.map
 var clayPay;
 (function (clayPay) {
+    class ReceiptPayment {
+        constructor() {
+            this.CashierId = "";
+            this.PayId = -1;
+            this.OTId = -1;
+            this.Info = "";
+            this.TransactionDate = new Date();
+            this.PaymentType = "";
+            this.PaymentTypeDescription = "";
+            this.AmountApplied = -1;
+            this.AmountTendered = -1;
+            this.ChangeDue = -1;
+            this.ConvenienceFeeAmount = -1;
+        }
+    }
+    clayPay.ReceiptPayment = ReceiptPayment;
+})(clayPay || (clayPay = {}));
+//# sourceMappingURL=ReceiptPayment.js.map
+var clayPay;
+(function (clayPay) {
     class ClientResponse {
         constructor() {
-            this.TimeStamp = "";
-            this.CashierId = "";
+            this.ResponseCashierData = new clayPay.CashierData();
+            this.Charges = [];
+            this.ReceiptPayments = [];
             this.TransactionId = "";
-            this.AmountPaid = 0;
-            this.ChangeDue = 0;
             this.Errors = []; // Errors are full stop, meaning the payment did not process.
             this.PartialErrors = []; // Partial errors mean part of the transaction was completed, but something wasn't.
         }
@@ -1443,20 +1662,22 @@ var clayPay;
                 }
                 return;
             }
-            if (cr.PartialErrors.length > 0) {
-                Utilities.Error_Show(ClientResponse.ReceiptErrorContainer, cr.PartialErrors, false);
-            }
-            if (cr.TransactionId.trim().length > 0) {
-                Utilities.Show(ClientResponse.TransactionIdContainer);
-            }
-            else {
-                Utilities.Hide(ClientResponse.TransactionIdContainer);
-            }
-            Utilities.Set_Value(ClientResponse.TransactionId, cr.TransactionId);
-            Utilities.Set_Text(ClientResponse.TimeStampInput, cr.TimeStamp);
-            Utilities.Set_Value(ClientResponse.CashierIdInput, cr.CashierId);
-            Utilities.Set_Value(ClientResponse.AmountPaidInput, Utilities.Format_Amount(cr.AmountPaid));
-            Utilities.Set_Value(ClientResponse.ChangeDueInput, Utilities.Format_Amount(cr.ChangeDue));
+            //if (cr.PartialErrors.length > 0)
+            //{
+            //  Utilities.Error_Show(ClientResponse.ReceiptErrorContainer, cr.PartialErrors, false);
+            //}
+            //if (cr.TransactionId.trim().length > 0)
+            //{
+            //  Utilities.Show(ClientResponse.TransactionIdContainer);
+            //} else
+            //{
+            //  Utilities.Hide(ClientResponse.TransactionIdContainer);
+            //}
+            //Utilities.Set_Value(ClientResponse.TransactionId, cr.TransactionId);
+            //Utilities.Set_Text(ClientResponse.TimeStampInput, cr.TimeStamp);
+            //Utilities.Set_Value(ClientResponse.CashierIdInput, cr.CashierId);
+            //Utilities.Set_Value(ClientResponse.AmountPaidInput, Utilities.Format_Amount(cr.AmountPaid));
+            //Utilities.Set_Value(ClientResponse.ChangeDueInput, Utilities.Format_Amount(cr.ChangeDue));
             // this needs to hide all of the other sections and just show the receipt.
             Utilities.Show_Hide_Selector("#views > section", ClientResponse.ReceiptContainer);
         }
@@ -1822,7 +2043,7 @@ var clayPay;
             { state: "WYOMING", abv: "WY" }
         ];
         UI.ExpYears = [];
-        let Menus = [
+        UI.Menus = [
             {
                 id: "nav-Home",
                 title: "Welcome!",
@@ -1924,21 +2145,25 @@ var clayPay;
         //  Utilities.Show('CCForm');
         //  Utilities.Hide('PaymentPosting');
         //}
-        function PopulateReceipt(pr) {
-            //clayPay.toggleNavDisplay('receipt');
-            Utilities.Set_Value("receiptUniqueId", pr.CashierId);
-            Utilities.Set_Value("receiptTimestamp", pr.TimeStamp_Display);
-            Utilities.Set_Value("receiptAmount", pr.Amount.toFixed(2));
-        }
-        function ToggleDisabled(id, status) {
-            document.getElementById(id).disabled = status;
-        }
-        function Disable(id) {
-            ToggleDisabled(id, true);
-        }
-        function Enable(id) {
-            ToggleDisabled(id, false);
-        }
+        //function PopulateReceipt(pr: {CashierId:string, TimeStamp_Display: string, Amount: number}):void
+        //{
+        //  //clayPay.toggleNavDisplay('receipt');
+        //  Utilities.Set_Value("receiptUniqueId", pr.CashierId);
+        //  Utilities.Set_Value("receiptTimestamp", pr.TimeStamp_Display);
+        //  Utilities.Set_Value("receiptAmount", pr.Amount.toFixed(2));
+        //}
+        //function ToggleDisabled(id: string, status: boolean): void
+        //{
+        //  (<HTMLButtonElement>document.getElementById(id)).disabled = status;
+        //}
+        //function Disable(id: string): void
+        //{
+        //  ToggleDisabled(id, true);
+        //}
+        //function Enable(id: string): void
+        //{
+        //  ToggleDisabled(id, false);
+        //}
         function BuildErrors(errors) {
             let errorList = document.getElementById("errorList");
             let df = document.createDocumentFragment();
@@ -1996,24 +2221,6 @@ var clayPay;
             }
         }
         UI.BuildExpYears = BuildExpYears;
-        //export function toggleNav(nav: string, element: string): void
-        //{
-        //  let e = document.getElementById(nav);
-        //  if (e === null) return;
-        //  let activeNodes: NodeListOf<Element> = e.getElementsByClassName("active");
-        //  for (var i = 0; i < activeNodes.length; i++)
-        //  {
-        //    activeNodes[i].classList.remove("active");
-        //  }
-        //  let eNav = document.getElementById("nav-" + element);
-        //  if (eNav === null) return;
-        //  eNav.classList.add("active");
-        //}
-        //function toggleSearch(e: HTMLButtonElement, disabled: boolean)
-        //{
-        //  e.disabled = disabled;
-        //  e.classList.toggle("is-loading", disabled);
-        //}
         function Search(buttonId, inputId, errorId) {
             //let button = <HTMLButtonElement>document.getElementById(buttonId);
             Utilities.Toggle_Loading_Button(buttonId, true);
@@ -2040,7 +2247,7 @@ var clayPay;
                 Utilities.Get(path + "API/Payments/Query/?key=" + k).then(function (charges) {
                     clayPay.CurrentTransaction.CurrentCharges = charges;
                     if (charges.length > 0) {
-                        ProcessResults(charges, k);
+                        ProcessSearchResults(charges);
                         Utilities.Show("searchResults");
                     }
                     else {
@@ -2066,94 +2273,43 @@ var clayPay;
             }
         }
         UI.Search = Search;
-        function ProcessResults(charges, key) {
-            AddCharges(charges);
+        function ProcessSearchResults(charges) {
+            let container = document.getElementById('Charges');
+            Utilities.Clear_Element(container);
+            container.appendChild(clayPay.Charge.CreateChargesTable(charges, clayPay.ChargeView.search_results));
             Utilities.Set_Text('ChargesKey', charges[0].AssocKey);
             Utilities.Set_Text('ChargesDetail', charges[0].Detail);
         }
-        function AddCharges(charges) {
-            let container = document.getElementById('Charges');
-            let df = document.createDocumentFragment();
-            Utilities.Clear_Element(container);
-            charges.forEach(function (charge) {
-                df.appendChild(buildChargeRow(charge));
-            });
-            df.appendChild(buildChargeFooterRow());
-            container.appendChild(df);
-        }
-        function buildChargeFooterRow() {
-            let df = document.createDocumentFragment();
-            let tr1 = document.createElement("tr");
-            tr1.appendChild(createTableElement("", "", 3));
-            tr1.appendChild(createTableElementButton("Add All to Cart", 0, "", true, AddAllItemsToCart, RemoveItemFromCart));
-            df.appendChild(tr1);
-            let tr2 = document.createElement("tr");
-            tr2.appendChild(createTableElement("", "", 3));
-            let menulist = Menus.filter(function (j) { return j.id === "nav-cart"; });
-            let cartMenu = menulist[0];
-            tr2.appendChild(createViewCartTableElementButton("View Cart", function () {
-                let title = document.getElementById("menuTitle");
-                let subTitle = document.getElementById("menuSubTitle");
-                Utilities.Clear_Element(title);
-                Utilities.Clear_Element(subTitle);
-                title.appendChild(document.createTextNode(cartMenu.title));
-                subTitle.appendChild(document.createTextNode(cartMenu.subTitle));
-                Utilities.Show_Menu(cartMenu.id);
-            }));
-            df.appendChild(tr2);
-            return df;
-        }
-        function buildChargeRow(charge) {
-            let tr = document.createElement("tr");
-            tr.appendChild(createTableElement(charge.Description, "left"));
-            tr.appendChild(createTableElement(charge.TimeStampDisplay));
-            tr.appendChild(createTableElement(charge.Total.toFixed(2)));
-            tr.appendChild(createTableElementButton("Add to Cart", charge.ItemId, "", true, AddItemToCart, RemoveItemFromCart));
-            return tr;
-        }
-        function AddItemToCart(ev, itemId) {
-            let item = clayPay.CurrentTransaction.CurrentCharges.filter((c) => {
-                return c.ItemId == itemId;
-            });
-            if (item.length === 1 && clayPay.CurrentTransaction.Cart.indexOf(item[0]) === -1) {
-                clayPay.CurrentTransaction.Cart.push(item[0]);
-            }
-            ToggleAddRemoveButtons(itemId);
-            updateCart();
-        }
-        function RemoveItemFromCart(ev, itemId, toggle) {
-            let newCart = clayPay.CurrentTransaction.Cart.filter((c) => {
-                return c.ItemId !== itemId;
-            });
-            clayPay.CurrentTransaction.Cart = newCart;
-            if (toggle)
-                ToggleAddRemoveButtons(itemId);
-            updateCart();
-        }
-        function ToggleAddRemoveButtons(itemId) {
-            let btnAdd = document.getElementById("btnAdd" + itemId.toString());
-            let btnRem = document.getElementById("btnRemove" + itemId.toString());
-            let showAdd = btnAdd.style.display === "inline-block";
-            btnAdd.style.display = showAdd ? "none" : "inline-block";
-            btnRem.style.display = showAdd ? "inline-block" : "none";
-        }
+        UI.ProcessSearchResults = ProcessSearchResults;
         function IsItemInCart(itemId) {
             let item = clayPay.CurrentTransaction.Cart.filter((c) => {
                 return c.ItemId == itemId;
             });
             return item.length !== 0;
         }
-        function AddAllItemsToCart() {
-            for (let charge of clayPay.CurrentTransaction.CurrentCharges) {
-                if (!IsItemInCart(charge.ItemId)) {
-                    clayPay.CurrentTransaction.Cart.push(charge);
-                }
-            }
-            updateCart();
-            // we're going to rerun the "Create Table" so that it'll 
-            // update each row
-            AddCharges(clayPay.CurrentTransaction.CurrentCharges);
+        UI.IsItemInCart = IsItemInCart;
+        //export function AddAllItemsToCart(): void
+        //{
+        //  for (let charge of clayPay.CurrentTransaction.CurrentCharges)
+        //  {
+        //    if (!IsItemInCart(charge.ItemId))
+        //    {
+        //      clayPay.CurrentTransaction.Cart.push(charge);
+        //    }
+        //  }
+        //  updateCart();
+        //  // we're going to rerun the "Create Table" so that it'll 
+        //  // update each row
+        //  ProcessSearchResults(clayPay.CurrentTransaction.CurrentCharges);
+        //  //AddCharges(clayPay.CurrentTransaction.CurrentCharges);
+        //}
+        function createTableHeaderElement(value, width) {
+            let th = document.createElement("th");
+            th.width = width;
+            th.appendChild(document.createTextNode(value));
+            return th;
         }
+        UI.createTableHeaderElement = createTableHeaderElement;
         function createTableElement(value, className, colspan) {
             let d = document.createElement("td");
             if (className !== undefined) {
@@ -2165,6 +2321,7 @@ var clayPay;
             d.appendChild(document.createTextNode(value));
             return d;
         }
+        UI.createTableElement = createTableElement;
         function createTableElementButton(value, itemId, className, toggle, addOnClickFunction, removeOnClickFunction) {
             let IsInCart = IsItemInCart(itemId);
             let d = document.createElement("td");
@@ -2197,6 +2354,7 @@ var clayPay;
             d.appendChild(remove);
             return d;
         }
+        UI.createTableElementButton = createTableElementButton;
         function createAddAllTableElementButton(value, ViewCartClickFunction) {
             let d = document.createElement("td");
             let add = document.createElement("button");
@@ -2204,18 +2362,6 @@ var clayPay;
             add.className = "btn btn-primary";
             add.onclick = (ev) => {
                 ViewCartClickFunction('cart');
-            };
-            add.appendChild(document.createTextNode(value));
-            d.appendChild(add);
-            return d;
-        }
-        function createViewCartTableElementButton(value, ViewCartClickFunction) {
-            let d = document.createElement("td");
-            let add = document.createElement("button");
-            add.type = "button";
-            add.className = "button is-primary";
-            add.onclick = (ev) => {
-                ViewCartClickFunction();
             };
             add.appendChild(document.createTextNode(value));
             d.appendChild(add);
@@ -2254,53 +2400,23 @@ var clayPay;
             }
         }
         function updateCart() {
-            let CartCharges = document.getElementById('CartCharges');
-            let df = document.createDocumentFragment();
+            let CartCharges = document.getElementById('fullCart');
             Utilities.Clear_Element(CartCharges);
-            for (let charge of clayPay.CurrentTransaction.Cart) {
-                df.appendChild(buildCartRow(charge));
-            }
-            df.appendChild(buildCartFooterRow());
-            df.appendChild(buildCartConvFeeFooterRow());
-            CartCharges.appendChild(df);
+            //let df = document.createDocumentFragment();
+            //for (let charge of clayPay.CurrentTransaction.Cart)
+            //{
+            //  df.appendChild(buildCartRow(charge));
+            //}
+            //df.appendChild(buildCartFooterRow());
+            //df.appendChild(buildCartConvFeeFooterRow());
+            //CartCharges.appendChild(df);
+            CartCharges.appendChild(clayPay.Charge.CreateChargesTable(clayPay.CurrentTransaction.Cart, clayPay.ChargeView.cart));
             updateCartNav();
         }
         UI.updateCart = updateCart;
-        function buildCartFooterRow() {
-            let tr = document.createElement("tr");
-            tr.style.fontWeight = "bolder";
-            tr.appendChild(createTableElement("", "", 2));
-            tr.appendChild(createTableElement("Total", "center", 1));
-            let TotalAmount = clayPay.CurrentTransaction.Cart.reduce((total, b) => {
-                return total + b.Total;
-            }, 0);
-            clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
-            clayPay.CurrentTransaction.UpdateTotals();
-            tr.appendChild(createTableElement(TotalAmount.toFixed(2), "", 1));
-            tr.appendChild(createTableElement("", "", 1));
-            return tr;
-        }
-        function buildCartConvFeeFooterRow() {
-            let tr = document.createElement("tr");
-            tr.style.fontWeight = "bolder";
-            tr.appendChild(createTableElement("Please Note: There is a nonrefundable transaction fee charged for Credit Card Payments by our payment provider. This is charged in addition to the total above.", "", 2));
-            tr.appendChild(createTableElement("Conv. Fee", "center", 1));
-            tr.appendChild(createTableElement(clayPay.ConvenienceFee, "", 1));
-            tr.appendChild(createTableElement("", "", 1));
-            return tr;
-        }
-        function buildCartRow(charge) {
-            let tr = document.createElement("tr");
-            tr.appendChild(createTableElement(charge.AssocKey));
-            tr.appendChild(createTableElement(charge.Description, "left"));
-            tr.appendChild(createTableElement(charge.TimeStampDisplay, "center"));
-            tr.appendChild(createTableElement(charge.Total.toFixed(2), "center"));
-            tr.appendChild(createTableElementButton("Add to Cart", charge.ItemId, "center", true, AddItemToCart, RemoveItemFromCart));
-            return tr;
-        }
         function buildMenuElements() {
             let menu = document.getElementById("menuTabs");
-            for (let menuItem of Menus) {
+            for (let menuItem of UI.Menus) {
                 menu.appendChild(createMenuElement(menuItem));
             }
             createNavCart();
@@ -2353,4 +2469,4 @@ var clayPay;
         UI.ShowPaymentMethod = ShowPaymentMethod;
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map

@@ -9,7 +9,7 @@ namespace ClayPay.Models.Claypay
   public class ClientResponse
   {
     public CashierData ResponseCashierData { get; set; }
-    public List<Charge> ChargeList { get; set; } = new List<Charge>();
+    public List<Charge> Charges { get; set; } = new List<Charge>();
     public List<ReceiptPayment> ReceiptPayments { get; set; }
     public List<string> Errors { get; set; } = new List<string>();
 
@@ -21,7 +21,7 @@ namespace ClayPay.Models.Claypay
     public ClientResponse(string cashierid, List<Charge> charges)
     {
       ResponseCashierData = CashierData.Get(cashierid);
-      ChargeList = charges;
+      Charges = charges;
       ReceiptPayments = ReceiptPayment.Get(cashierid);
       
     }
@@ -29,7 +29,7 @@ namespace ClayPay.Models.Claypay
     public ClientResponse(string cashierid)
     {
       ResponseCashierData = CashierData.Get(cashierid);
-      ChargeList = Charge.GetChargesByCashierId(cashierid);
+      Charges = Charge.GetChargesByCashierId(cashierid);
       ReceiptPayments = ReceiptPayment.Get(cashierid);
     }
 

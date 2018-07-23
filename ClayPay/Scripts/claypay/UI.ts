@@ -65,7 +65,7 @@ namespace clayPay.UI
       { state: "WYOMING", abv: "WY" }
   ];
   export let ExpYears: Array<string> = [];
-  let Menus: Array<{ id: string, title: string, subTitle: string, icon: string, label: string, selected: boolean }> =  [
+  export let Menus: Array<{ id: string, title: string, subTitle: string, icon: string, label: string, selected: boolean }> =  [
     {
       id: "nav-Home",
       title: "Welcome!",
@@ -174,28 +174,28 @@ namespace clayPay.UI
 
   //}
 
-  function PopulateReceipt(pr: {CashierId:string, TimeStamp_Display: string, Amount: number}):void
-  {
-    //clayPay.toggleNavDisplay('receipt');
-    Utilities.Set_Value("receiptUniqueId", pr.CashierId);
-    Utilities.Set_Value("receiptTimestamp", pr.TimeStamp_Display);
-    Utilities.Set_Value("receiptAmount", pr.Amount.toFixed(2));
-  }
+  //function PopulateReceipt(pr: {CashierId:string, TimeStamp_Display: string, Amount: number}):void
+  //{
+  //  //clayPay.toggleNavDisplay('receipt');
+  //  Utilities.Set_Value("receiptUniqueId", pr.CashierId);
+  //  Utilities.Set_Value("receiptTimestamp", pr.TimeStamp_Display);
+  //  Utilities.Set_Value("receiptAmount", pr.Amount.toFixed(2));
+  //}
 
-  function ToggleDisabled(id: string, status: boolean): void
-  {
-    (<HTMLButtonElement>document.getElementById(id)).disabled = status;
-  }
+  //function ToggleDisabled(id: string, status: boolean): void
+  //{
+  //  (<HTMLButtonElement>document.getElementById(id)).disabled = status;
+  //}
 
-  function Disable(id: string): void
-  {
-    ToggleDisabled(id, true);
-  }
+  //function Disable(id: string): void
+  //{
+  //  ToggleDisabled(id, true);
+  //}
 
-  function Enable(id: string): void
-  {
-    ToggleDisabled(id, false);
-  }
+  //function Enable(id: string): void
+  //{
+  //  ToggleDisabled(id, false);
+  //}
 
   function BuildErrors(errors: Array<string>): void
   {
@@ -264,27 +264,6 @@ namespace clayPay.UI
       ExpYears.push(y); // save the year we're adding for later when we do some basic validation
     }
   }
-  
-  //export function toggleNav(nav: string, element: string): void
-  //{
-  //  let e = document.getElementById(nav);
-  //  if (e === null) return;
-  //  let activeNodes: NodeListOf<Element> = e.getElementsByClassName("active");
-
-  //  for (var i = 0; i < activeNodes.length; i++)
-  //  {
-  //    activeNodes[i].classList.remove("active");
-  //  }
-  //  let eNav = document.getElementById("nav-" + element);
-  //  if (eNav === null) return;
-  //  eNav.classList.add("active");
-  //}
-
-  //function toggleSearch(e: HTMLButtonElement, disabled: boolean)
-  //{
-  //  e.disabled = disabled;
-  //  e.classList.toggle("is-loading", disabled);
-  //}
 
   export function Search(buttonId: string, inputId: string, errorId: string): boolean
   {
@@ -319,7 +298,7 @@ namespace clayPay.UI
         clayPay.CurrentTransaction.CurrentCharges = charges;
         if (charges.length > 0)
         {
-          ProcessResults(charges, k);
+          ProcessSearchResults(charges);
           Utilities.Show("searchResults");
         }
         else
@@ -350,107 +329,16 @@ namespace clayPay.UI
     }
   }
 
-  function ProcessResults(charges: Array<Charge>, key: string): void
+  export function ProcessSearchResults(charges: Array<Charge>): void
   {
-    AddCharges(charges);
+    let container: HTMLElement = (<HTMLElement>document.getElementById('Charges'));
+    Utilities.Clear_Element(container);    
+    container.appendChild(Charge.CreateChargesTable(charges, ChargeView.search_results));
     Utilities.Set_Text('ChargesKey', charges[0].AssocKey);
     Utilities.Set_Text('ChargesDetail', charges[0].Detail);
   }
-
-  function AddCharges(charges: Array<Charge>)
-  {
-    let container: HTMLElement = (<HTMLElement>document.getElementById('Charges'));
-    let df = document.createDocumentFragment();
-    Utilities.Clear_Element(container);    
-    charges.forEach(function (charge)
-    {
-      df.appendChild(buildChargeRow(charge));
-    });
-    df.appendChild(buildChargeFooterRow());
-    container.appendChild(df);
-  }
-
-  function buildChargeFooterRow(): DocumentFragment
-  {
-    let df = document.createDocumentFragment();
-    let tr1 = document.createElement("tr");
-    tr1.appendChild(createTableElement("", "", 3));
-    tr1.appendChild(createTableElementButton(
-      "Add All to Cart",
-      0,
-      "",
-      true,
-      AddAllItemsToCart,
-      RemoveItemFromCart));
-    df.appendChild(tr1);
-    let tr2 = document.createElement("tr");
-    tr2.appendChild(createTableElement("", "", 3));
-
-    let menulist = Menus.filter(function (j) { return j.id === "nav-cart" });
-    let cartMenu = menulist[0];
-
-    tr2.appendChild(createViewCartTableElementButton(
-      "View Cart",
-      function ()
-      {
-        let title = document.getElementById("menuTitle");
-        let subTitle = document.getElementById("menuSubTitle");
-        Utilities.Clear_Element(title);
-        Utilities.Clear_Element(subTitle);
-        title.appendChild(document.createTextNode(cartMenu.title));
-        subTitle.appendChild(document.createTextNode(cartMenu.subTitle));
-        Utilities.Show_Menu(cartMenu.id);
-      }));
-    df.appendChild(tr2);
-    return df;
-  }
-
-  function buildChargeRow(charge: Charge): HTMLElement
-  {
-    let tr = document.createElement("tr");
-    tr.appendChild(createTableElement(charge.Description, "left"));
-    tr.appendChild(createTableElement(charge.TimeStampDisplay));
-    tr.appendChild(createTableElement(charge.Total.toFixed(2)));
-    tr.appendChild(createTableElementButton("Add to Cart", charge.ItemId, "", true, AddItemToCart, RemoveItemFromCart));
-    return tr;
-  }
-
-  function AddItemToCart(ev: Event, itemId: number): void
-  {    
-    let item: Array<Charge> = clayPay.CurrentTransaction.CurrentCharges.filter((c: Charge) =>
-    {
-      return c.ItemId == itemId;
-    });
-    if (item.length === 1 && clayPay.CurrentTransaction.Cart.indexOf(item[0]) === -1)
-    {
-      clayPay.CurrentTransaction.Cart.push(item[0]);
-    }
-    ToggleAddRemoveButtons(itemId);
-    updateCart();
-  }
-
-  function RemoveItemFromCart(ev: Event, itemId: number, toggle: boolean): void
-  {
-    let newCart: Array<Charge> = clayPay.CurrentTransaction.Cart.filter((c: Charge) =>
-    {
-      return c.ItemId !== itemId;
-    });
-    clayPay.CurrentTransaction.Cart = newCart;
-    if(toggle) ToggleAddRemoveButtons(itemId);
-    updateCart();
-  }
-
-  function ToggleAddRemoveButtons(itemId: number):void
-  {
-    
-    let btnAdd: HTMLElement = document.getElementById("btnAdd" + itemId.toString());
-    let btnRem: HTMLElement = document.getElementById("btnRemove" + itemId.toString());
-    let showAdd: boolean = btnAdd.style.display === "inline-block";
-    btnAdd.style.display = showAdd ? "none" : "inline-block";
-    btnRem.style.display = showAdd ? "inline-block" : "none";    
-  }
-
-  function IsItemInCart(itemId: number): boolean
+  
+  export function IsItemInCart(itemId: number): boolean
   {
     let item: Array<Charge> = clayPay.CurrentTransaction.Cart.filter((c: Charge) =>
     {
@@ -459,25 +347,34 @@ namespace clayPay.UI
     return item.length !== 0;
   }
 
-  function AddAllItemsToCart(): void
+  //export function AddAllItemsToCart(): void
+  //{
+  //  for (let charge of clayPay.CurrentTransaction.CurrentCharges)
+  //  {
+  //    if (!IsItemInCart(charge.ItemId))
+  //    {
+  //      clayPay.CurrentTransaction.Cart.push(charge);
+  //    }
+  //  }
+  //  updateCart();
+  //  // we're going to rerun the "Create Table" so that it'll 
+  //  // update each row
+  //  ProcessSearchResults(clayPay.CurrentTransaction.CurrentCharges);
+  //  //AddCharges(clayPay.CurrentTransaction.CurrentCharges);
+  //}
+
+  export function createTableHeaderElement(value: string, width: string): HTMLTableHeaderCellElement
   {
-    for (let charge of clayPay.CurrentTransaction.CurrentCharges)
-    {
-      if (!IsItemInCart(charge.ItemId))
-      {
-        clayPay.CurrentTransaction.Cart.push(charge);
-      }
-    }
-    updateCart();
-    // we're going to rerun the "Create Table" so that it'll 
-    // update each row
-    AddCharges(clayPay.CurrentTransaction.CurrentCharges);
+    let th = document.createElement("th");
+    th.width = width;
+    th.appendChild(document.createTextNode(value));
+    return th;
   }
 
-  function createTableElement(
+  export function createTableElement(
     value: string,
     className?: string,
-    colspan?: number): HTMLElement
+    colspan?: number): HTMLTableCellElement
   {
     let d = document.createElement("td");
     if (className !== undefined)
@@ -492,13 +389,13 @@ namespace clayPay.UI
     return d;
   }
 
-  function createTableElementButton(
+  export function createTableElementButton(
     value: string,
     itemId: number,
     className: string,
     toggle: boolean,
     addOnClickFunction: (ev: Event, i: number) => void,
-    removeOnClickFunction: (ev: Event, i: number, t: boolean) => void): HTMLElement
+    removeOnClickFunction: (ev: Event, i: number, t: boolean) => void): HTMLTableCellElement
   {
     let IsInCart: boolean = IsItemInCart(itemId);
     let d = document.createElement("td");
@@ -553,23 +450,7 @@ namespace clayPay.UI
   }
 
 
-  function createViewCartTableElementButton(
-    value: string,            
-    ViewCartClickFunction: () => void): HTMLElement
-  {
-    
-    let d = document.createElement("td");    
-    let add = document.createElement("button");    
-    add.type = "button";    
-    add.className = "button is-primary";
-    add.onclick = (ev: Event) =>
-    {
-      ViewCartClickFunction();
-    }
-    add.appendChild(document.createTextNode(value));
-    d.appendChild(add);
-    return d;
-  }
+
 
   function updateCartNav():void
   {
@@ -608,57 +489,22 @@ namespace clayPay.UI
 
   export function updateCart(): void
   {
-    let CartCharges: HTMLElement = document.getElementById('CartCharges');
-    let df = document.createDocumentFragment();
+    let CartCharges: HTMLElement = document.getElementById('fullCart');
+    
     Utilities.Clear_Element(CartCharges);
-    for (let charge of clayPay.CurrentTransaction.Cart)
-    {
-      df.appendChild(buildCartRow(charge));
-    }
-    df.appendChild(buildCartFooterRow());
-    df.appendChild(buildCartConvFeeFooterRow());
-    CartCharges.appendChild(df);
+    //let df = document.createDocumentFragment();
+    //for (let charge of clayPay.CurrentTransaction.Cart)
+    //{
+    //  df.appendChild(buildCartRow(charge));
+    //}
+    //df.appendChild(buildCartFooterRow());
+    //df.appendChild(buildCartConvFeeFooterRow());
+    //CartCharges.appendChild(df);
+    CartCharges.appendChild(Charge.CreateChargesTable(clayPay.CurrentTransaction.Cart, ChargeView.cart));
     updateCartNav();
   }
 
-  function buildCartFooterRow(): HTMLElement
-  {
-    let tr = document.createElement("tr");
-    tr.style.fontWeight = "bolder";
-    tr.appendChild(createTableElement("", "", 2));
-    tr.appendChild(createTableElement("Total", "center", 1));
-    let TotalAmount: number = clayPay.CurrentTransaction.Cart.reduce((total:number, b: Charge) =>
-    {
-      return total + b.Total;
-    }, 0);
-    clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
-    clayPay.CurrentTransaction.UpdateTotals();
-    tr.appendChild(createTableElement(TotalAmount.toFixed(2), "", 1));
-    tr.appendChild(createTableElement("", "", 1));
-    return tr;
-  }
 
-  function buildCartConvFeeFooterRow(): HTMLElement
-  {
-    let tr = document.createElement("tr");
-    tr.style.fontWeight = "bolder";
-    tr.appendChild(createTableElement("Please Note: There is a nonrefundable transaction fee charged for Credit Card Payments by our payment provider. This is charged in addition to the total above.", "", 2));
-    tr.appendChild(createTableElement("Conv. Fee", "center", 1));
-    tr.appendChild(createTableElement(clayPay.ConvenienceFee, "", 1));
-    tr.appendChild(createTableElement("", "", 1));
-    return tr;
-  }
-
-  function buildCartRow(charge: Charge): HTMLElement
-  {
-    let tr = document.createElement("tr");
-    tr.appendChild(createTableElement(charge.AssocKey));
-    tr.appendChild(createTableElement(charge.Description, "left"));
-    tr.appendChild(createTableElement(charge.TimeStampDisplay, "center"));
-    tr.appendChild(createTableElement(charge.Total.toFixed(2), "center"));
-    tr.appendChild(createTableElementButton("Add to Cart", charge.ItemId, "center", true, AddItemToCart, RemoveItemFromCart));
-    return tr;
-  }
 
   export function buildMenuElements():void
   {
