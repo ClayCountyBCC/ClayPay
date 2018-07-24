@@ -354,6 +354,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Scripts\app\typings\" />
+    <Folder Include="Scripts\Balancing\" />
     <Folder Include="Views\Receipt\" />
   </ItemGroup>
   <ItemGroup>

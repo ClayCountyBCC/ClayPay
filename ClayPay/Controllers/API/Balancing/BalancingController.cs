@@ -83,10 +83,9 @@ namespace ClayPay.Controllers
 
         }
 
-        if (DateToFinalize.Date < DateTime.Now.Date)
+        if (DateToFinalize.Date >= DateTime.Now.Date)
         {
           dj.Error.Add("Cannot finalize payments made on or after today. Please select a previous date.");
-
         }
         return Ok(dj);
       }
