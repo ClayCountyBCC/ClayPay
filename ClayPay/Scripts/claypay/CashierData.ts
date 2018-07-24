@@ -2,28 +2,38 @@
 {
   interface ICashierData
   {
+    PayerName: string;
     PayerFirstName: string;
     PayerLastName: string;
     PayerPhoneNumber: string;
     PayerEmailAddress: string;
     PayerCompanyName: string;
     PayerStreetAddress: string;
+    PayerStreet1: string;
+    PayerStreet2: string;
     PayerCity: string;
     PayerState: string;
     PayerZip: string;
+    UserName: string;
+    TransactionDate: Date;
   }
 
   export class CashierData implements ICashierData
   {
-    public PayerFirstName: string;
-    public PayerLastName: string;
-    public PayerPhoneNumber: string;
-    public PayerEmailAddress: string;
-    public PayerCompanyName: string;
-    public PayerStreetAddress: string;
-    public PayerCity: string;
-    public PayerState: string;
-    public PayerZip: string;
+    public PayerFirstName: string = "";
+    public PayerLastName: string = "";
+    public PayerName: string = "";
+    public PayerPhoneNumber: string = "";
+    public PayerEmailAddress: string = "";
+    public PayerCompanyName: string = "";
+    public PayerStreetAddress: string = "";
+    public PayerStreet1: string = "";
+    public PayerStreet2: string = "";
+    public PayerCity: string = "";
+    public PayerState: string = "";
+    public PayerZip: string = "";
+    public UserName: string = "";
+    public TransactionDate: Date = new Date();
 
     // Payer Inputs
     public static payerFirstName = "payerFirstName";
@@ -105,8 +115,6 @@
       Utilities.Set_Value(CashierData.payerStreet, "");
       (<HTMLSelectElement>document.getElementById(CashierData.payerState)).selectedIndex = 0;
     }
-
-
 
     ResetPayerData(): void
     {

@@ -148,7 +148,7 @@
       return tr;
     }
     
-    static createAddAllChargesToCartButton(): HTMLTableCellElement
+    private static createAddAllChargesToCartButton(): HTMLTableCellElement
     {
       let td = document.createElement("td");
       let button = document.createElement("button");
@@ -176,7 +176,7 @@
     
     }
 
-    static createChargeCartButtonToggle(
+    private static createChargeCartButtonToggle(
       value: string,
       itemId: number,
       className: string,
@@ -237,7 +237,7 @@
     }
 
 
-    static createViewCartFooterRow(): HTMLTableRowElement
+    private static createViewCartFooterRow(): HTMLTableRowElement
     {
       let tr = document.createElement("tr");
       tr.appendChild(UI.createTableElement("", "", 4));

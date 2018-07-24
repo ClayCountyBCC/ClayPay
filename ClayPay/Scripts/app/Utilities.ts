@@ -282,6 +282,11 @@ namespace Utilities
     return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   }
 
+  export function Format_Date(date: Date): string
+  {
+    return date.toLocaleString('en-US', { timeZone: 'EST' });
+  }
+
   export function Validate_Text(e: string, errorElementId: string, errorText: string): string
   export function Validate_Text(e: HTMLInputElement, errorElementId: string, errorText: string): string
   export function Validate_Text(e: HTMLSelectElement, errorElementId: string, errorText: string): string

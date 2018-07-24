@@ -100,6 +100,47 @@
   </section>
 
   <section class="hide"
+           id="existingReceipts">
+
+    <div class="field is-horizontal">
+      <div class="field-label is-normal">
+        <label class="label">Receipt Number</label>
+      </div>
+      <div class="field-body">
+        <div class="field is-grouped">
+          <div class="control">
+            <input id="receiptSearch"
+                   class="input"
+                   type="text"
+                   maxlength="9"
+                   value="@(HttpContext.Current.IsDebuggingEnabled ? "18-013663" : "")"
+                   placeholder="18-000001" />
+          </div>
+          <div class="control">
+            <button id="receiptSearchButton"
+                    type="button"
+                    class="button is-primary">
+              Search
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column is-offset-1">
+        <div class="hide"
+             id="receiptSearchError">
+
+        </div>
+      </div>
+      <div class="column">
+
+      </div>
+    </div>
+
+  </section>
+
+  <section class="hide"
            id="contractorFees">
 
     <div class="field is-horizontal">
@@ -212,18 +253,6 @@
     <div id="Charges">
 
     </div>
-    @*<table class="table is-fullwidth">
-      <thead>
-        <tr>
-          <th width="50%">Description</th>
-          <th width="20%">Date</th>
-          <th width="20%">Amount</th>
-          <th width="10%"></th>
-        </tr>
-      </thead>
-      <tbody id="Charges"></tbody>
-    </table>*@
-
   </section>
 
   <section style="margin-bottom: 5em;"
@@ -237,16 +266,6 @@
     </div>
     <div id="fullCart"
            class="hide">
-      @*<thead>
-        <tr>
-          <th class="20%">Key</th>
-          <th width="40%">Description</th>
-          <th width="15%">Date</th>
-          <th width="15%">Amount</th>
-          <th width="10%"></th>
-        </tr>
-      </thead>
-      <tbody id="CartCharges"></tbody>*@
     </div>
 
     <div class="hide"
@@ -712,9 +731,10 @@
       }
     </div>
   </section>
+
   <section class="hide"
            id="receipt">
-    <div class="level">
+    @*<div class="level">
       <div class="level-item title">
         Payment Receipt
       </div>
@@ -785,10 +805,8 @@
           </div>
         </div>
       </div>
-    </div>
-    <div id="receiptTransactionErrorContainer">
+    </div>*@
 
-    </div>
 
   </section>
 </div>

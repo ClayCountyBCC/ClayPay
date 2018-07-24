@@ -2,6 +2,20 @@ var clayPay;
 (function (clayPay) {
     class CashierData {
         constructor() {
+            this.PayerFirstName = "";
+            this.PayerLastName = "";
+            this.PayerName = "";
+            this.PayerPhoneNumber = "";
+            this.PayerEmailAddress = "";
+            this.PayerCompanyName = "";
+            this.PayerStreetAddress = "";
+            this.PayerStreet1 = "";
+            this.PayerStreet2 = "";
+            this.PayerCity = "";
+            this.PayerState = "";
+            this.PayerZip = "";
+            this.UserName = "";
+            this.TransactionDate = new Date();
         }
         ValidatePayer() {
             this.ResetPayerData();

@@ -109,13 +109,12 @@ var clayPay;
             this.CCData.UpdatePayerData();
         }
         Save() {
-            if (!this.Validate)
+            // Disable the button that was just used so that it can't be clicked multiple times.
+            let loadingButton = this.IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
+            Utilities.Toggle_Loading_Button(loadingButton, true);
+            if (!this.Validate()) {
+                Utilities.Toggle_Loading_Button(loadingButton, false);
                 return;
-            if (this.IsCashier) {
-                Utilities.Toggle_Loading_Button(NewTransaction.PayNowCashierButton, true);
-            }
-            else {
-                Utilities.Toggle_Loading_Button(NewTransaction.PayNowPublicButton, true);
             }
             this.ItemIds = clayPay.CurrentTransaction.Cart.map((c) => {
                 return c.ItemId;
@@ -131,6 +130,7 @@ var clayPay;
             }
             Utilities.Post(path + "API/Payments/Pay/", this)
                 .then(function (cr) {
+                console.log('client response', cr);
                 if (cr.Errors.length > 0) // Errors occurred, payment was unsuccessful.
                  {
                     Utilities.Error_Show(errorTarget, cr.Errors);
@@ -141,8 +141,8 @@ var clayPay;
                     clayPay.Payment.ResetAll();
                     clayPay.CurrentTransaction = new NewTransaction(); // this will reset the entire object back to default.
                     clayPay.UI.updateCart();
+                    clayPay.ClientResponse.ShowPaymentReceipt(cr, true, errorTarget);
                 }
-                clayPay.ClientResponse.HandleResponse(cr, true);
                 Utilities.Toggle_Loading_Button(toggleButton, false);
                 // need to reset the form and transaction / payment objects
             }, function (e) {
@@ -163,4 +163,4 @@ var clayPay;
     NewTransaction.paymentError = "paymentError";
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=newtransaction.js.map
+//# sourceMappingURL=NewTransaction.js.map

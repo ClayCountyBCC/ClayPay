@@ -63,6 +63,17 @@ var clayPay;
             .onclick = () => {
             clayPay.UI.Search('applicationSearchButton', 'applicationSearch', 'applicationSearchError');
         };
+        document.getElementById('receiptSearch')
+            .onkeydown = function (event) {
+            var e = event || window.event;
+            if (event.keyCode == 13) {
+                clayPay.ClientResponse.Search();
+            }
+        };
+        document.getElementById("receiptSearchButton")
+            .onclick = () => {
+            clayPay.ClientResponse.Search();
+        };
     }
     function loadDefaultValues() {
         loadApplicationTypes();

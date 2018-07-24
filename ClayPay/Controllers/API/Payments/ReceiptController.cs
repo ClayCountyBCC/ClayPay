@@ -13,11 +13,11 @@ using ClayPay.Models.Claypay;
 namespace ClayPay.Controllers.API.Payments
 {
 
-    [RoutePrefix("API/Receipt")]
+    [RoutePrefix("API/Payments")]
     public class ReceiptController : ApiController
     {
       [HttpGet]
-      [Route("Query")]
+      [Route("Receipt")]
       public IHttpActionResult Get(string CashierId)
       {
         var cr = new ClientResponse(CashierId);

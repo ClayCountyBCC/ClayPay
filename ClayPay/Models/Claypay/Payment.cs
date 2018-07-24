@@ -147,36 +147,6 @@ namespace ClayPay.Models.Claypay
       return true;
     }
 
-
-    
-    public static bool SaveOnlinePaymentToBeProcessed(string CashierId, string username)
-    {
-
-      var param = new DynamicParameters();
-      param.Add("@CashierId", CashierId);
-
-      var query = @"
-          USE WATSC;
-          INSERT INTO
-          SELECT CP.PayID, C.CashierId, LTRIM(RTRIM(CI.AssocKey))
-          FROM ccCashierPayment CP
-          INNER JOIN ccCashier C ON CP.OTid = C.OTId
-          INNER JOIN ccCashierItem CI ON CP.OTid = CI.OTId AND CI.CashierId = C.CashierId 
-          INNER JOIN ccOnlineCCPaymentsToProcess CCO ON CCO.CashierId = C.CashierId
-          WHERE UPPER(PmtType) IN ('CC ON', 'CC_ONLINE')
-            AND CI.AssocKey IS NOT NULL
-            AND C.CashierId = @CashierId
-
-          ";
-      return false;
-    }
-
-    public static bool AssignOnlinePaymentForProcessing(string CashierId, int PayId)
-    {
-    
-    
-      return false;
-    }
   }
   
 }

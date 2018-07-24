@@ -105,7 +105,15 @@ namespace clayPay.UI
       icon: "fas fa-shopping-cart",
       label: "Cart",
       selected: false
-    }
+    },
+    {
+      id: "nav-existingReceipts",
+      title: "View Existing Receipts",
+      subTitle: "Shows the Transaction Date, Charges Paid, and method of payment for a receipt number.",
+      icon: "fas fa-file",
+      label: "Receipt Search",
+      selected: false
+    },
   ];
 
   //export function Submit():boolean
@@ -211,11 +219,6 @@ namespace clayPay.UI
     errorList.appendChild(df);
   }
 
-  function getValue(id: string):string
-  {
-    return (<HTMLInputElement>document.getElementById(id)).value;
-  }
-
   export function BuildPayerStates(States: Array<any>, id: string): void
   {
     let stateSelect:HTMLSelectElement = (<HTMLSelectElement>document.getElementById(id));
@@ -267,7 +270,6 @@ namespace clayPay.UI
 
   export function Search(buttonId: string, inputId: string, errorId: string): boolean
   {
-    //let button = <HTMLButtonElement>document.getElementById(buttonId);
     Utilities.Toggle_Loading_Button(buttonId, true);
     let input = <HTMLInputElement>document.getElementById(inputId);
     let k: string = input.value.trim().toUpperCase();

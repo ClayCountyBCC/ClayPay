@@ -9,10 +9,11 @@ namespace ClayPay.Models.Claypay
   public class CashierData
   {
     public UserAccess CurrentUser { get; set; }
-    public int OTId { get; set; }
-    public string CashierId { get; set; }
+    public int OTId { get; set; } = -1;
+    public string CashierId { get; set; } = "";
     public DateTime TransactionDate { get; set; } = DateTime.Now;
     public string PayerCompanyName { get; set; } = "";
+    public string PayerName { get; set; } = "";
     public string PayerFirstName { get; set; } = ""; // Required
     public string PayerLastName { get; set; } = "";// Required
     public string PayerPhoneNumber { get; set; } = "";// Required
@@ -31,6 +32,7 @@ namespace ClayPay.Models.Claypay
     public string PayerCity { get; set; } = "";// Required
     public string PayerState { get; set; } = "";// Required
     public string PayerZip { get; set; } = "";// Required
+    public string UserName { get; set; } = "";
 
     public CashierData()
     {
@@ -50,11 +52,13 @@ namespace ClayPay.Models.Claypay
           OTId,
           CashierId,
           TransDt TransactionDate,
-          CoName PayerCompanyName,
-          Phone PayerPhoneNumber,
-          EmailAddress PayerEmailAddress,
-          Addr1 PayerStreet1,
-          Addr2 PayerStreet2
+          ISNULL(Name, '') PayerName,
+          ISNULL(CoName, '') PayerCompanyName,
+          ISNULL(Phone, '') PayerPhoneNumber,
+          ISNULL(Addr1, '') PayerStreet1,
+          ISNULL(Addr2, '') PayerStreet2,
+          ISNULL(EmailAddress, '') PayerEmailAddress,
+          NTUser UserName
         FROM ccCashier
         WHERE CashierId = @CashierId";
 

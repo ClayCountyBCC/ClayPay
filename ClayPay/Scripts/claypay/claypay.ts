@@ -86,6 +86,23 @@ namespace clayPay
         clayPay.UI.Search('applicationSearchButton', 'applicationSearch', 'applicationSearchError'); 
       };
 
+    (<HTMLInputElement>document.getElementById('receiptSearch'))
+      .onkeydown = function (this: HTMLElement, event: KeyboardEvent)
+      {
+        var e = event || window.event;
+        if (event.keyCode == 13)
+        {
+          clayPay.ClientResponse.Search();
+        }
+      };
+
+    (<HTMLButtonElement>document.getElementById("receiptSearchButton"))
+      .onclick = () =>
+      {
+        clayPay.ClientResponse.Search();
+      };
+
+
   }
 
   function loadDefaultValues(): void

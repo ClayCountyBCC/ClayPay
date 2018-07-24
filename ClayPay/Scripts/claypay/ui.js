@@ -102,7 +102,15 @@ var clayPay;
                 icon: "fas fa-shopping-cart",
                 label: "Cart",
                 selected: false
-            }
+            },
+            {
+                id: "nav-existingReceipts",
+                title: "View Existing Receipts",
+                subTitle: "Shows the Transaction Date, Charges Paid, and method of payment for a receipt number.",
+                icon: "fas fa-file",
+                label: "Receipt Search",
+                selected: false
+            },
         ];
         //export function Submit():boolean
         //{
@@ -194,9 +202,6 @@ var clayPay;
             }
             errorList.appendChild(df);
         }
-        function getValue(id) {
-            return document.getElementById(id).value;
-        }
         function BuildPayerStates(States, id) {
             let stateSelect = document.getElementById(id);
             if (stateSelect === undefined)
@@ -241,7 +246,6 @@ var clayPay;
         }
         UI.BuildExpYears = BuildExpYears;
         function Search(buttonId, inputId, errorId) {
-            //let button = <HTMLButtonElement>document.getElementById(buttonId);
             Utilities.Toggle_Loading_Button(buttonId, true);
             let input = document.getElementById(inputId);
             let k = input.value.trim().toUpperCase();

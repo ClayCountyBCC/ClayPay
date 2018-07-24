@@ -29,6 +29,11 @@ namespace ClayPay.Models.Claypay
     public ClientResponse(string cashierid)
     {
       ResponseCashierData = CashierData.Get(cashierid);
+      if(ResponseCashierData.CashierId != cashierid)
+      {
+        Errors.Add($"CashierId: {cashierid} was not found.");
+        return;
+      }
       Charges = Charge.GetChargesByCashierId(cashierid);
       ReceiptPayments = ReceiptPayment.Get(cashierid);
     }

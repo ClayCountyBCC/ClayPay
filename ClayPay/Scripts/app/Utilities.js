@@ -208,6 +208,10 @@ var Utilities;
         return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
     }
     Utilities.Format_Amount = Format_Amount;
+    function Format_Date(date) {
+        return date.toLocaleString('en-US', { timeZone: 'EST' });
+    }
+    Utilities.Format_Date = Format_Date;
     function Validate_Text(e, errorElementId, errorText) {
         // this should only be used for required elements.
         if (typeof e == "string") {

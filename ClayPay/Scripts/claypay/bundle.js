@@ -942,6 +942,10 @@ var Utilities;
         return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
     }
     Utilities.Format_Amount = Format_Amount;
+    function Format_Date(date) {
+        return date.toLocaleString('en-US', { timeZone: 'EST' });
+    }
+    Utilities.Format_Date = Format_Date;
     function Validate_Text(e, errorElementId, errorText) {
         // this should only be used for required elements.
         if (typeof e == "string") {
@@ -975,6 +979,20 @@ var clayPay;
 (function (clayPay) {
     class CashierData {
         constructor() {
+            this.PayerFirstName = "";
+            this.PayerLastName = "";
+            this.PayerName = "";
+            this.PayerPhoneNumber = "";
+            this.PayerEmailAddress = "";
+            this.PayerCompanyName = "";
+            this.PayerStreetAddress = "";
+            this.PayerStreet1 = "";
+            this.PayerStreet2 = "";
+            this.PayerCity = "";
+            this.PayerState = "";
+            this.PayerZip = "";
+            this.UserName = "";
+            this.TransactionDate = new Date();
         }
         ValidatePayer() {
             this.ResetPayerData();
@@ -1636,6 +1654,20 @@ var clayPay;
             this.ChangeDue = -1;
             this.ConvenienceFeeAmount = -1;
         }
+        CreateReceiptPaymentView(receipts) {
+            let df = document.createDocumentFragment();
+            // Here we handle Change Due and Convenience fees.
+            // We'll add a row for each of them that are > 0
+            let changeDueTmp = receipts.filter(function (j) { return j.ChangeDue > 0; });
+            let changeDue = changeDueTmp.reduce((ChangeDue, b) => {
+                return ChangeDue + b.ChangeDue;
+            }, 0);
+            let convenienceFeeTmp = receipts.filter(function (j) { return j.ConvenienceFeeAmount > 0; });
+            let convenienceFee = convenienceFeeTmp.reduce((ConvenienceFeeAmount, b) => {
+                return ConvenienceFeeAmount + b.ConvenienceFeeAmount;
+            }, 0);
+            return df;
+        }
     }
     clayPay.ReceiptPayment = ReceiptPayment;
 })(clayPay || (clayPay = {}));
@@ -1651,17 +1683,11 @@ var clayPay;
             this.Errors = []; // Errors are full stop, meaning the payment did not process.
             this.PartialErrors = []; // Partial errors mean part of the transaction was completed, but something wasn't.
         }
-        static HandleResponse(cr, IsCashier) {
+        static ShowPaymentReceipt(cr) {
             console.log('client response', cr);
-            if (cr.Errors.length > 0) {
-                if (IsCashier) {
-                    Utilities.Error_Show(ClientResponse.CashierErrorTarget, cr.Errors);
-                }
-                else {
-                    Utilities.Error_Show(ClientResponse.CashierErrorTarget, cr.Errors);
-                }
-                return;
-            }
+            let container = document.getElementById(ClientResponse.ReceiptContainer);
+            Utilities.Clear_Element(container);
+            container.appendChild(ClientResponse.CreateReceiptView(cr));
             //if (cr.PartialErrors.length > 0)
             //{
             //  Utilities.Error_Show(ClientResponse.ReceiptErrorContainer, cr.PartialErrors, false);
@@ -1681,20 +1707,79 @@ var clayPay;
             // this needs to hide all of the other sections and just show the receipt.
             Utilities.Show_Hide_Selector("#views > section", ClientResponse.ReceiptContainer);
         }
+        static CreateReceiptView(cr) {
+            let df = document.createDocumentFragment();
+            df.appendChild(ClientResponse.CreateReceiptView(cr));
+            df.appendChild(clayPay.Charge.CreateChargesTable(cr.Charges, clayPay.ChargeView.receipt));
+            return df;
+        }
+        static CreateReceiptHeader(cr) {
+            let div = document.createElement("div");
+            div.classList.add("level");
+            let title = document.createElement("span");
+            title.classList.add("level-item");
+            title.classList.add("title");
+            title.appendChild(document.createTextNode("Payment Receipt for: " + cr.ReceiptPayments[0].CashierId));
+            div.appendChild(title);
+            let receiptDate = document.createElement("span");
+            receiptDate.classList.add("level-item");
+            receiptDate.classList.add("subtitle");
+            receiptDate.appendChild(document.createTextNode(Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
+            let timestamp = cr.ResponseCashierData.TransactionDate;
+            return div;
+        }
+        static Search() {
+            Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, true);
+            let input = document.getElementById(ClientResponse.receiptSearchInput);
+            let k = input.value.trim().toUpperCase();
+            if (k.length !== 9) {
+                Utilities.Error_Show(ClientResponse.receiptSearchError, "Receipts must be 8 digits and a dash, like 18-000001.");
+                return;
+            }
+            if (k.length > 0) {
+                let path = "/";
+                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                if (i == 0) {
+                    path = "/claypay/";
+                }
+                Utilities.Get(path + "API/Payments/Receipt/?CashierId=" + k).then(function (cr) {
+                    if (cr.Errors.length > 0) {
+                        Utilities.Error_Show(ClientResponse.receiptSearchError, cr.Errors);
+                    }
+                    else {
+                        ClientResponse.ShowPaymentReceipt(cr);
+                    }
+                    Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
+                    return true;
+                }, function (errorText) {
+                    console.log('error in Receipt Search', errorText);
+                    Utilities.Error_Show(ClientResponse.receiptSearchError, errorText);
+                    // do something with the error here
+                    // need to figure out how to detect if something wasn't found
+                    // versus an error.
+                    Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
+                    return;
+                });
+            }
+            else {
+                Utilities.Error_Show(ClientResponse.receiptSearchError, "Invalid search. Please check your entry and try again.");
+                input.focus();
+                Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
+                return;
+            }
+        }
     }
     ClientResponse.CashierErrorTarget = "paymentError";
     ClientResponse.PublicErrorTarget = "publicPaymentError";
     ClientResponse.ReceiptContainer = "receipt";
-    ClientResponse.TimeStampInput = "receiptTimeStamp";
-    ClientResponse.CashierIdInput = "receiptCashierId";
-    ClientResponse.AmountPaidInput = "receiptAmountPaid";
-    ClientResponse.ChangeDueInput = "receiptChangeDue";
-    ClientResponse.TransactionIdContainer = "receiptTransactionIdContainer";
-    ClientResponse.TransactionId = "receiptTransactionId";
-    ClientResponse.ReceiptErrorContainer = "receiptTransactionErrorContainer";
+    //static ReceiptErrorContainer: string = "receiptTransactionErrorContainer"; // To be used for partial payments.
+    // receiptSearchElements
+    ClientResponse.receiptSearchInput = "receiptSearch";
+    ClientResponse.receiptSearchButton = "receiptSearchButton";
+    ClientResponse.receiptSearchError = "receiptSearchError";
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=clientresponse.js.map
+//# sourceMappingURL=ClientResponse.js.map
 /// <reference path="payment.ts" />
 /// <reference path="clientresponse.ts" />
 var clayPay;
@@ -1806,13 +1891,12 @@ var clayPay;
             this.CCData.UpdatePayerData();
         }
         Save() {
-            if (!this.Validate)
+            // Disable the button that was just used so that it can't be clicked multiple times.
+            let loadingButton = this.IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
+            Utilities.Toggle_Loading_Button(loadingButton, true);
+            if (!this.Validate()) {
+                Utilities.Toggle_Loading_Button(loadingButton, false);
                 return;
-            if (this.IsCashier) {
-                Utilities.Toggle_Loading_Button(NewTransaction.PayNowCashierButton, true);
-            }
-            else {
-                Utilities.Toggle_Loading_Button(NewTransaction.PayNowPublicButton, true);
             }
             this.ItemIds = clayPay.CurrentTransaction.Cart.map((c) => {
                 return c.ItemId;
@@ -1828,6 +1912,7 @@ var clayPay;
             }
             Utilities.Post(path + "API/Payments/Pay/", this)
                 .then(function (cr) {
+                console.log('client response', cr);
                 if (cr.Errors.length > 0) // Errors occurred, payment was unsuccessful.
                  {
                     Utilities.Error_Show(errorTarget, cr.Errors);
@@ -1838,8 +1923,8 @@ var clayPay;
                     clayPay.Payment.ResetAll();
                     clayPay.CurrentTransaction = new NewTransaction(); // this will reset the entire object back to default.
                     clayPay.UI.updateCart();
+                    clayPay.ClientResponse.ShowPaymentReceipt(cr, true, errorTarget);
                 }
-                clayPay.ClientResponse.HandleResponse(cr, true);
                 Utilities.Toggle_Loading_Button(toggleButton, false);
                 // need to reset the form and transaction / payment objects
             }, function (e) {
@@ -1860,7 +1945,7 @@ var clayPay;
     NewTransaction.paymentError = "paymentError";
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=newtransaction.js.map
+//# sourceMappingURL=NewTransaction.js.map
 var clayPay;
 (function (clayPay) {
     class AppType {
@@ -1936,6 +2021,17 @@ var clayPay;
         document.getElementById("applicationSearchButton")
             .onclick = () => {
             clayPay.UI.Search('applicationSearchButton', 'applicationSearch', 'applicationSearchError');
+        };
+        document.getElementById('receiptSearch')
+            .onkeydown = function (event) {
+            var e = event || window.event;
+            if (event.keyCode == 13) {
+                clayPay.ClientResponse.Search();
+            }
+        };
+        document.getElementById("receiptSearchButton")
+            .onclick = () => {
+            clayPay.ClientResponse.Search();
         };
     }
     function loadDefaultValues() {
@@ -2083,7 +2179,15 @@ var clayPay;
                 icon: "fas fa-shopping-cart",
                 label: "Cart",
                 selected: false
-            }
+            },
+            {
+                id: "nav-existingReceipts",
+                title: "View Existing Receipts",
+                subTitle: "Shows the Transaction Date, Charges Paid, and method of payment for a receipt number.",
+                icon: "fas fa-file",
+                label: "Receipt Search",
+                selected: false
+            },
         ];
         //export function Submit():boolean
         //{
@@ -2175,9 +2279,6 @@ var clayPay;
             }
             errorList.appendChild(df);
         }
-        function getValue(id) {
-            return document.getElementById(id).value;
-        }
         function BuildPayerStates(States, id) {
             let stateSelect = document.getElementById(id);
             if (stateSelect === undefined)
@@ -2222,7 +2323,6 @@ var clayPay;
         }
         UI.BuildExpYears = BuildExpYears;
         function Search(buttonId, inputId, errorId) {
-            //let button = <HTMLButtonElement>document.getElementById(buttonId);
             Utilities.Toggle_Loading_Button(buttonId, true);
             let input = document.getElementById(inputId);
             let k = input.value.trim().toUpperCase();

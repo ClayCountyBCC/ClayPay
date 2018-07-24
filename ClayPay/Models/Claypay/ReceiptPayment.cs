@@ -76,11 +76,6 @@ namespace ClayPay.Models.Claypay
       var query = @"
         USE WATSC;
 
-        WITH VOID_CASHEIRIDS(CashierId) AS (
-        SELECT DISTINCT LEFT(CASHIERID,9)
-        FROM ccCashier
-        WHERE RIGHT(CashierId,1) = 'V')
-
         SELECT DISTINCT
           C.CashierId,
           CP.OTId,
@@ -97,8 +92,7 @@ namespace ClayPay.Models.Claypay
         INNER JOIN ccCashier C ON C.OTId = CP.OTid
         INNER JOIN ccCashierItem CI ON CP.OTid = CI.OTId AND C.CashierId = CI.CashierId
         INNER JOIN ccLookUp L ON LEFT(L.CODE,5) = LEFT(CP.PmtType,5)
-        WHERE LEFT(C.CashierId,9) NOT IN (SELECT CashierId FROM VOID_CASHEIRIDS)
-         AND C.CashierId = @cashierId
+        WHERE C.CashierId = @cashierId
         ORDER BY CashierId DESC";
 
       return Constants.Get_Data<ReceiptPayment>(query, param);
