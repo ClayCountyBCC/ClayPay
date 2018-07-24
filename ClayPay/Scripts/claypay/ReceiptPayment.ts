@@ -44,13 +44,13 @@
       // Here we handle Change Due and Convenience fees.
       // We'll add a row for each of them that are > 0
       let changeDueTmp = receipts.filter(function (j) { return j.ChangeDue > 0 });
-      let changeDue = changeDueTmp.reduce((ChangeDue: number, b: ReceiptPayment) =>
+      let TotalChangeDue = changeDueTmp.reduce((ChangeDue: number, b: ReceiptPayment) =>
       {
         return ChangeDue + b.ChangeDue;
       }, 0);
 
       let convenienceFeeTmp = receipts.filter(function (j) { return j.ConvenienceFeeAmount > 0 });
-      let convenienceFee = convenienceFeeTmp.reduce((ConvenienceFeeAmount: number, b: ReceiptPayment) =>
+      let TotalConvenienceFee = convenienceFeeTmp.reduce((ConvenienceFeeAmount: number, b: ReceiptPayment) =>
       {
         return ConvenienceFeeAmount + b.ConvenienceFeeAmount;
       }, 0);

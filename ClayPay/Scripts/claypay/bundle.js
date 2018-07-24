@@ -1659,11 +1659,11 @@ var clayPay;
             // Here we handle Change Due and Convenience fees.
             // We'll add a row for each of them that are > 0
             let changeDueTmp = receipts.filter(function (j) { return j.ChangeDue > 0; });
-            let changeDue = changeDueTmp.reduce((ChangeDue, b) => {
+            let TotalChangeDue = changeDueTmp.reduce((ChangeDue, b) => {
                 return ChangeDue + b.ChangeDue;
             }, 0);
             let convenienceFeeTmp = receipts.filter(function (j) { return j.ConvenienceFeeAmount > 0; });
-            let convenienceFee = convenienceFeeTmp.reduce((ConvenienceFeeAmount, b) => {
+            let TotalConvenienceFee = convenienceFeeTmp.reduce((ConvenienceFeeAmount, b) => {
                 return ConvenienceFeeAmount + b.ConvenienceFeeAmount;
             }, 0);
             return df;
