@@ -28,6 +28,30 @@ var clayPay;
             }, 0);
             return df;
         }
+        static CreateTable() {
+            let table = document.createElement("table");
+            table.classList.add("table");
+            table.classList.add("table");
+            table.classList.add("is-fullwidth");
+            let thead = document.createElement("THEAD");
+            let tr = document.createElement("tr");
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Payment Type", "20%"));
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "40%"));
+            //if (view !== ChargeView.receipt)
+            //{
+            //  tr.appendChild(UI.createTableHeaderElement("Date", "15%"));
+            //  tr.appendChild(UI.createTableHeaderElement("Amount", "15%"));
+            //  tr.appendChild(UI.createTableHeaderElement("", "10%"));
+            //}
+            //else
+            //{
+            //  tr.appendChild(UI.createTableHeaderElement("Date", "20%"));
+            //  tr.appendChild(UI.createTableHeaderElement("Amount", "20%"));
+            //}
+            thead.appendChild(tr);
+            table.appendChild(thead);
+            return table;
+        }
     }
     clayPay.ReceiptPayment = ReceiptPayment;
 })(clayPay || (clayPay = {}));

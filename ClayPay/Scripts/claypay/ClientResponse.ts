@@ -36,7 +36,7 @@ namespace clayPay
 
     public static ShowPaymentReceipt(cr: ClientResponse):void
     {
-      console.log('client response', cr);
+      console.log('client response ShowPaymentReceipt', cr);
       let container = document.getElementById(ClientResponse.ReceiptContainer);
       Utilities.Clear_Element(container);
       container.appendChild(ClientResponse.CreateReceiptView(cr));
@@ -64,9 +64,10 @@ namespace clayPay
     private static CreateReceiptView(cr: ClientResponse): DocumentFragment
     {
       let df = document.createDocumentFragment();
-      df.appendChild(ClientResponse.CreateReceiptView(cr));
+      df.appendChild(ClientResponse.CreateReceiptHeader(cr));
       df.appendChild(Charge.CreateChargesTable(cr.Charges, ChargeView.receipt));
-
+      df.appendChild(ClientResponse.CreateReceiptPayerView(cr.ResponseCashierData));
+      // show payment info
       return df;
     }
 
@@ -85,6 +86,49 @@ namespace clayPay
       receiptDate.appendChild(document.createTextNode(Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
       let timestamp = cr.ResponseCashierData.TransactionDate
       return div;
+    }
+
+    private static CreateReceiptPayerView(cd: CashierData): DocumentFragment
+    {
+      let df = document.createDocumentFragment();
+      df.appendChild(ClientResponse.CreatePayerDataColumns("Name", cd.PayerName, "Company Name", cd.PayerCompanyName));
+      df.appendChild(ClientResponse.CreatePayerDataColumns("Phone Number", cd.PayerPhoneNumber, "Email Address", cd.PayerEmailAddress));
+      df.appendChild(ClientResponse.CreatePayerDataColumns("Street Address", cd.PayerStreet1, "Processed By", cd.UserName));
+      df.appendChild(ClientResponse.CreatePayerDataColumns("Address 2", cd.PayerStreet2, "", ""));
+      return df;
+    }
+
+    private static CreatePayerDataColumns(label1: string, value1: string, label2: string, value2: string): HTMLDivElement
+    {
+      let div = document.createElement("div");
+      div.classList.add("columns");
+      div.style.marginBottom = "0";
+      div.appendChild(ClientResponse.CreatePayerData(label1, value1));
+      div.appendChild(ClientResponse.CreatePayerData(label2, value2));
+      return div;
+    }
+
+    private static CreatePayerData(label: string, value: string): HTMLDivElement
+    {
+      let field = document.createElement("div");
+      field.classList.add("field");
+      field.classList.add("column");
+      let dataLabel = document.createElement("label");
+      dataLabel.classList.add("label");
+      dataLabel.appendChild(document.createTextNode(label));
+      let control = document.createElement("div");
+      control.classList.add("control");
+
+      let input = document.createElement("input");
+      input.classList.add("input");
+      input.classList.add("is-static");
+      input.readOnly = true;
+      input.type = "text";
+      input.value = value;
+      control.appendChild(input);      
+      field.appendChild(dataLabel);
+      field.appendChild(control);
+      return field;
     }
 
     public static Search(): void
@@ -108,6 +152,7 @@ namespace clayPay
         Utilities.Get(path + "API/Payments/Receipt/?CashierId=" + k).then(
           function (cr: ClientResponse)
           {
+            console.log('Client Response', cr);
             if (cr.Errors.length > 0)
             {
               Utilities.Error_Show(ClientResponse.receiptSearchError, cr.Errors);
@@ -117,7 +162,6 @@ namespace clayPay
               ClientResponse.ShowPaymentReceipt(cr);
             }
             Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
-            return true;
           },
           function (errorText)
           {
@@ -127,14 +171,12 @@ namespace clayPay
             // need to figure out how to detect if something wasn't found
             // versus an error.
             Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
-            return;
           });
       } else
       {
         Utilities.Error_Show(ClientResponse.receiptSearchError, "Invalid search. Please check your entry and try again.")
         input.focus();
         Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
-        return;
       }
 
 

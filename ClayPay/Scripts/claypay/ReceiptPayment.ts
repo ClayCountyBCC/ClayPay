@@ -69,17 +69,17 @@
       let tr = document.createElement("tr");
       tr.appendChild(UI.createTableHeaderElement("Payment Type", "20%"));
       tr.appendChild(UI.createTableHeaderElement("Description", "40%"));
-      if (view !== ChargeView.receipt)
-      {
-        tr.appendChild(UI.createTableHeaderElement("Date", "15%"));
-        tr.appendChild(UI.createTableHeaderElement("Amount", "15%"));
-        tr.appendChild(UI.createTableHeaderElement("", "10%"));
-      }
-      else
-      {
-        tr.appendChild(UI.createTableHeaderElement("Date", "20%"));
-        tr.appendChild(UI.createTableHeaderElement("Amount", "20%"));
-      }
+      //if (view !== ChargeView.receipt)
+      //{
+      //  tr.appendChild(UI.createTableHeaderElement("Date", "15%"));
+      //  tr.appendChild(UI.createTableHeaderElement("Amount", "15%"));
+      //  tr.appendChild(UI.createTableHeaderElement("", "10%"));
+      //}
+      //else
+      //{
+      //  tr.appendChild(UI.createTableHeaderElement("Date", "20%"));
+      //  tr.appendChild(UI.createTableHeaderElement("Amount", "20%"));
+      //}
       thead.appendChild(tr);
       table.appendChild(thead);
       return table;

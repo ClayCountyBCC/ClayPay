@@ -22,6 +22,7 @@ namespace ClayPay.Models.Claypay
         {
           case "cc_online":
           case "cc_cashier":
+          case "CC Online":
           case "CC On":
             return "Credit Card";
           case "CA":
@@ -43,9 +44,9 @@ namespace ClayPay.Models.Claypay
         
       }
     }
-    public decimal AmountApplied { get; set; }
-    public decimal AmountTendered { get; set; }
-    public decimal ChangeDue;
+    public decimal AmountApplied { get; set; } = -1;
+    public decimal AmountTendered { get; set; } = -1;
+    public decimal ChangeDue { get; set; }
     public decimal ConvenienceFeeAmount 
     {
       get
@@ -55,13 +56,16 @@ namespace ClayPay.Models.Claypay
           case "cc_online":
           case "cc_cashier":
           case "cc on":
+          case "cc online":
             return Convert.ToDecimal(PaymentResponse.GetFee(AmountTendered));
           default:
             return 0;
         }
       }
     }
-    public string TransactionId { get; set; }
+    public string TransactionId { get; set; } = "";
+
+    public bool IsFinalized { get; set; } = false;
   
     
     public ReceiptPayment()
@@ -87,10 +91,9 @@ namespace ClayPay.Models.Claypay
           AmtApplied [AmountApplied], 
           (AmtTendered - AmtApplied) ChangeDue, 
           CkNo [CheckNumber],
-          TransactionId
+          ISNULL(TransactionId, '') TransactionId
         FROM ccCashierPayment CP
         INNER JOIN ccCashier C ON C.OTId = CP.OTid
-        INNER JOIN ccCashierItem CI ON CP.OTid = CI.OTId AND C.CashierId = CI.CashierId
         INNER JOIN ccLookUp L ON LEFT(L.CODE,5) = LEFT(CP.PmtType,5)
         WHERE C.CashierId = @cashierId
         ORDER BY CashierId DESC";

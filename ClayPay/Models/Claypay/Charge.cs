@@ -66,14 +66,13 @@ namespace ClayPay.Models
            USE WATSC;
            SELECT 
 	          ItemId,
-	          Description,
+	          ISNULL(Description, '') Description,
 	          TimeStamp,
 	          Assoc,
 	          AssocKey,
-	          Total,	
+	          ISNULL(Total, 0) Total,	
 	          Detail
           FROM vwClaypayCharges vC
-          --INNER JOIN ccCashierItem CI ON CI.ItemId = vC.ItemId
           WHERE CashierId = @CashierId
         ORDER BY TimeStamp ASC";
       var lc = Constants.Get_Data<Charge>(sql, dbArgs);
