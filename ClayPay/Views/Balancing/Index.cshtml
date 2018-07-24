@@ -12,6 +12,13 @@
 <script>
   document.addEventListener("DOMContentLoaded", function (event)
   {
-    console.log(Utilities.Get("//API/Balancing/Get"));
+    var daysToSubtract = 1;
+    var yesterday = new Date();
+    if (yesterday.getDay() === 2)
+    {
+      daysToSubtract = 5;
+    }
+    yesterday.setDate(yesterday.getDate() - daysToSubtract);
+    console.log(Utilities.Get("../API/Balancing/Get?DateToBalance=" + yesterday.toDateString()));
   });
 </script>

@@ -19,6 +19,7 @@ namespace ClayPay.Models.Balancing
 
     public DJournal(DateTime dateToProcess, bool finalize = false, string NTUser = "")
     {
+      //check for dates not finalized after initial finalize date
       this.ProcessedPaymentTotals = CashierTotal.ProcessPaymentTypeTotals(dateToProcess);
       this.GUTotals = CashierTotal.GetGUTotals(dateToProcess);
       this.GLAccountTotals = Account.GetGLAccountTotals(dateToProcess);
@@ -49,5 +50,10 @@ namespace ClayPay.Models.Balancing
       }
     }
 
+
+    public void getDatesNotFinalized()
+    {
+      
+    }
   }
 }

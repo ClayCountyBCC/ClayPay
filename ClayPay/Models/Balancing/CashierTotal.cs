@@ -45,9 +45,7 @@ namespace ClayPay.Models.Balancing
       dbArgs.Add("@DateToBalance", DateToBalance);
 
       var sql = @"
-        USE WATSC;
-        
-        --SELECT * CashierIds FROM DATE
+       --SELECT * CashierIds FROM DATE
         WITH CashierIdsToBalance (CashierId) AS (
         SELECT CashierId
         FROM dbo.ccCashier C
@@ -62,7 +60,7 @@ namespace ClayPay.Models.Balancing
         )
 
         -- CREATE TMP TABLE TO BE ABLE TO MERGE ALL TOTALS TO ONE WORKABLE TABLE
-        SELECT Narrative PaymentType, AmtApplied TotalAmount FROM 
+        SELECT Narrative Type, AmtApplied TotalAmount FROM 
           
           (
           -- GET TOTAL AMOUNT OF CHARGES FOR BALANCING 
@@ -73,8 +71,8 @@ namespace ClayPay.Models.Balancing
               'Total Charges' Narrative,
               SUM(total) AmtApplied,
               'AA' CdType
-            FROM cccashieritem
-            INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
+            FROM cccashieritem C
+            INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
 
           UNION
 
@@ -84,7 +82,7 @@ namespace ClayPay.Models.Balancing
              SELECT PmtType, AmtApplied
              FROM  ccCashierPayment CP
              LEFT OUTER join ccCashier C ON C.OTId = CP.OTid
-             INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
+             INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
            ) AS TempAllPayments
            RIGHT OUTER JOIN ccLookUp L ON LEFT(TempAllPayments.PmtType,5) = LEFT(L.CODE,5)
            WHERE L.CdType IN ('SPECIALPT','PMTTYPE')
@@ -100,7 +98,7 @@ namespace ClayPay.Models.Balancing
               'ZB'CdType
             FROM ccCashierPayment CP
             INNER JOIN ccCashier C ON C.OTId = CP.OTid
-            INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
+            INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
               AND PmtType IN ('CK', 'CA')
          
             UNION   
@@ -113,7 +111,7 @@ namespace ClayPay.Models.Balancing
               'ZC' CdType
             FROM ccCashierPayment CP
             INNER JOIN ccCashier C ON C.OTId = CP.OTid
-            INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
+            INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
               AND PmtType IN ('CK', 'CA')
          
             UNION   
@@ -126,7 +124,7 @@ namespace ClayPay.Models.Balancing
               'ZD' CdType
             FROM ccCashierPayment CP
             INNER JOIN ccCashier C ON CP.OTid = C.OTid
-            INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
+            INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
 
         ) AS TMP
         ORDER BY CdType, SortKey; --THIS ALLOWS FOR THE DATA TO BE IN THE SAME ORDER AS IT IS CURRENTLY
@@ -135,7 +133,8 @@ namespace ClayPay.Models.Balancing
        ";
       try
       {
-        return Constants.Get_Data<CashierTotal>(sql, dbArgs);
+        var casheirtotals = Constants.Get_Data<CashierTotal>(sql, dbArgs);
+        return casheirtotals;
       }
       catch (Exception ex)
       {
@@ -175,7 +174,8 @@ namespace ClayPay.Models.Balancing
       try
       {
 
-        return Constants.Get_Data<CashierTotal>(sql, dbArgs);
+        var guTotals = Constants.Get_Data<CashierTotal>(sql, dbArgs);
+        return guTotals;
       }
       catch (Exception ex)
       {

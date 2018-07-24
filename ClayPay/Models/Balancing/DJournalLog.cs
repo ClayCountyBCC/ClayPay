@@ -64,7 +64,8 @@ namespace ClayPay.Models.Balancing
         ";
       try
       {
-        return Constants.Get_Data<DJournalLog>(sql, param).DefaultIfEmpty(new DJournalLog()).First();
+      var l = Constants.Get_Data<DJournalLog>(sql, param).First();
+        return l;
       }
       catch (Exception ex)
       {
