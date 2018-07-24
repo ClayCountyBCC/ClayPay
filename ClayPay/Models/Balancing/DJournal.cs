@@ -8,7 +8,7 @@ using System.Web;
 using Dapper;
 
 namespace ClayPay.Models.Balancing
-{
+{ 
   public class DJournal
   {
     public List<CashierTotal> ProcessedPaymentTotals { get; set; }
