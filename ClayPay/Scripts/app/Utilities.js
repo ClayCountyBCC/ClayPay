@@ -209,7 +209,7 @@ var Utilities;
     }
     Utilities.Format_Amount = Format_Amount;
     function Format_Date(date) {
-        return date.toLocaleString('en-US', { timeZone: 'EST' });
+        return new Date(date).toLocaleString('en-US');
     }
     Utilities.Format_Date = Format_Date;
     function Validate_Text(e, errorElementId, errorText) {

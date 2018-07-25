@@ -63,6 +63,7 @@ namespace ClayPay.Models.Claypay
         }
       }
     }
+    public string CheckNumber { get; set; } = "";
     public string TransactionId { get; set; } = "";
 
     public bool IsFinalized { get; set; } = false;

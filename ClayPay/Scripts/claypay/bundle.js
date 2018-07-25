@@ -943,7 +943,7 @@ var Utilities;
     }
     Utilities.Format_Amount = Format_Amount;
     function Format_Date(date) {
-        return date.toLocaleString('en-US', { timeZone: 'EST' });
+        return new Date(date).toLocaleString('en-US');
     }
     Utilities.Format_Date = Format_Date;
     function Validate_Text(e, errorElementId, errorText) {
@@ -1099,15 +1099,15 @@ var clayPay;
             let thead = document.createElement("THEAD");
             let tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableHeaderElement("Key", "20%"));
-            tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "40%"));
             if (view !== ChargeView.receipt) {
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "40%"));
                 tr.appendChild(clayPay.UI.createTableHeaderElement("Date", "15%"));
                 tr.appendChild(clayPay.UI.createTableHeaderElement("Amount", "15%"));
                 tr.appendChild(clayPay.UI.createTableHeaderElement("", "10%"));
             }
             else {
-                tr.appendChild(clayPay.UI.createTableHeaderElement("Date", "20%"));
-                tr.appendChild(clayPay.UI.createTableHeaderElement("Amount", "20%"));
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "50%"));
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Amount", "30%"));
             }
             thead.appendChild(tr);
             table.appendChild(thead);
@@ -1140,8 +1140,8 @@ var clayPay;
             //  1. Total Charges
             let df = document.createDocumentFragment();
             let trTotal = document.createElement("tr");
-            trTotal.appendChild(clayPay.UI.createTableElement("", "", 2));
-            trTotal.appendChild(clayPay.UI.createTableElement("Total", "has-text-weight-bold", 1));
+            trTotal.appendChild(clayPay.UI.createTableElement("", "", view === ChargeView.receipt ? 1 : 2));
+            trTotal.appendChild(clayPay.UI.createTableElement("Total", "has-text-weight-bold has-text-right", 1));
             let TotalAmount = charges.reduce((total, b) => {
                 return total + b.Total;
             }, 0);
@@ -1150,7 +1150,9 @@ var clayPay;
                 trTotal.appendChild(Charge.createAddAllChargesToCartButton());
             }
             else {
-                trTotal.appendChild(clayPay.UI.createTableElement("", "", 1));
+                if (view !== ChargeView.receipt) {
+                    trTotal.appendChild(clayPay.UI.createTableElement("", "", 1));
+                }
             }
             df.appendChild(trTotal);
             switch (view) {
@@ -1178,7 +1180,9 @@ var clayPay;
             let tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableElement(charge.AssocKey));
             tr.appendChild(clayPay.UI.createTableElement(charge.Description, "left"));
-            tr.appendChild(clayPay.UI.createTableElement(charge.TimeStampDisplay, "center"));
+            if (view !== ChargeView.receipt) {
+                tr.appendChild(clayPay.UI.createTableElement(charge.TimeStampDisplay, "center"));
+            }
             tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(charge.Total), "center"));
             if (view !== ChargeView.receipt) {
                 tr.appendChild(Charge.createChargeCartButtonToggle("Add to Cart", charge.ItemId, "center", true));
@@ -1653,19 +1657,35 @@ var clayPay;
             this.AmountTendered = -1;
             this.ChangeDue = -1;
             this.ConvenienceFeeAmount = -1;
+            this.CheckNumber = "";
+            this.TransactionId = "";
         }
-        CreateReceiptPaymentView(receipts) {
+        static CreateReceiptPaymentView(receipts) {
             let df = document.createDocumentFragment();
+            let table = ReceiptPayment.CreateTable();
+            let tbody = document.createElement("TBODY");
+            for (let receipt of receipts) {
+                let transaction = receipt.CheckNumber.length > 0 ? receipt.CheckNumber : receipt.TransactionId;
+                tbody.appendChild(ReceiptPayment.BuildPaymentRow(receipt.PaymentTypeDescription, receipt.Info, transaction, receipt.AmountTendered, receipt.AmountApplied));
+            }
             // Here we handle Change Due and Convenience fees.
             // We'll add a row for each of them that are > 0
             let changeDueTmp = receipts.filter(function (j) { return j.ChangeDue > 0; });
             let TotalChangeDue = changeDueTmp.reduce((ChangeDue, b) => {
                 return ChangeDue + b.ChangeDue;
             }, 0);
+            if (TotalChangeDue > 0) {
+                tbody.appendChild(ReceiptPayment.BuildPaymentRow("Total Change Due", "", "", TotalChangeDue, 0));
+            }
             let convenienceFeeTmp = receipts.filter(function (j) { return j.ConvenienceFeeAmount > 0; });
             let TotalConvenienceFee = convenienceFeeTmp.reduce((ConvenienceFeeAmount, b) => {
                 return ConvenienceFeeAmount + b.ConvenienceFeeAmount;
             }, 0);
+            if (TotalConvenienceFee > 0) {
+                tbody.appendChild(ReceiptPayment.BuildPaymentRow("Convenience Fee Estimate", "", "", TotalConvenienceFee, 0));
+            }
+            table.appendChild(tbody);
+            df.appendChild(table);
             return df;
         }
         static CreateTable() {
@@ -1675,22 +1695,23 @@ var clayPay;
             table.classList.add("is-fullwidth");
             let thead = document.createElement("THEAD");
             let tr = document.createElement("tr");
-            tr.appendChild(clayPay.UI.createTableHeaderElement("Payment Type", "20%"));
-            tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "40%"));
-            //if (view !== ChargeView.receipt)
-            //{
-            //  tr.appendChild(UI.createTableHeaderElement("Date", "15%"));
-            //  tr.appendChild(UI.createTableHeaderElement("Amount", "15%"));
-            //  tr.appendChild(UI.createTableHeaderElement("", "10%"));
-            //}
-            //else
-            //{
-            //  tr.appendChild(UI.createTableHeaderElement("Date", "20%"));
-            //  tr.appendChild(UI.createTableHeaderElement("Amount", "20%"));
-            //}
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Payment Type", "15%"));
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Info", "35%"));
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Check/Trans#", "20%"));
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Tendered", "15%"));
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Applied", "15%"));
             thead.appendChild(tr);
             table.appendChild(thead);
             return table;
+        }
+        static BuildPaymentRow(paymentType, info, checkNumber, tendered, applied) {
+            let tr = document.createElement("tr");
+            tr.appendChild(clayPay.UI.createTableElement(paymentType));
+            tr.appendChild(clayPay.UI.createTableElement(info));
+            tr.appendChild(clayPay.UI.createTableElement(checkNumber));
+            tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(tendered)));
+            tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(applied)));
+            return tr;
         }
     }
     clayPay.ReceiptPayment = ReceiptPayment;
@@ -1712,30 +1733,16 @@ var clayPay;
             let container = document.getElementById(ClientResponse.ReceiptContainer);
             Utilities.Clear_Element(container);
             container.appendChild(ClientResponse.CreateReceiptView(cr));
-            //if (cr.PartialErrors.length > 0)
-            //{
-            //  Utilities.Error_Show(ClientResponse.ReceiptErrorContainer, cr.PartialErrors, false);
-            //}
-            //if (cr.TransactionId.trim().length > 0)
-            //{
-            //  Utilities.Show(ClientResponse.TransactionIdContainer);
-            //} else
-            //{
-            //  Utilities.Hide(ClientResponse.TransactionIdContainer);
-            //}
-            //Utilities.Set_Value(ClientResponse.TransactionId, cr.TransactionId);
-            //Utilities.Set_Text(ClientResponse.TimeStampInput, cr.TimeStamp);
-            //Utilities.Set_Value(ClientResponse.CashierIdInput, cr.CashierId);
-            //Utilities.Set_Value(ClientResponse.AmountPaidInput, Utilities.Format_Amount(cr.AmountPaid));
-            //Utilities.Set_Value(ClientResponse.ChangeDueInput, Utilities.Format_Amount(cr.ChangeDue));
-            // this needs to hide all of the other sections and just show the receipt.
             Utilities.Show_Hide_Selector("#views > section", ClientResponse.ReceiptContainer);
         }
         static CreateReceiptView(cr) {
             let df = document.createDocumentFragment();
+            if (cr.ReceiptPayments.length === 0)
+                return df;
             df.appendChild(ClientResponse.CreateReceiptHeader(cr));
-            df.appendChild(clayPay.Charge.CreateChargesTable(cr.Charges, clayPay.ChargeView.receipt));
             df.appendChild(ClientResponse.CreateReceiptPayerView(cr.ResponseCashierData));
+            df.appendChild(clayPay.Charge.CreateChargesTable(cr.Charges, clayPay.ChargeView.receipt));
+            df.appendChild(clayPay.ReceiptPayment.CreateReceiptPaymentView(cr.ReceiptPayments));
             // show payment info
             return df;
         }
@@ -1746,11 +1753,12 @@ var clayPay;
             title.classList.add("level-item");
             title.classList.add("title");
             title.appendChild(document.createTextNode("Payment Receipt for: " + cr.ReceiptPayments[0].CashierId));
-            div.appendChild(title);
             let receiptDate = document.createElement("span");
             receiptDate.classList.add("level-item");
             receiptDate.classList.add("subtitle");
-            receiptDate.appendChild(document.createTextNode(Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
+            receiptDate.appendChild(document.createTextNode("Transaction Date: " + Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
+            div.appendChild(title);
+            div.appendChild(receiptDate);
             let timestamp = cr.ResponseCashierData.TransactionDate;
             return div;
         }
@@ -1758,8 +1766,8 @@ var clayPay;
             let df = document.createDocumentFragment();
             df.appendChild(ClientResponse.CreatePayerDataColumns("Name", cd.PayerName, "Company Name", cd.PayerCompanyName));
             df.appendChild(ClientResponse.CreatePayerDataColumns("Phone Number", cd.PayerPhoneNumber, "Email Address", cd.PayerEmailAddress));
-            df.appendChild(ClientResponse.CreatePayerDataColumns("Street Address", cd.PayerStreet1, "Processed By", cd.UserName));
-            df.appendChild(ClientResponse.CreatePayerDataColumns("Address 2", cd.PayerStreet2, "", ""));
+            df.appendChild(ClientResponse.CreatePayerDataColumns("Street Address", cd.PayerStreet1, "Address 2", cd.PayerStreet2));
+            df.appendChild(ClientResponse.CreatePayerDataColumns("Processed By", cd.UserName, "", ""));
             return df;
         }
         static CreatePayerDataColumns(label1, value1, label2, value2) {
@@ -1839,7 +1847,7 @@ var clayPay;
     ClientResponse.receiptSearchError = "receiptSearchError";
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=clientresponse.js.map
+//# sourceMappingURL=ClientResponse.js.map
 /// <reference path="payment.ts" />
 /// <reference path="clientresponse.ts" />
 var clayPay;
@@ -2005,7 +2013,7 @@ var clayPay;
     NewTransaction.paymentError = "paymentError";
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=newtransaction.js.map
+//# sourceMappingURL=NewTransaction.js.map
 var clayPay;
 (function (clayPay) {
     class AppType {
@@ -2629,4 +2637,4 @@ var clayPay;
         UI.ShowPaymentMethod = ShowPaymentMethod;
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map

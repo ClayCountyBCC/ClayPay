@@ -40,33 +40,18 @@ namespace clayPay
       let container = document.getElementById(ClientResponse.ReceiptContainer);
       Utilities.Clear_Element(container);
       container.appendChild(ClientResponse.CreateReceiptView(cr));
-      
-      //if (cr.PartialErrors.length > 0)
-      //{
-      //  Utilities.Error_Show(ClientResponse.ReceiptErrorContainer, cr.PartialErrors, false);
-      //}
-      //if (cr.TransactionId.trim().length > 0)
-      //{
-      //  Utilities.Show(ClientResponse.TransactionIdContainer);
-      //} else
-      //{
-      //  Utilities.Hide(ClientResponse.TransactionIdContainer);
-      //}
-      //Utilities.Set_Value(ClientResponse.TransactionId, cr.TransactionId);
-      //Utilities.Set_Text(ClientResponse.TimeStampInput, cr.TimeStamp);
-      //Utilities.Set_Value(ClientResponse.CashierIdInput, cr.CashierId);
-      //Utilities.Set_Value(ClientResponse.AmountPaidInput, Utilities.Format_Amount(cr.AmountPaid));
-      //Utilities.Set_Value(ClientResponse.ChangeDueInput, Utilities.Format_Amount(cr.ChangeDue));
-      // this needs to hide all of the other sections and just show the receipt.
+
       Utilities.Show_Hide_Selector("#views > section", ClientResponse.ReceiptContainer);
     }
 
     private static CreateReceiptView(cr: ClientResponse): DocumentFragment
-    {
+    {      
       let df = document.createDocumentFragment();
+      if (cr.ReceiptPayments.length === 0) return df;
       df.appendChild(ClientResponse.CreateReceiptHeader(cr));
-      df.appendChild(Charge.CreateChargesTable(cr.Charges, ChargeView.receipt));
       df.appendChild(ClientResponse.CreateReceiptPayerView(cr.ResponseCashierData));
+      df.appendChild(Charge.CreateChargesTable(cr.Charges, ChargeView.receipt));
+      df.appendChild(ReceiptPayment.CreateReceiptPaymentView(cr.ReceiptPayments));
       // show payment info
       return df;
     }
@@ -79,11 +64,14 @@ namespace clayPay
       title.classList.add("level-item");
       title.classList.add("title");
       title.appendChild(document.createTextNode("Payment Receipt for: " + cr.ReceiptPayments[0].CashierId));
-      div.appendChild(title);
+      
       let receiptDate = document.createElement("span");
       receiptDate.classList.add("level-item");
       receiptDate.classList.add("subtitle");
-      receiptDate.appendChild(document.createTextNode(Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
+      receiptDate.appendChild(document.createTextNode("Transaction Date: " + Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
+
+      div.appendChild(title);
+      div.appendChild(receiptDate);
       let timestamp = cr.ResponseCashierData.TransactionDate
       return div;
     }
@@ -93,8 +81,8 @@ namespace clayPay
       let df = document.createDocumentFragment();
       df.appendChild(ClientResponse.CreatePayerDataColumns("Name", cd.PayerName, "Company Name", cd.PayerCompanyName));
       df.appendChild(ClientResponse.CreatePayerDataColumns("Phone Number", cd.PayerPhoneNumber, "Email Address", cd.PayerEmailAddress));
-      df.appendChild(ClientResponse.CreatePayerDataColumns("Street Address", cd.PayerStreet1, "Processed By", cd.UserName));
-      df.appendChild(ClientResponse.CreatePayerDataColumns("Address 2", cd.PayerStreet2, "", ""));
+      df.appendChild(ClientResponse.CreatePayerDataColumns("Street Address", cd.PayerStreet1, "Address 2", cd.PayerStreet2));
+      df.appendChild(ClientResponse.CreatePayerDataColumns("Processed By", cd.UserName, "", ""));
       return df;
     }
 

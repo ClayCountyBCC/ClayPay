@@ -20,15 +20,15 @@ var clayPay;
             let thead = document.createElement("THEAD");
             let tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableHeaderElement("Key", "20%"));
-            tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "40%"));
             if (view !== ChargeView.receipt) {
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "40%"));
                 tr.appendChild(clayPay.UI.createTableHeaderElement("Date", "15%"));
                 tr.appendChild(clayPay.UI.createTableHeaderElement("Amount", "15%"));
                 tr.appendChild(clayPay.UI.createTableHeaderElement("", "10%"));
             }
             else {
-                tr.appendChild(clayPay.UI.createTableHeaderElement("Date", "20%"));
-                tr.appendChild(clayPay.UI.createTableHeaderElement("Amount", "20%"));
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "50%"));
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Amount", "30%"));
             }
             thead.appendChild(tr);
             table.appendChild(thead);
@@ -61,8 +61,8 @@ var clayPay;
             //  1. Total Charges
             let df = document.createDocumentFragment();
             let trTotal = document.createElement("tr");
-            trTotal.appendChild(clayPay.UI.createTableElement("", "", 2));
-            trTotal.appendChild(clayPay.UI.createTableElement("Total", "has-text-weight-bold", 1));
+            trTotal.appendChild(clayPay.UI.createTableElement("", "", view === ChargeView.receipt ? 1 : 2));
+            trTotal.appendChild(clayPay.UI.createTableElement("Total", "has-text-weight-bold has-text-right", 1));
             let TotalAmount = charges.reduce((total, b) => {
                 return total + b.Total;
             }, 0);
@@ -71,7 +71,9 @@ var clayPay;
                 trTotal.appendChild(Charge.createAddAllChargesToCartButton());
             }
             else {
-                trTotal.appendChild(clayPay.UI.createTableElement("", "", 1));
+                if (view !== ChargeView.receipt) {
+                    trTotal.appendChild(clayPay.UI.createTableElement("", "", 1));
+                }
             }
             df.appendChild(trTotal);
             switch (view) {
@@ -99,7 +101,9 @@ var clayPay;
             let tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableElement(charge.AssocKey));
             tr.appendChild(clayPay.UI.createTableElement(charge.Description, "left"));
-            tr.appendChild(clayPay.UI.createTableElement(charge.TimeStampDisplay, "center"));
+            if (view !== ChargeView.receipt) {
+                tr.appendChild(clayPay.UI.createTableElement(charge.TimeStampDisplay, "center"));
+            }
             tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(charge.Total), "center"));
             if (view !== ChargeView.receipt) {
                 tr.appendChild(Charge.createChargeCartButtonToggle("Add to Cart", charge.ItemId, "center", true));
