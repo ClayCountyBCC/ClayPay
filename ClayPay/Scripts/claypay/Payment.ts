@@ -20,20 +20,27 @@ namespace clayPay
 
   interface IPayment
   {
+    Editable: boolean;
+    TransactionDate: Date;
     PaymentType: payment_type;
     Amount: number;
     CheckNumber: string;
     TransactionId: string;
     Validated: boolean;
+    Error: string
   }
 
   export class Payment implements IPayment
   {
+    public Editable: boolean = false;
+    public TransactionDate: Date;
     public PaymentType: payment_type;
     public Amount: number = 0;
     public CheckNumber: string = "";
     public TransactionId: string = "";
     public Validated: boolean = false;
+    public Error: string = "";
+
     static checkErrorElement: string = "checkPaymentError";
     static checkAmountInput: string = "checkPaymentAmount";
     static checkNumberInput: string = "checkNumber";

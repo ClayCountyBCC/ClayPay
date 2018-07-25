@@ -58,13 +58,13 @@ namespace ClayPay.Models.Balancing
             SELECT 
               djournal_date, 
               created_on, 
-              created_by,
+              created_by
             FROM ccDJournalTransactionLog
             WHERE CAST(djournal_date AS DATE) = CAST(@DateToGet AS DATE)
         ";
       try
       {
-      var l = Constants.Get_Data<DJournalLog>(sql, param).First();
+      var l = Constants.Get_Data<DJournalLog>(sql, param).DefaultIfEmpty(new DJournalLog()).First();
         return l;
       }
       catch (Exception ex)

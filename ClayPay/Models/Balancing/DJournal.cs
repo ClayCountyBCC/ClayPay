@@ -51,9 +51,14 @@ namespace ClayPay.Models.Balancing
     }
 
 
-    public void getDatesNotFinalized()
+    public static DateTime NextDateToFinalize()
     {
-      
+      var sql = @"
+        SELECT CAST(DATEADD(dd,1,MAX(djournal_date)) AS DATE)
+        FROM ccDjournalTransactionLog
+        WHERE CAST(djournal_date AS DATE) < CAST(GETDATE() AS DATE)
+      ";
+      return Constants.Get_Data<DateTime>(sql).DefaultIfEmpty( DateTime.MaxValue).First();
     }
   }
 }

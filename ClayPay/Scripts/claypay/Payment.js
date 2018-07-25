@@ -16,10 +16,12 @@ var clayPay;
     })(payment_type = clayPay.payment_type || (clayPay.payment_type = {}));
     class Payment {
         constructor(paymentType) {
+            this.Editable = false;
             this.Amount = 0;
             this.CheckNumber = "";
             this.TransactionId = "";
             this.Validated = false;
+            this.Error = "";
             this.PaymentType = paymentType;
         }
         UpdateTotal() {

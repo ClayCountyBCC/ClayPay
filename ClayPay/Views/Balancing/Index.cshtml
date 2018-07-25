@@ -6,19 +6,29 @@
 }
 
 <h2>Index</h2>
-<script src="~/bower_components/promise-polyfill/dist/polyfill.min.js"></script>
-<script src="~/bower_components/fetch/fetch.js"></script>
-<script src="~/Scripts/app/Utilities.js"></script>
+<script src="~/Scripts/claypay/bundle.js"></script>
+
+@*<script src="~/bower_components/promise-polyfill/dist/polyfill.min.js"></script>
+  <script src="~/bower_components/fetch/fetch.js"></script>
+  <script src="~/Scripts/app/Utilities.js"></script>
+  <script src="~/Scripts/claypay/UI.js"></script>
+  <script src="~/Scripts/claypay/Charge.js"></script>
+  <script src="~/Scripts/claypay/AppTypes.js"></script>
+  <script src="~/Scripts/claypay/Payment.js"></script>
+  <script src="~/Scripts/claypay/CCPayment.js"></script>
+  <script src="~/Scripts/claypay/NewTransaction.js"></script>
+  <script src="~/Scripts/claypay/claypay.js"></script>*@
 <script>
   document.addEventListener("DOMContentLoaded", function (event)
   {
-    var daysToSubtract = 1;
-    var yesterday = new Date();
-    if (yesterday.getDay() === 2)
-    {
-      daysToSubtract = 5;
-    }
-    yesterday.setDate(yesterday.getDate() - daysToSubtract);
-    console.log(Utilities.Get("../API/Balancing/Get?DateToBalance=" + yesterday.toDateString()));
+    var yesterday = new Date("2018-7-19");
+    
+    var i = Utilities.Get("../API/Balancing/Get?DateToBalance=" + yesterday.toLocaleDateString());
+    // Had to use literal for payment type for testing. Cannot seem to reference Payment.js. 
+    // It is in bundle as shown above but doesn't seem to let me reference it. 
+    var j = Utilities.Get("../API/Balancing/GetPayments?DateToBalance=" + yesterday.toLocaleDateString() + "&PaymentType=" + "1"); 
+
+    console.log(i);
+    console.log(j);
   });
 </script>

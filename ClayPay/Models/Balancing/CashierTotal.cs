@@ -127,6 +127,7 @@ namespace ClayPay.Models.Balancing
             INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
 
         ) AS TMP
+        WHERE AmtApplied > 0 AND AmtApplied IS NOT NULL
         ORDER BY CdType, SortKey; --THIS ALLOWS FOR THE DATA TO BE IN THE SAME ORDER AS IT IS CURRENTLY
                                   -- SOLELY FOR CONTINUITY. THE ACTUAL LAYOUT MAY CHANGE BASED ON MOCKUP
 

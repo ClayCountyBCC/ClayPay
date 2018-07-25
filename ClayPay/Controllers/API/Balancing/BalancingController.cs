@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Results;
+using ClayPay.Models.Claypay;
 using ClayPay.Models.Balancing;
 using ClayPay.Models;
 
@@ -65,6 +66,22 @@ namespace ClayPay.Controllers
       }
     }
 
+    [HttpGet]
+    [Route("GetPayments")]
+    public IHttpActionResult Get(DateTime DateToBalance, Models.Claypay.Payment.payment_type PaymentType)
+    {
+      try
+      {
+        var dj = Models.Balancing.Payment.GetPayments(DateToBalance, PaymentType, new UserAccess(User.Identity.Name));
+        return Ok(dj);
+      }
+      catch (Exception ex)
+      {
+        Constants.Log(ex);
+        return InternalServerError();
+      }
+    }
+
     [HttpPost]
     [Route("Save")]
     public IHttpActionResult Save(DateTime DateToFinalize)
@@ -96,5 +113,27 @@ namespace ClayPay.Controllers
       }
     }
 
+    [HttpPut]
+    [Route("AssignOnlinePayment")]
+    public IHttpActionResult Put(string CashierId)
+    {
+      return Ok(AssignedOnlinePayment.AssignPaymentToUser(CashierId, User.Identity.Name));
+    }
+
+    [HttpGet]
+    [Route("UnassagnedPayments")]
+    public IHttpActionResult Get()
+    {
+      var p = AssignedOnlinePayment.Get();
+      if (p != null)
+      {
+        return Ok(p);
+      }
+      else
+      {
+
+        return Ok(p);
+      }
+    }
   }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Dapper;
-namespace ClayPay.Models.Claypay
+namespace ClayPay.Models.Balancing
 {
   public class AssignedOnlinePayment
   {
@@ -12,7 +12,6 @@ namespace ClayPay.Models.Claypay
     public DateTime TransactionDate { get; set; }
     public string AssignedTo { get; set; }
     public DateTime DateAssigned { get; set; }
-
 
     public AssignedOnlinePayment()
     {
@@ -33,9 +32,8 @@ namespace ClayPay.Models.Claypay
           CP.AmtTendered AmountTendered,
           CP.TransactionId
         FROM ccOnlineccPaymentsToProcess CCO
-        INNER JOIN ccCashierItem CI ON CI.CashierId = CCO.CashierId
         INNER JOIN ccCashierPayment CP CI.Otid = CP.OTid
-        INNER JOIN ccCashier C ON C.OTid = CP.OTid
+        INNER JOIN ccCashier C ON C.OTid = CP.OTid AND CP.CashierId = C.CashierId
         WHERE CCO.DateAssigned > DATEADD(HOUR,-24,GETDATE())
           AND DateAssigned IS NULL
            ";
