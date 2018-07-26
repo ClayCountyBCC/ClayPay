@@ -83,15 +83,14 @@ namespace ClayPay.Controllers
     }
 
     [HttpPost]
-    [Route("Save")]
-    public IHttpActionResult Save(DateTime DateToFinalize)
+    [Route("Finalize")]
+    public IHttpActionResult Post(DateTime DateToFinalize)
     {
       try
       {
-        var finalize = DateToFinalize.Date < DateTime.Now.Date;
         var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
-        finalize = ua.djournal_access;
+        var finalize = ua.djournal_access && DateToFinalize.Date < DateTime.Now.Date;
         var dj = new DJournal(DateToFinalize, finalize, User.Identity.Name);
 
         if(ua.djournal_access == false)
@@ -113,15 +112,8 @@ namespace ClayPay.Controllers
       }
     }
 
-    [HttpPut]
-    [Route("AssignOnlinePayment")]
-    public IHttpActionResult Put(string CashierId)
-    {
-      return Ok(AssignedOnlinePayment.AssignPaymentToUser(CashierId, User.Identity.Name));
-    }
-
     [HttpGet]
-    [Route("UnassagnedPayments")]
+    [Route("UnassignedPayments")]
     public IHttpActionResult Get()
     {
       var p = AssignedOnlinePayment.Get();
@@ -135,5 +127,14 @@ namespace ClayPay.Controllers
         return Ok(p);
       }
     }
+
+    [HttpPost]
+    [Route("AssignPayment")]
+    public IHttpActionResult Post(string CashierId)
+    {
+      return Ok(AssignedOnlinePayment.AssignPaymentToUser(CashierId, User.Identity.Name));
+    }
+
+
   }
 }

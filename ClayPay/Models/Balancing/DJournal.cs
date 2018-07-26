@@ -23,8 +23,16 @@ namespace ClayPay.Models.Balancing
       this.ProcessedPaymentTotals = CashierTotal.ProcessPaymentTypeTotals(dateToProcess);
       this.GUTotals = CashierTotal.GetGUTotals(dateToProcess);
       this.GLAccountTotals = Account.GetGLAccountTotals(dateToProcess);
+      var TotalGUChargeAmount = CashierTotal.GetChargeTotal(dateToProcess);
+      var guAmount = GUTotals[0].TotalAmount;
+      if(guAmount != TotalGUChargeAmount)
+      {
+        var keys = String.Join(", \n", CashierTotal.GetOutOfBalanceCashierIds(dateToProcess));
+        Error.Add("Out of balance. The following keys have issues:\n" + keys);
+      }
+
       this.GetLog(dateToProcess);
-      if (finalize)
+      if (finalize && Error.Count() == 0)
       {
         if (this.Log != null)
         {
@@ -58,7 +66,7 @@ namespace ClayPay.Models.Balancing
         FROM ccDjournalTransactionLog
         WHERE CAST(djournal_date AS DATE) < CAST(GETDATE() AS DATE)
       ";
-      return Constants.Get_Data<DateTime>(sql).DefaultIfEmpty( DateTime.MaxValue).First();
+      return Constants.Get_Data<DateTime>(sql).DefaultIfEmpty( DateTime.Now.Date).First();
     }
   }
 }

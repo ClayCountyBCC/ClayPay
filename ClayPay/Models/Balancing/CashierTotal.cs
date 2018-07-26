@@ -9,11 +9,11 @@ namespace ClayPay.Models.Balancing
   public class CashierTotal
   {
     public string Type { get; set; }
-    public double TotalAmount { get; set; }
+    public decimal TotalAmount { get; set; }
 
     public CashierTotal()
     {
-      
+
     }
 
     public static List<CashierTotal> ProcessPaymentTypeTotals(DateTime DateToBalance)
@@ -185,5 +185,63 @@ namespace ClayPay.Models.Balancing
       }
     }
 
+    public static decimal GetChargeTotal(DateTime DateToBalance)
+    {
+      var param = new DynamicParameters();
+      param.Add("@DateToBalance", DateToBalance);
+
+      var query = @"
+        USE WATSC;
+
+        DECLARE @DateToBalance date = DATEADD(dd,-1,CAST(GETDATE()AS DATE));
+        WITH CashierIdsToBalance (CashierId) AS (
+          SELECT DISTINCT
+            C.CashierId
+          FROM ccCashier C
+          INNER JOIN ccCashierPayment CP ON CP.OTid = C.OTId
+          INNER JOIN ccLookUp L ON UPPER(LEFT(L.CODE,5)) = UPPER(LEFT(CP.PMTTYPE,5)) AND L.CdType='PMTTYPE'
+          WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE))
+            
+          SELECT
+        SUM(total)
+        FROM cccashieritem C
+        INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
+        ";
+
+      var i = Constants.Get_Data<decimal>(query, param).DefaultIfEmpty(0).First();
+      return i;
+    }
+
+    public static List<string> GetOutOfBalanceCashierIds(DateTime dateToBalance)
+    {
+
+      var param = new DynamicParameters();
+      param.Add("@DateToBalance", dateToBalance);
+
+      var query = @"
+        USE WATSC;
+
+        SELECT CashierId FROM (
+        SELECT  CashierId, PmtType, Ttl, Sum(AmtApplied) AmtApplied FROM (
+        SELECT 
+          ccCashier.CashierId , 
+          ccCashierPayment.PmtType, 
+          ccCashierPayment.AmtApplied, 
+        (SELECT Sum( ccCashierPayment.AmtApplied)
+          FROM ccCashierPayment
+          WHERE ccCashierPayment.OTid = ccCashier.OTId) as Ttl
+
+        FROM ccCashierPayment 
+        INNER JOIN ccCashier ON ccCashierPayment.OTid = ccCashier.OTId
+        WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE) ) AS TMP
+        WHERE AmtApplied != Ttl
+        GROUP BY CashierId, PmtType, Ttl ) AS TMP
+        WHERE Ttl != AmtApplied
+      
+      ";
+
+      var i = Constants.Get_Data<string>(query, param);
+      return i;
+    }
   }
 }

@@ -22,13 +22,19 @@
   document.addEventListener("DOMContentLoaded", function (event)
   {
     var yesterday = new Date("2018-7-19");
-    
-    var i = Utilities.Get("../API/Balancing/Get?DateToBalance=" + yesterday.toLocaleDateString());
+    var CashierId = "18-013974";
+    //var i = Utilities.Get("../API/Balancing/Get?DateToBalance=" + yesterday.toLocaleDateString());
     // Had to use literal for payment type for testing. Cannot seem to reference Payment.js. 
     // It is in bundle as shown above but doesn't seem to let me reference it. 
-    var j = Utilities.Get("../API/Balancing/GetPayments?DateToBalance=" + yesterday.toLocaleDateString() + "&PaymentType=" + "1"); 
+    //var j = Utilities.Get("../API/Balancing/GetPayments?DateToBalance=" + yesterday.toLocaleDateString() + "&PaymentType=" + "1"); 
+    var k = Utilities.Get("../API/Balancing/Finalize?DateToFinalize=" + yesterday.toLocaleDateString());
+    var l = Utilities.Get("../API/Balancing/UnassignedPayments");
+    var m = Utilities.Get("../API/Balancing/AssignPayment?CashierId=" + CashierId);
 
-    console.log(i);
-    console.log(j);
+    //console.log(i);
+    //console.log(j);
+    console.log(k);
+    console.log(l);
+    console.log(m);
   });
 </script>

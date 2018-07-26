@@ -568,10 +568,7 @@ namespace ClayPay.Models.Claypay
           Constants.Get_ConnStr("WATSC" + (Constants.UseProduction() ? "Prod" : "QA"))))
         {
           int i = db.Execute(query, new { CashierPayment = dt.AsTableValuedParameter("CashierPayment") }, commandTimeout: 60);
-          if(i > 0 && CCData.Validated)
-          {
-            SaveCashierIdToProcessTable(TransactionCashierData.CashierId);
-          }
+
           return i > 0;
         }
       }
