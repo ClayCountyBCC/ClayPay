@@ -192,8 +192,6 @@ namespace ClayPay.Models.Balancing
 
       var query = @"
         USE WATSC;
-
-        DECLARE @DateToBalance date = DATEADD(dd,-1,CAST(GETDATE()AS DATE));
         WITH CashierIdsToBalance (CashierId) AS (
           SELECT DISTINCT
             C.CashierId
@@ -209,6 +207,7 @@ namespace ClayPay.Models.Balancing
         ";
 
       var i = Constants.Get_Data<decimal>(query, param).DefaultIfEmpty(0).First();
+      
       return i;
     }
 

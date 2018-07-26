@@ -93,7 +93,7 @@ namespace ClayPay.Controllers
         var finalize = ua.djournal_access && DateToFinalize.Date < DateTime.Now.Date;
         var dj = new DJournal(DateToFinalize, finalize, User.Identity.Name);
 
-        if(ua.djournal_access == false)
+        if(!ua.djournal_access)
         {
           dj.Error.Add("DJournal was not finalized. User does not have the correct level of access.");
 
@@ -135,6 +135,19 @@ namespace ClayPay.Controllers
       return Ok(AssignedOnlinePayment.AssignPaymentToUser(CashierId, User.Identity.Name));
     }
 
-
+    [HttpGet]
+    [Route("NextDateToFinalize")]
+    public IHttpActionResult GetNextFinalizeDate()
+    {
+      try
+      {
+        return Ok(DJournal.NextDateToFinalize());
+      }
+      catch(Exception ex)
+      {
+        Constants.Log(ex);
+        return Ok(DateTime.MinValue);
+      }
+    }
   }
 }

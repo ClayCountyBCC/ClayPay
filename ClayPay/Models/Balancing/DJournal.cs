@@ -15,7 +15,7 @@ namespace ClayPay.Models.Balancing
     public List<CashierTotal> GUTotals { get; set; }
     public List<Account> GLAccountTotals { get; set; }
     public DJournalLog Log { get; set; }
-    public List<string> Error { get; set; }
+    public List<string> Error { get; set; } = new List<string>();
 
     public DJournal(DateTime dateToProcess, bool finalize = false, string NTUser = "")
     {
@@ -25,18 +25,18 @@ namespace ClayPay.Models.Balancing
       this.GLAccountTotals = Account.GetGLAccountTotals(dateToProcess);
       var TotalGUChargeAmount = CashierTotal.GetChargeTotal(dateToProcess);
       var guAmount = GUTotals[0].TotalAmount;
-      if(guAmount != TotalGUChargeAmount)
+      if (guAmount != TotalGUChargeAmount)
       {
         var keys = String.Join(", \n", CashierTotal.GetOutOfBalanceCashierIds(dateToProcess));
         Error.Add("Out of balance. The following keys have issues:\n" + keys);
       }
 
-      this.GetLog(dateToProcess);
+      Log = DJournalLog.Get(dateToProcess);
       if (finalize && Error.Count() == 0)
       {
-        if (this.Log != null)
+        if (this.Log != null && !Log.IsCreated)
         {
-          if (DJournalLog.Create(dateToProcess, NTUser) == 1)
+          if (DJournalLog.Create(dateToProcess, NTUser) != -1)
           {
             this.Log = DJournalLog.Get(dateToProcess);
           }
@@ -44,6 +44,10 @@ namespace ClayPay.Models.Balancing
           {
             this.Error.Add($"There was an issue saving the DJournal log for {dateToProcess.ToShortDateString()}.");
           }
+        }
+        else
+        {
+          Error.Add($"{dateToProcess.ToShortDateString()} has already been finalized.");
         }
       }
     }
