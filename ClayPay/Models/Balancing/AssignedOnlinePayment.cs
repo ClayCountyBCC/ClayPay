@@ -60,8 +60,19 @@ namespace ClayPay.Models.Balancing
       }
     }
 
-    public static bool AssignPaymentToUser(string CashierId, string UserName)
+
+    public static string AssignPaymentToUser(string CashierId, string UserName)
     {
+      var cashierIdCheck = CashierIdIsAssigned(CashierId);
+      if(cashierIdCheck == CashierId)
+      {
+        return "CashierId has already been assigned.";
+      }
+      else if(cashierIdCheck.Length > 0 && cashierIdCheck != CashierId)
+      {
+        return cashierIdCheck;
+      }
+      
       var param = new DynamicParameters();
       param.Add("@CashierId", CashierId);
       param.Add("@Username", UserName.Replace("CLAYBCC\\", ""));
@@ -69,18 +80,35 @@ namespace ClayPay.Models.Balancing
       
         USE WATSC;
 
-          INSERT INTO ccOnlineccPaymentsToProcess
-          (CashierId, AssignedTo, DateAssigned)
-          VALUES
-          (@CashierId, @Username, GETDATE())
-          
-
+            INSERT INTO ccOnlineccPaymentsToProcess
+            (CashierId, AssignedTo, DateAssigned)
+            VALUES
+            (@CashierId, @Username, GETDATE())
+            
            ";
-      return Constants.Save_Data(query, param);
+      var i = Constants.Exec_Query(query, param);
+      if (i > 0)
+      {
+        return "";
+      }
+      else
+      {
+        return "There was an issue assigning the payment.";
+      }
     }
 
-    public static bool ChangeAssignedTo(string CashierId, string UserName)
+
+    public static string ChangeAssignedTo(string CashierId, string UserName)
     {
+      var cashierIdCheck = CashierIdIsAssigned(CashierId);
+      if (cashierIdCheck.Length == 0)
+      {
+        return "CashierId is has not been assigned";
+      }
+      else if (cashierIdCheck.Length > 0 && cashierIdCheck != CashierId)
+      {
+        return cashierIdCheck;
+      }
       var param = new DynamicParameters();
       param.Add("@CashierId", CashierId);
       param.Add("@Username", UserName);
@@ -89,9 +117,41 @@ namespace ClayPay.Models.Balancing
         USE WATSC;
         UPDATE ccOnlineccPaymentsToProcess
         SET DateAssigned = GETDATE(), AssignedTo = @Username
+        WHERE CashierId = @CashierId";
+
+      var i = Constants.Exec_Query(query, param);
+      if (i > 0)
+      {
+        return "";
+      }
+      else
+      {
+        return "There was an issue re-assigning the payment.";
+      }
+    }
+
+    public static string CashierIdIsAssigned(string CashierId)
+    {
+      var param = new DynamicParameters();
+      param.Add("@CashierId", CashierId);
+      var query = @"
+      
+        USE WATSC;
+        SELECT CashierId
+        FROM ccOnlineccPaymentsToProcess
         WHERE CashierId = @CashierId
-           ";
-      return Constants.Save_Data(query, param);
+        ";
+      try
+      {
+        return Constants.Get_Data<string>(query, param).DefaultIfEmpty("").First();
+
+      }
+      catch (Exception ex)
+      {
+        Constants.Log(ex, query);
+        return "Checing CashierId failed. Could not be assigned";
+      }
+
     }
   }
 }

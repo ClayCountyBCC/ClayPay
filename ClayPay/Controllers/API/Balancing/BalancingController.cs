@@ -134,6 +134,19 @@ namespace ClayPay.Controllers
       return Ok(AssignedOnlinePayment.AssignPaymentToUser(CashierId, User.Identity.Name));
     }
 
+    [HttpPost]
+    [Route("UpdateAssignedPayment")]
+    public IHttpActionResult Post(string CashierId, bool update)
+    {
+      if(update)
+      {
+        return Ok(AssignedOnlinePayment.ChangeAssignedTo(CashierId, User.Identity.Name));
+      }
+      else
+      {
+        return Ok("Could not update");
+      }
+    }
     [HttpGet]
     [Route("NextDateToFinalize")]
     public IHttpActionResult GetNextFinalizeDate()

@@ -70,6 +70,9 @@
       var m = Utilities.Post("../API/Balancing/AssignPayment?CashierId=" + CashierId);
       console.log("Assign cashierId to current user (literal for testing: 18-013974", m);
 
+      var n = Utilities.Post("../API/Balancing/UpdateAssignedPayment?CashierId=" + CashierId + "&update=" + true);
+      console.log("Assign cashierId to current user (literal for testing: 18-013974", n);
+
     }).catch(function (e)
     {
       // figure out what we want to do with the errors.
