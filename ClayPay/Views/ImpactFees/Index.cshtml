@@ -267,259 +267,297 @@
 
     <form id="formPermitAllocations">
 
-      <div class="columns">
-        <div class="column field">
-          <div class="field">
-            <label class="label">Permit Number</label>
-          </div>
-          <div class="field is-grouped">
-            <div class="control">
-              <input id="permitNumber"
-                     class="input"
-                     type="number"
-                     maxlength="8"
-                     tabindex="1"
-                     placeholder="11800000" />
-              <p class="help">Charges with a Cat Code of IFRD2 or IFRD3 will be shown.</p>
-              <p id="permitNumberLengthError"
-                 class="help is-danger hide">Permit numbers must be 8 digits.</p>
-              <p id="permitNumberNumericError"
-                 class="help is-danger hide">
-                Permit number must be numeric.
-              </p>
-            </div>
-            <div class="control">
-              <button onclick="ImpactFees.PermitAllocation.SearchPermit(); return false;"
-                      type="button"
-                      class="button is-primary">
-                Search
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="column field">
-          <div class="field">
-            <label class="label">Road Impact Fee</label>
-          </div>
-          <div class="control">
-            <input type="text"
-                   class="input"
-                   value="$0.00"
-                   readonly
-                   id="permitRoadImpactFee" />
-          </div>
-        </div>
-        <div class="column"></div>
-
+      <div class="control">
+        <label class="radio">
+          <input onchange="ImpactFees.PermitActionChange();"
+                 type="radio"
+                 value="IFCR"
+                 name="actionType" />
+          Credit
+        </label>
+        <label class="radio">
+          <input onchange="ImpactFees.PermitActionChange();"
+                 type="radio"
+                 value="IFWS"
+                 name="actionType" />
+          School Waiver
+        </label>
+        <label class="radio">
+          <input onchange="ImpactFees.PermitActionChange();"
+                 type="radio"
+                 value="IFWR"
+                 name="actionType" />
+          Waiver
+        </label>
+        <label class="radio">
+          <input onchange="ImpactFees.PermitActionChange();"
+                 type="radio"
+                 value="IFEX"
+                 name="actionType" />
+          Exemption
+        </label>
       </div>
-      <div id="permitInfo"
-           class="hide">
+
+      <div class="hide"
+           id="permitCredits">
         <div class="columns">
           <div class="column field">
-            <label class="label">Contractor #</label>
-            <div class="control">
-              <input id="permitContractorNumber"
-                     class="input"
-                     type="text"
-                     readonly />
+            <div class="field">
+              <label class="label">Permit Number</label>
             </div>
-          </div>
-
-          <div class="column field">
-            <label class="label">Contractor Name</label>
-            <div class="control">
-              <input id="permitContractorName"
-                     class="input"
-                     type="text"
-                     readonly />
-            </div>
-          </div>
-          <div class="column field">
-            <label class="label">Cashier Id</label>
-            <div class="control">
-              <input id="permitCashierId"
-                     class="input"
-                     type="text"
-                     readonly />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="permitErrorContainer"
-           class="hide">
-        <div class="field">
-          <label class="label">Permit Error - Unable to procede</label>
-          <div class="control">
-            <textarea id="permitErrorText"
-                      class="textarea"
-                      type="text"
-                      readonly>
-              </textarea>
-          </div>
-        </div>
-      </div>
-
-      <div id="permitSelectDeveloper"
-           class="hide">
-        <div class="columns">
-          <div class="field column">
-            <label class="label">Developer Agreement</label>
-            <div class="control">
-              <div class="select">
-                <select onchange="ImpactFees.PermitAllocation.LoadBuilders(this);"
-                        tabindex="2"
-                        id="permitSelectAgreement">
-                  <option>Select Agreement</option>
-                </select>
+            <div class="field is-grouped">
+              <div class="control">
+                <input id="permitNumber"
+                       class="input"
+                       type="number"
+                       maxlength="8"
+                       tabindex="1"
+                       placeholder="11800000" />
+                <p class="help">Charges with a Cat Code of IFRD2 or IFRD3 will be shown.</p>
+                <p id="permitNumberLengthError"
+                   class="help is-danger hide">Permit numbers must be 8 digits.</p>
+                <p id="permitNumberNumericError"
+                   class="help is-danger hide">
+                  Permit number must be numeric.
+                </p>
               </div>
-            </div>
-          </div>
-
-          <div class="column field">
-            <label class="label">Agreement Amount</label>
-            <div class="control">
-              <input id="permitDeveloperAmount"
-                     class="input"
-                     type="text"
-                     placeholder="$0.00"
-                     readonly />
-            </div>
-          </div>
-
-          <div class="column field">
-            <label class="label">Currently Allocated to Builders</label>
-            <div class="control">
-              <input id="permitDeveloperCurrentlyAllocated"
-                     class="input"
-                     type="text"
-                     placeholder="$0.00"
-                     readonly />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="permitBuilderContainer"
-           class="hide">
-        <div class="columns">
-          <div class="field column">
-            <label class="label">Builder</label>
-            <div class="control">
-              <div class="select">
-                <select onchange="ImpactFees.PermitAllocation.BuilderSelected(this);"
-                        tabindex="3"
-                        id="permitSelectBuilder"></select>
+              <div class="control">
+                <button onclick="ImpactFees.PermitAllocation.SearchPermit(); return false;"
+                        type="button"
+                        class="button is-primary">
+                  Search
+                </button>
               </div>
             </div>
           </div>
           <div class="column field">
-            <label class="label">Currently Allocated to this Builder</label>
-            <div class="control">
-              <input id="permitBuilderAmount"
-                     class="input"
-                     type="text"
-                     placeholder="$0.00"
-                     readonly />
+            <div class="field">
+              <label class="label">Road Impact Fee</label>
             </div>
-          </div>
-          <div class="column field">
-            <label class="label">Amount allocated to Permits</label>
             <div class="control">
-              <input id="permitBuilderCurrentlyAllocated"
+              <input type="text"
                      class="input"
-                     type="text"
-                     placeholder="$0.00"
-                     readonly />
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      <div id="permitBuilderSelected"
-           class="field hide">
-
-        <div class="columns">
-
-          <div class="column field">
-            <label class="label">Credit Amount</label>
-            <div class="control">
-              <input id="permitCreditAmount"
-                     tabindex="4"
-                     class="input"
-                     type="number"
-                     placeholder="0" />
-              <p style="display: none;"
-                 id="permitCreditAmountError"
-                 class="help is-danger">
-                The amount entered is invalid.  Please enter numbers only, and it must be greater than or equal to zero.
-              </p>
-            </div>
-          </div>
-
-          <div id="existingAgreementAmountAllocated"
-               class="column field">
-            <label class="label">Builder Allocation Remaining</label>
-            <div class="control">
-              <input id="permitBuilderAllocationRemaining"
-                     class="input"
-                     type="text"
-                     readonly />
+                     value="$0.00"
+                     readonly
+                     id="permitRoadImpactFee" />
             </div>
           </div>
           <div class="column"></div>
 
         </div>
+        <div id="permitInfo"
+             class="hide">
+          <div class="columns">
+            <div class="column field">
+              <label class="label">Contractor #</label>
+              <div class="control">
+                <input id="permitContractorNumber"
+                       class="input"
+                       type="text"
+                       readonly />
+              </div>
+            </div>
 
-        <div id="existingPermitAllocation"
-             class="field hide">
-
+            <div class="column field">
+              <label class="label">Contractor Name</label>
+              <div class="control">
+                <input id="permitContractorName"
+                       class="input"
+                       type="text"
+                       readonly />
+              </div>
+            </div>
+            <div class="column field">
+              <label class="label">Cashier Id</label>
+              <div class="control">
+                <input id="permitCashierId"
+                       class="input"
+                       type="text"
+                       readonly />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="permitErrorContainer"
+             class="hide">
           <div class="field">
-            <label class="label">Audit Log</label>
+            <label class="label">Permit Error - Unable to procede</label>
             <div class="control">
-              <textarea id="permitAllocationAuditLog"
+              <textarea id="permitErrorText"
                         class="textarea"
                         type="text"
                         readonly>
               </textarea>
             </div>
           </div>
-
         </div>
 
-        <div id="permitAllocationError"
-             class="field hide">
-          <div class="field">
-            <label class="label">Errors</label>
-            <div class="control">
-              <textarea id="permitAllocationErrorList"
-                        class="textarea"
-                        type="text"
-                        rows="4"
-                        readonly>
-                </textarea>
+        <div id="permitSelectDeveloper"
+             class="hide">
+          <div class="columns">
+            <div class="field column">
+              <label class="label">Developer Agreement</label>
+              <div class="control">
+                <div class="select">
+                  <select onchange="ImpactFees.PermitAllocation.LoadBuilders(this);"
+                          tabindex="2"
+                          id="permitSelectAgreement">
+                    <option>Select Agreement</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="column field">
+              <label class="label">Agreement Amount</label>
+              <div class="control">
+                <input id="permitDeveloperAmount"
+                       class="input"
+                       type="text"
+                       placeholder="$0.00"
+                       readonly />
+              </div>
+            </div>
+
+            <div class="column field">
+              <label class="label">Currently Allocated to Builders</label>
+              <div class="control">
+                <input id="permitDeveloperCurrentlyAllocated"
+                       class="input"
+                       type="text"
+                       placeholder="$0.00"
+                       readonly />
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="field is-grouped">
-          <div class="control">
-            <button onclick="ImpactFees.PermitAllocation.SavePermitAllocation(); return false;"
-                    type="button"
-                    tabindex="5"
-                    class="button is-primary">
-              Save Permit Allocation
-            </button>
-          </div>
-          <div class="control">
-            <button onclick="ImpactFees.PermitAllocation.Reset(); return false;"
-                    type="button"
-                    tabindex="6"
-                    class="button is-warning">
-              Clear Permit Data
-            </button>
+        <div id="permitBuilderContainer"
+             class="hide">
+          <div class="columns">
+            <div class="field column">
+              <label class="label">Builder</label>
+              <div class="control">
+                <div class="select">
+                  <select onchange="ImpactFees.PermitAllocation.BuilderSelected(this);"
+                          tabindex="3"
+                          id="permitSelectBuilder"></select>
+                </div>
+              </div>
+            </div>
+            <div class="column field">
+              <label class="label">Currently Allocated to this Builder</label>
+              <div class="control">
+                <input id="permitBuilderAmount"
+                       class="input"
+                       type="text"
+                       placeholder="$0.00"
+                       readonly />
+              </div>
+            </div>
+            <div class="column field">
+              <label class="label">Amount allocated to Permits</label>
+              <div class="control">
+                <input id="permitBuilderCurrentlyAllocated"
+                       class="input"
+                       type="text"
+                       placeholder="$0.00"
+                       readonly />
+              </div>
+            </div>
           </div>
         </div>
+
+        <div id="permitBuilderSelected"
+             class="field hide">
+
+          <div class="columns">
+
+            <div class="column field">
+              <label class="label">Credit Amount</label>
+              <div class="control">
+                <input id="permitCreditAmount"
+                       tabindex="4"
+                       class="input"
+                       type="number"
+                       placeholder="0" />
+                <p style="display: none;"
+                   id="permitCreditAmountError"
+                   class="help is-danger">
+                  The amount entered is invalid.  Please enter numbers only, and it must be greater than or equal to zero.
+                </p>
+              </div>
+            </div>
+
+            <div id="existingAgreementAmountAllocated"
+                 class="column field">
+              <label class="label">Builder Allocation Remaining</label>
+              <div class="control">
+                <input id="permitBuilderAllocationRemaining"
+                       class="input"
+                       type="text"
+                       readonly />
+              </div>
+            </div>
+            <div class="column"></div>
+
+          </div>
+
+          <div id="existingPermitAllocation"
+               class="field hide">
+
+            <div class="field">
+              <label class="label">Audit Log</label>
+              <div class="control">
+                <textarea id="permitAllocationAuditLog"
+                          class="textarea"
+                          type="text"
+                          readonly>
+              </textarea>
+              </div>
+            </div>
+
+          </div>
+
+          <div id="permitAllocationError"
+               class="field hide">
+            <div class="field">
+              <label class="label">Errors</label>
+              <div class="control">
+                <textarea id="permitAllocationErrorList"
+                          class="textarea"
+                          type="text"
+                          rows="4"
+                          readonly>
+                </textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-grouped">
+            <div class="control">
+              <button onclick="ImpactFees.PermitAllocation.SavePermitAllocation(); return false;"
+                      type="button"
+                      tabindex="5"
+                      class="button is-primary">
+                Save Permit Allocation
+              </button>
+            </div>
+            <div class="control">
+              <button onclick="ImpactFees.PermitAllocation.Reset(); return false;"
+                      type="button"
+                      tabindex="6"
+                      class="button is-warning">
+                Clear Permit Data
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="hide"
+           id="permitOther">
 
       </div>
 

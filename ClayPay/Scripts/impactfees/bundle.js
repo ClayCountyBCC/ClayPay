@@ -1254,6 +1254,17 @@ var ImpactFees;
         LoadAgreements();
     }
     ImpactFees.Start = Start;
+    function PermitActionChange() {
+        let actionType = document.querySelector('input[name="actionType"]:checked').value;
+        Utilities.Hide("permitCredits");
+        Utilities.Hide("permitOther");
+        if (actionType === "IFCR") {
+            Utilities.Show("permitCredits");
+            return;
+        }
+        Utilities.Show("permitOther");
+    }
+    ImpactFees.PermitActionChange = PermitActionChange;
     function LoadAgreements() {
         ImpactFees.CombinedAllocation.GetAll("", -1, "").then(function (a) {
             ImpactFees.CombinedAllocations = a;
