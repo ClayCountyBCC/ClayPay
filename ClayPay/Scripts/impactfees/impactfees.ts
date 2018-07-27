@@ -46,6 +46,18 @@ namespace ImpactFees
     LoadAgreements();
   }
 
+  export function PermitActionChange():void
+  {
+    let actionType = (<HTMLInputElement>document.querySelector('input[name="actionType"]:checked')).value;
+    Utilities.Hide("permitCredits");
+    Utilities.Hide("permitOther");
+    if (actionType === "IFCR")
+    {
+      Utilities.Show("permitCredits");
+      return;
+    }
+    Utilities.Show("permitOther");
+  }
 
   function LoadAgreements()
   {

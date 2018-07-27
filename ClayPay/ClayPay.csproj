@@ -186,7 +186,6 @@
     <None Include="bower_components\bulma\BACKERS.md" />
     <None Include="bower_components\bulma\bower.json" />
     <None Include="bower_components\bulma\bulma.sass" />
-    <None Include="bower_components\bulma\CHANGELOG.md" />
     <None Include="bower_components\bulma\css\bulma.css.map" />
     <None Include="bower_components\bulma\LICENSE" />
     <None Include="bower_components\bulma\package.json" />
@@ -343,6 +342,7 @@
     <Content Include="Views\Payments\CreditCardPayment.cshtml" />
     <None Include="Properties\PublishProfiles\Deploy Folder.pubxml" />
     <None Include="Properties\PublishProfiles\DV10 Internal.pubxml" />
+    <None Include="Properties\PublishProfiles\Internal Production.pubxml" />
     <None Include="Properties\PublishProfiles\Public Production.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

@@ -15,10 +15,10 @@ namespace ClayPay.Models.Claypay
   {
     public CashierData TransactionCashierData { get; set; } = new CashierData();
     public List<int> ItemIds { get; set; } = new List<int>();
-    public List<Charge> Charges { get; set; }
-    public CCPayment CCData { get; set; }
-    public Payment CashPayment { get; set; }
-    public Payment CheckPayment { get; set; }
+    public List<Charge> Charges { get; set; } = new List<Charge>();
+    public CCPayment CCData { get; set; } = new CCPayment();
+    public Payment CashPayment { get; set; } = new Payment(Payment.payment_type.cash);
+    public Payment CheckPayment { get; set; } = new Payment(Payment.payment_type.check);
     public Payment OtherPayment { get; set; } = new Payment(Payment.payment_type.impact_fee_credit); // for waivers / credits / etc.
     public List<Payment> Payments { get; set; } = new List<Payment>();
     public List<string> Errors { get; set; } = new List<string>();
@@ -568,7 +568,6 @@ namespace ClayPay.Models.Claypay
           Constants.Get_ConnStr("WATSC" + (Constants.UseProduction() ? "Prod" : "QA"))))
         {
           int i = db.Execute(query, new { CashierPayment = dt.AsTableValuedParameter("CashierPayment") }, commandTimeout: 60);
-
           return i > 0;
         }
       }
@@ -809,17 +808,7 @@ namespace ClayPay.Models.Claypay
       }
     }
 
-    public void SaveCashierIdToProcessTable(string CashierId)
-    {
-      var query = @"
-      
-          INSERT INTO ccOnlinePaymentsToProcess
-          (CashierId)
-          VALUES
-          (@CashierId)";
 
-      Constants.Save_Data(query, CashierId);
-    }
 
     //public string CreateEmailBody()
     //{

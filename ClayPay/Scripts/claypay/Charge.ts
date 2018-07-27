@@ -42,18 +42,18 @@
       table.classList.add("is-fullwidth");
       let thead = document.createElement("THEAD");
       let tr = document.createElement("tr");
-      tr.appendChild(UI.createTableHeaderElement("Key", "20%"));
-      tr.appendChild(UI.createTableHeaderElement("Description", "40%"));
+      tr.appendChild(UI.createTableHeaderElement("Key", "20%"));      
       if (view !== ChargeView.receipt)
       {
+        tr.appendChild(UI.createTableHeaderElement("Description", "40%"));
         tr.appendChild(UI.createTableHeaderElement("Date", "15%"));
         tr.appendChild(UI.createTableHeaderElement("Amount", "15%"));
         tr.appendChild(UI.createTableHeaderElement("", "10%"));
       }
       else
       {
-        tr.appendChild(UI.createTableHeaderElement("Date", "20%"));
-        tr.appendChild(UI.createTableHeaderElement("Amount", "20%"));
+        tr.appendChild(UI.createTableHeaderElement("Description", "50%"));        
+        tr.appendChild(UI.createTableHeaderElement("Amount", "30%"));
       }
       thead.appendChild(tr);
       table.appendChild(thead);
@@ -93,8 +93,8 @@
 
       let df = document.createDocumentFragment();
       let trTotal = document.createElement("tr");
-      trTotal.appendChild(UI.createTableElement("", "", 2)); 
-      trTotal.appendChild(UI.createTableElement("Total", "has-text-weight-bold", 1));
+      trTotal.appendChild(UI.createTableElement("", "", view === ChargeView.receipt ? 1 : 2)); 
+      trTotal.appendChild(UI.createTableElement("Total", "has-text-weight-bold has-text-right", 1));
       let TotalAmount: number = charges.reduce((total: number, b: Charge) =>
       {
         return total + b.Total;
@@ -106,7 +106,10 @@
       }
       else
       {
-        trTotal.appendChild(UI.createTableElement("", "", 1));
+        if (view !== ChargeView.receipt)
+        {
+          trTotal.appendChild(UI.createTableElement("", "", 1));
+        }
       }
       df.appendChild(trTotal);
       switch (view)
@@ -139,7 +142,10 @@
       let tr = document.createElement("tr");
       tr.appendChild(UI.createTableElement(charge.AssocKey));
       tr.appendChild(UI.createTableElement(charge.Description, "left"));
-      tr.appendChild(UI.createTableElement(charge.TimeStampDisplay, "center"));
+      if (view !== ChargeView.receipt)
+      {
+        tr.appendChild(UI.createTableElement(charge.TimeStampDisplay, "center"));
+      }      
       tr.appendChild(UI.createTableElement(Utilities.Format_Amount(charge.Total), "center"));
       if (view !== ChargeView.receipt)
       {

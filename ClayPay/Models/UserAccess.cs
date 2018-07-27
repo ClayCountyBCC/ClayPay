@@ -154,7 +154,6 @@ namespace ClayPay.Models
         //un = ""; /* change "" to user_name you wish to test */
         switch (Environment.MachineName.ToUpper())
         {
-          case "CLAYBCCDV10":
           case "MISSL01":
           case "MISHL05":
             return new UserAccess(un);

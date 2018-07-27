@@ -121,7 +121,7 @@ namespace ClayPay.Models
               ErrorText = val[1];
               break;
             case "CONV_FEE":
-              ConvFee = (val[1]) + "%";
+              ConvFee = (val[1]);
               break;
 
             default:
