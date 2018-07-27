@@ -128,4 +128,4 @@ var clayPay;
     ClientResponse.receiptSearchError = "receiptSearchError";
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ClientResponse.js.map
+//# sourceMappingURL=clientresponse.js.map
