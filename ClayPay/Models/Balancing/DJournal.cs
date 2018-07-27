@@ -25,10 +25,12 @@ namespace ClayPay.Models.Balancing
       this.GLAccountTotals = Account.GetGLAccountTotals(dateToProcess);
       var TotalGUChargeAmount = CashierTotal.GetChargeTotal(dateToProcess);
       var guAmount = GUTotals[0].TotalAmount;
-      if (guAmount != TotalGUChargeAmount)
+      var balancedText = CashierTotal.IsDjournalBalanced(dateToProcess);
+      if (balancedText.Length > 0)
       {
+        Error.Add("Djournal is " + balancedText);
         var keys = String.Join(", \n", CashierTotal.GetOutOfBalanceCashierIds(dateToProcess));
-        Error.Add("Out of balance. The following keys have issues:\n" + keys);
+        Error.Add("The following keys have issues:\n" + keys);
       }
 
       Log = DJournalLog.Get(dateToProcess);
@@ -61,16 +63,16 @@ namespace ClayPay.Models.Balancing
         this.Error.Add($"There was an error validating the DJournalLog for {dateToProcess.ToShortDateString()}.");
       }
     }
-
-
+    
     public static DateTime NextDateToFinalize()
     {
       var sql = @"
-        SELECT CAST(DATEADD(dd,1,MAX(djournal_date)) AS DATE)
+        SELECT ISNULL(CAST(DATEADD(dd,1,MAX(djournal_date)) AS DATE), CAST('2018-07-19' AS DATE))
         FROM ccDjournalTransactionLog
         WHERE CAST(djournal_date AS DATE) < CAST(GETDATE() AS DATE)
       ";
-      return Constants.Get_Data<DateTime>(sql).DefaultIfEmpty( DateTime.Now.Date).First();
+      var date = Constants.Get_Data<DateTime>(sql).DefaultIfEmpty( DateTime.Now.Date).First();
+      return date.Date;
     }
   }
 }

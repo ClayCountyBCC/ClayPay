@@ -22,6 +22,14 @@ namespace ClayPay.Models.Balancing
     {
       var query = @"      
         USE WATSC;
+        DECLARE @MinDate DATE = CAST('2018-07-19' AS DATE);
+
+        WITH AssignedCashierIds (CashierId) AS (
+          SELECT CashierId FROM ccOnlineCCPaymentsToProcess OP
+          WHERE DateAssigned > DATEADD(HOUR,-3,GETDATE())
+          )
+
+
         SELECT DISTINCT
           C.CashierId, 
           ISNULL(C.[Name], C.CoName) [Info], 
@@ -32,11 +40,12 @@ namespace ClayPay.Models.Balancing
           DateAssigned
          FROM ccCashierPayment CP
         INNER JOIN CCCASHIER C ON C.OTId = CP.OTid
-        INNER JOIN ccOnlineCCPaymentsToProcess OP ON OP.CashierId = C.CashierId
         INNER JOIN ccCashierItem CI ON CI.OTId = CP.OTid
         INNER JOIN ccLookUp L ON UPPER(LEFT(CP.PmtType,5)) = UPPER(LEFT(L.Code,5))
+        LEFT OUTER JOIN ccOnlineccPaymentsToProcess OP ON OP.CashierId = C.CashierID
         WHERE CP.PmtType IN ('CC On', 'cc_online')
-          AND AssignedTo IS NULL
+          AND (C.TransDt > @MinDate
+          OR (C.CashierId IN (SELECT CashierId FROM AssignedCashierIds)))
            ";
 
       try
@@ -54,14 +63,19 @@ namespace ClayPay.Models.Balancing
     public static bool AssignPaymentToUser(string CashierId, string UserName)
     {
       var param = new DynamicParameters();
-      param.Add("@CasheirId", CashierId);
-      param.Add("@Username", UserName);
+      param.Add("@CashierId", CashierId);
+      param.Add("@Username", UserName.Replace("CLAYBCC\\", ""));
       var query = @"
       
         USE WATSC;
-        UPDATE ccOnlineccPayments
-        SET DateAssigned = @NOW, AssignedTo = @Username
-        WHERE CashierId = @CashierId
+        BEGIN TRY
+          INSERT INTO ccOnlineccPaymentsToProcess
+          (CashierId, AssignedTo, DateAssigned)
+          VALUES
+          (@CashierId, @Username, GETDATE())
+          END TRY
+        BEGIN CATCH
+        END CATCH
            ";
       return Constants.Save_Data(query, param);
     }
@@ -69,13 +83,13 @@ namespace ClayPay.Models.Balancing
     public static bool ChangeAssignedTo(string CashierId, string UserName)
     {
       var param = new DynamicParameters();
-      param.Add("@CasheirId", CashierId);
+      param.Add("@CashierId", CashierId);
       param.Add("@Username", UserName);
       var query = @"
       
         USE WATSC;
-        UPDATE ccOnlineccPayments
-        SET DateAssigned = @NOW, AssignedTo = @Username
+        UPDATE ccOnlineccPaymentsToProcess
+        SET DateAssigned = GETDATE(), AssignedTo = @Username
         WHERE CashierId = @CashierId
            ";
       return Constants.Save_Data(query, param);

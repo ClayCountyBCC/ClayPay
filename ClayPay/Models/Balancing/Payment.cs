@@ -12,7 +12,7 @@ namespace ClayPay.Models.Balancing
     public string CashierId { get; set; }
     public long OTid { get; set; }
     public string Name { get; set; }
-    public double Total { get; set; }
+    public decimal Total { get; set; }
     public bool Editable { get; set; } = false;
     public string Error { get; set; } = "";
 
@@ -147,9 +147,9 @@ namespace ClayPay.Models.Balancing
       var param = new DynamicParameters();
       param.Add("@DateToCheck", DateToCheck);
       var sql = @"
-        SELECT DjournalDate
+        SELECT djournal_date
         FROM ccDjournalTransactionLog
-        WHERE CAST(DjournalDate AS DATE) = CAST(@DateToCheck AS DATE)
+        WHERE CAST(djournal_date AS DATE) = CAST(@DateToCheck AS DATE)
       ";
       
       var i = Constants.Exec_Query(sql, param);

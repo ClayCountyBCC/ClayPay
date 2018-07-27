@@ -21,23 +21,62 @@
 <script>
   document.addEventListener("DOMContentLoaded", function (event)
   {
-    var yesterday = new Date("2018-7-19");
-    var CashierId = "18-013974";
-    //var i = Utilities.Get("../API/Balancing/Get?DateToBalance=" + yesterday.toLocaleDateString());
-    // Had to use literal for payment type for testing. Cannot seem to reference Payment.js. 
-    // It is in bundle as shown above but doesn't seem to let me reference it. 
-    //var j = Utilities.Get("../API/Balancing/GetPayments?DateToBalance=" + yesterday.toLocaleDateString() + "&PaymentType=" + "1"); 
-    //var k = Utilities.Post("../API/Balancing/Finalize?DateToFinalize=" + yesterday.toLocaleDateString());
-    //var l = Utilities.Get("../API/Balancing/UnassignedPayments");
-    //var m = Utilities.Post("../API/Balancing/AssignPayment?CashierId=" + CashierId);
-    //var n = Utilities.Get("../API/Balancing/NextDateToFinalize");
+  
 
-    //console.log(i);
-    //console.log(j);
-    //console.log(k);
-    //console.log(l);
-    //console.log(m);
-    //console.log(n);
+    //console.log("Initial Date To Finalize");
+
+    //var yesterday = new Date("2018-7-19");
+    var CashierId = "18-013974";
+    var dateToFinalize = "";
+    var date = new Date();
+    Utilities.Get("../API/Balancing/NextDateToFinalize").then(function (a)
+    {
+      console.log('response', a);
+      date = a;
+      dateToFinalize = date;
+      console.log('dateToFinalize', date);
+
+      var i = Utilities.Get("../API/Balancing/Get?DateToBalance=" + date);
+      console.log("Initial Djournal", i);
+
+      //// Had to use literal for payment type for testing. Cannot seem to reference Payment.js. 
+      //// It is in bundle as shown above but doesn't seem to let me reference it. 
+      var j = Utilities.Get("../API/Balancing/GetPayments?DateToBalance=" +date + "&PaymentType=" + "1");
+      console.log("List of Payments", j);
+
+      Utilities.Post("../API/Balancing/Finalize?DateToFinalize=" + date).then(function (k)
+      {
+        Utilities.Get("../API/Balancing/NextDateToFinalize").then(function (a)
+        {
+          console.log("NextDateToFinalize:", a);
+        }).catch(function (e)
+        {
+          console.log("error", e);
+
+        });
+        console.log("Finalize Djournal date", k);
+
+      }).catch(function (e)
+      {
+        console.log("error", e);
+      });
+
+
+      
+
+      var l = Utilities.Get("../API/Balancing/UnassignedPayments");
+      console.log("Fetch unassigned payments", l);
+
+      var m = Utilities.Post("../API/Balancing/AssignPayment?CashierId=" + CashierId);
+      console.log("Assign cashierId to current user (literal for testing: 18-013974", m);
+
+    }).catch(function (e)
+    {
+      // figure out what we want to do with the errors.
+      console.log("exception", e);
+    });
+
 
   });
+
 </script>
