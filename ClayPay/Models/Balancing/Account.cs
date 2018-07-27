@@ -60,17 +60,13 @@ namespace ClayPay.Models.Balancing
       try
       {
         var a = Constants.Get_Data<Account>(sql, dbArgs);
-
+        return a;
       }
       catch (Exception ex)
       {
         Constants.Log(ex, sql);
         return new List<Account>();
       }
-
-
-      return new List<Account>();
-
     }
 
   }

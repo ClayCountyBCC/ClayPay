@@ -20,26 +20,32 @@ namespace ClayPay.Models.Balancing
 
     public DJournalLog()
     {
-
+      
     }
 
     public static int Create(DateTime dateToFinalize, String username)
     {
       var param = new DynamicParameters();
       param.Add("@DateToFinalize", dateToFinalize);
-      param.Add("@created_by", username);
+      param.Add("@created_by", username.Replace("CLAYBCC\\", ""));
       var sql = $@"
+        BEGIN TRY
           USE WATSC;
           INSERT INTO ccDJournalTransactionLog
           (djournal_date, created_by)
           VALUES
-          (@DateToBalance, @username )
+          (@DateToFinalize, @created_by )
 
-
+          COMMIT
+        END TRY
+        BEGIN CATCH
+          -- ROLLBACK
+        END CATCH
         ";
       try
       { 
-        return Constants.Exec_Query(sql, param);
+        var i = Constants.Exec_Query(sql, param);
+        return i;
       }
       catch(Exception ex)
       {
@@ -56,15 +62,16 @@ namespace ClayPay.Models.Balancing
             USE WATSC;
 
             SELECT 
-              djournal_date, 
-              created_on, 
-              created_by,
+              djournal_date DJournalDate, 
+              created_on FinalizedOn, 
+              created_by CreatedBy
             FROM ccDJournalTransactionLog
             WHERE CAST(djournal_date AS DATE) = CAST(@DateToGet AS DATE)
         ";
       try
       {
-        return Constants.Get_Data<DJournalLog>(sql, param).DefaultIfEmpty(new DJournalLog()).First();
+      var l = Constants.Get_Data<DJournalLog>(sql, param).DefaultIfEmpty(new DJournalLog()).First();
+        return l;
       }
       catch (Exception ex)
       {

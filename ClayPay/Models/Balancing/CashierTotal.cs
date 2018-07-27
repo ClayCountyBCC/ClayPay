@@ -9,11 +9,11 @@ namespace ClayPay.Models.Balancing
   public class CashierTotal
   {
     public string Type { get; set; }
-    public double TotalAmount { get; set; }
+    public decimal TotalAmount { get; set; }
 
     public CashierTotal()
     {
-      
+
     }
 
     public static List<CashierTotal> ProcessPaymentTypeTotals(DateTime DateToBalance)
@@ -45,9 +45,7 @@ namespace ClayPay.Models.Balancing
       dbArgs.Add("@DateToBalance", DateToBalance);
 
       var sql = @"
-        USE WATSC;
-        
-        --SELECT * CashierIds FROM DATE
+       --SELECT * CashierIds FROM DATE
         WITH CashierIdsToBalance (CashierId) AS (
         SELECT CashierId
         FROM dbo.ccCashier C
@@ -62,7 +60,7 @@ namespace ClayPay.Models.Balancing
         )
 
         -- CREATE TMP TABLE TO BE ABLE TO MERGE ALL TOTALS TO ONE WORKABLE TABLE
-        SELECT Narrative PaymentType, AmtApplied TotalAmount FROM 
+        SELECT Narrative Type, AmtApplied TotalAmount FROM 
           
           (
           -- GET TOTAL AMOUNT OF CHARGES FOR BALANCING 
@@ -73,8 +71,8 @@ namespace ClayPay.Models.Balancing
               'Total Charges' Narrative,
               SUM(total) AmtApplied,
               'AA' CdType
-            FROM cccashieritem
-            INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
+            FROM cccashieritem C
+            INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
 
           UNION
 
@@ -84,7 +82,7 @@ namespace ClayPay.Models.Balancing
              SELECT PmtType, AmtApplied
              FROM  ccCashierPayment CP
              LEFT OUTER join ccCashier C ON C.OTId = CP.OTid
-             INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
+             INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
            ) AS TempAllPayments
            RIGHT OUTER JOIN ccLookUp L ON LEFT(TempAllPayments.PmtType,5) = LEFT(L.CODE,5)
            WHERE L.CdType IN ('SPECIALPT','PMTTYPE')
@@ -100,7 +98,7 @@ namespace ClayPay.Models.Balancing
               'ZB'CdType
             FROM ccCashierPayment CP
             INNER JOIN ccCashier C ON C.OTId = CP.OTid
-            INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
+            INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
               AND PmtType IN ('CK', 'CA')
          
             UNION   
@@ -113,7 +111,7 @@ namespace ClayPay.Models.Balancing
               'ZC' CdType
             FROM ccCashierPayment CP
             INNER JOIN ccCashier C ON C.OTId = CP.OTid
-            INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
+            INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
               AND PmtType IN ('CK', 'CA')
          
             UNION   
@@ -126,16 +124,18 @@ namespace ClayPay.Models.Balancing
               'ZD' CdType
             FROM ccCashierPayment CP
             INNER JOIN ccCashier C ON CP.OTid = C.OTid
-            INNER JOIN CashierIdsToBalance CIB = C.CashierId = CIB.CashierId
+            INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
 
         ) AS TMP
+        WHERE AmtApplied > 0 AND AmtApplied IS NOT NULL
         ORDER BY CdType, SortKey; --THIS ALLOWS FOR THE DATA TO BE IN THE SAME ORDER AS IT IS CURRENTLY
                                   -- SOLELY FOR CONTINUITY. THE ACTUAL LAYOUT MAY CHANGE BASED ON MOCKUP
 
        ";
       try
       {
-        return Constants.Get_Data<CashierTotal>(sql, dbArgs);
+        var casheirtotals = Constants.Get_Data<CashierTotal>(sql, dbArgs);
+        return casheirtotals;
       }
       catch (Exception ex)
       {
@@ -175,7 +175,8 @@ namespace ClayPay.Models.Balancing
       try
       {
 
-        return Constants.Get_Data<CashierTotal>(sql, dbArgs);
+        var guTotals = Constants.Get_Data<CashierTotal>(sql, dbArgs);
+        return guTotals;
       }
       catch (Exception ex)
       {
@@ -184,5 +185,123 @@ namespace ClayPay.Models.Balancing
       }
     }
 
+    public static decimal GetChargeTotal(DateTime DateToBalance)
+    {
+      var param = new DynamicParameters();
+      param.Add("@DateToBalance", DateToBalance);
+
+      var query = @"
+        USE WATSC;
+
+        SELECT SUM(TTL) [TOTAL CHARGE AMOUNT] FROM (
+          SELECT DISTINCT 
+            ccCashier.CashierId , 
+            ccCashier.Name, 
+            ccCashierPayment.PmtType, 
+            ccCashierPayment.OTid, 
+            NTUser,
+            (SELECT Sum( ccCashierPayment.AmtApplied)
+              FROM ccCashierPayment 
+              WHERE ccCashierPayment.OTid = ccCashier.OTId) as Ttl
+        FROM ccCashierPayment 
+        INNER JOIN ccCashier ON ccCashierPayment.OTid = ccCashier.OTId
+        WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)) AS TMP
+        LEFT OUTER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(PmtType,5))
+        WHERE L.CdType = 'PMTTYPE'
+
+
+
+        ";
+
+      var i = Constants.Get_Data<decimal>(query, param).DefaultIfEmpty(0).First();
+      
+      return i;
+    }
+
+    public static List<string> GetOutOfBalanceCashierIds(DateTime dateToBalance)
+    {
+
+      var param = new DynamicParameters();
+      param.Add("@DateToBalance", dateToBalance);
+
+      var query = @"
+        USE WATSC;
+          SELECT DISTINCT * FROM (
+            SELECT   CashierId,OTId,NTUser,
+              (SELECT     SUM(Total) AS ItemTtl
+              FROM         dbo.ccCashierItem
+              WHERE     (dbo.ccCashierItem.OTId = dbo.ccCashier.OTId)) AS ItemTtl,
+
+              (SELECT SUM(AmtApplied) AS PmtTtl
+              FROM dbo.ccCashierPayment
+              WHERE (dbo.ccCashierPayment.OTId = dbo.ccCashier.OTId)) AS PmtTtl,
+
+              (SELECT ISNULL(COUNT(*),0)
+              FROM dbo.ccCashierPayment
+              WHERE (dbo.ccCashierPayment.OTId = dbo.ccCashier.OTId) AND 
+              (dbo.ccCashierPayment.PmtType = 'ESP')) AS EscrowPmt,
+            
+              (SELECT SUM(dbo.ccGUItem.Amount) AS GUTtl
+              FROM dbo.ccGU INNER JOIN
+              dbo.ccGUItem ON dbo.ccGU.GUId = dbo.ccGUItem.GUID
+              WHERE (dbo.ccGU.OTId = dbo.ccCashier.OTId) and (dbo.ccGUItem.Type = 'c')) AS GUTtl
+
+            FROM dbo.ccCashier
+            WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE))
+          AS tmp
+          WHERE PmtTtl + EscrowPmt != GUTtl OR ItemTtl != GUTtl
+          ORDER BY CashierId
+      
+      ";
+
+      var i = Constants.Get_Data<string>(query, param);
+      return i;
+    }
+
+    public static string IsDjournalBalanced(DateTime dateToBalance)
+    {
+      
+      var param = new DynamicParameters();
+      param.Add("@DateToBalance", dateToBalance);
+
+      var query = @"
+        USE WATSC;
+
+        WITH GuTotal(TotalPayments) AS (
+        SELECT SUM(Amount) TotalAmount FROM (
+              SELECT otid, cashierid, cast(transdt AS DATE) transdt, account, amount, type
+        FROM dbo.ccGU INNER JOIN dbo.ccGUItem ON dbo.ccGU.GUId = dbo.ccGUItem.GUID
+        WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)
+          AND TYPE = 'd') AS tmp
+        GROUP BY type)
+
+        ,ChargeTotals ([TotalCharges])AS 
+        (SELECT SUM(TTL) [TOTAL CHARGE AMOUNT] FROM (
+          SELECT DISTINCT 
+            ccCashier.CashierId , 
+            ccCashier.Name, 
+            ccCashierPayment.PmtType, 
+            ccCashierPayment.OTid, 
+            NTUser,
+            (SELECT Sum( ccCashierPayment.AmtApplied)
+              FROM ccCashierPayment 
+              WHERE ccCashierPayment.OTid = ccCashier.OTId) as Ttl
+        FROM ccCashierPayment 
+        INNER JOIN ccCashier ON ccCashierPayment.OTid = ccCashier.OTId
+        WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)) AS TMP
+        LEFT OUTER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(PmtType,5))
+        WHERE L.CdType = 'PMTTYPE')
+
+        SELECT
+        CASE WHEN G.TotalPayments = C.TotalCharges THEN '' ELSE 'out of balance' END
+        FROM GuTotal G
+        INNER JOIN ChargeTotals C ON C.TotalCharges != 0 OR G.TotalPayments != 0
+      
+      ";
+
+      var i = Constants.Get_Data<string>(query, param).DefaultIfEmpty("").First();
+
+      return i;
+    }
   }
 }

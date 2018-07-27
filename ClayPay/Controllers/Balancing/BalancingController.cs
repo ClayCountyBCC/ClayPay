@@ -9,7 +9,7 @@ using ClayPay.Models.Balancing;
 using ClayPay.Models;
 
 
-namespace ClayPay.Controllers
+namespace ClayPay.Controllers.Balancng
 {    
   [RoutePrefix("API/Balancing")]
   public class BalancingController : ApiController
@@ -74,10 +74,10 @@ namespace ClayPay.Controllers
         var finalize = DateToFinalize.Date < DateTime.Now.Date;
         var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
-        finalize = ua.in_event_djournal_group;
+        finalize = ua.djournal_access;
         var dj = new DJournal(DateToFinalize, finalize, User.Identity.Name);
 
-        if(ua.in_event_djournal_group == false)
+        if(ua.djournal_access == false)
         {
           dj.Error.Add("DJournal was not finalized. User does not have the correct level of access.");
 

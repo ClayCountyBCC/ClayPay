@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Results;
+using ClayPay.Models.Claypay;
 using ClayPay.Models.Balancing;
 using ClayPay.Models;
 
@@ -65,28 +66,42 @@ namespace ClayPay.Controllers
       }
     }
 
-    [HttpPost]
-    [Route("Save")]
-    public IHttpActionResult Save(DateTime DateToFinalize)
+    [HttpGet]
+    [Route("GetPayments")]
+    public IHttpActionResult Get(DateTime DateToBalance, Models.Claypay.Payment.payment_type PaymentType)
     {
       try
       {
-        var finalize = DateToFinalize.Date < DateTime.Now.Date;
+        var dj = Models.Balancing.Payment.GetPayments(DateToBalance, PaymentType, new UserAccess(User.Identity.Name));
+        return Ok(dj);
+      }
+      catch (Exception ex)
+      {
+        Constants.Log(ex);
+        return InternalServerError();
+      }
+    }
+
+    [HttpPost]
+    [Route("Finalize")]
+    public IHttpActionResult Post(DateTime DateToFinalize)
+    {
+      try
+      {
         var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
-        finalize = ua.djournal_access;
+        var finalize = ua.djournal_access && DateToFinalize.Date < DateTime.Now.Date;
         var dj = new DJournal(DateToFinalize, finalize, User.Identity.Name);
 
-        if(ua.djournal_access == false)
+        if(!ua.djournal_access)
         {
           dj.Error.Add("DJournal was not finalized. User does not have the correct level of access.");
 
         }
 
-        if (DateToFinalize.Date < DateTime.Now.Date)
+        if (DateToFinalize.Date >= DateTime.Now.Date)
         {
           dj.Error.Add("Cannot finalize payments made on or after today. Please select a previous date.");
-
         }
         return Ok(dj);
       }
@@ -97,5 +112,42 @@ namespace ClayPay.Controllers
       }
     }
 
+    [HttpGet]
+    [Route("UnassignedPayments")]
+    public IHttpActionResult Get()
+    {
+      var p = AssignedOnlinePayment.Get();
+      if (p != null)
+      {
+        return Ok(p);
+      }
+      else
+      {
+
+        return Ok(p);
+      }
+    }
+
+    [HttpPost]
+    [Route("AssignPayment")]
+    public IHttpActionResult Post(string CashierId)
+    {
+      return Ok(AssignedOnlinePayment.AssignPaymentToUser(CashierId, User.Identity.Name));
+    }
+
+    [HttpGet]
+    [Route("NextDateToFinalize")]
+    public IHttpActionResult GetNextFinalizeDate()
+    {
+      try
+      {
+        return Ok(DJournal.NextDateToFinalize());
+      }
+      catch(Exception ex)
+      {
+        Constants.Log(ex);
+        return Ok(DateTime.MinValue);
+      }
+    }
   }
 }
