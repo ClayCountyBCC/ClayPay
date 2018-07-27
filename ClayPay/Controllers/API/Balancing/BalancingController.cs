@@ -48,8 +48,7 @@ namespace ClayPay.Controllers
      display Account.GetAccountTotals
 
     **************************************************************************************************************/
-
-
+    
     [HttpGet]
     [Route("Get")]
     public IHttpActionResult Get(DateTime DateToBalance)
