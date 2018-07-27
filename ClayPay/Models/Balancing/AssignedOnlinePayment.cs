@@ -68,14 +68,13 @@ namespace ClayPay.Models.Balancing
       var query = @"
       
         USE WATSC;
-        BEGIN TRY
+
           INSERT INTO ccOnlineccPaymentsToProcess
           (CashierId, AssignedTo, DateAssigned)
           VALUES
           (@CashierId, @Username, GETDATE())
-          END TRY
-        BEGIN CATCH
-        END CATCH
+          
+
            ";
       return Constants.Save_Data(query, param);
     }

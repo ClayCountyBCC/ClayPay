@@ -71,7 +71,7 @@ namespace ClayPay.Models.Balancing
         FROM ccDjournalTransactionLog
         WHERE CAST(djournal_date AS DATE) < CAST(GETDATE() AS DATE)
       ";
-      var date = Constants.Get_Data<DateTime>(sql).DefaultIfEmpty( DateTime.Now.Date).First();
+      var date = Constants.Get_Data<DateTime>(sql).First();
       return date.Date;
     }
   }
