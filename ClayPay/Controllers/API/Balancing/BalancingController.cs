@@ -51,11 +51,12 @@ namespace ClayPay.Controllers
     
     [HttpGet]
     [Route("Get")]
-    public IHttpActionResult Get(DateTime DateToBalance)
+    public IHttpActionResult Get(DateTime? DateToBalance = null)
     {
       try
       {
-        var dj = new DJournal(DateToBalance);
+        if (!DateToBalance.HasValue) DateToBalance = DJournal.NextDateToFinalize();
+        var dj = new DJournal(DateToBalance.Value);
         return Ok(dj);
       }
       catch (Exception ex)
@@ -90,7 +91,7 @@ namespace ClayPay.Controllers
         var ua = UserAccess.GetUserAccess(User.Identity.Name);
 
         var finalize = ua.djournal_access && DateToFinalize.Date < DateTime.Now.Date;
-        var dj = new DJournal(DateToFinalize, finalize, User.Identity.Name);
+        var dj = new DJournal(DateToFinalize, finalize, ua.user_name);
 
         if(!ua.djournal_access)
         {
@@ -147,6 +148,7 @@ namespace ClayPay.Controllers
         return Ok("Could not update");
       }
     }
+
     [HttpGet]
     [Route("NextDateToFinalize")]
     public IHttpActionResult GetNextFinalizeDate()

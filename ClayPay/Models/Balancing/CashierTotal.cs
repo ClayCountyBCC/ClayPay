@@ -193,24 +193,11 @@ namespace ClayPay.Models.Balancing
       var query = @"
         USE WATSC;
 
-        SELECT SUM(TTL) [TOTAL CHARGE AMOUNT] FROM (
-          SELECT DISTINCT 
-            ccCashier.CashierId , 
-            ccCashier.Name, 
-            ccCashierPayment.PmtType, 
-            ccCashierPayment.OTid, 
-            NTUser,
-            (SELECT Sum( ccCashierPayment.AmtApplied)
-              FROM ccCashierPayment 
-              WHERE ccCashierPayment.OTid = ccCashier.OTId) as Ttl
-        FROM ccCashierPayment 
-        INNER JOIN ccCashier ON ccCashierPayment.OTid = ccCashier.OTId
-        WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)) AS TMP
-        LEFT OUTER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(PmtType,5))
-        WHERE L.CdType = 'PMTTYPE'
-
-
-
+        SELECT SUM(CP.AmtApplied) [TOTAL CHARGE AMOUNT] 
+        FROM ccCashierPayment CP 
+        INNER JOIN ccCashier C ON CP.OTid = C.OTId
+        INNER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(CP.PmtType,5)) AND L.CdType='PMTTYPE'
+        WHERE CAST(C.TransDt AS DATE) = CAST(@DateToBalance AS DATE)
         ";
 
       var i = Constants.Get_Data<decimal>(query, param).DefaultIfEmpty(0).First();

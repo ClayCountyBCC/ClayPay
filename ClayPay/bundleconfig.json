@@ -31,6 +31,16 @@
       "Scripts/impactfees/CombinedAllocation.js",
       "Scripts/impactfees/BuilderAllocation.js"
     ]
+  },
+  {
+    "outputFileName": "Scripts/balancing/bundle.js",
+    "inputFiles": [
+      "bower_components/promise-polyfill/dist/polyfill.js",
+      "bower_components/fetch/fetch.js",
+      "Scripts/app/Utilities.js",
+      "Scripts/claypay/Payment.js",
+      "Scripts/balancing/Balancing.js"
+    ]
   }
 ]
 

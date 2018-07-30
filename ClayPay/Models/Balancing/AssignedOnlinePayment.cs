@@ -7,10 +7,11 @@ namespace ClayPay.Models.Balancing
 {
   public class AssignedOnlinePayment
   {
-    public string CasheirId { get; set; }
-    public DateTime TransactionDate { get; set; }
-    public string AssignedTo { get; set; }
-    public DateTime DateAssigned { get; set; }
+    public string CasheirId { get; set; } = "";
+    public DateTime TransactionDate { get; set; } = DateTime.MinValue;
+    public string AssignedTo { get; set; } = "";
+    public decimal AmountApplied { get; set; } = 0;
+    public DateTime DateAssigned { get; set; } = DateTime.MinValue;
 
     public AssignedOnlinePayment()
     {
@@ -24,28 +25,20 @@ namespace ClayPay.Models.Balancing
         USE WATSC;
         DECLARE @MinDate DATE = CAST('2018-07-19' AS DATE);
 
-        WITH AssignedCashierIds (CashierId) AS (
-          SELECT CashierId FROM ccOnlineCCPaymentsToProcess OP
-          WHERE DateAssigned > DATEADD(HOUR,-3,GETDATE())
-          )
-
-
-        SELECT DISTINCT
+        SELECT 
           C.CashierId, 
-          ISNULL(C.[Name], C.CoName) [Info], 
-          L.Code [PaymentType], 
-          ISNULL(CP.TransactionId, CkNo) [TransactionID], 
-          TransDt,
+          C.TransDt TransactionDate,
+          CP.AmtApplied AmountApplied,
           AssignedTo,
           DateAssigned
-         FROM ccCashierPayment CP
-        INNER JOIN CCCASHIER C ON C.OTId = CP.OTid
-        INNER JOIN ccCashierItem CI ON CI.OTId = CP.OTid
-        INNER JOIN ccLookUp L ON UPPER(LEFT(CP.PmtType,5)) = UPPER(LEFT(L.Code,5))
+        FROM ccCashierPayment CP
+        INNER JOIN ccCashier C ON CP.OTid = C.OTId
         LEFT OUTER JOIN ccOnlineccPaymentsToProcess OP ON OP.CashierId = C.CashierID
-        WHERE CP.PmtType IN ('CC On', 'cc_online')
-          AND (C.TransDt > @MinDate
-          OR (C.CashierId IN (SELECT CashierId FROM AssignedCashierIds)))
+        WHERE CP.PmtType IN ('CC On', 'cc_online', 'CC Online')
+          AND C.TransDt > @MinDate
+          AND (OP.CashierId IS NULL
+          OR OP.DateAssigned > DATEADD(HOUR,-3,GETDATE()))
+        ORDER BY C.TransDt ASC
            ";
 
       try

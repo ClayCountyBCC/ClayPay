@@ -67,7 +67,7 @@ namespace ClayPay.Models.Balancing
     public static DateTime NextDateToFinalize()
     {
       var sql = @"
-        SELECT ISNULL(CAST(DATEADD(dd,1,MAX(djournal_date)) AS DATE), CAST('2018-07-19' AS DATE))
+        SELECT CAST(ISNULL(DATEADD(dd,1,MAX(djournal_date)), '2018-07-19') AS DATE)
         FROM ccDjournalTransactionLog
         WHERE CAST(djournal_date AS DATE) < CAST(GETDATE() AS DATE)
       ";

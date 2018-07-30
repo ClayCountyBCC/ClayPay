@@ -209,6 +209,9 @@ var Utilities;
     }
     Utilities.Format_Amount = Format_Amount;
     function Format_Date(date) {
+        if (date instanceof Date) {
+            return date.toLocaleDateString('en-us');
+        }
         return new Date(date).toLocaleString('en-US');
     }
     Utilities.Format_Date = Format_Date;
@@ -239,5 +242,38 @@ var Utilities;
         b.classList.toggle("is-loading", disabled);
     }
     Utilities.Toggle_Loading_Button = Toggle_Loading_Button;
+    function Create_Menu_Element(menuItem) {
+        let li = document.createElement("li");
+        if (menuItem.selected)
+            li.classList.add("is-active");
+        let a = document.createElement("a");
+        a.id = menuItem.id;
+        a.href = "#";
+        a.onclick = function () {
+            let title = document.getElementById("menuTitle");
+            let subTitle = document.getElementById("menuSubTitle");
+            Utilities.Clear_Element(title);
+            Utilities.Clear_Element(subTitle);
+            title.appendChild(document.createTextNode(menuItem.title));
+            subTitle.appendChild(document.createTextNode(menuItem.subTitle));
+            Utilities.Show_Menu(menuItem.id);
+        };
+        if (menuItem.icon.length > 0) {
+            let span = document.createElement("span");
+            span.classList.add("icon");
+            span.classList.add("is-medium");
+            let i = document.createElement("i");
+            let icons = menuItem.icon.split(" ");
+            for (let icon of icons) {
+                i.classList.add(icon);
+            }
+            span.appendChild(i);
+            a.appendChild(span);
+        }
+        a.appendChild(document.createTextNode(menuItem.label));
+        li.appendChild(a);
+        return li;
+    }
+    Utilities.Create_Menu_Element = Create_Menu_Element;
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map

@@ -440,7 +440,7 @@ var clayPay;
         function buildMenuElements() {
             let menu = document.getElementById("menuTabs");
             for (let menuItem of UI.Menus) {
-                menu.appendChild(createMenuElement(menuItem));
+                menu.appendChild(Utilities.Create_Menu_Element(menuItem));
             }
             createNavCart();
         }
@@ -455,41 +455,6 @@ var clayPay;
             cartTotal.appendChild(document.createTextNode("(empty)"));
             cart.appendChild(cartTotal);
         }
-        function createMenuElement(menuItem) {
-            let li = document.createElement("li");
-            if (menuItem.selected)
-                li.classList.add("is-active");
-            let a = document.createElement("a");
-            a.id = menuItem.id;
-            a.href = "#";
-            a.onclick = function () {
-                let title = document.getElementById("menuTitle");
-                let subTitle = document.getElementById("menuSubTitle");
-                Utilities.Clear_Element(title);
-                Utilities.Clear_Element(subTitle);
-                title.appendChild(document.createTextNode(menuItem.title));
-                subTitle.appendChild(document.createTextNode(menuItem.subTitle));
-                Utilities.Show_Menu(menuItem.id);
-            };
-            if (menuItem.icon.length > 0) {
-                let span = document.createElement("span");
-                span.classList.add("icon");
-                span.classList.add("is-medium");
-                let i = document.createElement("i");
-                let icons = menuItem.icon.split(" ");
-                for (let icon of icons) {
-                    i.classList.add(icon);
-                }
-                span.appendChild(i);
-                a.appendChild(span);
-            }
-            a.appendChild(document.createTextNode(menuItem.label));
-            li.appendChild(a);
-            return li;
-        }
-        function ShowPaymentMethod(id) {
-        }
-        UI.ShowPaymentMethod = ShowPaymentMethod;
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map

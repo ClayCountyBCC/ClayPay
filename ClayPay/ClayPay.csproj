@@ -264,6 +264,10 @@
     <Content Include="Content\Fontawesome\webfonts\fa-solid-900.woff" />
     <Content Include="Content\Fontawesome\webfonts\fa-solid-900.woff2" />
     <Content Include="index.html" />
+    <Content Include="Scripts\Balancing\bundle.js" />
+    <Content Include="Scripts\Balancing\bundle.min.js">
+      <DependentUpon>bundle.js</DependentUpon>
+    </Content>
     <Content Include="Scripts\claypay\bundle.js" />
     <Content Include="Scripts\claypay\bundle.min.js">
       <DependentUpon>bundle.js</DependentUpon>
@@ -355,10 +359,14 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Scripts\app\typings\" />
-    <Folder Include="Scripts\Balancing\" />
     <Folder Include="Views\Receipt\" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\Balancing\Account.ts" />
+    <TypeScriptCompile Include="Scripts\Balancing\Balancing.ts" />
+    <TypeScriptCompile Include="Scripts\Balancing\CashierTotal.ts" />
+    <TypeScriptCompile Include="Scripts\Balancing\DJournal.ts" />
+    <TypeScriptCompile Include="Scripts\Balancing\DjournalLog.ts" />
     <TypeScriptCompile Include="Scripts\claypay\CashierData.ts" />
     <TypeScriptCompile Include="Scripts\claypay\ClientResponse.ts" />
     <TypeScriptCompile Include="Scripts\app\Utilities.ts" />

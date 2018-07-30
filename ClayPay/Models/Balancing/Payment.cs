@@ -25,7 +25,10 @@ namespace ClayPay.Models.Balancing
       Error = er;
   }
     // Without the ability to void payments, this will become unnecessary after a time
-    public static List<Payment> GetPayments(DateTime DateToBalance, Claypay.Payment.payment_type payment_type, UserAccess ua)
+    public static List<Payment> GetPayments(
+      DateTime DateToBalance, 
+      Claypay.Payment.payment_type payment_type, 
+      UserAccess ua)
     {
       string PaymentType = "";
       string error = "";
@@ -70,7 +73,7 @@ namespace ClayPay.Models.Balancing
       WITH ALL_CHOSEN (TransactionDate,CashierId, name,OTid, Total,CKNO, Editable) AS (
       SELECT DISTINCT 
         C.TransDt,
-        CI.CashierId ,
+        C.CashierId ,
         name,
         CP.OTid, 
         AmtApplied, 
@@ -78,9 +81,9 @@ namespace ClayPay.Models.Balancing
         CASE WHEN CP.PmtType = 'CA' OR CP.PmtType = 'CK' THEN 1 ELSE 0 END Editable
       FROM ccCashierPayment CP
       LEFT OUTER JOIN ccLookUp L ON LEFT(UPPER(CP.PmtType),5) = LEFT(UPPER(L.Code),5)
-      LEFT OUTER JOIN ccCashierItem CI ON CP.OTid = CI.OTId
+      --LEFT OUTER JOIN ccCashierItem CI ON CP.OTid = CI.OTId
       LEFT OUTER JOIN ccCatCd CC ON CC.CatCode  = CI.CatCode
-      LEFT OUTER JOIN CCCASHIER C ON CI.CashierId = C.CashierId
+      LEFT OUTER JOIN CCCASHIER C ON CP.OTId = C.OTId
       WHERE CAST(C.TransDt AS DATE) = CAST(@DateToBalance AS DATE)
         AND Description IS NOT NULL
         AND TOTAL IS NOT NULL 
@@ -110,9 +113,6 @@ namespace ClayPay.Models.Balancing
         (SELECT SUM(Total)
         FROM ALL_CHOSEN)
       ORDER BY Total
-
-
-
        ";
       try
       {
