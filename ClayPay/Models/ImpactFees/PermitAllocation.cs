@@ -61,12 +61,12 @@ namespace ClayPay.Models.ImpactFees
       return tmp.First();
     }
 
-    public List<string> Validate()
+    public List<string> ValidateImpactFeeCredits()
     {
       List<string> errors = new List<string>();
       Permit_Number = Permit_Number.Trim();
       var current = PermitAllocation.Get(Permit_Number);
-      var pif = PermitImpactFee.Get(Permit_Number);
+      var pif = PermitImpactFee.Get(Permit_Number, "IFCR");
       if(pif.Error_Text.Length > 0)
       {
         errors.Add(pif.Error_Text);        
@@ -150,7 +150,7 @@ namespace ClayPay.Models.ImpactFees
         // will also need to apply the credit.
       }
       if (!SaveAllocation()) return false;
-      var permit = PermitImpactFee.Get(Permit_Number);
+      var permit = PermitImpactFee.Get(Permit_Number, "IFCR");
       
       if (!permit.ItemId.HasValue) return false;
       if(permit.ImpactFee_Amount < this.Amount_Allocated)

@@ -94,13 +94,17 @@ var ImpactFees;
         static SearchPermit() {
             // this function will take the contents of the permit input and query it against the webservice.
             let permitErrorContainer = document.getElementById("permitErrorContainer");
+            let permitErrorText = document.getElementById("permitErrorText");
             let permitInfo = document.getElementById("permitInfo");
             Utilities.Hide(permitErrorContainer);
             Utilities.Hide(permitInfo);
             let permitInput = document.getElementById("permitNumber");
-            let permitNumber = permitInput.value;
+            let permitNumber = permitInput.value.trim();
+            let searchType = document.querySelector('input[name="searchType"]:checked').value;
             PermitAllocation.Reset();
             permitInput.value = permitNumber;
+            let searchTypeInput = document.querySelector('input[name="searchType"][value="' + searchType + '"]');
+            searchTypeInput.checked = true;
             if (permitNumber.length !== 8) {
                 // show error
                 let permitNumberLengthError = document.getElementById("permitNumberLengthError");
@@ -112,7 +116,7 @@ var ImpactFees;
                 Utilities.Error_Show(permitNumberNumericError);
                 return;
             }
-            ImpactFees.PermitImpactFee.Get(permitNumber).then(function (pif) {
+            ImpactFees.PermitImpactFee.Get(permitNumber, "", "IFCR").then(function (pif) {
                 let ImpactFee = document.getElementById("permitRoadImpactFee");
                 let ContractorNumber = document.getElementById("permitContractorNumber");
                 let ContractorName = document.getElementById("permitContractorName");
@@ -123,7 +127,6 @@ var ImpactFees;
                 CashierId.value = pif.Cashier_Id;
                 Utilities.Show(permitInfo);
                 if (pif.Error_Text.length > 0) {
-                    let permitErrorText = document.getElementById("permitErrorText");
                     permitErrorText.value = pif.Error_Text;
                     Utilities.Show(permitErrorContainer);
                     return; // if we find an error, we should stop here.
@@ -157,8 +160,49 @@ var ImpactFees;
                         }
                     }
                 }, function (err) {
+                    console.log('error', err);
+                    permitErrorText.value = err;
+                    Utilities.Show(permitErrorContainer);
                 });
             }, function (e) {
+                console.log('error', e);
+                permitErrorText.value = e;
+                Utilities.Show(permitErrorContainer);
+            });
+        }
+        static SearchPermitOther() {
+            // this function will take the contents of the permit input and query it against the webservice.
+            Utilities.Hide("permitOtherApplyWaiver"); // hide the button, we'll show it if we make it there.
+            let permitErrorContainer = document.getElementById("permitOtherErrorContainer");
+            let permitErrorText = document.getElementById("permitOtherErrorText");
+            Utilities.Hide(permitErrorContainer);
+            let permitInput = document.getElementById("permitNumberOther");
+            let permitNumber = permitInput.value.trim();
+            permitInput.value = permitNumber;
+            if (permitNumber.length !== 8) {
+                // show error
+                let permitNumberLengthError = document.getElementById("permitNumberOtherLengthError");
+                Utilities.Error_Show(permitNumberLengthError);
+                return;
+            }
+            if (isNaN(parseInt(permitNumber))) {
+                let permitNumberNumericError = document.getElementById("permitNumberOtherNumericError");
+                Utilities.Error_Show(permitNumberNumericError);
+                return;
+            }
+            let searchType = document.querySelector('input[name="searchType"]:checked').value;
+            ImpactFees.PermitImpactFee.Get(permitNumber, "", searchType).then(function (pif) {
+                let ImpactFee = document.getElementById("permitOtherImpactFee");
+                ImpactFee.value = pif.ImpactFee_Amount_Formatted;
+                if (pif.Error_Text.length > 0) {
+                    permitErrorText.value = pif.Error_Text;
+                    Utilities.Show(permitErrorContainer);
+                    return; // if we find an error, we should stop here.
+                }
+                Utilities.Show("permitOtherApplyWaiver");
+            }, function (e) {
+                permitErrorText.value = e;
+                Utilities.Show(permitErrorContainer);
             });
         }
         static SavePermitAllocation() {
@@ -184,10 +228,47 @@ var ImpactFees;
             pa.Permit_Number = permitNumber.value.trim();
             pa.Save();
         }
+        static SavePermitWaiver() {
+            let permitNumber = document.getElementById("permitNumberOther");
+            let permitErrorContainer = document.getElementById("permitOtherErrorContainer");
+            let permitErrorText = document.getElementById("permitOtherErrorText");
+            let searchType = document.querySelector('input[name="searchType"]:checked').value;
+            let path = "/";
+            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            if (i == 0) {
+                path = "/claypay/";
+            }
+            let pw = new ImpactFees.PermitWaiver();
+            let amount = document.getElementById("permitOtherImpactFee").value.replace("$", "").replace(",", "");
+            console.log('amount', amount);
+            pw.Amount = parseFloat(amount);
+            pw.Permit_Number = permitNumber.value.trim();
+            pw.Waiver_Type = searchType;
+            Utilities.Post(path + "API/ImpactFees/SavePermitWaiver", pw)
+                .then(function (a) {
+                console.log('response', a);
+                if (a.length > 0 && a !== "success") {
+                    Utilities.Show(permitErrorContainer);
+                    permitErrorText.value = a;
+                }
+                else {
+                    // let's indicate success in some way.
+                    // probably show a message of some sort
+                    // and then reset();
+                    PermitAllocation.Reset();
+                    Utilities.Hide("permitCredits");
+                    Utilities.Hide("permitOther");
+                    alert("Successfully applied Waiver/Exemption to Permit: " + pw.Permit_Number);
+                }
+            }).catch(function (e) {
+                // figure out what we want to do with the errors.
+                Utilities.Show(permitErrorContainer);
+                permitErrorText.value = e;
+            });
+        }
         Save() {
             let permitAllocationErrorContainer = document.getElementById("permitAllocationError");
             let permitAllocationError = document.getElementById("permitAllocationErrorList");
-            //XHR.SaveObject<PermitAllocation>("./API/ImpactFees/SavePermitAllocation", this)
             let path = "/";
             let i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {

@@ -316,6 +316,7 @@
     <Compile Include="Models\ImpactFees\DeveloperAgreement.cs" />
     <Compile Include="Models\ImpactFees\PermitAllocation.cs" />
     <Compile Include="Models\ImpactFees\PermitImpactFee.cs" />
+    <Compile Include="Models\ImpactFees\PermitWaiver.cs" />
     <Compile Include="Models\MyCache.cs" />
     <Compile Include="Models\Claypay\PaymentResponse.cs" />
     <Compile Include="Models\UserAccess.cs" />
@@ -375,6 +376,7 @@
     <TypeScriptCompile Include="Scripts\impactfees\ImpactFees.ts" />
     <TypeScriptCompile Include="Scripts\impactfees\PermitAllocation.ts" />
     <TypeScriptCompile Include="Scripts\impactfees\PermitImpactFee.ts" />
+    <TypeScriptCompile Include="Scripts\impactfees\PermitWaiver.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

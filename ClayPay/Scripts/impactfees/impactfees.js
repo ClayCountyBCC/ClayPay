@@ -42,7 +42,12 @@ var ImpactFees;
     }
     ImpactFees.Start = Start;
     function PermitActionChange() {
-        let actionType = document.querySelector('input[name="actionType"]:checked').value;
+        Utilities.Hide("permitOtherApplyWaiver");
+        Utilities.Set_Value("permitNumberOther", "");
+        Utilities.Set_Value("permitNumber", "");
+        let actionType = document.querySelector('input[name="searchType"]:checked').value;
+        if (actionType === null || actionType === undefined)
+            return;
         Utilities.Hide("permitCredits");
         Utilities.Hide("permitOther");
         if (actionType === "IFCR") {
@@ -310,4 +315,4 @@ var ImpactFees;
     }
     ImpactFees.buildMenuElements = buildMenuElements;
 })(ImpactFees || (ImpactFees = {}));
-//# sourceMappingURL=impactfees.js.map
+//# sourceMappingURL=ImpactFees.js.map

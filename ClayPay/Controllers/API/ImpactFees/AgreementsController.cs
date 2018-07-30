@@ -17,6 +17,11 @@ namespace ClayPay.Controllers.ImpactFees
     [Route("GetAgreements")]
     public IHttpActionResult GetAgreements(string agreementNumber = "", int builderId = -1, string permitNumber = "")
     {
+      var ua = Models.UserAccess.GetUserAccess(User.Identity.Name);
+      if (!ua.impactfee_access)
+      {
+        return Unauthorized();
+      }
       return Ok(CombinedAllocation.Get(agreementNumber, builderId, permitNumber));
     }
 
@@ -24,7 +29,11 @@ namespace ClayPay.Controllers.ImpactFees
     [Route("SaveDeveloperAgreement")]
     public IHttpActionResult SaveDeveloperAgreement(DeveloperAgreement da)
     {
-      
+      var ua = Models.UserAccess.GetUserAccess(User.Identity.Name);
+      if (!ua.impactfee_access)
+      {
+        return Unauthorized();
+      }
       var errors = da.Validate();
       if(errors.Count() > 0)
       {
@@ -46,7 +55,11 @@ namespace ClayPay.Controllers.ImpactFees
     [Route("SaveBuilderAllocation")]
     public IHttpActionResult SaveBuilderAllocation(BuilderAllocation ba)
     {
-
+      var ua = Models.UserAccess.GetUserAccess(User.Identity.Name);
+      if (!ua.impactfee_access)
+      {
+        return Unauthorized();
+      }
       var errors = ba.Validate();
       if (errors.Count() > 0)
       {
@@ -68,8 +81,13 @@ namespace ClayPay.Controllers.ImpactFees
     [Route("SavePermitAllocation")]
     public IHttpActionResult SavePermitAllocation(PermitAllocation pa)
     {
+      var ua = Models.UserAccess.GetUserAccess(User.Identity.Name);
+      if(!ua.impactfee_access)
+      {
+        return Unauthorized();
+      }
 
-      var errors = pa.Validate();
+      var errors = pa.ValidateImpactFeeCredits();
       if (errors.Count() > 0)
       {
         return Ok(errors);
@@ -87,11 +105,33 @@ namespace ClayPay.Controllers.ImpactFees
       }
     }
 
+    [HttpPost]
+    [Route("SavePermitWaiver")]
+    public IHttpActionResult SavePermitWaiver(PermitWaiver pw)
+    {
+      var ua = Models.UserAccess.GetUserAccess(User.Identity.Name);
+      if (!ua.impactfee_access)
+      {
+        return Unauthorized();
+      }
+      var permit = PermitImpactFee.Get(pw.Permit_Number, pw.Waiver_Type, "");
+      var error = pw.Validate(permit);
+      if (error.Length > 0) return Ok(error);
+
+      string IpAddress = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
+      if (!pw.ApplyWaiver(permit, IpAddress, ua))
+      {
+        return Ok("An error occurred while saving this permit's allocation, please try again.  If the error persists, please contact MIS.");
+      }
+      return Ok("success");
+    }
+
+
     [HttpGet]
     [Route("GetPermit")]
-    public IHttpActionResult GetPermit(string Permit_Number, string Agreement_Number = "")
+    public IHttpActionResult GetPermit(string Permit_Number, string Search_Type, string Agreement_Number = "")
     {
-      return Ok(PermitImpactFee.Get(Permit_Number));
+      return Ok(PermitImpactFee.Get(Permit_Number, Search_Type, Agreement_Number));
     }
 
   }

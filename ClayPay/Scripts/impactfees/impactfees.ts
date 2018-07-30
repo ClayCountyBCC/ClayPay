@@ -48,7 +48,12 @@ namespace ImpactFees
 
   export function PermitActionChange():void
   {
-    let actionType = (<HTMLInputElement>document.querySelector('input[name="actionType"]:checked')).value;
+    Utilities.Hide("permitOtherApplyWaiver");
+    Utilities.Set_Value("permitNumberOther", "");
+    Utilities.Set_Value("permitNumber", "");
+
+    let actionType = (<HTMLInputElement>document.querySelector('input[name="searchType"]:checked')).value;
+    if (actionType === null || actionType === undefined) return;
     Utilities.Hide("permitCredits");
     Utilities.Hide("permitOther");
     if (actionType === "IFCR")
@@ -57,6 +62,7 @@ namespace ImpactFees
       return;
     }
     Utilities.Show("permitOther");
+    
   }
 
   function LoadAgreements()

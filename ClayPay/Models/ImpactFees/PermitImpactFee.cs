@@ -71,10 +71,24 @@ namespace ClayPay.Models.ImpactFees
       }
     }
 
-    public static PermitImpactFee Get(string Permit_Number, string Agreement_Number = "")
+    public static PermitImpactFee Get(
+      string Permit_Number,
+      string Search_Type,
+      string Agreement_Number = "")
     {
       var dp = new DynamicParameters();
       dp.Add("@Permit_Number", Permit_Number);
+      List<string> catCodes = new List<string>();
+      if (Search_Type == "IFWS")
+      {
+        catCodes.Add("IFSCH"); // School Impact Fee
+      }
+      else
+      {
+        catCodes.Add("IFRD2");
+        catCodes.Add("IFRD3");
+      }
+      dp.Add("@CatCodes", catCodes);
       string query = @"
         SELECT
           M.PermitNo Permit_Number,
@@ -91,7 +105,7 @@ namespace ClayPay.Models.ImpactFees
         FROM bpMASTER_PERMIT M
         INNER JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
         LEFT OUTER JOIN clContractor C ON B.ContractorId = C.ContractorCd
-        LEFT OUTER JOIN ccCashierItem CI ON M.PermitNo = CI.AssocKey AND CI.CatCode IN ('IFRD2', 'IFRD3')
+        LEFT OUTER JOIN ccCashierItem CI ON M.PermitNo = CI.AssocKey AND CI.CatCode IN @CatCodes
         LEFT OUTER JOIN ccCashier CC ON CI.CashierId = CC.CashierId AND CC.IsVoided = 0
         LEFT OUTER JOIN ImpactFees_Permit_Allocations PA ON M.PermitNo = PA.Permit_Number
         WHERE M.PermitNo=@Permit_Number;";

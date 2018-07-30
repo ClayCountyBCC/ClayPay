@@ -27,7 +27,10 @@ namespace ImpactFees
 
     }
 
-    public static Get(Permit_Number: string, Agreement_Number: string = ""): Promise<PermitImpactFee>
+    public static Get(
+      Permit_Number: string,
+      Agreement_Number: string = "",
+      Search_Type: string): Promise<PermitImpactFee>
     {
       let path = "/";
       let i = window.location.pathname.toLowerCase().indexOf("/claypay");
@@ -37,6 +40,7 @@ namespace ImpactFees
       }
 
       let qs = "?permit_number=" + Permit_Number.trim();
+      qs += "&search_type=" + Search_Type;
       if (Agreement_Number.length > 0)
       {
         qs += "&agreement_number=" + Agreement_Number;

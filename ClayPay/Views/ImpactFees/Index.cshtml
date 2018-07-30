@@ -266,36 +266,39 @@
            class="hide">
 
     <form id="formPermitAllocations">
+      <div class="field">
+        <label class="label">Handle this Impact Fee as...</label>
 
-      <div class="control">
-        <label class="radio">
-          <input onchange="ImpactFees.PermitActionChange();"
-                 type="radio"
-                 value="IFCR"
-                 name="actionType" />
-          Credit
-        </label>
-        <label class="radio">
-          <input onchange="ImpactFees.PermitActionChange();"
-                 type="radio"
-                 value="IFWS"
-                 name="actionType" />
-          School Waiver
-        </label>
-        <label class="radio">
-          <input onchange="ImpactFees.PermitActionChange();"
-                 type="radio"
-                 value="IFWR"
-                 name="actionType" />
-          Waiver
-        </label>
-        <label class="radio">
-          <input onchange="ImpactFees.PermitActionChange();"
-                 type="radio"
-                 value="IFEX"
-                 name="actionType" />
-          Exemption
-        </label>
+        <div class="control">
+          <label class="radio">
+            <input onchange="ImpactFees.PermitActionChange();"
+                   type="radio"
+                   value="IFCR"
+                   name="searchType" />
+            Credit
+          </label>
+          <label class="radio">
+            <input onchange="ImpactFees.PermitActionChange();"
+                   type="radio"
+                   value="IFWS"
+                   name="searchType" />
+            School Waiver
+          </label>
+          <label class="radio">
+            <input onchange="ImpactFees.PermitActionChange();"
+                   type="radio"
+                   value="IFWR"
+                   name="searchType" />
+            Waiver
+          </label>
+          <label class="radio">
+            <input onchange="ImpactFees.PermitActionChange();"
+                   type="radio"
+                   value="IFEX"
+                   name="searchType" />
+            Exemption
+          </label>
+        </div>
       </div>
 
       <div class="hide"
@@ -303,7 +306,7 @@
         <div class="columns">
           <div class="column field">
             <div class="field">
-              <label class="label">Permit Number</label>
+              <label class="label">Permit Number - Impact Fee Credit</label>
             </div>
             <div class="field is-grouped">
               <div class="control">
@@ -558,6 +561,70 @@
 
       <div class="hide"
            id="permitOther">
+
+        <div class="columns">
+          <div class="column field">
+            <div class="field">
+              <label class="label">Permit Number - Other</label>
+            </div>
+            <div class="field is-grouped">
+              <div class="control">
+                <input id="permitNumberOther"
+                       class="input"
+                       type="number"
+                       maxlength="8"
+                       tabindex="1"
+                       placeholder="11800000" />
+                <p class="help">Charges shown will be based on the Type you selected above.</p>
+                <p id="permitNumberOtherLengthError"
+                   class="help is-danger hide">Permit numbers must be 8 digits.</p>
+                <p id="permitNumberOtherNumericError"
+                   class="help is-danger hide">
+                  Permit number must be numeric.
+                </p>
+              </div>
+              <div class="control">
+                <button onclick="ImpactFees.PermitAllocation.SearchPermitOther(); return false;"
+                        type="button"
+                        class="button is-primary">
+                  Search
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="column field">
+            <div class="field">
+              <label class="label">Impact Fee</label>
+            </div>
+            <div class="control">
+              <input type="text"
+                     class="input"
+                     value="$0.00"
+                     readonly
+                     id="permitOtherImpactFee" />
+            </div>
+          </div>
+          <div class="column"></div>
+        </div>
+        <button onclick="ImpactFees.PermitAllocation.SavePermitWaiver()"
+                type="button"
+                class="button is-success"
+                id="permitOtherApplyWaiver">
+          Apply Waiver / Exemption
+        </button>
+        <div id="permitOtherErrorContainer"
+             class="hide">
+          <div class="field">
+            <label class="label">Permit Error - Unable to procede</label>
+            <div class="control">
+              <textarea id="permitOtherErrorText"
+                        class="textarea"
+                        type="text"
+                        readonly>
+              </textarea>
+            </div>
+          </div>
+        </div>
 
       </div>
 
