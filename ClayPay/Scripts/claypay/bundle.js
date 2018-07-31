@@ -1198,6 +1198,8 @@ var clayPay;
                     break;
                 case ChargeView.cart:
                     // Show Convenience Fee
+                    clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
+                    clayPay.CurrentTransaction.UpdateTotals();
                     df.appendChild(Charge.buildConvFeeFooterRow());
                     break;
             }
@@ -1885,7 +1887,7 @@ var clayPay;
     ClientResponse.receiptSearchError = "receiptSearchError";
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=clientresponse.js.map
+//# sourceMappingURL=ClientResponse.js.map
 /// <reference path="payment.ts" />
 /// <reference path="clientresponse.ts" />
 var clayPay;
@@ -2051,7 +2053,7 @@ var clayPay;
     NewTransaction.paymentError = "paymentError";
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=newtransaction.js.map
+//# sourceMappingURL=NewTransaction.js.map
 var clayPay;
 (function (clayPay) {
     class AppType {
@@ -2640,4 +2642,4 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map
