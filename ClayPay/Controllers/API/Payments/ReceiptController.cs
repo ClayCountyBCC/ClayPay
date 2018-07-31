@@ -13,24 +13,32 @@ using ClayPay.Models.Claypay;
 namespace ClayPay.Controllers.API.Payments
 {
 
-    [RoutePrefix("API/Payments")]
-    public class ReceiptController : ApiController
+  [RoutePrefix("API/Payments")]
+  public class ReceiptController : ApiController
+  {
+    [HttpGet]
+    [Route("Receipt")]
+    public IHttpActionResult Get(string CashierId)
     {
-      [HttpGet]
-      [Route("Receipt")]
-      public IHttpActionResult Get(string CashierId)
+      var cr = new ClientResponse(CashierId);
+      if (cr == null)
       {
-        var cr = new ClientResponse(CashierId);
-        if (cr == null)
-        {
-          return InternalServerError();
-        }
-        else
-        {
-          return Ok(cr);
-        }
+        return InternalServerError();
       }
-
+      else
+      {
+        return Ok(cr);
+      }
     }
+
+    [HttpPost]
+    [Route("EditPayments")]
+    public IHttpActionResult Get(List<ReceiptPayment> paymentList)
+    {
+      // TODO: Check if Payments in list 
+      return Ok(new ClientResponse(paymentList[0].CashierId));
+    }
+  }
+
 }
  

@@ -147,6 +147,6 @@ nav ul {
 .credit-card-box .panel-heading img {
   min-width: 180px; }
 
-@media screen, print {
+@media print {
   .hide-for-print {
     display: none; } }
