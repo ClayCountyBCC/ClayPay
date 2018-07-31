@@ -172,6 +172,7 @@ namespace ClayPay.Models.ImpactFees
       var ifPayment = new Claypay.Payment(Claypay.Payment.payment_type.impact_fee_credit)
       {
         Amount = Amount_Allocated,
+        AmountTendered = 0,
         AmountApplied = Amount_Allocated,        
         Validated = true
       };

@@ -24,6 +24,7 @@ namespace ClayPay.Models.ImpactFees
       var ifPayment = new Claypay.Payment(Payment_Type)
       {
         Amount = permit.ImpactFee_Amount.Value,
+        AmountTendered = 0,
         AmountApplied = permit.ImpactFee_Amount.Value,
         Validated = true
       };
