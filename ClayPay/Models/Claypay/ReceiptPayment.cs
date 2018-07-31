@@ -81,7 +81,7 @@ namespace ClayPay.Models.Claypay
       var query = @"
         USE WATSC;
         SELECT DISTINCT
-          C.CashierId,
+          LTRIM(RTRIM(C.CashierId),
           CP.OTId,
           PayId, 
           TRANSDT [TransactionDate], 
@@ -105,6 +105,77 @@ namespace ClayPay.Models.Claypay
       var i = Constants.Get_Data<ReceiptPayment>(query, param);
       return i;
 
+    }
+
+    public static List<ReceiptPayment> GetPaymentsByPayId(List<int> payIds)
+    {
+
+      //var param = new DynamicParameters();
+      //param.Add("@PayId", payIds);
+      var query = @"
+        USE WATSC;
+        SELECT DISTINCT
+          LTRIM(RTRIM(C.CashierId),
+          CP.OTId,
+          PayId, 
+          TRANSDT [TransactionDate], 
+          INFO,
+          L.CODE [PaymentType],
+          CASE WHEN UPPER(LEFT(L.Narrative,2)) = 'CC' 
+               THEN LTRIM(RTRIM(SUBSTRING(L.Narrative,4,LEN(L.Narrative)))) 
+               ELSE L.Narrative END PaymentTypeDescription,
+          AmtTendered [AmountTendered], 
+          AmtApplied [AmountApplied], 
+          (AmtTendered - AmtApplied) ChangeDue, 
+          CkNo [CheckNumber],
+          ISNULL(TransactionId, '') TransactionId
+        FROM ccCashierPayment CP
+        INNER JOIN ccCashier C ON C.OTId = CP.OTid
+        INNER JOIN ccLookUp L ON LEFT(L.CODE,5) = LEFT(CP.PmtType,5)
+        WHERE CdType IN ('SPECIALPT', 'PMTTYPE')
+          AND CP.PayId in (@payIds)
+        ORDER BY CashierId DESC";
+
+      var i = Constants.Get_Data<ReceiptPayment>(query, payIds);
+      return i;
+    }
+
+    public static List<ReceiptPayment> EditPayments(List<ReceiptPayment> paymentsToEdit)
+    {
+      var cashierId = paymentsToEdit[0].CashierId;
+      foreach (var p in paymentsToEdit)
+      {
+        if (p.PaymentType == "CA" || p.PaymentType == "CK")
+        {
+
+
+          var param = new DynamicParameters();
+          param.Add("@PayId", p.PayId);
+          param.Add("@PaymentType", p.PaymentType);
+          param.Add("@CheckNumber", p.CheckNumber);
+          var query = @"
+          USE WATSC;
+
+          UPDATE ccCashierPayment
+          SET PmtType = @PaymentType, CkNo = @CheckNumber
+          WHERE PayId = @PayId;
+
+        ";
+
+          try
+          { 
+            
+            var i = Constants.Exec_Query(query, param); 
+
+          }
+          catch(Exception ex)
+          {
+            Constants.Log(ex, query);
+          }
+        }
+      }
+
+      return Get(cashierId);
     }
   }
 }

@@ -45,13 +45,12 @@ namespace ClayPay.Models.Balancing
       dbArgs.Add("@DateToBalance", DateToBalance);
 
       var sql = @"
-       --SELECT * CashierIds FROM DATE
         WITH CashierIdsToBalance (CashierId) AS (
         SELECT CashierId
         FROM dbo.ccCashier C
         WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE))
         
-        -- SELECT * Payment Types FROM ccLOOKUP TABLE
+        
         ,PaymentTypes (Code, SortKey,Narrative,CdType) AS 
         (
           SELECT DISTINCT Code,SortKey, Narrative, CdType
@@ -59,9 +58,7 @@ namespace ClayPay.Models.Balancing
           WHERE CdType IN ('SPECIALPT','PMTTYPE')
         )
 
-        -- CREATE TMP TABLE TO BE ABLE TO MERGE ALL TOTALS TO ONE WORKABLE TABLE
         SELECT Narrative Type, AmtApplied TotalAmount FROM 
-          
           (
           -- GET TOTAL AMOUNT OF CHARGES FOR BALANCING 
           -- CHECK THIS TOTAL AGAINST THE SUM(ccCashierPayment.AmtApplied) IN THE LAST SELECT STATEMENT
