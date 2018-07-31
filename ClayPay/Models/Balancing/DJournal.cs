@@ -23,8 +23,6 @@ namespace ClayPay.Models.Balancing
       this.ProcessedPaymentTotals = CashierTotal.ProcessPaymentTypeTotals(dateToProcess);
       this.GUTotals = CashierTotal.GetGUTotals(dateToProcess);
       this.GLAccountTotals = Account.GetGLAccountTotals(dateToProcess);
-      var TotalGUChargeAmount = CashierTotal.GetChargeTotal(dateToProcess);
-      var guAmount = GUTotals[0].TotalAmount;
       var balancedText = CashierTotal.IsDjournalBalanced(dateToProcess);
       if (balancedText.Length > 0)
       {

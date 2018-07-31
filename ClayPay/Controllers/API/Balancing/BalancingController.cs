@@ -55,8 +55,7 @@ namespace ClayPay.Controllers
     {
       try
       {
-        if (!DateToBalance.HasValue) DateToBalance = DJournal.NextDateToFinalize();
-        var dj = new DJournal(DateToBalance.Value);
+        var dj = new DJournal(DateToBalance ?? DJournal.NextDateToFinalize());
         return Ok(dj);
       }
       catch (Exception ex)

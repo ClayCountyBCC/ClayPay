@@ -185,26 +185,6 @@ namespace ClayPay.Models.Balancing
       }
     }
 
-    public static decimal GetChargeTotal(DateTime DateToBalance)
-    {
-      var param = new DynamicParameters();
-      param.Add("@DateToBalance", DateToBalance);
-
-      var query = @"
-        USE WATSC;
-
-        SELECT SUM(CP.AmtApplied) [TOTAL CHARGE AMOUNT] 
-        FROM ccCashierPayment CP 
-        INNER JOIN ccCashier C ON CP.OTid = C.OTId
-        INNER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(CP.PmtType,5)) AND L.CdType='PMTTYPE'
-        WHERE CAST(C.TransDt AS DATE) = CAST(@DateToBalance AS DATE)
-        ";
-
-      var i = Constants.Get_Data<decimal>(query, param).DefaultIfEmpty(0).First();
-      
-      return i;
-    }
-
     public static List<string> GetOutOfBalanceCashierIds(DateTime dateToBalance)
     {
 
@@ -253,7 +233,6 @@ namespace ClayPay.Models.Balancing
 
       var query = @"
         USE WATSC;
-
         WITH GuTotal(TotalPayments) AS (
         SELECT SUM(Amount) TotalAmount FROM (
               SELECT otid, cashierid, cast(transdt AS DATE) transdt, account, amount, type
@@ -262,28 +241,17 @@ namespace ClayPay.Models.Balancing
           AND TYPE = 'd') AS tmp
         GROUP BY type)
 
-        ,ChargeTotals ([TotalCharges])AS 
-        (SELECT SUM(TTL) [TOTAL CHARGE AMOUNT] FROM (
-          SELECT DISTINCT 
-            ccCashier.CashierId , 
-            ccCashier.Name, 
-            ccCashierPayment.PmtType, 
-            ccCashierPayment.OTid, 
-            NTUser,
-            (SELECT Sum( ccCashierPayment.AmtApplied)
-              FROM ccCashierPayment 
-              WHERE ccCashierPayment.OTid = ccCashier.OTId) as Ttl
-        FROM ccCashierPayment 
-        INNER JOIN ccCashier ON ccCashierPayment.OTid = ccCashier.OTId
-        WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)) AS TMP
-        LEFT OUTER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(PmtType,5))
-        WHERE L.CdType = 'PMTTYPE')
+        ,ChargeTotals ([TotalCharges]) AS 
+        ( SELECT SUM(CP.AmtApplied) 
+        FROM ccCashierPayment CP 
+        INNER JOIN ccCashier C ON CP.OTid = C.OTId
+        INNER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(CP.PmtType,5)) AND L.CdType='PMTTYPE'
+        WHERE CAST(C.TransDt AS DATE) = CAST(@DateToBalance AS DATE))
 
         SELECT
         CASE WHEN G.TotalPayments = C.TotalCharges THEN '' ELSE 'out of balance' END
         FROM GuTotal G
         INNER JOIN ChargeTotals C ON C.TotalCharges != 0 OR G.TotalPayments != 0
-      
       ";
 
       var i = Constants.Get_Data<string>(query, param).DefaultIfEmpty("").First();

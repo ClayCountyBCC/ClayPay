@@ -192,4 +192,8 @@ nav ul {
   min-width: 180px;
 }
 
-
+@media screen, print {
+  .hide-for-print {
+    display: none;
+  }
+}
