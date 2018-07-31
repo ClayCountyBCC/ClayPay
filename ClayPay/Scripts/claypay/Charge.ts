@@ -120,6 +120,8 @@
           break;
         case ChargeView.cart:
           // Show Convenience Fee
+          clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
+          clayPay.CurrentTransaction.UpdateTotals();
           df.appendChild(Charge.buildConvFeeFooterRow());
           break;
       }
