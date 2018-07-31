@@ -23,9 +23,10 @@
   display: flex;
 }
 
-@media print {
-  .hide-for-print {
+@media print
+{
+  .hide-for-print
+  {
     display: none;
   }
 }
-

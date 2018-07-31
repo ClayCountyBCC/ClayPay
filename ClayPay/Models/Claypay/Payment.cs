@@ -83,13 +83,7 @@ namespace ClayPay.Models.Claypay
       }
     }
     public decimal Amount { get; set; }
-    public decimal AmountTendered
-    {
-      get
-      {
-        return Amount;
-      }
-    }
+    public decimal AmountTendered { get; set; } = 0;
     public decimal AmountApplied { get; set; } = 0;
     public string Info { get; set; } = "";
     public string CheckNumber { get; set; } = "";
@@ -111,6 +105,7 @@ namespace ClayPay.Models.Claypay
     {
       PaymentType = pt;
       Amount = ccpayment.Amount;
+      AmountTendered = Amount;
       AmountApplied = Amount;
       TransactionId = ccpayment.TransactionId;
     }
@@ -129,6 +124,13 @@ namespace ClayPay.Models.Claypay
       if (Amount == 0) this.Validated = false;
       if (!this.Validated || Amount == 0) return false;
       if (AmountApplied == 0 && Amount > 0) AmountApplied = Amount;
+      if(PaymentType == payment_type.cash || PaymentType == payment_type.check)
+      {
+        if(AmountTendered == 0 && Amount > 0)
+        {
+          AmountTendered = Amount;
+        }
+      }
       if (Amount <= 0) // Payment amount should never be 0 or less
       {
         Error = "The Amount Paid cannot be less than or equal to zero.";
