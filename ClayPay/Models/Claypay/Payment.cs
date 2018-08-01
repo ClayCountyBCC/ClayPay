@@ -149,6 +149,31 @@ namespace ClayPay.Models.Claypay
       return true;
     }
 
+    public static string GetPaymentType(string pt)
+    {
+      switch (pt.ToLower())
+      {
+        case "cc_online":
+        case "cc_cashier":
+        case "cc on":
+          return "Credit Card";
+
+        case "ck":
+          return "Check";
+        case "ca":
+          return "Cash";
+        case "ifcr":
+          return "Impact Fee Credit";
+        case "ifex":
+          return "Impact Fee Exemption";
+        case "ifws":
+          return "School Impact Fee Waiver";
+        case "ifwr":
+          return "Road Impact Fee Waiver";
+        default:
+          return ""; // this should not ever be the case.
+      }
+    }
   }
   
 }

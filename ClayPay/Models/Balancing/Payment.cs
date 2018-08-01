@@ -108,13 +108,7 @@ namespace ClayPay.Models.Balancing
       {
 
         var payments = Constants.Get_Data<Payment>(sql, param);
-        //if (!ua.djournal_access || DateFinalized(DateToBalance))
-        //{
-        //  foreach (var p in payments)
-        //  {
-        //    p.Editable = false;
-        //  }
-        //}
+
         return payments;
       }
       catch (Exception ex)
@@ -123,9 +117,5 @@ namespace ClayPay.Models.Balancing
         return new List<Payment>();
       }
     }
-
-
-
-
   }
 }

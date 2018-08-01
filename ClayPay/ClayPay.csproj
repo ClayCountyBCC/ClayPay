@@ -347,6 +347,9 @@
     <Content Include="Views\Payments\CreditCardPayment.cshtml" />
     <None Include="Properties\PublishProfiles\Deploy Folder.pubxml" />
     <None Include="Properties\PublishProfiles\DV10 Internal.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile1.pubxml" />
+    <None Include="Properties\PublishProfiles\FolderProfile2.pubxml" />
     <None Include="Properties\PublishProfiles\Internal Production.pubxml" />
     <None Include="Properties\PublishProfiles\Public Production.pubxml" />
     <None Include="Web.Debug.config">

@@ -8,12 +8,12 @@ namespace ClayPay.Models.Claypay
 {
   public class ReceiptPayment
   {
-    public string CashierId{ get; set; }
+    public string CashierId { get; set; }
     public int PayId { get; set; }
     public int OTId { get; set; }
     public string Info { get; set; }
     public DateTime TransactionDate { get; set; }
-    public string PaymentType{ get; set; }
+    public string PaymentType { get; set; }
     public string PaymentTypeDescription
     {
       get; set;
@@ -41,17 +41,17 @@ namespace ClayPay.Models.Claypay
       //    default:
       //      return "";
       //  }
-        
+
       //}
     }
     public decimal AmountApplied { get; set; } = -1;
     public decimal AmountTendered { get; set; } = -1;
     public decimal ChangeDue { get; set; }
-    public decimal ConvenienceFeeAmount 
+    public decimal ConvenienceFeeAmount
     {
       get
       {
-        switch(PaymentType.Trim().ToLower())
+        switch (PaymentType.Trim().ToLower())
         {
           case "cc_online":
           case "cc_cashier":
@@ -67,8 +67,8 @@ namespace ClayPay.Models.Claypay
     public string TransactionId { get; set; } = "";
 
     public bool IsFinalized { get; set; } = false;
-  
-    
+
+
     public ReceiptPayment()
     {
 
@@ -140,9 +140,11 @@ namespace ClayPay.Models.Claypay
       return i;
     }
 
-    public static List<ReceiptPayment> EditPayments(List<ReceiptPayment> paymentsToEdit)
+    public static List<string> UpdatePayments(List<ReceiptPayment> paymentsToEdit,
+                  List<ReceiptPayment> originalPayments, // do i need this to rollback the transaction if not doing it using SQL?
+                  string username)
     {
-      var cashierId = paymentsToEdit[0].CashierId;
+      var errors = new List<string>();
       foreach (var p in paymentsToEdit)
       {
         if (p.PaymentType == "CA" || p.PaymentType == "CK")
@@ -151,31 +153,109 @@ namespace ClayPay.Models.Claypay
 
           var param = new DynamicParameters();
           param.Add("@PayId", p.PayId);
+          param.Add("@otid", p.OTId);
           param.Add("@PaymentType", p.PaymentType);
           param.Add("@CheckNumber", p.CheckNumber);
+          param.Add("@username", username.Replace("CLAYBCC\\", ""));
           var query = @"
           USE WATSC;
 
           UPDATE ccCashierPayment
-          SET PmtType = @PaymentType, CkNo = @CheckNumber
-          WHERE PayId = @PayId;
+          SET 
+            PmtType = @PaymentType, 
+            CkNo = @CheckNumber, 
+            UpdatedBy = @username, 
+            UpdatedOn = GETDATE()
+          WHERE PayId = @PayId 
+            AND OTid = @otid;
 
         ";
 
           try
-          { 
-            
-            var i = Constants.Exec_Query(query, param); 
+          {
+            if(!Constants.Save_Data(query, param))
+            {
+              
+              errors.Add($@"The {Payment.GetPaymentType(p.PaymentType).ToLower()} 
+                            payment with payId {p.PayId} was not updated");
+            }
 
           }
-          catch(Exception ex)
+          catch (Exception ex)
           {
             Constants.Log(ex, query);
+            errors.Add($@"The {Payment.GetPaymentType(p.PaymentType).ToLower()} 
+                            payment with payId {p.PayId} did not update properly");
           }
         }
       }
+      return errors;
+    }
 
-      return Get(cashierId);
+    public static List<string> EditPaymentValidation(List<ReceiptPayment> paymentsToEdit, List<ReceiptPayment> originalPayments)
+    {
+      var errors = new List<string>();
+      foreach(var p in paymentsToEdit)
+      {
+        bool hasMatch = false;
+        foreach(var o in originalPayments)
+        {
+          if(HasMatchingPayment(p, o))
+          {
+            hasMatch = true;
+            break;
+          }
+        }
+
+        if(!hasMatch)
+        {
+          errors.Add($@"The {Payment.GetPaymentType(p.PaymentType)} payment with payId {p.PayId} is not a valid payment.");
+        }
+      }
+      if (NotEditablePaymentTypes(paymentsToEdit, originalPayments))
+      {
+        errors.Add("You can only edit cash or check payments");
+      }
+
+      if (DateFinalized(originalPayments))
+      {
+        errors.Add("These payments have been finalized and can no longer be edited");
+      }
+        
+
+      return errors;
+    }
+
+
+    public static bool NotEditablePaymentTypes(List<ReceiptPayment> paymentTypesToEdit, List<ReceiptPayment> originalPaymentTypes)
+    {
+      if ((from p in paymentTypesToEdit
+           where p.PaymentType != "CA" &&
+                 p.PaymentType != "CK"
+           select p).ToList().Count() > 0 ||
+        (from p in originalPaymentTypes
+         where p.PaymentType != "CA" &&
+               p.PaymentType != "CK"
+         select p).ToList().Count() > 0)
+      {
+        return true;
+      }
+
+      return false;
+    }
+
+    public static bool DateFinalized(List<ReceiptPayment> originalPayments)
+    {
+      return Models.Balancing.DJournal.LastDateFinalized().AddDays(1).Date >= originalPayments[0].TransactionDate.Date;
+    }
+
+    public static bool HasMatchingPayment(ReceiptPayment paymentToCheck, ReceiptPayment originalPayment)
+    {
+      if(paymentToCheck.PayId == originalPayment.PayId && paymentToCheck.OTId == originalPayment.OTId)
+      {
+        return true;
+      }
+      return false;
     }
   }
 }

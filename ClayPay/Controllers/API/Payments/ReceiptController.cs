@@ -37,36 +37,23 @@ namespace ClayPay.Controllers.API.Payments
     [Route("EditPayments")]
     public IHttpActionResult Post(List<ReceiptPayment> editPaymentList)
     {
-
+    
       if (editPaymentList != null && editPaymentList.Count() > 0)
       {
-        var response = new ClientResponse(editPaymentList[0].CashierId);
-        var cashierId = editPaymentList[0].CashierId;
-
-        var isNotFinalized = DJournal.LastDateFinalized().AddDays(1).Date >= editPaymentList[0].TransactionDate.Date;
-        if (!isNotFinalized)
-        {
-          response.Errors.Add("These payments have been finalized and can no longer be edited");
-        }
-        
-        // Get Payment data from DB
+        var errors = new List<string>();
         var originalPaymentList = ReceiptPayment.GetPaymentsByPayId((from p in editPaymentList
-                                                                     where p.PaymentType == "CA" ||
-                                                                           p.PaymentType == "CK"
                                                                      select p.PayId).ToList());
-        // this will be true if there are not cash or check payments
-        if (originalPaymentList.Count() == 0)
-        {
-          response.Errors.Add("There were no cash or check payments to edit.");
-          return Ok(new ClientResponse(cashierId));
-        }
-        // removes any payments not in the list of payments to edit
-        originalPaymentList.RemoveAll(p => !editPaymentList.Contains(p));
 
-        if(isNotFinalized && originalPaymentList.Count() == editPaymentList.Count() )
+        var cashierId = originalPaymentList[0].CashierId;
+        errors = ReceiptPayment.EditPaymentValidation(editPaymentList, originalPaymentList);
+
+        if(errors.Count() == 0)
         {
-          response.ReceiptPayments = ReceiptPayment.EditPayments(editPaymentList);
+          errors = ReceiptPayment.UpdatePayments(editPaymentList, originalPaymentList, User.Identity.Name);
         }
+
+        var response = new ClientResponse(cashierId);
+        response.Errors = errors;
 
         return Ok(response);
 
@@ -75,9 +62,8 @@ namespace ClayPay.Controllers.API.Payments
       {
         return Ok(BadRequest("There are no payments to edit"));
       }
-      
+
     }
   }
-
 }
  
