@@ -28,6 +28,7 @@ var Balancing;
     ];
     function Start() {
         buildMenuElements();
+        Balancing.DJournal.GetAndShow();
     }
     Balancing.Start = Start;
     function buildMenuElements() {

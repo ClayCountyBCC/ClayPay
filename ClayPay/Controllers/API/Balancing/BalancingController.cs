@@ -50,12 +50,12 @@ namespace ClayPay.Controllers
     **************************************************************************************************************/
     
     [HttpGet]
-    [Route("Get")]
+    [Route("GetDJournal")]
     public IHttpActionResult Get(DateTime? DateToBalance = null)
     {
       try
       {
-        var dj = new DJournal(DateToBalance ?? DJournal.NextDateToFinalize());
+        var dj = new DJournal(DateToBalance ?? DJournal.LastDateFinalized().AddDays(1));
         return Ok(dj);
       }
       catch (Exception ex)
@@ -154,7 +154,7 @@ namespace ClayPay.Controllers
     {
       try
       {
-        return Ok(DJournal.NextDateToFinalize());
+        return Ok(DJournal.LastDateFinalized().AddDays(1));
       }
       catch(Exception ex)
       {

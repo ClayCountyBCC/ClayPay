@@ -10,7 +10,7 @@ namespace ClayPay.Models.Balancing
   {
     public DateTime DJournalDate { get; set; } = DateTime.MinValue.Date;
     public DateTime FinalizedOn { get; set; } = DateTime.MinValue;
-    public string CreatedBy { get; set; } = "";
+    public string CreatedBy { get; set; } 
     public bool IsCreated
     { 
       get
@@ -19,9 +19,14 @@ namespace ClayPay.Models.Balancing
       }
     }
 
-    public DJournalLog()
+    public DJournalLog(string CreatedBy)
     {
       
+    }
+
+    public DJournalLog()
+    {
+      CreatedBy = "";
     }
 
     public static int Create(DateTime dateToFinalize, String username)

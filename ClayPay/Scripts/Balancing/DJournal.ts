@@ -21,6 +21,26 @@
     {
 
     }
+
+    public static GetAndShow(): void
+    {
+      let path = "/";
+      let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+      if (i == 0)
+      {
+        path = "/claypay/";
+      }
+      Utilities.Get<DJournal>(path + "API/Balancing/GetDJournal").then(
+        function (dj)
+        {
+          console.log('djournal', dj);
+        }, function (error)
+        {
+          console.log('error', error);
+        });
+    }
+
+
   }
 
 }

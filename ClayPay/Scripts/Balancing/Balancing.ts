@@ -32,6 +32,7 @@ namespace Balancing
   export function Start() : void
   {
     buildMenuElements();
+    DJournal.GetAndShow();
   }
 
   export function buildMenuElements(): void

@@ -136,6 +136,23 @@ namespace ClayPay.Models
       }
     }
 
+    public static T Exec_Scalar<T>(string query, DynamicParameters dbA = null)
+    {
+      try
+      {
+        using (IDbConnection db =
+          new SqlConnection(Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
+        {
+          return db.ExecuteScalar<T>(query, dbA);
+        }
+      }
+      catch (Exception ex)
+      {
+        Log(ex, query);
+        return default(T);
+      }
+    }
+
     public static bool Save_Data<T>(string Query, T item)
     {
       try

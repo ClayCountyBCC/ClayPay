@@ -20,7 +20,7 @@ namespace ClayPay.Controllers
     public IHttpActionResult Post(NewTransaction thisTransaction)
     {
       thisTransaction.TransactionCashierData.ipAddress = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
-      thisTransaction.TransactionCashierData.CurrentUser = new UserAccess(User.Identity.Name);
+      thisTransaction.TransactionCashierData.CurrentUser = UserAccess.GetUserAccess(User.Identity.Name);
       if (thisTransaction.ValidatePaymentTransaction())
       {
         var response = thisTransaction.ProcessPaymentTransaction(); 

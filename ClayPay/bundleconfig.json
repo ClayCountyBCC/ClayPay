@@ -38,7 +38,10 @@
       "bower_components/promise-polyfill/dist/polyfill.js",
       "bower_components/fetch/fetch.js",
       "Scripts/app/Utilities.js",
-      "Scripts/claypay/Payment.js",
+      "Scripts/balancing/Account.js",
+      "Scripts/balancing/CashierTotal.js",
+      "Scripts/balancing/DJournal.js",
+      "Scripts/balancing/DJournalLog.js",
       "Scripts/balancing/Balancing.js"
     ]
   }

@@ -81,7 +81,7 @@ namespace ClayPay.Models.Claypay
       var query = @"
         USE WATSC;
         SELECT DISTINCT
-          LTRIM(RTRIM(C.CashierId),
+          LTRIM(RTRIM(C.CashierId)) CashierId,
           CP.OTId,
           PayId, 
           TRANSDT [TransactionDate], 
@@ -115,7 +115,7 @@ namespace ClayPay.Models.Claypay
       var query = @"
         USE WATSC;
         SELECT DISTINCT
-          LTRIM(RTRIM(C.CashierId),
+          LTRIM(RTRIM(C.CashierId)) CashierId,
           CP.OTId,
           PayId, 
           TRANSDT [TransactionDate], 

@@ -43,7 +43,7 @@ namespace ClayPay.Controllers.API.Payments
         var response = new ClientResponse(editPaymentList[0].CashierId);
         var cashierId = editPaymentList[0].CashierId;
 
-        var isNotFinalized = DJournal.NextDateToFinalize() >= editPaymentList[0].TransactionDate.Date;
+        var isNotFinalized = DJournal.LastDateFinalized().AddDays(1).Date >= editPaymentList[0].TransactionDate.Date;
         if (!isNotFinalized)
         {
           response.Errors.Add("These payments have been finalized and can no longer be edited");
