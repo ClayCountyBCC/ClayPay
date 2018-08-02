@@ -8,12 +8,12 @@ namespace ClayPay.Models.Claypay
 {
   public class ReceiptPayment
   {
-    public string CashierId { get; set; }
-    public int PayId { get; set; }
-    public int OTId { get; set; }
-    public string Info { get; set; }
-    public DateTime TransactionDate { get; set; }
-    public string PaymentType { get; set; }
+    public string CashierId { get; set; } = "";
+    public int PayId { get; set; } = -1;
+    public int OTId { get; set; } = -1;
+    public string Info { get; set; } = "";
+    public DateTime TransactionDate { get; set; } = DateTime.MinValue;
+    public string PaymentType { get; set; } = "";
     public string PaymentTypeDescription
     {
       get; set;
@@ -46,7 +46,7 @@ namespace ClayPay.Models.Claypay
     }
     public decimal AmountApplied { get; set; } = -1;
     public decimal AmountTendered { get; set; } = -1;
-    public decimal ChangeDue { get; set; }
+    public decimal ChangeDue { get; set; } = -1;
     public decimal ConvenienceFeeAmount
     {
       get

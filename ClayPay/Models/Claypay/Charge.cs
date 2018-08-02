@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-
+using Dapper;
 namespace ClayPay.Models
 {
   public class Charge
   {
-    public int ItemId { get; set; }
-    public string Description { get; set; }
+    public int ItemId { get; set; } = -1;
+    public string Description { get; set; } = "";
     public DateTime TimeStamp { get; set; } = DateTime.MinValue;
-    public string Assoc { get; set; }
-    public string AssocKey { get; set; }
+    public string Assoc { get; set; } = "";
+    public string AssocKey { get; set; } = "";
     public decimal Total { get; set; } = 0;
     public string TotalDisplay
     {
@@ -20,7 +20,7 @@ namespace ClayPay.Models
         return Total.ToString("C");
       }
     }
-    public string Detail { get; set; }
+    public string Detail { get; set; } = "";
 
     public string TimeStampDisplay
     {
@@ -36,7 +36,7 @@ namespace ClayPay.Models
 
     public static List<Charge> GetChargesByAssocKey(string AssocKey)
     {
-      var dbArgs = new Dapper.DynamicParameters( );
+      var dbArgs = new DynamicParameters( );
       dbArgs.Add("@AK", AssocKey);
       string sql = @"
         USE WATSC;
@@ -59,7 +59,7 @@ namespace ClayPay.Models
 
     public static List<Charge> GetChargesByCashierId(string CashierId)
     {
-      var dbArgs = new Dapper.DynamicParameters();
+      var dbArgs = new DynamicParameters();
       dbArgs.Add("@CashierId", CashierId);
       string sql = @"
  
@@ -75,6 +75,7 @@ namespace ClayPay.Models
           FROM vwClaypayCharges vC
           WHERE CashierId = @CashierId
         ORDER BY TimeStamp ASC";
+
       var lc = Constants.Get_Data<Charge>(sql, dbArgs);
       return lc;
     }
@@ -98,5 +99,44 @@ namespace ClayPay.Models
       return lc;
     }
 
+    public static List<Charge> GetChargesWithNoGLByDate(DateTime dateToProcess)
+    {
+
+      var param = new DynamicParameters();
+      //param.Add("@DateToProcess", dateToProcess);
+
+      var sql = @"
+        USE WATSC;
+        DECLARE @DateToBalance DATE = DATEADD(dd,-1,GETDATE());
+      
+
+        WITH CashierIdsWithoutGL (CashierId) AS (
+        SELECT DISTINCT LEFT(CI.CashierId,9) CashierId
+        FROM ccCASHIER C
+        INNER JOIN ccCashierPayment CP ON CP.OTid = C.OTId
+        INNER JOIN ccCashierItem CI ON CI.CashierId = C.CashierId AND CI.OTId = CP.OTid
+        INNER JOIN ccLookUp L ON LEFT(UPPER(L.CODE),5) = LEFT(UPPER(CP.PmtType),5)
+        INNER JOIN ccGL GL ON CI.CatCode = GL.CatCode
+        WHERE CAST(C.TransDt AS DATE) = CAST(@DateToBalance AS DATE)
+          AND (GL.ACCOUNT IS NULL OR GL.ACCOUNT = '')
+        GROUP BY CI.CashierId)
+
+        SELECT DISTINCT
+	        vC.ItemId,
+	        ISNULL(CONCAT(LTRIM(RTRIM(CI.CatCode)), ' - ' + Description), '') Description,
+	        vC.TimeStamp,
+	        vC.Assoc,
+	        vC.AssocKey,
+	        ISNULL(vC.Total, 0) Total,	
+	        Detail
+        FROM vwClaypayCharges vC
+        INNER JOIN ccCashierItem CI ON CI.ItemId = vC.ItemId
+        WHERE vC.CashierId in (select CashierId from CashierIdsWithoutGL)
+        ORDER BY TimeStamp ASC";
+
+
+      var c = Constants.Get_Data<Charge>(sql, param);
+      return c;
+    }
   }
 }

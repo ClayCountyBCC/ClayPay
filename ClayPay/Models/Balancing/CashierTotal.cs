@@ -45,6 +45,8 @@ namespace ClayPay.Models.Balancing
       dbArgs.Add("@DateToBalance", DateToBalance);
 
       var sql = @"
+        USE WATSC;
+
         WITH CashierIdsToBalance (CashierId) AS (
         SELECT CashierId
         FROM dbo.ccCashier C

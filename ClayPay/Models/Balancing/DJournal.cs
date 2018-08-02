@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Data;
-
 using System.Linq;
 using System.Web;
 using Dapper;
+using ClayPay.Controllers;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using ClayPay.Models.Claypay;
 
 namespace ClayPay.Models.Balancing
-{ 
+{
   public class DJournal
   {
     public List<CashierTotal> ProcessedPaymentTotals { get; set; } = new List<CashierTotal>();
@@ -25,13 +27,38 @@ namespace ClayPay.Models.Balancing
       this.ProcessedPaymentTotals = CashierTotal.ProcessPaymentTypeTotals(dateToProcess);
       this.GUTotals = CashierTotal.GetGUTotals(dateToProcess);
       this.GLAccountTotals = Account.GetGLAccountTotals(dateToProcess);
-      var balancedText = CashierTotal.IsDjournalBalanced(dateToProcess);
-      if (balancedText.Length > 0)
+      var chargesWithNoGLs = Charge.GetChargesWithNoGLByDate(dateToProcess);
+      if (chargesWithNoGLs.Count() > 0)
       {
-        Error.Add("Djournal is " + balancedText);
-        var keys = String.Join(", \n", CashierTotal.GetOutOfBalanceCashierIds(dateToProcess));
-        Error.Add("The following keys have issues:\n" + keys);
+        var chargeString = "";
+        foreach (var c in chargesWithNoGLs)
+        {
+          chargeString += $"\n{c.AssocKey}\t{c.Description}";
+        }
+        Error.Add("The following assokeys have charges with category codes not associated with a GL account:\n" +
+                  "\nAssocKey\tDescrtiption" +
+                  "\n********\t*********************\n" +
+                  chargeString +
+                  "\n\nThe Djournal for " +
+                  dateToProcess.ToShortDateString() +
+                  " cannot be finalized until all category codes are associated with a GL account.");
+
+        Console.Write("Just here Sto check the error string", Error);
       }
+
+
+      if(Error.Count() ==0)
+      {
+        var balancedText = CashierTotal.IsDjournalBalanced(dateToProcess);
+        if (balancedText.Length > 0)
+        {
+          Error.Add("Djournal is " + balancedText);
+          var keys = String.Join(", \n", CashierTotal.GetOutOfBalanceCashierIds(dateToProcess));
+          Error.Add("The following keys have issues:\n" + keys);
+        }
+      }
+
+      //
 
       Log = DJournalLog.Get(dateToProcess);
       if (finalize && Error.Count() == 0)
@@ -64,17 +91,6 @@ namespace ClayPay.Models.Balancing
       }
     }
 
-    //public static DateTime NextDateToFinalize()
-    //{
-    //  var sql = @"
-    //    SELECT CAST(ISNULL(DATEADD(dd,1,MAX(djournal_date)), '2018-07-19') AS DATE)
-    //    FROM ccDjournalTransactionLog
-    //    WHERE CAST(djournal_date AS DATE) < CAST(GETDATE() AS DATE)
-    //  ";
-    //  return Constants.Exec_Scalar<DateTime>(sql).Date;
-    //  //var date = Constants.Get_Data<DateTime>(sql).First();
-    //  //return date.Date;
-    //}
     public static bool IsDateFinalized(DateTime DateToCheck)
     {
       return DateToCheck <= LastDateFinalized();
@@ -91,5 +107,7 @@ namespace ClayPay.Models.Balancing
       //return djournalDate.Date < DateToCheck.Date;
       //return i > 0;
     }
+
+
   }
 }

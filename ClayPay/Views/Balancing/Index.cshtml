@@ -37,15 +37,15 @@
     //var CashierId = "18-013974";
     //var dateToFinalize = "";
     //var date = new Date();
-    //Utilities.Get("../API/Balancing/NextDateToFinalize").then(function (a)
-    //{
+    Utilities.Get("../API/Balancing/NextDateToFinalize").then(function (a)
+    {
     //  console.log('response', a);
     //  date = a;
     //  dateToFinalize = date;
     //  console.log('dateToFinalize', date);
 
-    //  var i = Utilities.Get("../API/Balancing/Get?DateToBalance=" + date);
-    //  console.log("Initial Djournal", i);
+      var i = Utilities.Get("../API/Balancing/GetDJournal?DateToBalance=" + date);
+      console.log("Initial Djournal", i);
 
     //  //// Had to use literal for payment type for testing. Cannot seem to reference Payment.js.
     //  //// It is in bundle as shown above but doesn't seem to let me reference it.
@@ -64,10 +64,10 @@
     //    });
     //    console.log("Finalize Djournal date", k);
 
-    //  }).catch(function (e)
-    //  {
-    //    console.log("error", e);
-    //  });
+      }).catch(function (e)
+      {
+        console.log("error", e);
+      });
 
 
 
