@@ -86,7 +86,7 @@ namespace ClayPay.Models.Claypay
         var amountPaid = (from payment in Payments select payment.AmountApplied).Sum();
 
         var cr = new ClientResponse(TransactionCashierData.CashierId, Charges);
-        cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddressRemoveThisAgain);
+        cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddress);
         return cr;
       }
       else
