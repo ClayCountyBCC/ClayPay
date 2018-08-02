@@ -50,6 +50,11 @@ namespace ClayPay.Models.Claypay
     }
 
 
+    public void SendPayerEmailReceipt(string EmailAddress)
+    {
+      if (EmailAddress.Length == 0) return;
+      int i = 0;
+    }
 
   }
 }

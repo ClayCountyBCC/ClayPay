@@ -7,6 +7,7 @@ using System.Web.Http;
 using System.Net;
 using System.IO;
 using System.Data;
+using System.Data.SqlClient;
 using Dapper;
 using ClayPay.Models.Claypay;
 using System.Web.WebPages;
@@ -84,7 +85,9 @@ namespace ClayPay.Models.Claypay
       {
         var amountPaid = (from payment in Payments select payment.AmountApplied).Sum();
 
-        return new ClientResponse(TransactionCashierData.CashierId, Charges);
+        var cr = new ClientResponse(TransactionCashierData.CashierId, Charges);
+        cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddressRemoveThisAgain);
+        return cr;
       }
       else
       {
@@ -738,38 +741,7 @@ namespace ClayPay.Models.Claypay
         cashierId = TransactionCashierData.CashierId,
         UserName = TransactionCashierData.CurrentUser.user_name
       }) != -1;
-      //if(IssueAssociatedPermits())
-      //{
-      //  Constants.Log($"There was a problem seeting the permit issue dates for OTID: {TransactionOTid}",
-      //                $"Need to set Issue Date for permits based on charges with OTID: {TransactionOTid}.",
-      //                "", "", "");
 
-      //  Errors.Add($@"Problem Issuing Permits. Please contact Building department for assistance. Reference 
-      //                        Receipt number {TransactionCashierId}.");
-
-      //  return false;
-      //}
-      //if(!HandleHolds())
-      //{
-      //  Constants.Log($"There was a problem signing off holds for charges associated with OTID: {TransactionOTid}",
-      //                $"Need to sign of holds based on charges with OTID: {TransactionOTid}.",
-      //                "", "", "");
-      //  Errors.Add($@"There was an issue signing of holds associated with the payment. 
-      //                Please contact the building department for assistance.
-      //                 Reference receipt number {TransactionCashierId}.");
-      //  return false;
-      //}
-      //if (!UpdateContractorDates())
-      //{
-      //  Constants.Log($"There was a problem updating the contractors expiraction date. OTID: {TransactionOTid}",
-      //                $"Need to update contractor based on paid charges with OTID: {TransactionOTid}.",
-      //                "", "", "");
-      //  Errors.Add($@"There was a problem updating the contractors expiraction date. 
-      //                Please contact the building department for assistance.
-      //                 Reference receipt number {TransactionCashierId}.");
-      //  return false;
-      //}
-      //return true;
     }
 
     public bool rollbackTransaction()
