@@ -103,12 +103,10 @@ namespace ClayPay.Models
     {
 
       var param = new DynamicParameters();
-      //param.Add("@DateToProcess", dateToProcess);
+      param.Add("@DateToProcess", dateToProcess);
 
       var sql = @"
         USE WATSC;
-        DECLARE @DateToBalance DATE = DATEADD(dd,-1,GETDATE());
-      
 
         WITH CashierIdsWithoutGL (CashierId) AS (
         SELECT DISTINCT LEFT(CI.CashierId,9) CashierId
@@ -117,13 +115,13 @@ namespace ClayPay.Models
         INNER JOIN ccCashierItem CI ON CI.CashierId = C.CashierId AND CI.OTId = CP.OTid
         INNER JOIN ccLookUp L ON LEFT(UPPER(L.CODE),5) = LEFT(UPPER(CP.PmtType),5)
         INNER JOIN ccGL GL ON CI.CatCode = GL.CatCode
-        WHERE CAST(C.TransDt AS DATE) = CAST(@DateToBalance AS DATE)
+        WHERE CAST(C.TransDt AS DATE) = CAST(@DateToProcess AS DATE)
           AND (GL.ACCOUNT IS NULL OR GL.ACCOUNT = '')
         GROUP BY CI.CashierId)
 
         SELECT DISTINCT
 	        vC.ItemId,
-	        ISNULL(CONCAT(LTRIM(RTRIM(CI.CatCode)), ' - ' + Description), '') Description,
+	        ISNULL(CONCAT(LTRIM(RTRIM(CI.CatCode)), ' - ' + Description), '') [Description],
 	        vC.TimeStamp,
 	        vC.Assoc,
 	        vC.AssocKey,
@@ -131,8 +129,9 @@ namespace ClayPay.Models
 	        Detail
         FROM vwClaypayCharges vC
         INNER JOIN ccCashierItem CI ON CI.ItemId = vC.ItemId
+        INNER JOIN ccGL GL ON GL.CatCode = CI.CatCode AND GL.Account IS NULL
         WHERE vC.CashierId in (select CashierId from CashierIdsWithoutGL)
-        ORDER BY TimeStamp ASC";
+        ORDER BY vC.AssocKey";
 
 
       var c = Constants.Get_Data<Charge>(sql, param);

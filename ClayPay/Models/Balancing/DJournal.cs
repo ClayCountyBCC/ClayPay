@@ -35,9 +35,9 @@ namespace ClayPay.Models.Balancing
         {
           chargeString += $"\n{c.AssocKey}\t{c.Description}";
         }
-        Error.Add("The following assokeys have charges with category codes not associated with a GL account:\n" +
-                  "\nAssocKey\tDescrtiption" +
-                  "\n********\t*********************\n" +
+        Error.Add("The following assockeys have charges with category codes not associated with a GL account:\n" +
+                  "\nAssocKey\tCatCode - Descrtiption" +
+                  "\n********\t**********************\n" +
                   chargeString +
                   "\n\nThe Djournal for " +
                   dateToProcess.ToShortDateString() +
