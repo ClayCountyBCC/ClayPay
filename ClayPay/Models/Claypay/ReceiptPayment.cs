@@ -140,9 +140,10 @@ namespace ClayPay.Models.Claypay
       return i;
     }
 
-    public static List<string> UpdatePayments(List<ReceiptPayment> paymentsToEdit,
-                  List<ReceiptPayment> originalPayments, // do i need this to rollback the transaction if not doing it using SQL?
-                  string username)
+    public static List<string> UpdatePayments(
+      List<ReceiptPayment> paymentsToEdit,
+      List<ReceiptPayment> originalPayments, // do i need this to rollback the transaction if not doing it using SQL?
+      string username)
     {
       var errors = new List<string>();
       foreach (var p in paymentsToEdit)
@@ -173,9 +174,9 @@ namespace ClayPay.Models.Claypay
 
           try
           {
-            if(!Constants.Save_Data(query, param))
+            if (!Constants.Save_Data(query, param))
             {
-              
+
               errors.Add($@"The {Payment.GetPaymentType(p.PaymentType).ToLower()} 
                             payment with payId {p.PayId} was not updated");
             }
