@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using Dapper;
-
-using ClayPay.Controllers;
+using System.Text;
+using System.Web.Http;
+using System.Net;
+using System.IO;
 using System.Data;
-using System.Data.SqlClient;
-using System.Configuration;
+using Dapper;
+using ClayPay.Models.Claypay;
+using System.Web.WebPages;
+
 
 namespace ClayPay.Models.Claypay
 {
@@ -808,7 +811,66 @@ namespace ClayPay.Models.Claypay
       }
     }
 
+    public static List<string> BuildEmailBody(string cashierId, CashierData payerData)
+    {
+      var charges = Charge.GetChargesByCashierId(cashierId);
+      var payments = ReceiptPayment.Get(cashierId);
 
+      var emailReceipt = new List<string>();
+      var emailHeader = new StringBuilder();
+      var csHeader = new StringBuilder();
+      var cs = new StringBuilder();
+      var psHeader = new StringBuilder();
+      var ps = new StringBuilder();
+
+      emailHeader.Append(payerData.PayerName).Append("\t\t\t").Append(payerData.TransactionDate.ToString()).AppendLine()
+                 .Append(payerData.PayerEmailAddress).AppendLine()
+                 .Append(payerData.PayerCompanyName).AppendLine()
+                 .Append(payerData.PayerStreetAddress).AppendLine()
+                 .Append(payerData.PayerStreet2).AppendLine()
+                 .AppendLine()
+                 .AppendLine();
+                 
+      csHeader.AppendLine()
+              .Append("Key\t\tDescription\tAmount");
+
+      
+      foreach (var c in charges)
+      {
+        cs.Append(c.AssocKey).
+        Append("\t")
+        .Append(c.Description)
+        .Append("\t")
+        .Append(c.TotalDisplay)
+        .AppendLine();
+      }
+      psHeader.AppendLine()
+              .Append("\t\tCheck Number\n")
+              .Append("Payment Type\tTransaction ID\tAmount\tConvenience Fee(cc only)");
+
+      foreach (var p in payments)
+      {
+        ps.Append(p.PaymentTypeDescription)
+        .Append("\t")
+        .Append(p.CheckNumber + p.TransactionId)
+        .Append("\t\t")
+        .Append(p.AmountApplied)
+        .Append("\t")
+        .Append(p.ConvenienceFeeAmount)
+        .AppendLine();
+      }
+
+      var emailBody = new List<string>
+      {
+        emailHeader.ToString(),
+        csHeader.ToString(),
+        cs.ToString(),
+        psHeader.ToString(),
+        ps.ToString()
+       };
+       
+      return emailBody;
+    }
 
     //public string CreateEmailBody()
     //{
