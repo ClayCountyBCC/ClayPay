@@ -728,7 +728,7 @@ namespace ClayPay.Models.Claypay
               FROM ccCashierItem 
               WHERE OTId=@otid AND
                 Assoc='CL' AND
-                CatCode IN ('CLLTF', 'CLFE', 'CIAC', 'LFE') AND
+                CatCode IN ('CLLTF', 'CLFE', 'CIAC', 'LFE') ANDd
               (SELECT ISNULL(SUM(Total), 0) AS Total 
                 FROM ccCashierItem
                 WHERE AssocKey IN (SELECT DISTINCT AssocKey 
