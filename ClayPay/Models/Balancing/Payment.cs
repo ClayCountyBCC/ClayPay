@@ -29,48 +29,49 @@ namespace ClayPay.Models.Balancing
     // Without the ability to void payments, this will become unnecessary after a time
     public static List<Payment> GetPayments(
       DateTime DateToBalance,
-      Claypay.Payment.payment_type payment_type,
-      UserAccess ua)
+      string PaymentType
+      )
     {
-      List<string> PaymentTypes = new List<string>();
-      switch (payment_type)
-      {
-        case Claypay.Payment.payment_type.cash:
-          PaymentTypes.Add("CA");
-          break;
-        case Claypay.Payment.payment_type.check:
-          PaymentTypes.Add("CK");
-          break;
-        case Claypay.Payment.payment_type.credit_card_public:
-          PaymentTypes.Add("CC_ONLINE");
-          PaymentTypes.Add("CC ON");
-          PaymentTypes.Add("CC ONLINE");
-          break;
-        case Claypay.Payment.payment_type.credit_card_cashier:
-          PaymentTypes.Add("CC_CASHIER");
-          PaymentTypes.Add("VISA");
-          PaymentTypes.Add("MC");
-          PaymentTypes.Add("AMEX");
-          PaymentTypes.Add("DISC");
-          break;
-        case Claypay.Payment.payment_type.impact_fee_credit:
-          PaymentTypes.Add("IFCR");
-          break;
-        case Claypay.Payment.payment_type.impact_fee_exemption:
-          PaymentTypes.Add("IFEX");
-          break;
-        case Claypay.Payment.payment_type.impact_waiver_school:
-          PaymentTypes.Add("IFWS");
-          break;
-        case Claypay.Payment.payment_type.impact_waiver_road:
-          PaymentTypes.Add("IFWR");
-          break;
-        default:
-          return new List<Payment> { new Payment("Invalid Payment Type.") };
-      }
+      // Claypay.Payment.payment_type payment_type
+      //List<string> PaymentTypes = new List<string>();
+      //switch (payment_type)
+      //{
+      //  case Claypay.Payment.payment_type.cash:
+      //    PaymentTypes.Add("CA");
+      //    break;
+      //  case Claypay.Payment.payment_type.check:
+      //    PaymentTypes.Add("CK");
+      //    break;
+      //  case Claypay.Payment.payment_type.credit_card_public:
+      //    PaymentTypes.Add("CC_ONLINE");
+      //    PaymentTypes.Add("CC ON");
+      //    PaymentTypes.Add("CC ONLINE");
+      //    break;
+      //  case Claypay.Payment.payment_type.credit_card_cashier:
+      //    PaymentTypes.Add("CC_CASHIER");
+      //    PaymentTypes.Add("VISA");
+      //    PaymentTypes.Add("MC");
+      //    PaymentTypes.Add("AMEX");
+      //    PaymentTypes.Add("DISC");
+      //    break;
+      //  case Claypay.Payment.payment_type.impact_fee_credit:
+      //    PaymentTypes.Add("IFCR");
+      //    break;
+      //  case Claypay.Payment.payment_type.impact_fee_exemption:
+      //    PaymentTypes.Add("IFEX");
+      //    break;
+      //  case Claypay.Payment.payment_type.impact_waiver_school:
+      //    PaymentTypes.Add("IFWS");
+      //    break;
+      //  case Claypay.Payment.payment_type.impact_waiver_road:
+      //    PaymentTypes.Add("IFWR");
+      //    break;
+      //  default:
+      //    return new List<Payment> { new Payment("Invalid Payment Type.") };
+      //}
       var param = new DynamicParameters();
       param.Add("@DateToBalance", DateToBalance);
-      param.Add("@PaymentTypes", PaymentTypes);
+      param.Add("@PaymentType", PaymentType.ToUpper());
       //param.Add("@PaymentType", PaymentType);
 
       var sql = @"
@@ -91,7 +92,7 @@ namespace ClayPay.Models.Balancing
       FROM ccCashierPayment CP
       LEFT OUTER JOIN CCCASHIER C ON CP.OTId = C.OTId
       WHERE CAST(C.TransDt AS DATE) = CAST(@DateToBalance AS DATE)
-        AND UPPER(CP.PmtType) IN (@PaymentTypes)
+        AND UPPER(CP.PmtType) = @PaymentType
       GROUP BY C.CashierId
         WITH ROLLUP
       )

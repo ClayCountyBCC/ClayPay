@@ -8,8 +8,9 @@ namespace ClayPay.Models.Balancing
 {
   public class CashierTotal
   {
-    public string Type { get; set; }
-    public decimal TotalAmount { get; set; }
+    public string Type { get; set; } = "";
+    public string Code { get; set; } = "";
+    public decimal TotalAmount { get; set; } = 0;
 
     public CashierTotal()
     {
@@ -38,6 +39,14 @@ namespace ClayPay.Models.Balancing
        *     REMOVING THE VOID PROCESS SHOULD SIGNIFICANTLY REDUCE THE CHANCE IT WILL BE OUT OF BALANCE.
        *     
        *  TABLE IS RETURNED PRE-FORMATTED
+       *  Removed this from this function, it did nothing.
+       * ,PaymentTypes (Code, SortKey,Narrative,CdType) AS 
+        (
+          SELECT DISTINCT Code,SortKey, Narrative, CdType
+          FROM ccLookUp L
+          WHERE CdType IN ('SPECIALPT','PMTTYPE')
+        )
+
        * 
        */
       var dbArgs = new DynamicParameters();
@@ -53,14 +62,12 @@ namespace ClayPay.Models.Balancing
         WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE))
         
         
-        ,PaymentTypes (Code, SortKey,Narrative,CdType) AS 
-        (
-          SELECT DISTINCT Code,SortKey, Narrative, CdType
-          FROM ccLookUp L
-          WHERE CdType IN ('SPECIALPT','PMTTYPE')
-        )
 
-        SELECT Narrative Type, AmtApplied TotalAmount FROM 
+        SELECT 
+        ISNULL(Code, '') Code, 
+        Narrative Type, 
+        AmtApplied TotalAmount 
+        FROM 
           (
           -- GET TOTAL AMOUNT OF CHARGES FOR BALANCING 
           -- CHECK THIS TOTAL AGAINST THE SUM(ccCashierPayment.AmtApplied) IN THE LAST SELECT STATEMENT

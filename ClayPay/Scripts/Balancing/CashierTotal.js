@@ -3,6 +3,7 @@ var Balancing;
     class CashierTotal {
         constructor() {
             this.Type = "";
+            this.Code = "";
             this.TotalAmount = 0;
         }
     }

@@ -370,6 +370,7 @@
     <TypeScriptCompile Include="Scripts\Balancing\CashierTotal.ts" />
     <TypeScriptCompile Include="Scripts\Balancing\DJournal.ts" />
     <TypeScriptCompile Include="Scripts\Balancing\DjournalLog.ts" />
+    <TypeScriptCompile Include="Scripts\Balancing\Payment.ts" />
     <TypeScriptCompile Include="Scripts\claypay\CashierData.ts" />
     <TypeScriptCompile Include="Scripts\claypay\ClientResponse.ts" />
     <TypeScriptCompile Include="Scripts\app\Utilities.ts" />

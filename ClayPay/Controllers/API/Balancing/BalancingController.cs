@@ -67,11 +67,12 @@ namespace ClayPay.Controllers
 
     [HttpGet]
     [Route("GetPayments")]
-    public IHttpActionResult Get(DateTime DateToBalance, Models.Claypay.Payment.payment_type PaymentType)
+    public IHttpActionResult Get(DateTime DateToBalance, string PaymentType)
     {
       try
       {
-        var dj = Models.Balancing.Payment.GetPayments(DateToBalance, PaymentType, new UserAccess(User.Identity.Name));
+        //var ua = new UserAccess(User.Identity.Name);
+        var dj = Models.Balancing.Payment.GetPayments(DateToBalance, PaymentType);
         return Ok(dj);
       }
       catch (Exception ex)
@@ -122,7 +123,6 @@ namespace ClayPay.Controllers
       }
       else
       {
-
         return Ok(p);
       }
     }

@@ -257,26 +257,6 @@ namespace Utilities
     })
   }
 
-  export function Put<T>(url: string, data: object): Promise<T>
-  {
-     return fetch(url, {
-      method: "PUT",
-      body: JSON.stringify(data),
-      cache: "no-cache",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      credentials: "include"
-    }).then(response =>
-    {
-      if (!response.ok)
-      {
-        throw new Error(response.statusText)
-      }
-      return response.json();
-    })
-  }
-
   export function Format_Amount(amount: number): string
   {
     return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });

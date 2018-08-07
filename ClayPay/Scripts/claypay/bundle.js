@@ -921,23 +921,6 @@ var Utilities;
         });
     }
     Utilities.Post = Post;
-    function Put(url, data) {
-        return fetch(url, {
-            method: "PUT",
-            body: JSON.stringify(data),
-            cache: "no-cache",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include"
-        }).then(response => {
-            if (!response.ok) {
-                throw new Error(response.statusText);
-            }
-            return response.json();
-        });
-    }
-    Utilities.Put = Put;
     function Format_Amount(amount) {
         return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
     }
@@ -1129,7 +1112,6 @@ var clayPay;
         }
         static CreateTable(view) {
             let table = document.createElement("table");
-            table.classList.add("table");
             table.classList.add("table");
             table.classList.add("is-fullwidth");
             let thead = document.createElement("THEAD");

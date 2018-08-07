@@ -921,23 +921,6 @@ var Utilities;
         });
     }
     Utilities.Post = Post;
-    function Put(url, data) {
-        return fetch(url, {
-            method: "PUT",
-            body: JSON.stringify(data),
-            cache: "no-cache",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include"
-        }).then(response => {
-            if (!response.ok) {
-                throw new Error(response.statusText);
-            }
-            return response.json();
-        });
-    }
-    Utilities.Put = Put;
     function Format_Amount(amount) {
         return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
     }
@@ -1623,7 +1606,7 @@ var ImpactFees;
     }
     ImpactFees.buildMenuElements = buildMenuElements;
 })(ImpactFees || (ImpactFees = {}));
-//# sourceMappingURL=impactfees.js.map
+//# sourceMappingURL=ImpactFees.js.map
 var ImpactFees;
 (function (ImpactFees) {
     class DeveloperAgreement {

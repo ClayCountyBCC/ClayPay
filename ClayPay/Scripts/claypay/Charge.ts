@@ -38,7 +38,6 @@
     {
       let table = document.createElement("table");
       table.classList.add("table");
-      table.classList.add("table");
       table.classList.add("is-fullwidth");
       let thead = document.createElement("THEAD");
       let tr = document.createElement("tr");
