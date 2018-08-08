@@ -33,37 +33,7 @@ namespace ClayPay.Controllers.API.Payments
       }
     }
 
-    [HttpPost]
-    [Route("EditPayments")]
-    public IHttpActionResult Post(List<ReceiptPayment> editPaymentList)
-    {
-    
-      if (editPaymentList != null && editPaymentList.Count() > 0)
-      {
-        var errors = new List<string>();
-        var originalPaymentList = ReceiptPayment.GetPaymentsByPayId((from p in editPaymentList
-                                                                     select p.PayId).ToList());
 
-        var cashierId = originalPaymentList[0].CashierId;
-        errors = ReceiptPayment.EditPaymentValidation(editPaymentList, originalPaymentList);
-
-        if(errors.Count() == 0)
-        {
-          errors = ReceiptPayment.UpdatePayments(editPaymentList, originalPaymentList, User.Identity.Name);
-        }
-
-        var response = new ClientResponse(cashierId);
-        response.Errors = errors;
-
-        return Ok(response);
-
-      }
-      else
-      {
-        return Ok(BadRequest("There are no payments to edit"));
-      }
-
-    }
   }
 }
  

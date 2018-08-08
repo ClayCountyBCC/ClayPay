@@ -111,7 +111,7 @@ var Balancing;
         }
         static BuildShortDJournalRow(payment, djournalDate) {
             let tr = document.createElement("tr");
-            tr.appendChild(DJournal.CreateTableCellLink(payment.Type, "45%", djournalDate));
+            tr.appendChild(DJournal.CreateTableCellLink(payment.Type, payment.Code, "45%", djournalDate));
             tr.appendChild(DJournal.CreateTableCell(Utilities.Format_Amount(payment.TotalAmount), "15%"));
             tr.appendChild(DJournal.CreateTableCell(payment.Type + " Deposits", "25%"));
             tr.appendChild(DJournal.CreateTableCell(Utilities.Format_Amount(payment.TotalAmount), "15%"));
@@ -119,7 +119,7 @@ var Balancing;
         }
         static BuildPaymentRow(payment, djournalDate) {
             let tr = document.createElement("tr");
-            tr.appendChild(DJournal.CreateTableCellLink(payment.Type, "45%", djournalDate));
+            tr.appendChild(DJournal.CreateTableCellLink(payment.Type, payment.Code, "45%", djournalDate));
             tr.appendChild(DJournal.CreateTableCell(Utilities.Format_Amount(payment.TotalAmount), "15%"));
             tr.appendChild(DJournal.CreateTableCell("", "25%"));
             tr.appendChild(DJournal.CreateTableCell("", "15%"));
@@ -132,22 +132,33 @@ var Balancing;
             td.appendChild(document.createTextNode(value));
             return td;
         }
-        static CreateTableCellLink(value, width, djournalDate) {
+        static CreateTableCellLink(value, paymentType, width, djournalDate) {
             let td = document.createElement("td");
             td.classList.add("has-text-right");
             td.width = width;
             let link = document.createElement("A");
-            link.href = "#";
             link.onclick = () => {
                 Utilities.Set_Text(link, "loading...");
                 // load data here
-                Utilities.Get("");
-                Utilities.Hide(DJournal.DJournalTotalsContainer);
-                Utilities.Set_Text(link, value); // change it back
-                Utilities.Show(DJournal.PaymentsContainer);
-                // 
-                //link.classList.add("is-loading");
-                //alert(value + " " + djournalDate);
+                let path = "/";
+                let qs = "";
+                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                if (i == 0) {
+                    path = "/claypay/";
+                }
+                //DateTime DateToBalance, string PaymentType
+                qs = "?DateToBalance=" + djournalDate + "&PaymentType=" + paymentType;
+                Utilities.Get(path + "API/Balancing/GetPayments" + qs)
+                    .then(function (payments) {
+                    console.log('payments', payments);
+                    Balancing.Payment.ShowPayments(payments, value, djournalDate);
+                    Utilities.Hide(DJournal.DJournalTotalsContainer);
+                    Utilities.Set_Text(link, value); // change it back
+                    Utilities.Show(DJournal.PaymentsContainer);
+                }, function (error) {
+                    console.log('error getting payments for payment type: ' + paymentType, error);
+                    Utilities.Set_Text(link, value); // change it back
+                });
             };
             link.appendChild(document.createTextNode(value));
             td.appendChild(link);

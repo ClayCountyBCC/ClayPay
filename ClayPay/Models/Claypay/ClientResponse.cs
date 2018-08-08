@@ -13,6 +13,7 @@ namespace ClayPay.Models.Claypay
     public CashierData ResponseCashierData { get; set; }
     public List<Charge> Charges { get; set; } = new List<Charge>();
     public List<ReceiptPayment> ReceiptPayments { get; set; }
+    public bool IsEditable { get; set; } = false;
     public List<string> Errors { get; set; } = new List<string>();
 
     // These two are used only when there is an issue saving payments AFTER 

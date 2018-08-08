@@ -8,6 +8,7 @@ namespace clayPay
     ReceiptPayments: Array<ReceiptPayment>;
     Errors: Array<string>;
     TransactionId: string;
+    IsEditable: boolean;
     PartialErrors: Array<string>;
   }
 
@@ -17,7 +18,7 @@ namespace clayPay
     public Charges: Array<Charge> = [];
     public ReceiptPayments: Array<ReceiptPayment> = [];
     public TransactionId: string = "";
-
+    public IsEditable: boolean;
     public Errors: Array<string> = []; // Errors are full stop, meaning the payment did not process.
     public PartialErrors: Array<string> = []; // Partial errors mean part of the transaction was completed, but something wasn't.
 

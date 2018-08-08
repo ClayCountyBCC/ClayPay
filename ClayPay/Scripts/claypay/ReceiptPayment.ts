@@ -125,7 +125,15 @@
       tr.appendChild(UI.createTableElement(info));
       tr.appendChild(UI.createTableElement(checkNumber));
       tr.appendChild(UI.createTableElement(Utilities.Format_Amount(tendered)));
-      tr.appendChild(UI.createTableElement(Utilities.Format_Amount(applied)));
+      if (paymentType === "Convenience Fee Estimate")
+      {
+        tr.appendChild(UI.createTableElement(""));
+      }
+      else
+      {
+        tr.appendChild(UI.createTableElement(Utilities.Format_Amount(applied)));
+      }
+      
       return tr;
     }
 

@@ -40,6 +40,7 @@
       "Scripts/app/Utilities.js",
       "Scripts/balancing/Account.js",
       "Scripts/balancing/CashierTotal.js",
+      "Scripts/balancing/Payment.js",
       "Scripts/balancing/DJournal.js",
       "Scripts/balancing/DJournalLog.js",
       "Scripts/balancing/Balancing.js"

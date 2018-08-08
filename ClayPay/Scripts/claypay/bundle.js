@@ -1732,7 +1732,12 @@ var clayPay;
             tr.appendChild(clayPay.UI.createTableElement(info));
             tr.appendChild(clayPay.UI.createTableElement(checkNumber));
             tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(tendered)));
-            tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(applied)));
+            if (paymentType === "Convenience Fee Estimate") {
+                tr.appendChild(clayPay.UI.createTableElement(""));
+            }
+            else {
+                tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(applied)));
+            }
             return tr;
         }
     }
@@ -1869,7 +1874,7 @@ var clayPay;
     ClientResponse.receiptSearchError = "receiptSearchError";
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=clientresponse.js.map
+//# sourceMappingURL=ClientResponse.js.map
 /// <reference path="payment.ts" />
 /// <reference path="clientresponse.ts" />
 var clayPay;
@@ -2035,7 +2040,7 @@ var clayPay;
     NewTransaction.paymentError = "paymentError";
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=newtransaction.js.map
+//# sourceMappingURL=NewTransaction.js.map
 var clayPay;
 (function (clayPay) {
     class AppType {
@@ -2624,4 +2629,4 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map

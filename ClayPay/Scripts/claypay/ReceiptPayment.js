@@ -66,7 +66,12 @@ var clayPay;
             tr.appendChild(clayPay.UI.createTableElement(info));
             tr.appendChild(clayPay.UI.createTableElement(checkNumber));
             tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(tendered)));
-            tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(applied)));
+            if (paymentType === "Convenience Fee Estimate") {
+                tr.appendChild(clayPay.UI.createTableElement(""));
+            }
+            else {
+                tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(applied)));
+            }
             return tr;
         }
     }
