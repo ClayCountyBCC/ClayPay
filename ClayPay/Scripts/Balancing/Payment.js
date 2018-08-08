@@ -21,7 +21,7 @@ var Balancing;
             // Table with payment info
             for (let p of payments) {
                 let tr = document.createElement("tr");
-                tr.appendChild(Balancing.Payment.createTableCell("td", p.CashierId, "20%"));
+                tr.appendChild(Balancing.Payment.createTableCellLink("td", p.CashierId, "20%"));
                 tr.appendChild(Balancing.Payment.createTableCell("td", p.Name, "40%"));
                 tr.appendChild(Balancing.Payment.createTableCell("td", Utilities.Format_Date(p.TransactionDate), "25%"));
                 let amount = Balancing.Payment.createTableCell("td", Utilities.Format_Amount(p.Total), "15%");
@@ -53,9 +53,11 @@ var Balancing;
             paymentTypeHeader.colSpan = 2;
             paymentTypeHeader.appendChild(document.createTextNode(paymentType + " Payments"));
             paymentTypeHeader.classList.add("has-text-centered");
+            paymentTypeHeader.style.verticalAlign = "middle";
             let paymentDateHeader = document.createElement("th");
             paymentDateHeader.classList.add("has-text-centered");
             paymentDateHeader.appendChild(document.createTextNode(paymentDate));
+            paymentDateHeader.style.verticalAlign = "middle";
             let closeButtonHeader = document.createElement("th");
             closeButtonHeader.classList.add("has-text-centered");
             closeButtonHeader.appendChild(Balancing.Payment.CreateCloseButton());
@@ -67,7 +69,8 @@ var Balancing;
             tr.appendChild(Balancing.Payment.createTableCell("th", "Cashier Id", "20%"));
             tr.appendChild(Balancing.Payment.createTableCell("th", "Name", "40%"));
             tr.appendChild(Balancing.Payment.createTableCell("th", "Transaction Date", "25%"));
-            tr.appendChild(Balancing.Payment.createTableCell("th", "Total", "15%"));
+            let total = Balancing.Payment.createTableCell("th", "Total", "15%", "has-text-right");
+            tr.appendChild(total);
             thead.appendChild(tr);
             return thead;
         }
@@ -84,15 +87,50 @@ var Balancing;
             tfoot.appendChild(tr);
             return tfoot;
         }
-        static createTableCell(type, value, width) {
+        static createTableCell(type, value, width, className = "") {
             let cell = document.createElement(type);
             cell.width = width;
+            if (className.length > 0)
+                cell.classList.add(className);
             cell.appendChild(document.createTextNode(value));
+            return cell;
+        }
+        static createTableCellLink(type, value, width) {
+            let cell = document.createElement(type);
+            cell.width = width;
+            let link = document.createElement("a");
+            link.onclick = () => {
+                Utilities.Set_Text(link, "loading...");
+                let path = "/";
+                let qs = "";
+                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                if (i == 0) {
+                    path = "/claypay/";
+                }
+                //DateTime DateToBalance, string PaymentType
+                qs = "?CashierId=" + value;
+                Utilities.Get(path + "API/Balancing/Receipt" + qs)
+                    .then(function (cr) {
+                    console.log('client response', cr);
+                    Utilities.Set_Text(link, value);
+                    //Balancing.Payment.ShowPayments(payments, value, djournalDate);
+                    //Utilities.Hide(DJournal.DJournalTotalsContainer);
+                    //Utilities.Hide(DJournal.DJournalReceiptContainer);
+                    //Utilities.Set_Text(link, value); // change it back
+                    //Utilities.Show(DJournal.PaymentsContainer);
+                }, function (error) {
+                    console.log('error getting client response for cashier id: ' + value, error);
+                    Utilities.Set_Text(link, value); // change it back
+                });
+            };
+            link.appendChild(document.createTextNode(value));
+            cell.appendChild(link);
             return cell;
         }
     }
     Payment.PaymentsContainer = "djournalPaymentsByType";
     Payment.DJournalTotalsContainer = "djournalTotals";
+    Payment.DJournalReceiptContainer = "djournalReceipt";
     Balancing.Payment = Payment;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=Payment.js.map

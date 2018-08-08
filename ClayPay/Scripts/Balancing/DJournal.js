@@ -153,6 +153,7 @@ var Balancing;
                     console.log('payments', payments);
                     Balancing.Payment.ShowPayments(payments, value, djournalDate);
                     Utilities.Hide(DJournal.DJournalTotalsContainer);
+                    Utilities.Hide(DJournal.DJournalReceiptContainer);
                     Utilities.Set_Text(link, value); // change it back
                     Utilities.Show(DJournal.PaymentsContainer);
                 }, function (error) {
@@ -169,6 +170,7 @@ var Balancing;
     DJournal.DJournalDateInput = "djournalDate";
     DJournal.DjournalContainer = "balancingDJournal";
     DJournal.PaymentsContainer = "djournalPaymentsByType";
+    DJournal.DJournalReceiptContainer = "djournalReceipt";
     Balancing.DJournal = DJournal;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=DJournal.js.map

@@ -994,6 +994,422 @@ var Utilities;
     Utilities.Create_Menu_Element = Create_Menu_Element;
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map
+var clayPay;
+(function (clayPay) {
+    let ChargeView;
+    (function (ChargeView) {
+        ChargeView[ChargeView["search_results"] = 0] = "search_results";
+        ChargeView[ChargeView["cart"] = 1] = "cart";
+        ChargeView[ChargeView["receipt"] = 2] = "receipt";
+    })(ChargeView = clayPay.ChargeView || (clayPay.ChargeView = {}));
+    class Charge {
+        constructor() {
+            this.ItemId = 0;
+            this.Description = "";
+            this.TimeStampDisplay = "";
+        }
+        static CreateTable(view) {
+            let table = document.createElement("table");
+            table.classList.add("table");
+            table.classList.add("is-fullwidth");
+            let thead = document.createElement("THEAD");
+            let tr = document.createElement("tr");
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Key", "20%"));
+            if (view !== ChargeView.receipt) {
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "40%"));
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Date", "15%"));
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Amount", "15%"));
+                tr.appendChild(clayPay.UI.createTableHeaderElement("", "10%"));
+            }
+            else {
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "50%"));
+                tr.appendChild(clayPay.UI.createTableHeaderElement("Amount", "30%"));
+            }
+            thead.appendChild(tr);
+            table.appendChild(thead);
+            return table;
+        }
+        static CreateChargesTable(charges, view) {
+            let df = document.createDocumentFragment();
+            let table = Charge.CreateTable(view);
+            let tbody = document.createElement("TBODY");
+            charges.forEach(function (charge) {
+                tbody.appendChild(Charge.buildChargeRow(charge, view));
+            });
+            let tfoot = document.createElement("TFOOT");
+            tfoot.appendChild(Charge.buildChargeFooterRow(charges, view));
+            table.appendChild(tbody);
+            table.appendChild(tfoot);
+            df.appendChild(table);
+            return df;
+        }
+        static buildChargeFooterRow(charges, view) {
+            // Based on ChargeView:
+            // Search Results Footer should show: 
+            //  1. Total Charges
+            //  2. Add All Charges To Cart
+            //  3. View Cart
+            // Cart Footer should show:
+            //  1. Total Charges
+            //  2. Convenience Fee
+            // Receipt Footer should show:
+            //  1. Total Charges
+            let df = document.createDocumentFragment();
+            let trTotal = document.createElement("tr");
+            trTotal.appendChild(clayPay.UI.createTableElement("", "", view === ChargeView.receipt ? 1 : 2));
+            trTotal.appendChild(clayPay.UI.createTableElement("Total", "has-text-weight-bold has-text-right", 1));
+            let TotalAmount = charges.reduce((total, b) => {
+                return total + b.Total;
+            }, 0);
+            trTotal.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(TotalAmount), ""));
+            if (view === ChargeView.search_results) {
+                trTotal.appendChild(Charge.createAddAllChargesToCartButton());
+            }
+            else {
+                if (view !== ChargeView.receipt) {
+                    trTotal.appendChild(clayPay.UI.createTableElement("", "", 1));
+                }
+            }
+            df.appendChild(trTotal);
+            switch (view) {
+                case ChargeView.search_results:
+                    // Add View Cart button
+                    df.appendChild(Charge.createViewCartFooterRow());
+                    break;
+                case ChargeView.cart:
+                    // Show Convenience Fee
+                    clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
+                    clayPay.CurrentTransaction.UpdateTotals();
+                    df.appendChild(Charge.buildConvFeeFooterRow());
+                    break;
+            }
+            return df;
+        }
+        static buildConvFeeFooterRow() {
+            let tr = document.createElement("tr");
+            tr.style.fontWeight = "bolder";
+            tr.appendChild(clayPay.UI.createTableElement("There is a nonrefundable transaction fee charged for Credit Card Payments by our payment provider. This is charged in addition to the total above.", "", 2));
+            tr.appendChild(clayPay.UI.createTableElement("Conv. Fee", "center", 1));
+            tr.appendChild(clayPay.UI.createTableElement(clayPay.ConvenienceFee, "", 1));
+            tr.appendChild(clayPay.UI.createTableElement("", "", 1));
+            return tr;
+        }
+        static buildChargeRow(charge, view) {
+            let tr = document.createElement("tr");
+            tr.appendChild(clayPay.UI.createTableElement(charge.AssocKey));
+            tr.appendChild(clayPay.UI.createTableElement(charge.Description, "left"));
+            if (view !== ChargeView.receipt) {
+                tr.appendChild(clayPay.UI.createTableElement(charge.TimeStampDisplay, "center"));
+            }
+            tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(charge.Total), "center"));
+            if (view !== ChargeView.receipt) {
+                tr.appendChild(Charge.createChargeCartButtonToggle("Add to Cart", charge.ItemId, "center", true));
+            }
+            return tr;
+        }
+        static createAddAllChargesToCartButton() {
+            let td = document.createElement("td");
+            let button = document.createElement("button");
+            button.type = "button";
+            button.classList.add("button");
+            button.classList.add("is-primary");
+            button.appendChild(document.createTextNode("Add All To Cart"));
+            button.onclick = (ev) => {
+                for (let charge of clayPay.CurrentTransaction.CurrentCharges) {
+                    if (!clayPay.UI.IsItemInCart(charge.ItemId)) {
+                        clayPay.CurrentTransaction.Cart.push(charge);
+                    }
+                }
+                clayPay.UI.updateCart();
+                // we're going to rerun the "Create Table" so that it'll 
+                // update each row
+                clayPay.UI.ProcessSearchResults(clayPay.CurrentTransaction.CurrentCharges);
+                //AddCharges(clayPay.CurrentTransaction.CurrentCharges);
+            };
+            td.appendChild(button);
+            return td;
+        }
+        static createChargeCartButtonToggle(value, itemId, className, toggle) {
+            let removeButton = document.createElement("a");
+            let remove = document.createElement("div");
+            let addButton = document.createElement("button");
+            let IsInCart = clayPay.UI.IsItemInCart(itemId);
+            let d = document.createElement("td");
+            d.className = className;
+            addButton.style.display = IsInCart ? "none" : "inline-block";
+            addButton.type = "button";
+            addButton.className = "button is-primary";
+            addButton.onclick = (ev) => {
+                let item = clayPay.CurrentTransaction.CurrentCharges.filter((c) => {
+                    return c.ItemId == itemId;
+                });
+                if (item.length === 1 && clayPay.CurrentTransaction.Cart.indexOf(item[0]) === -1) {
+                    clayPay.CurrentTransaction.Cart.push(item[0]);
+                }
+                remove.style.display = "inline-block";
+                addButton.style.display = "none";
+                clayPay.UI.updateCart();
+            };
+            remove.style.display = IsInCart ? "inline-block" : "none";
+            remove.appendChild(document.createTextNode('Added ('));
+            removeButton.classList.add("is-warning");
+            removeButton.style.cursor = "pointer";
+            removeButton.appendChild(document.createTextNode('remove'));
+            removeButton.onclick = (ev) => {
+                let newCart = clayPay.CurrentTransaction.Cart.filter((c) => {
+                    return c.ItemId !== itemId;
+                });
+                clayPay.CurrentTransaction.Cart = newCart;
+                clayPay.UI.updateCart();
+                remove.style.display = "none";
+                addButton.style.display = "inline-block";
+            };
+            remove.appendChild(removeButton);
+            remove.appendChild(document.createTextNode(')'));
+            addButton.appendChild(document.createTextNode(value));
+            d.appendChild(addButton);
+            d.appendChild(remove);
+            return d;
+        }
+        static createViewCartFooterRow() {
+            let tr = document.createElement("tr");
+            tr.appendChild(clayPay.UI.createTableElement("", "", 4));
+            let td = document.createElement("td");
+            let button = document.createElement("button");
+            button.type = "button";
+            button.classList.add("button");
+            button.classList.add("is-success");
+            button.onclick = (ev) => {
+                let menulist = clayPay.UI.Menus.filter(function (j) { return j.id === "nav-cart"; });
+                let cartMenu = menulist[0];
+                let title = document.getElementById("menuTitle");
+                let subTitle = document.getElementById("menuSubTitle");
+                Utilities.Clear_Element(title);
+                Utilities.Clear_Element(subTitle);
+                title.appendChild(document.createTextNode(cartMenu.title));
+                subTitle.appendChild(document.createTextNode(cartMenu.subTitle));
+                Utilities.Show_Menu(cartMenu.id);
+            };
+            button.appendChild(document.createTextNode("View Cart"));
+            td.appendChild(button);
+            tr.appendChild(td);
+            return tr;
+        }
+    }
+    clayPay.Charge = Charge;
+})(clayPay || (clayPay = {}));
+//# sourceMappingURL=Charge.js.map
+var clayPay;
+(function (clayPay) {
+    class ReceiptPayment {
+        constructor() {
+            this.CashierId = "";
+            this.PayId = -1;
+            this.OTId = -1;
+            this.Info = "";
+            this.TransactionDate = new Date();
+            this.PaymentType = "";
+            this.PaymentTypeDescription = "";
+            this.AmountApplied = -1;
+            this.AmountTendered = -1;
+            this.ChangeDue = -1;
+            this.ConvenienceFeeAmount = -1;
+            this.CheckNumber = "";
+            this.TransactionId = "";
+        }
+        static CreateReceiptPaymentView(receipts) {
+            let df = document.createDocumentFragment();
+            let table = ReceiptPayment.CreateTable();
+            let tbody = document.createElement("TBODY");
+            for (let receipt of receipts) {
+                let transaction = receipt.CheckNumber.length > 0 ? receipt.CheckNumber : receipt.TransactionId;
+                tbody.appendChild(ReceiptPayment.BuildPaymentRow(receipt.PaymentTypeDescription, receipt.Info, transaction, receipt.AmountTendered, receipt.AmountApplied));
+            }
+            // Here we handle Change Due and Convenience fees.
+            // We'll add a row for each of them that are > 0
+            let changeDueTmp = receipts.filter(function (j) { return j.ChangeDue > 0; });
+            let TotalChangeDue = changeDueTmp.reduce((ChangeDue, b) => {
+                return ChangeDue + b.ChangeDue;
+            }, 0);
+            if (TotalChangeDue > 0) {
+                tbody.appendChild(ReceiptPayment.BuildPaymentRow("Total Change Due", "", "", TotalChangeDue, 0));
+            }
+            let convenienceFeeTmp = receipts.filter(function (j) { return j.ConvenienceFeeAmount > 0; });
+            let TotalConvenienceFee = convenienceFeeTmp.reduce((ConvenienceFeeAmount, b) => {
+                return ConvenienceFeeAmount + b.ConvenienceFeeAmount;
+            }, 0);
+            if (TotalConvenienceFee > 0) {
+                tbody.appendChild(ReceiptPayment.BuildPaymentRow("Convenience Fee Estimate", "", "", TotalConvenienceFee, 0));
+            }
+            table.appendChild(tbody);
+            df.appendChild(table);
+            return df;
+        }
+        static CreateTable() {
+            let table = document.createElement("table");
+            table.classList.add("table");
+            table.classList.add("table");
+            table.classList.add("is-fullwidth");
+            let thead = document.createElement("THEAD");
+            let tr = document.createElement("tr");
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Payment Type", "15%"));
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Info", "35%"));
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Check/Trans#", "20%"));
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Tendered", "15%"));
+            tr.appendChild(clayPay.UI.createTableHeaderElement("Applied", "15%"));
+            thead.appendChild(tr);
+            table.appendChild(thead);
+            return table;
+        }
+        static BuildPaymentRow(paymentType, info, checkNumber, tendered, applied) {
+            let tr = document.createElement("tr");
+            tr.appendChild(clayPay.UI.createTableElement(paymentType));
+            tr.appendChild(clayPay.UI.createTableElement(info));
+            tr.appendChild(clayPay.UI.createTableElement(checkNumber));
+            tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(tendered)));
+            if (paymentType === "Convenience Fee Estimate") {
+                tr.appendChild(clayPay.UI.createTableElement(""));
+            }
+            else {
+                tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(applied)));
+            }
+            return tr;
+        }
+    }
+    clayPay.ReceiptPayment = ReceiptPayment;
+})(clayPay || (clayPay = {}));
+//# sourceMappingURL=ReceiptPayment.js.map
+var clayPay;
+(function (clayPay) {
+    class ClientResponse {
+        constructor() {
+            this.ResponseCashierData = new clayPay.CashierData();
+            this.Charges = [];
+            this.ReceiptPayments = [];
+            this.TransactionId = "";
+            this.Errors = []; // Errors are full stop, meaning the payment did not process.
+            this.PartialErrors = []; // Partial errors mean part of the transaction was completed, but something wasn't.
+        }
+        static ShowPaymentReceipt(cr) {
+            console.log('client response ShowPaymentReceipt', cr);
+            let container = document.getElementById(ClientResponse.ReceiptContainer);
+            Utilities.Clear_Element(container);
+            container.appendChild(ClientResponse.CreateReceiptView(cr));
+            Utilities.Show_Hide_Selector("#views > section", ClientResponse.ReceiptContainer);
+        }
+        static CreateReceiptView(cr) {
+            let df = document.createDocumentFragment();
+            if (cr.ReceiptPayments.length === 0)
+                return df;
+            df.appendChild(ClientResponse.CreateReceiptHeader(cr));
+            df.appendChild(ClientResponse.CreateReceiptPayerView(cr.ResponseCashierData));
+            df.appendChild(clayPay.Charge.CreateChargesTable(cr.Charges, clayPay.ChargeView.receipt));
+            df.appendChild(clayPay.ReceiptPayment.CreateReceiptPaymentView(cr.ReceiptPayments));
+            // show payment info
+            return df;
+        }
+        static CreateReceiptHeader(cr) {
+            let div = document.createElement("div");
+            div.classList.add("level");
+            let title = document.createElement("span");
+            title.classList.add("level-item");
+            title.classList.add("title");
+            title.appendChild(document.createTextNode("Payment Receipt for: " + cr.ReceiptPayments[0].CashierId));
+            let receiptDate = document.createElement("span");
+            receiptDate.classList.add("level-item");
+            receiptDate.classList.add("subtitle");
+            receiptDate.appendChild(document.createTextNode("Transaction Date: " + Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
+            div.appendChild(title);
+            div.appendChild(receiptDate);
+            let timestamp = cr.ResponseCashierData.TransactionDate;
+            return div;
+        }
+        static CreateReceiptPayerView(cd) {
+            let df = document.createDocumentFragment();
+            df.appendChild(ClientResponse.CreatePayerDataColumns("Name", cd.PayerName, "Company Name", cd.PayerCompanyName));
+            df.appendChild(ClientResponse.CreatePayerDataColumns("Phone Number", cd.PayerPhoneNumber, "Email Address", cd.PayerEmailAddress));
+            df.appendChild(ClientResponse.CreatePayerDataColumns("Street Address", cd.PayerStreet1, "Address 2", cd.PayerStreet2));
+            df.appendChild(ClientResponse.CreatePayerDataColumns("Processed By", cd.UserName, "", ""));
+            return df;
+        }
+        static CreatePayerDataColumns(label1, value1, label2, value2) {
+            let div = document.createElement("div");
+            div.classList.add("columns");
+            div.style.marginBottom = "0";
+            div.appendChild(ClientResponse.CreatePayerData(label1, value1));
+            div.appendChild(ClientResponse.CreatePayerData(label2, value2));
+            return div;
+        }
+        static CreatePayerData(label, value) {
+            let field = document.createElement("div");
+            field.classList.add("field");
+            field.classList.add("column");
+            let dataLabel = document.createElement("label");
+            dataLabel.classList.add("label");
+            dataLabel.appendChild(document.createTextNode(label));
+            let control = document.createElement("div");
+            control.classList.add("control");
+            let input = document.createElement("input");
+            input.classList.add("input");
+            input.classList.add("is-static");
+            input.readOnly = true;
+            input.type = "text";
+            input.value = value;
+            control.appendChild(input);
+            field.appendChild(dataLabel);
+            field.appendChild(control);
+            return field;
+        }
+        static Search() {
+            Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, true);
+            let input = document.getElementById(ClientResponse.receiptSearchInput);
+            let k = input.value.trim().toUpperCase();
+            if (k.length !== 9) {
+                Utilities.Error_Show(ClientResponse.receiptSearchError, "Receipts must be 8 digits and a dash, like 18-000001.");
+                return;
+            }
+            if (k.length > 0) {
+                let path = "/";
+                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                if (i == 0) {
+                    path = "/claypay/";
+                }
+                Utilities.Get(path + "API/Payments/Receipt/?CashierId=" + k).then(function (cr) {
+                    console.log('Client Response', cr);
+                    if (cr.Errors.length > 0) {
+                        Utilities.Error_Show(ClientResponse.receiptSearchError, cr.Errors);
+                    }
+                    else {
+                        ClientResponse.ShowPaymentReceipt(cr);
+                    }
+                    Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
+                }, function (errorText) {
+                    console.log('error in Receipt Search', errorText);
+                    Utilities.Error_Show(ClientResponse.receiptSearchError, errorText);
+                    // do something with the error here
+                    // need to figure out how to detect if something wasn't found
+                    // versus an error.
+                    Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
+                });
+            }
+            else {
+                Utilities.Error_Show(ClientResponse.receiptSearchError, "Invalid search. Please check your entry and try again.");
+                input.focus();
+                Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
+            }
+        }
+    }
+    ClientResponse.CashierErrorTarget = "paymentError";
+    ClientResponse.PublicErrorTarget = "publicPaymentError";
+    ClientResponse.ReceiptContainer = "receipt";
+    //static ReceiptErrorContainer: string = "receiptTransactionErrorContainer"; // To be used for partial payments.
+    // receiptSearchElements
+    ClientResponse.receiptSearchInput = "receiptSearch";
+    ClientResponse.receiptSearchButton = "receiptSearchButton";
+    ClientResponse.receiptSearchError = "receiptSearchError";
+    clayPay.ClientResponse = ClientResponse;
+})(clayPay || (clayPay = {}));
+//# sourceMappingURL=ClientResponse.js.map
 var Balancing;
 (function (Balancing) {
     class Account {
@@ -1044,7 +1460,7 @@ var Balancing;
             // Table with payment info
             for (let p of payments) {
                 let tr = document.createElement("tr");
-                tr.appendChild(Balancing.Payment.createTableCell("td", p.CashierId, "20%"));
+                tr.appendChild(Balancing.Payment.createTableCellLink("td", p.CashierId, "20%"));
                 tr.appendChild(Balancing.Payment.createTableCell("td", p.Name, "40%"));
                 tr.appendChild(Balancing.Payment.createTableCell("td", Utilities.Format_Date(p.TransactionDate), "25%"));
                 let amount = Balancing.Payment.createTableCell("td", Utilities.Format_Amount(p.Total), "15%");
@@ -1076,9 +1492,11 @@ var Balancing;
             paymentTypeHeader.colSpan = 2;
             paymentTypeHeader.appendChild(document.createTextNode(paymentType + " Payments"));
             paymentTypeHeader.classList.add("has-text-centered");
+            paymentTypeHeader.style.verticalAlign = "middle";
             let paymentDateHeader = document.createElement("th");
             paymentDateHeader.classList.add("has-text-centered");
             paymentDateHeader.appendChild(document.createTextNode(paymentDate));
+            paymentDateHeader.style.verticalAlign = "middle";
             let closeButtonHeader = document.createElement("th");
             closeButtonHeader.classList.add("has-text-centered");
             closeButtonHeader.appendChild(Balancing.Payment.CreateCloseButton());
@@ -1090,7 +1508,8 @@ var Balancing;
             tr.appendChild(Balancing.Payment.createTableCell("th", "Cashier Id", "20%"));
             tr.appendChild(Balancing.Payment.createTableCell("th", "Name", "40%"));
             tr.appendChild(Balancing.Payment.createTableCell("th", "Transaction Date", "25%"));
-            tr.appendChild(Balancing.Payment.createTableCell("th", "Total", "15%"));
+            let total = Balancing.Payment.createTableCell("th", "Total", "15%", "has-text-right");
+            tr.appendChild(total);
             thead.appendChild(tr);
             return thead;
         }
@@ -1107,15 +1526,50 @@ var Balancing;
             tfoot.appendChild(tr);
             return tfoot;
         }
-        static createTableCell(type, value, width) {
+        static createTableCell(type, value, width, className = "") {
             let cell = document.createElement(type);
             cell.width = width;
+            if (className.length > 0)
+                cell.classList.add(className);
             cell.appendChild(document.createTextNode(value));
+            return cell;
+        }
+        static createTableCellLink(type, value, width) {
+            let cell = document.createElement(type);
+            cell.width = width;
+            let link = document.createElement("a");
+            link.onclick = () => {
+                Utilities.Set_Text(link, "loading...");
+                let path = "/";
+                let qs = "";
+                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                if (i == 0) {
+                    path = "/claypay/";
+                }
+                //DateTime DateToBalance, string PaymentType
+                qs = "?CashierId=" + value;
+                Utilities.Get(path + "API/Balancing/Receipt" + qs)
+                    .then(function (cr) {
+                    console.log('client response', cr);
+                    Utilities.Set_Text(link, value);
+                    //Balancing.Payment.ShowPayments(payments, value, djournalDate);
+                    //Utilities.Hide(DJournal.DJournalTotalsContainer);
+                    //Utilities.Hide(DJournal.DJournalReceiptContainer);
+                    //Utilities.Set_Text(link, value); // change it back
+                    //Utilities.Show(DJournal.PaymentsContainer);
+                }, function (error) {
+                    console.log('error getting client response for cashier id: ' + value, error);
+                    Utilities.Set_Text(link, value); // change it back
+                });
+            };
+            link.appendChild(document.createTextNode(value));
+            cell.appendChild(link);
             return cell;
         }
     }
     Payment.PaymentsContainer = "djournalPaymentsByType";
     Payment.DJournalTotalsContainer = "djournalTotals";
+    Payment.DJournalReceiptContainer = "djournalReceipt";
     Balancing.Payment = Payment;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=Payment.js.map
@@ -1274,6 +1728,7 @@ var Balancing;
                     console.log('payments', payments);
                     Balancing.Payment.ShowPayments(payments, value, djournalDate);
                     Utilities.Hide(DJournal.DJournalTotalsContainer);
+                    Utilities.Hide(DJournal.DJournalReceiptContainer);
                     Utilities.Set_Text(link, value); // change it back
                     Utilities.Show(DJournal.PaymentsContainer);
                 }, function (error) {
@@ -1290,6 +1745,7 @@ var Balancing;
     DJournal.DJournalDateInput = "djournalDate";
     DJournal.DjournalContainer = "balancingDJournal";
     DJournal.PaymentsContainer = "djournalPaymentsByType";
+    DJournal.DJournalReceiptContainer = "djournalReceipt";
     Balancing.DJournal = DJournal;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=DJournal.js.map
