@@ -56,17 +56,16 @@ namespace ClayPay.Models.Claypay
     public void SendPayerEmailReceipt(string EmailAddress)
     {
       if (EmailAddress.Length == 0) return;
-
-      int i = 0;
+      Constants.SaveEmail(EmailAddress, "Clay County Payment Receipt", BuildEmailBody());
     }
 
     private string BuildEmailBody()
     {
-      var emailBody = "";
-      emailBody += CustomerEmailHeaderString();
-      emailBody += CustomerEmailChargesString();
-      emailBody += CustomerEmailPaymentsString();
-      return emailBody;
+      var sb = new StringBuilder();
+      sb.Append(CustomerEmailHeaderString());
+      sb.Append(CustomerEmailChargesString());
+      sb.Append(CustomerEmailPaymentsString());
+      return sb.ToString();
     }
 
     public string CustomerEmailHeaderString()

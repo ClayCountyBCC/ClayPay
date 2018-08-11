@@ -107,11 +107,11 @@ namespace ClayPay.Models.Claypay
 
     }
 
-    public static List<ReceiptPayment> GetPaymentsByPayId(List<int> payIds)
+    public static List<ReceiptPayment> GetPaymentsByPayId(int payId)
     {
 
-      //var param = new DynamicParameters();
-      //param.Add("@PayId", payIds);
+      var param = new DynamicParameters();
+      param.Add("@PayId", payId);
       var query = @"
         USE WATSC;
         SELECT DISTINCT
@@ -133,32 +133,31 @@ namespace ClayPay.Models.Claypay
         INNER JOIN ccCashier C ON C.OTId = CP.OTid
         INNER JOIN ccLookUp L ON LEFT(L.CODE,5) = LEFT(CP.PmtType,5)
         WHERE CdType IN ('SPECIALPT', 'PMTTYPE')
-          AND CP.PayId in (@payIds)
+          AND CP.PayId = @PayId
         ORDER BY CashierId DESC";
 
-      var i = Constants.Get_Data<ReceiptPayment>(query, payIds);
+      var i = Constants.Get_Data<ReceiptPayment>(query, param);
       return i;
     }
 
     public static List<string> UpdatePayments(
-      List<ReceiptPayment> paymentsToEdit,
-      List<ReceiptPayment> originalPayments, // do i need this to rollback the transaction if not doing it using SQL?
+      ReceiptPayment paymentToEdit,
+      ReceiptPayment originalPayment, // do i need this to rollback the transaction if not doing it using SQL?
       string username)
     {
       var errors = new List<string>();
-      foreach (var p in paymentsToEdit)
+      var p = paymentToEdit;
+      if (p.PaymentType == "CA" || p.PaymentType == "CK")
       {
-        if (p.PaymentType == "CA" || p.PaymentType == "CK")
-        {
 
 
-          var param = new DynamicParameters();
-          param.Add("@PayId", p.PayId);
-          param.Add("@otid", p.OTId);
-          param.Add("@PaymentType", p.PaymentType);
-          param.Add("@CheckNumber", p.CheckNumber);
-          param.Add("@username", username.Replace("CLAYBCC\\", ""));
-          var query = @"
+        var param = new DynamicParameters();
+        param.Add("@PayId", p.PayId);
+        param.Add("@otid", p.OTId);
+        param.Add("@PaymentType", p.PaymentType);
+        param.Add("@CheckNumber", p.CheckNumber);
+        param.Add("@username", username);
+        var query = @"
           USE WATSC;
 
           UPDATE ccCashierPayment
@@ -172,53 +171,47 @@ namespace ClayPay.Models.Claypay
 
         ";
 
-          try
+        try
+        {
+          if (!Constants.Save_Data(query, param))
           {
-            if (!Constants.Save_Data(query, param))
-            {
 
-              errors.Add($@"The {Payment.GetPaymentType(p.PaymentType).ToLower()} 
-                            payment with payId {p.PayId} was not updated");
-            }
-
-          }
-          catch (Exception ex)
-          {
-            Constants.Log(ex, query);
             errors.Add($@"The {Payment.GetPaymentType(p.PaymentType).ToLower()} 
-                            payment with payId {p.PayId} did not update properly");
+                            payment with payId {p.PayId} was not updated");
           }
+
+        }
+        catch (Exception ex)
+        {
+          Constants.Log(ex, query);
+          errors.Add($@"The {Payment.GetPaymentType(p.PaymentType).ToLower()} 
+                            payment with payId {p.PayId} did not update properly");
         }
       }
       return errors;
     }
 
-    public static List<string> EditPaymentValidation(List<ReceiptPayment> paymentsToEdit, List<ReceiptPayment> originalPayments)
+    public static List<string> EditPaymentValidation(ReceiptPayment paymentToEdit, ReceiptPayment originalPayment)
     {
       var errors = new List<string>();
-      foreach(var p in paymentsToEdit)
-      {
+      var p = paymentToEdit;
         bool hasMatch = false;
-        foreach(var o in originalPayments)
-        {
+      var o = originalPayment;
           if(HasMatchingPayment(p, o))
           {
             hasMatch = true;
-            break;
           }
-        }
 
         if(!hasMatch)
         {
           errors.Add($@"The {Payment.GetPaymentType(p.PaymentType)} payment with payId {p.PayId} is not a valid payment.");
         }
-      }
-      if (NotEditablePaymentTypes(paymentsToEdit, originalPayments))
+      if (NotEditablePaymentTypes(paymentToEdit, originalPayment))
       {
         errors.Add("You can only edit cash or check payments");
       }
 
-      if (DateFinalized(originalPayments))
+      if (DateFinalized(originalPayment))
       {
         errors.Add("These payments have been finalized and can no longer be edited");
       }
@@ -228,16 +221,19 @@ namespace ClayPay.Models.Claypay
     }
 
 
-    public static bool NotEditablePaymentTypes(List<ReceiptPayment> paymentTypesToEdit, List<ReceiptPayment> originalPaymentTypes)
+    public static bool NotEditablePaymentTypes(ReceiptPayment paymentTypeToEdit, ReceiptPayment originalPaymentType)
     {
-      if ((from p in paymentTypesToEdit
-           where p.PaymentType != "CA" &&
-                 p.PaymentType != "CK"
-           select p).ToList().Count() > 0 ||
-        (from p in originalPaymentTypes
-         where p.PaymentType != "CA" &&
-               p.PaymentType != "CK"
-         select p).ToList().Count() > 0)
+      string[] validPaymentTypes = { "CA", "CK" };
+      if(!validPaymentTypes.Contains(paymentTypeToEdit.PaymentType) ||
+        !validPaymentTypes.Contains(originalPaymentType.PaymentType))
+      //if ((from p in paymentTypeToEdit
+      //     where p.PaymentType != "CA" &&
+      //           p.PaymentType != "CK"
+      //     select p).ToList().Count() > 0 ||
+      //  (from p in originalPaymentType
+      //   where p.PaymentType != "CA" &&
+      //         p.PaymentType != "CK"
+      //   select p).ToList().Count() > 0)
       {
         return true;
       }
@@ -245,9 +241,9 @@ namespace ClayPay.Models.Claypay
       return false;
     }
 
-    public static bool DateFinalized(List<ReceiptPayment> originalPayments)
+    public static bool DateFinalized(ReceiptPayment originalPayment)
     {
-      return Models.Balancing.DJournal.LastDateFinalized().AddDays(1).Date >= originalPayments[0].TransactionDate.Date;
+      return Balancing.DJournal.LastDateFinalized().AddDays(1).Date >= originalPayment.TransactionDate.Date;
     }
 
     public static bool HasMatchingPayment(ReceiptPayment paymentToCheck, ReceiptPayment originalPayment)

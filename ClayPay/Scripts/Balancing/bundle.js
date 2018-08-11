@@ -967,13 +967,14 @@ var Utilities;
         a.id = menuItem.id;
         a.href = "#";
         a.onclick = function () {
-            let title = document.getElementById("menuTitle");
-            let subTitle = document.getElementById("menuSubTitle");
-            Utilities.Clear_Element(title);
-            Utilities.Clear_Element(subTitle);
-            title.appendChild(document.createTextNode(menuItem.title));
-            subTitle.appendChild(document.createTextNode(menuItem.subTitle));
-            Utilities.Show_Menu(menuItem.id);
+            Update_Menu(menuItem);
+            //let title = document.getElementById("menuTitle");
+            //let subTitle = document.getElementById("menuSubTitle");
+            //Utilities.Clear_Element(title);
+            //Utilities.Clear_Element(subTitle);
+            //title.appendChild(document.createTextNode(menuItem.title));
+            //subTitle.appendChild(document.createTextNode(menuItem.subTitle));
+            //Utilities.Show_Menu(menuItem.id);
         };
         if (menuItem.icon.length > 0) {
             let span = document.createElement("span");
@@ -992,6 +993,12 @@ var Utilities;
         return li;
     }
     Utilities.Create_Menu_Element = Create_Menu_Element;
+    function Update_Menu(menuItem) {
+        Set_Text("menuTitle", menuItem.title);
+        Set_Text("menuSubTitle", menuItem.subTitle);
+        Show_Menu(menuItem.id);
+    }
+    Utilities.Update_Menu = Update_Menu;
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map
 var clayPay;
@@ -1287,15 +1294,16 @@ var clayPay;
             this.Charges = [];
             this.ReceiptPayments = [];
             this.TransactionId = "";
+            this.IsEditable = false;
             this.Errors = []; // Errors are full stop, meaning the payment did not process.
             this.PartialErrors = []; // Partial errors mean part of the transaction was completed, but something wasn't.
         }
-        static ShowPaymentReceipt(cr) {
+        static ShowPaymentReceipt(cr, target) {
             console.log('client response ShowPaymentReceipt', cr);
-            let container = document.getElementById(ClientResponse.ReceiptContainer);
+            let container = document.getElementById(target);
             Utilities.Clear_Element(container);
             container.appendChild(ClientResponse.CreateReceiptView(cr));
-            Utilities.Show_Hide_Selector("#views > section", ClientResponse.ReceiptContainer);
+            Utilities.Show_Hide_Selector("#views > section", target);
         }
         static CreateReceiptView(cr) {
             let df = document.createDocumentFragment();
@@ -1380,7 +1388,7 @@ var clayPay;
                         Utilities.Error_Show(ClientResponse.receiptSearchError, cr.Errors);
                     }
                     else {
-                        ClientResponse.ShowPaymentReceipt(cr);
+                        ClientResponse.ShowPaymentReceipt(cr, ClientResponse.PaymentReceiptContainer);
                     }
                     Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
                 }, function (errorText) {
@@ -1398,10 +1406,37 @@ var clayPay;
                 Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
             }
         }
+        static BalancingSearch(link = null) {
+            let cashierId = Utilities.Get_Value("receiptSearch");
+            let path = "/";
+            let qs = "";
+            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            if (i == 0) {
+                path = "/claypay/";
+            }
+            //DateTime DateToBalance, string PaymentType
+            qs = "?CashierId=" + cashierId;
+            Utilities.Get(path + "API/Balancing/Receipt" + qs)
+                .then(function (cr) {
+                console.log('client response', cr);
+                if (link !== null)
+                    Utilities.Set_Text(link, cashierId);
+                clayPay.ClientResponse.ShowPaymentReceipt(cr, Balancing.Payment.DJournalReceiptContainer);
+                // need to select the right box at the top
+                let menulist = Balancing.Menus.filter(function (j) { return j.id === "nav-receipts"; });
+                let receiptMenu = menulist[0];
+                Utilities.Update_Menu(receiptMenu);
+            }, function (error) {
+                console.log('error getting client response for cashier id: ' + cashierId, error);
+                if (link !== null)
+                    Utilities.Set_Text(link, cashierId); // change it back
+            });
+        }
     }
     ClientResponse.CashierErrorTarget = "paymentError";
     ClientResponse.PublicErrorTarget = "publicPaymentError";
-    ClientResponse.ReceiptContainer = "receipt";
+    ClientResponse.PaymentReceiptContainer = "receipt";
+    ClientResponse.BalancingReceiptContainer = "receiptView";
     //static ReceiptErrorContainer: string = "receiptTransactionErrorContainer"; // To be used for partial payments.
     // receiptSearchElements
     ClientResponse.receiptSearchInput = "receiptSearch";
@@ -1409,7 +1444,467 @@ var clayPay;
     ClientResponse.receiptSearchError = "receiptSearchError";
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ClientResponse.js.map
+//# sourceMappingURL=clientresponse.js.map
+/// <reference path="apptypes.ts" />
+/// <reference path="charge.ts" />
+/// <reference path="claypay.ts" />
+var clayPay;
+(function (clayPay) {
+    var UI;
+    (function (UI) {
+        "use strict";
+        UI.ExpMonths = ['01', '02', '03', '04', '05',
+            '06', '07', '08', '09', '10', '11', '12'];
+        UI.AllStates = [
+            { state: "Select", abv: "" },
+            { state: "ALABAMA", abv: "AL" },
+            { state: "ALASKA", abv: "AK" },
+            { state: "ARIZONA", abv: "AZ" },
+            { state: "ARKANSAS", abv: "AR" },
+            { state: "CALIFORNIA", abv: "CA" },
+            { state: "COLORADO", abv: "CO" },
+            { state: "CONNECTICUT", abv: "CT" },
+            { state: "DELAWARE", abv: "DE" },
+            { state: "FLORIDA", abv: "FL" },
+            { state: "GEORGIA", abv: "GA" },
+            { state: "HAWAII", abv: "HI" },
+            { state: "IDAHO", abv: "ID" },
+            { state: "ILLINOIS", abv: "IL" },
+            { state: "INDIANA", abv: "IN" },
+            { state: "IOWA", abv: "IA" },
+            { state: "KANSAS", abv: "KS" },
+            { state: "KENTUCKY", abv: "KY" },
+            { state: "LOUISIANA", abv: "LA" },
+            { state: "MAINE", abv: "ME" },
+            { state: "MARYLAND", abv: "MD" },
+            { state: "MASSACHUSETTS", abv: "MA" },
+            { state: "MICHIGAN", abv: "MI" },
+            { state: "MINNESOTA", abv: "MN" },
+            { state: "MISSISSIPPI", abv: "MS" },
+            { state: "MISSOURI", abv: "MO" },
+            { state: "MONTANA", abv: "MT" },
+            { state: "NEBRASKA", abv: "NE" },
+            { state: "NEVADA", abv: "NV" },
+            { state: "NEW HAMPSHIRE", abv: "NH" },
+            { state: "NEW JERSEY", abv: "NJ" },
+            { state: "NEW MEXICO", abv: "NM" },
+            { state: "NEW YORK", abv: "NY" },
+            { state: "NORTH CAROLINA", abv: "NC" },
+            { state: "NORTH DAKOTA", abv: "ND" },
+            { state: "OHIO", abv: "OH" },
+            { state: "OKLAHOMA", abv: "OK" },
+            { state: "OREGON", abv: "OR" },
+            { state: "PENNSYLVANIA", abv: "PA" },
+            { state: "RHODE ISLAND", abv: "RI" },
+            { state: "SOUTH CAROLINA", abv: "SC" },
+            { state: "SOUTH DAKOTA", abv: "SD" },
+            { state: "TENNESSEE", abv: "TN" },
+            { state: "TEXAS", abv: "TX" },
+            { state: "UTAH", abv: "UT" },
+            { state: "VERMONT", abv: "VT" },
+            { state: "VIRGINIA", abv: "VA" },
+            { state: "WASHINGTON", abv: "WA" },
+            { state: "WEST VIRGINIA", abv: "WV" },
+            { state: "WISCONSIN", abv: "WI" },
+            { state: "WYOMING", abv: "WY" }
+        ];
+        UI.ExpYears = [];
+        UI.Menus = [
+            {
+                id: "nav-Home",
+                title: "Welcome!",
+                subTitle: "You can use this application to easily find and pay Clay County fees.",
+                icon: "fas fa-home",
+                label: "Home",
+                selected: true
+            },
+            {
+                id: "nav-permitFees",
+                title: "Search by Permit Number",
+                subTitle: "Searching by Permit number will show you all of the unpaid fees for a given permit number.",
+                icon: "fas fa-file",
+                label: "Permit Fees",
+                selected: false
+            },
+            {
+                id: "nav-contractorFees",
+                title: "Search by Contractor ID number",
+                subTitle: "Searching by Contractor ID will list any unpaid fees for a given contractor.",
+                icon: "fas fa-user",
+                label: "Contractor Fees",
+                selected: false
+            },
+            {
+                id: "nav-applicationFees",
+                title: "Search by Application Type and Application Number",
+                subTitle: "Pick an application type and then enter an application number to see any unpaid fees associated with that application.",
+                icon: "fas fa-clipboard",
+                label: "Application Fees",
+                selected: false
+            },
+            {
+                id: "nav-cart",
+                title: "Your Shopping Cart",
+                subTitle: "Shows the charges you have added to your shopping cart. You can pay for them here.",
+                icon: "fas fa-shopping-cart",
+                label: "Cart",
+                selected: false
+            },
+            {
+                id: "nav-existingReceipts",
+                title: "View Existing Receipts",
+                subTitle: "Shows the Transaction Date, Charges Paid, and method of payment for a receipt number.",
+                icon: "fas fa-file",
+                label: "Receipt Search",
+                selected: false
+            },
+        ];
+        //export function Submit():boolean
+        //{
+        //  Disable('btnSubmit');
+        //  Utilities.Hide('errorList');
+        //  Utilities.Hide('PaymentPosting');
+        //  let f: HTMLFormElement = <HTMLFormElement>document.getElementById('paymentForm');
+        //  if (!f.checkValidity()) return false;
+        //  let itemIds: Array<number> = Cart.map(function (i)
+        //  {
+        //    return i.ItemId;
+        //  });
+        //  let total: number = Cart.reduce((total: number, b: Charge) =>
+        //  {
+        //    return total + b.Total;
+        //  }, 0);
+        //  total = parseFloat(total.toFixed(2));
+        //  let cc = new clayPay.CCPayment();
+        //  let errors: Array<string> = cc.Validate(); // clientside validation
+        //  if (errors.length === 0)
+        //  {
+        //    Utilities.Hide('CCForm'); // Hide the form
+        //    Utilities.Show('PaymentPosting'); // show swirly
+        //    //let save = cc.Save();
+        //    //save.then(function (response)
+        //    //{
+        //    //  let pr = JSON.parse(response);
+        //    //  resetApp();
+        //    //  PopulateReceipt(pr);
+        //    //},
+        //    //  function (reject)
+        //    //  {
+        //    //    Utilities.Show('errorList');
+        //    //    errors = [reject];
+        //    //    BuildErrors(errors);          
+        //    //    Utilities.Show('CCForm');
+        //    //    Utilities.Hide('PaymentPosting');
+        //    //    Enable('btnSubmit');
+        //    //  });
+        //  } else
+        //  {
+        //    // show errors section
+        //    Utilities.Show('errorList');
+        //    BuildErrors(errors);
+        //    Enable('btnSubmit');
+        //  }    
+        //  return false;
+        //}
+        //function resetApp():void
+        //{
+        //  CurrentCharges = [];
+        //  Cart = [];
+        //  updateCart();
+        //  updateCartNav();
+        //  // reset paymentForm
+        //  let f: HTMLFormElement = <HTMLFormElement>document.getElementById('paymentForm');
+        //  f.reset();
+        //  Enable('btnSubmit');
+        //  Utilities.Show('CCForm');
+        //  Utilities.Hide('PaymentPosting');
+        //}
+        //function PopulateReceipt(pr: {CashierId:string, TimeStamp_Display: string, Amount: number}):void
+        //{
+        //  //clayPay.toggleNavDisplay('receipt');
+        //  Utilities.Set_Value("receiptUniqueId", pr.CashierId);
+        //  Utilities.Set_Value("receiptTimestamp", pr.TimeStamp_Display);
+        //  Utilities.Set_Value("receiptAmount", pr.Amount.toFixed(2));
+        //}
+        //function ToggleDisabled(id: string, status: boolean): void
+        //{
+        //  (<HTMLButtonElement>document.getElementById(id)).disabled = status;
+        //}
+        //function Disable(id: string): void
+        //{
+        //  ToggleDisabled(id, true);
+        //}
+        //function Enable(id: string): void
+        //{
+        //  ToggleDisabled(id, false);
+        //}
+        function BuildErrors(errors) {
+            let errorList = document.getElementById("errorList");
+            let df = document.createDocumentFragment();
+            Utilities.Clear_Element(errorList);
+            for (let error of errors) {
+                let li = document.createElement("li");
+                li.textContent = error;
+                df.appendChild(li);
+            }
+            errorList.appendChild(df);
+        }
+        function BuildPayerStates(States, id) {
+            let stateSelect = document.getElementById(id);
+            if (stateSelect === undefined)
+                return;
+            Utilities.Clear_Element(stateSelect);
+            States.forEach(function (j) {
+                stateSelect.appendChild(Utilities.Create_Option(j.abv, j.state));
+            });
+            stateSelect.selectedIndex = 0;
+        }
+        UI.BuildPayerStates = BuildPayerStates;
+        function BuildAppTypes(appTypes) {
+            let appSelect = document.getElementById("applicationSearchType");
+            Utilities.Clear_Element(appSelect);
+            appSelect.appendChild(Utilities.Create_Option("-1", "Select Application Type", true));
+            appTypes.forEach(function (a) {
+                appSelect.appendChild(Utilities.Create_Option(a.Value, a.Label));
+            });
+            appSelect.selectedIndex = 0;
+        }
+        UI.BuildAppTypes = BuildAppTypes;
+        function BuildExpMonths(id) {
+            let expMonth = document.getElementById(id);
+            if (expMonth === undefined)
+                return;
+            Utilities.Clear_Element(expMonth);
+            for (let month of UI.ExpMonths) {
+                expMonth.appendChild(Utilities.Create_Option(month, month));
+            }
+            expMonth.selectedIndex = 0;
+        }
+        UI.BuildExpMonths = BuildExpMonths;
+        function BuildExpYears(id) {
+            let expYear = document.getElementById(id);
+            Utilities.Clear_Element(expYear);
+            var year = new Date().getFullYear();
+            for (var i = 0; i < 10; i++) {
+                let y = (year + i).toString();
+                expYear.appendChild(Utilities.Create_Option(y, y));
+                UI.ExpYears.push(y); // save the year we're adding for later when we do some basic validation
+            }
+        }
+        UI.BuildExpYears = BuildExpYears;
+        function Search(buttonId, inputId, errorId) {
+            Utilities.Toggle_Loading_Button(buttonId, true);
+            let input = document.getElementById(inputId);
+            let k = input.value.trim().toUpperCase();
+            if (inputId.indexOf("application") > -1) {
+                // we'll need to validate the application data
+                // the user needs to select a valid application type 
+                // and enter a valid application number.
+                let appType = document.getElementById(inputId + "Type").value;
+                if (appType === "-1" || appType.length === 0) {
+                    Utilities.Error_Show(errorId, "You must select an Application Type in order to search by Application Number.");
+                    Utilities.Toggle_Loading_Button(buttonId, false);
+                    return false;
+                }
+                k = appType.toUpperCase() + "-" + input.value.trim().toUpperCase();
+            }
+            if (k.length > 0) {
+                let path = "/";
+                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                if (i == 0) {
+                    path = "/claypay/";
+                }
+                Utilities.Get(path + "API/Payments/Query/?key=" + k).then(function (charges) {
+                    clayPay.CurrentTransaction.CurrentCharges = charges;
+                    if (charges.length > 0) {
+                        ProcessSearchResults(charges);
+                        Utilities.Show("searchResults");
+                    }
+                    else {
+                        Utilities.Error_Show(errorId, "No charges were found for search: " + k);
+                    }
+                    Utilities.Toggle_Loading_Button(buttonId, false);
+                    return true;
+                }, function (errorText) {
+                    Utilities.Error_Show(errorId, errorText);
+                    console.log('error getting charges');
+                    // do something with the error here
+                    // need to figure out how to detect if something wasn't found
+                    // versus an error.
+                    Utilities.Toggle_Loading_Button(buttonId, false);
+                    return false;
+                });
+            }
+            else {
+                Utilities.Error_Show(errorId, "Invalid search. Please check your entry and try again.");
+                input.focus();
+                Utilities.Toggle_Loading_Button(buttonId, false);
+                return false;
+            }
+        }
+        UI.Search = Search;
+        function ProcessSearchResults(charges) {
+            let container = document.getElementById('Charges');
+            Utilities.Clear_Element(container);
+            container.appendChild(clayPay.Charge.CreateChargesTable(charges, clayPay.ChargeView.search_results));
+            Utilities.Set_Text('ChargesKey', charges[0].AssocKey);
+            Utilities.Set_Text('ChargesDetail', charges[0].Detail);
+        }
+        UI.ProcessSearchResults = ProcessSearchResults;
+        function IsItemInCart(itemId) {
+            let item = clayPay.CurrentTransaction.Cart.filter((c) => {
+                return c.ItemId == itemId;
+            });
+            return item.length !== 0;
+        }
+        UI.IsItemInCart = IsItemInCart;
+        //export function AddAllItemsToCart(): void
+        //{
+        //  for (let charge of clayPay.CurrentTransaction.CurrentCharges)
+        //  {
+        //    if (!IsItemInCart(charge.ItemId))
+        //    {
+        //      clayPay.CurrentTransaction.Cart.push(charge);
+        //    }
+        //  }
+        //  updateCart();
+        //  // we're going to rerun the "Create Table" so that it'll 
+        //  // update each row
+        //  ProcessSearchResults(clayPay.CurrentTransaction.CurrentCharges);
+        //  //AddCharges(clayPay.CurrentTransaction.CurrentCharges);
+        //}
+        function createTableHeaderElement(value, width) {
+            let th = document.createElement("th");
+            th.width = width;
+            th.appendChild(document.createTextNode(value));
+            return th;
+        }
+        UI.createTableHeaderElement = createTableHeaderElement;
+        function createTableElement(value, className, colspan) {
+            let d = document.createElement("td");
+            if (className !== undefined) {
+                d.className = className;
+            }
+            if (colspan !== undefined) {
+                d.colSpan = colspan;
+            }
+            d.appendChild(document.createTextNode(value));
+            return d;
+        }
+        UI.createTableElement = createTableElement;
+        function createTableElementButton(value, itemId, className, toggle, addOnClickFunction, removeOnClickFunction) {
+            let IsInCart = IsItemInCart(itemId);
+            let d = document.createElement("td");
+            d.className = className;
+            let add = document.createElement("button");
+            add.style.display = IsInCart ? "none" : "inline-block";
+            add.type = "button";
+            add.id = "btnAdd" + itemId.toString();
+            add.className = "button is-primary";
+            add.onclick = (ev) => {
+                addOnClickFunction(ev, itemId);
+            };
+            let remove = document.createElement("div");
+            remove.id = "btnRemove" + itemId.toString();
+            remove.style.display = IsInCart ? "inline-block" : "none";
+            remove.appendChild(document.createTextNode('Added ('));
+            let removeButton = document.createElement("a");
+            //removeButton
+            removeButton.classList.add("is-warning");
+            //removeButton.style.color = "darkgoldenrod";
+            removeButton.style.cursor = "pointer";
+            removeButton.appendChild(document.createTextNode('remove'));
+            removeButton.onclick = (ev) => {
+                removeOnClickFunction(ev, itemId, toggle);
+            };
+            remove.appendChild(removeButton);
+            remove.appendChild(document.createTextNode(')'));
+            add.appendChild(document.createTextNode(value));
+            d.appendChild(add);
+            d.appendChild(remove);
+            return d;
+        }
+        UI.createTableElementButton = createTableElementButton;
+        function createAddAllTableElementButton(value, ViewCartClickFunction) {
+            let d = document.createElement("td");
+            let add = document.createElement("button");
+            add.type = "button";
+            add.className = "btn btn-primary";
+            add.onclick = (ev) => {
+                ViewCartClickFunction('cart');
+            };
+            add.appendChild(document.createTextNode(value));
+            d.appendChild(add);
+            return d;
+        }
+        function updateCartNav() {
+            // This function is going to take the contents of the Cart array and 
+            // update the CartNav element.
+            // it's also going to make some changes to the cart Div, 
+            // specifically it's going to hide and unhide the CartEmpty Div
+            // based on the size of the array.
+            let CartNav = document.getElementById('nav-cart-total');
+            // emptyCart / fullCart is used when displaying the Cart
+            // if there are no charges, we show emptyCart.
+            // if there are charges, we show fullCart.
+            let emptyCart = document.getElementById("emptyCart");
+            let fullCart = document.getElementById("fullCart");
+            let payerData = document.getElementById("payerData");
+            let paymentData = document.getElementById("paymentData");
+            Utilities.Hide(emptyCart);
+            Utilities.Hide(fullCart);
+            Utilities.Hide(payerData);
+            //Utilities.Hide(paymentData);
+            //Utilities.Show()
+            Utilities.Clear_Element(CartNav);
+            if (clayPay.CurrentTransaction.Cart.length === 0) {
+                CartNav.appendChild(document.createTextNode("(empty)"));
+                Utilities.Show(emptyCart);
+            }
+            else {
+                let cartLength = clayPay.CurrentTransaction.Cart.length;
+                CartNav.appendChild(document.createTextNode(+cartLength.toString() + (cartLength === 1 ? ' item' : ' items')));
+                Utilities.Show(fullCart);
+                Utilities.Show(payerData);
+                //Utilities.Show(paymentData);
+            }
+        }
+        function updateCart() {
+            let CartCharges = document.getElementById('fullCart');
+            Utilities.Clear_Element(CartCharges);
+            //let df = document.createDocumentFragment();
+            //for (let charge of clayPay.CurrentTransaction.Cart)
+            //{
+            //  df.appendChild(buildCartRow(charge));
+            //}
+            //df.appendChild(buildCartFooterRow());
+            //df.appendChild(buildCartConvFeeFooterRow());
+            //CartCharges.appendChild(df);
+            CartCharges.appendChild(clayPay.Charge.CreateChargesTable(clayPay.CurrentTransaction.Cart, clayPay.ChargeView.cart));
+            updateCartNav();
+        }
+        UI.updateCart = updateCart;
+        function buildMenuElements() {
+            let menu = document.getElementById("menuTabs");
+            for (let menuItem of UI.Menus) {
+                menu.appendChild(Utilities.Create_Menu_Element(menuItem));
+            }
+            createNavCart();
+        }
+        UI.buildMenuElements = buildMenuElements;
+        function createNavCart() {
+            let cart = document.getElementById("nav-cart");
+            let cartTotal = document.createElement("span");
+            cartTotal.id = "nav-cart-total";
+            cartTotal.style.fontSize = "larger";
+            cartTotal.style.fontWeight = "bolder";
+            cartTotal.style.paddingLeft = "1em";
+            cartTotal.appendChild(document.createTextNode("(empty)"));
+            cart.appendChild(cartTotal);
+        }
+    })(UI = clayPay.UI || (clayPay.UI = {}));
+})(clayPay || (clayPay = {}));
+//# sourceMappingURL=ui.js.map
 var Balancing;
 (function (Balancing) {
     class Account {
@@ -1540,27 +2035,8 @@ var Balancing;
             let link = document.createElement("a");
             link.onclick = () => {
                 Utilities.Set_Text(link, "loading...");
-                let path = "/";
-                let qs = "";
-                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
-                if (i == 0) {
-                    path = "/claypay/";
-                }
-                //DateTime DateToBalance, string PaymentType
-                qs = "?CashierId=" + value;
-                Utilities.Get(path + "API/Balancing/Receipt" + qs)
-                    .then(function (cr) {
-                    console.log('client response', cr);
-                    Utilities.Set_Text(link, value);
-                    //Balancing.Payment.ShowPayments(payments, value, djournalDate);
-                    //Utilities.Hide(DJournal.DJournalTotalsContainer);
-                    //Utilities.Hide(DJournal.DJournalReceiptContainer);
-                    //Utilities.Set_Text(link, value); // change it back
-                    //Utilities.Show(DJournal.PaymentsContainer);
-                }, function (error) {
-                    console.log('error getting client response for cashier id: ' + value, error);
-                    Utilities.Set_Text(link, value); // change it back
-                });
+                Utilities.Set_Value("receiptSearch", value);
+                clayPay.ClientResponse.BalancingSearch(link);
             };
             link.appendChild(document.createTextNode(value));
             cell.appendChild(link);
@@ -1569,7 +2045,7 @@ var Balancing;
     }
     Payment.PaymentsContainer = "djournalPaymentsByType";
     Payment.DJournalTotalsContainer = "djournalTotals";
-    Payment.DJournalReceiptContainer = "djournalReceipt";
+    Payment.DJournalReceiptContainer = "receiptView";
     Balancing.Payment = Payment;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=Payment.js.map
@@ -1728,7 +2204,6 @@ var Balancing;
                     console.log('payments', payments);
                     Balancing.Payment.ShowPayments(payments, value, djournalDate);
                     Utilities.Hide(DJournal.DJournalTotalsContainer);
-                    Utilities.Hide(DJournal.DJournalReceiptContainer);
                     Utilities.Set_Text(link, value); // change it back
                     Utilities.Show(DJournal.PaymentsContainer);
                 }, function (error) {
@@ -1745,7 +2220,6 @@ var Balancing;
     DJournal.DJournalDateInput = "djournalDate";
     DJournal.DjournalContainer = "balancingDJournal";
     DJournal.PaymentsContainer = "djournalPaymentsByType";
-    DJournal.DJournalReceiptContainer = "djournalReceipt";
     Balancing.DJournal = DJournal;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=DJournal.js.map
@@ -1762,7 +2236,7 @@ var Balancing;
 //# sourceMappingURL=DjournalLog.js.map
 var Balancing;
 (function (Balancing) {
-    let Menus = [
+    Balancing.Menus = [
         {
             id: "nav-balancing",
             title: "Balancing & DJournal Handling",
@@ -1795,10 +2269,15 @@ var Balancing;
     Balancing.Start = Start;
     function buildMenuElements() {
         let menu = document.getElementById("menuTabs");
-        for (let menuItem of Menus) {
+        for (let menuItem of Balancing.Menus) {
             menu.appendChild(Utilities.Create_Menu_Element(menuItem));
         }
     }
     Balancing.buildMenuElements = buildMenuElements;
+    function ClearReceipt() {
+        let e = document.getElementById("receiptView");
+        Utilities.Clear_Element(e);
+    }
+    Balancing.ClearReceipt = ClearReceipt;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=Balancing.js.map

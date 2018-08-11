@@ -34,10 +34,6 @@
                class="hide">
 
           </div>
-          <div id="djournalReceipt"
-               class="hide">
-
-          </div>
         </div>
       </div>
     </div>
@@ -47,12 +43,57 @@
 
   <section class="hide"
            id="onlinePayments">
-    online payments
+    
   </section>
 
   <section class="hide"
            id="receipts">
-    receipts
+
+    <div class="field is-horizontal">
+      <div class="field-label is-normal">
+        <label class="label">Receipt Number</label>
+      </div>
+      <div class="field-body">
+        <div class="field is-grouped">
+          <div class="control">
+            <input id="receiptSearch"
+                   class="input"
+                   type="text"
+                   maxlength="9"
+                   value="@(HttpContext.Current.IsDebuggingEnabled ? "18-013663" : "")"
+                   placeholder="18-000001" />
+          </div>
+          <div class="control">
+            <button id="receiptSearchButton"
+                    type="button"
+                    class="button is-primary">
+              Search
+            </button>
+            <button onclick="Balancing.ClearReceipt();"
+                    id="clearReceipt"
+                    type="button"
+                    class="button is-warning">
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column is-offset-1">
+        <div class="hide"
+             id="receiptSearchError">
+
+        </div>
+      </div>
+      <div class="column">
+
+      </div>
+    </div>
+    <div id="receiptView">
+
+    </div>
+
   </section>
 
 </div>

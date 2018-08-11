@@ -2,7 +2,7 @@
 
 namespace Balancing
 {
-  let Menus: Array<{ id: string, title: string, subTitle: string, icon: string, label: string, selected: boolean }> = [
+  export let Menus: Array<{ id: string, title: string, subTitle: string, icon: string, label: string, selected: boolean }> = [
     {
       id: "nav-balancing",
       title: "Balancing & DJournal Handling",
@@ -42,6 +42,12 @@ namespace Balancing
     {
       menu.appendChild(Utilities.Create_Menu_Element(menuItem));
     }
+  }
+
+  export function ClearReceipt()
+  {
+    let e = document.getElementById("receiptView");
+    Utilities.Clear_Element(e);
   }
 
 

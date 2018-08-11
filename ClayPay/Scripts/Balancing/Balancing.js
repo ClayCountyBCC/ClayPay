@@ -1,6 +1,6 @@
 var Balancing;
 (function (Balancing) {
-    let Menus = [
+    Balancing.Menus = [
         {
             id: "nav-balancing",
             title: "Balancing & DJournal Handling",
@@ -33,10 +33,15 @@ var Balancing;
     Balancing.Start = Start;
     function buildMenuElements() {
         let menu = document.getElementById("menuTabs");
-        for (let menuItem of Menus) {
+        for (let menuItem of Balancing.Menus) {
             menu.appendChild(Utilities.Create_Menu_Element(menuItem));
         }
     }
     Balancing.buildMenuElements = buildMenuElements;
+    function ClearReceipt() {
+        let e = document.getElementById("receiptView");
+        Utilities.Clear_Element(e);
+    }
+    Balancing.ClearReceipt = ClearReceipt;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=Balancing.js.map

@@ -331,13 +331,14 @@ namespace Utilities
     a.href = "#";
     a.onclick = function ()
     {
-      let title = document.getElementById("menuTitle");
-      let subTitle = document.getElementById("menuSubTitle");
-      Utilities.Clear_Element(title);
-      Utilities.Clear_Element(subTitle);
-      title.appendChild(document.createTextNode(menuItem.title));
-      subTitle.appendChild(document.createTextNode(menuItem.subTitle));
-      Utilities.Show_Menu(menuItem.id);
+      Update_Menu(menuItem);
+      //let title = document.getElementById("menuTitle");
+      //let subTitle = document.getElementById("menuSubTitle");
+      //Utilities.Clear_Element(title);
+      //Utilities.Clear_Element(subTitle);
+      //title.appendChild(document.createTextNode(menuItem.title));
+      //subTitle.appendChild(document.createTextNode(menuItem.subTitle));
+      //Utilities.Show_Menu(menuItem.id);
     }
     if (menuItem.icon.length > 0)
     {
@@ -356,6 +357,21 @@ namespace Utilities
     a.appendChild(document.createTextNode(menuItem.label))
     li.appendChild(a);
     return li;
+  }
+
+  export function Update_Menu(
+    menuItem: {
+    id: string,
+    title: string,
+    subTitle: string,
+    icon: string,
+    label: string,
+    selected: boolean
+  }):void
+  {
+    Set_Text("menuTitle", menuItem.title);
+    Set_Text("menuSubTitle", menuItem.subTitle);
+    Show_Menu(menuItem.id);
   }
 
 }

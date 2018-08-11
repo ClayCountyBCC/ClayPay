@@ -141,7 +141,7 @@ var clayPay;
                     clayPay.Payment.ResetAll();
                     clayPay.CurrentTransaction = new NewTransaction(); // this will reset the entire object back to default.
                     clayPay.UI.updateCart();
-                    clayPay.ClientResponse.ShowPaymentReceipt(cr);
+                    clayPay.ClientResponse.ShowPaymentReceipt(cr, clayPay.ClientResponse.PaymentReceiptContainer);
                 }
                 Utilities.Toggle_Loading_Button(toggleButton, false);
                 // need to reset the form and transaction / payment objects
@@ -163,4 +163,4 @@ var clayPay;
     NewTransaction.paymentError = "paymentError";
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=NewTransaction.js.map
+//# sourceMappingURL=newtransaction.js.map

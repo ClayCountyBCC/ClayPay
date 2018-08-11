@@ -33,7 +33,6 @@ namespace ClayPay.Models.Claypay
     public NewTransaction()
     {
     }
-
   
     public ClientResponse ProcessPaymentTransaction()
     {
@@ -83,7 +82,7 @@ namespace ClayPay.Models.Claypay
 
       if (SaveTransaction()) // Unlock IDs at the end of this function
       {
-        var amountPaid = (from payment in Payments select payment.AmountApplied).Sum();
+        //var amountPaid = (from payment in Payments select payment.AmountApplied).Sum();
 
         var cr = new ClientResponse(TransactionCashierData.CashierId, Charges);
         cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddress);
@@ -728,7 +727,7 @@ namespace ClayPay.Models.Claypay
               FROM ccCashierItem 
               WHERE OTId=@otid AND
                 Assoc='CL' AND
-                CatCode IN ('CLLTF', 'CLFE', 'CIAC', 'LFE') ANDd
+                CatCode IN ('CLLTF', 'CLFE', 'CIAC', 'LFE') AND
               (SELECT ISNULL(SUM(Total), 0) AS Total 
                 FROM ccCashierItem
                 WHERE AssocKey IN (SELECT DISTINCT AssocKey 
@@ -783,66 +782,66 @@ namespace ClayPay.Models.Claypay
       }
     }
 
-    public static List<string> BuildEmailBody(string cashierId, CashierData payerData)
-    {
-      var charges = Charge.GetChargesByCashierId(cashierId);
-      var payments = ReceiptPayment.Get(cashierId);
+    //public static List<string> BuildEmailBody(string cashierId, CashierData payerData)
+    //{
+    //  var charges = Charge.GetChargesByCashierId(cashierId);
+    //  var payments = ReceiptPayment.Get(cashierId);
 
-      var emailReceipt = new List<string>();
-      var emailHeader = new StringBuilder();
-      var csHeader = new StringBuilder();
-      var cs = new StringBuilder();
-      var psHeader = new StringBuilder();
-      var ps = new StringBuilder();
+    //  var emailReceipt = new List<string>();
+    //  var emailHeader = new StringBuilder();
+    //  var csHeader = new StringBuilder();
+    //  var cs = new StringBuilder();
+    //  var psHeader = new StringBuilder();
+    //  var ps = new StringBuilder();
 
-      emailHeader.Append(payerData.PayerName).Append("\t\t\t").Append(payerData.TransactionDate.ToString()).AppendLine()
-                 .Append(payerData.PayerEmailAddress).AppendLine()
-                 .Append(payerData.PayerCompanyName).AppendLine()
-                 .Append(payerData.PayerStreetAddress).AppendLine()
-                 .Append(payerData.PayerStreet2).AppendLine()
-                 .AppendLine()
-                 .AppendLine();
+    //  emailHeader.Append(payerData.PayerName).Append("\t\t\t").Append(payerData.TransactionDate.ToString()).AppendLine()
+    //             .Append(payerData.PayerEmailAddress).AppendLine()
+    //             .Append(payerData.PayerCompanyName).AppendLine()
+    //             .Append(payerData.PayerStreetAddress).AppendLine()
+    //             .Append(payerData.PayerStreet2).AppendLine()
+    //             .AppendLine()
+    //             .AppendLine();
                  
-      csHeader.AppendLine()
-              .Append("Key\t\tDescription\tAmount");
+    //  csHeader.AppendLine()
+    //          .Append("Key\t\tDescription\tAmount");
 
       
-      foreach (var c in charges)
-      {
-        cs.Append(c.AssocKey).
-        Append("\t")
-        .Append(c.Description)
-        .Append("\t")
-        .Append(c.TotalDisplay)
-        .AppendLine();
-      }
-      psHeader.AppendLine()
-              .Append("\t\tCheck Number\n")
-              .Append("Payment Type\tTransaction ID\tAmount\tConvenience Fee(cc only)");
+    //  foreach (var c in charges)
+    //  {
+    //    cs.Append(c.AssocKey).
+    //    Append("\t")
+    //    .Append(c.Description)
+    //    .Append("\t")
+    //    .Append(c.TotalDisplay)
+    //    .AppendLine();
+    //  }
+    //  psHeader.AppendLine()
+    //          .Append("\t\tCheck Number\n")
+    //          .Append("Payment Type\tTransaction ID\tAmount\tConvenience Fee(cc only)");
 
-      foreach (var p in payments)
-      {
-        ps.Append(p.PaymentTypeDescription)
-        .Append("\t")
-        .Append(p.CheckNumber + p.TransactionId)
-        .Append("\t\t")
-        .Append(p.AmountApplied)
-        .Append("\t")
-        .Append(p.ConvenienceFeeAmount)
-        .AppendLine();
-      }
+    //  foreach (var p in payments)
+    //  {
+    //    ps.Append(p.PaymentTypeDescription)
+    //    .Append("\t")
+    //    .Append(p.CheckNumber + p.TransactionId)
+    //    .Append("\t\t")
+    //    .Append(p.AmountApplied)
+    //    .Append("\t")
+    //    .Append(p.ConvenienceFeeAmount)
+    //    .AppendLine();
+    //  }
 
-      var emailBody = new List<string>
-      {
-        emailHeader.ToString(),
-        csHeader.ToString(),
-        cs.ToString(),
-        psHeader.ToString(),
-        ps.ToString()
-       };
+    //  var emailBody = new List<string>
+    //  {
+    //    emailHeader.ToString(),
+    //    csHeader.ToString(),
+    //    cs.ToString(),
+    //    psHeader.ToString(),
+    //    ps.ToString()
+    //   };
        
-      return emailBody;
-    }
+    //  return emailBody;
+    //}
 
     //public string CreateEmailBody()
     //{

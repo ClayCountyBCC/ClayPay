@@ -220,10 +220,9 @@ namespace ClayPay.Models
           INSERT INTO EmailList 
           (EmailTo, EmailSubject, EmailBody)  
           VALUES (@To, @Subject, @Body);";
-
       try
       {
-        var dbArgs = new Dapper.DynamicParameters();
+        var dbArgs = new DynamicParameters();
         dbArgs.Add("@To", to);
         dbArgs.Add("@Subject", subject);
         dbArgs.Add("@Body", body);

@@ -967,13 +967,14 @@ var Utilities;
         a.id = menuItem.id;
         a.href = "#";
         a.onclick = function () {
-            let title = document.getElementById("menuTitle");
-            let subTitle = document.getElementById("menuSubTitle");
-            Utilities.Clear_Element(title);
-            Utilities.Clear_Element(subTitle);
-            title.appendChild(document.createTextNode(menuItem.title));
-            subTitle.appendChild(document.createTextNode(menuItem.subTitle));
-            Utilities.Show_Menu(menuItem.id);
+            Update_Menu(menuItem);
+            //let title = document.getElementById("menuTitle");
+            //let subTitle = document.getElementById("menuSubTitle");
+            //Utilities.Clear_Element(title);
+            //Utilities.Clear_Element(subTitle);
+            //title.appendChild(document.createTextNode(menuItem.title));
+            //subTitle.appendChild(document.createTextNode(menuItem.subTitle));
+            //Utilities.Show_Menu(menuItem.id);
         };
         if (menuItem.icon.length > 0) {
             let span = document.createElement("span");
@@ -992,6 +993,12 @@ var Utilities;
         return li;
     }
     Utilities.Create_Menu_Element = Create_Menu_Element;
+    function Update_Menu(menuItem) {
+        Set_Text("menuTitle", menuItem.title);
+        Set_Text("menuSubTitle", menuItem.subTitle);
+        Show_Menu(menuItem.id);
+    }
+    Utilities.Update_Menu = Update_Menu;
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map
 var clayPay;
@@ -1096,6 +1103,59 @@ var clayPay;
     clayPay.CashierData = CashierData;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=CashierData.js.map
+var clayPay;
+(function (clayPay) {
+    class LocationHash {
+        constructor(locationHash) {
+            this.Permit = "";
+            this.CashierId = "";
+            this.ContractorId = "";
+            this.ApplicationNumber = "";
+            let ha = locationHash.split("&");
+            for (let i = 0; i < ha.length; i++) {
+                let k = ha[i].split("=");
+                switch (k[0].toLowerCase()) {
+                    case "application":
+                        this.ApplicationNumber = k[1];
+                        break;
+                    case "contractor":
+                        this.ContractorId = k[1];
+                        break;
+                    case "permit":
+                        this.Permit = k[1];
+                        break;
+                    case "cashierid":
+                        this.CashierId = k[1];
+                        break;
+                }
+            }
+        }
+        //UpdatePermit(permit: string)
+        //{ // this function is going to take the current LocationHash
+        //  // and using its current properties, going to emit an updated hash
+        //  // with a new EmailId.
+        //  let h: string = "";
+        //  if (permit.length > 0) h += "&permit=" + permit;
+        //  return h.substring(1);
+        //}
+        ToHash() {
+            let h = "";
+            if (this.Permit.length > 0)
+                h += "&permit=" + this.Permit;
+            if (this.ApplicationNumber.length > 0)
+                h += "&application=" + this.ApplicationNumber;
+            if (this.ContractorId.length > 0)
+                h += "&contractor=" + this.ContractorId;
+            if (this.CashierId.length > 0)
+                h += "&cashierid=" + this.CashierId;
+            if (h.length > 0)
+                h = "#" + h.substring(1);
+            return h;
+        }
+    }
+    clayPay.LocationHash = LocationHash;
+})(clayPay || (clayPay = {}));
+//# sourceMappingURL=LocationHash.js.map
 var clayPay;
 (function (clayPay) {
     let ChargeView;
@@ -1752,15 +1812,16 @@ var clayPay;
             this.Charges = [];
             this.ReceiptPayments = [];
             this.TransactionId = "";
+            this.IsEditable = false;
             this.Errors = []; // Errors are full stop, meaning the payment did not process.
             this.PartialErrors = []; // Partial errors mean part of the transaction was completed, but something wasn't.
         }
-        static ShowPaymentReceipt(cr) {
+        static ShowPaymentReceipt(cr, target) {
             console.log('client response ShowPaymentReceipt', cr);
-            let container = document.getElementById(ClientResponse.ReceiptContainer);
+            let container = document.getElementById(target);
             Utilities.Clear_Element(container);
             container.appendChild(ClientResponse.CreateReceiptView(cr));
-            Utilities.Show_Hide_Selector("#views > section", ClientResponse.ReceiptContainer);
+            Utilities.Show_Hide_Selector("#views > section", target);
         }
         static CreateReceiptView(cr) {
             let df = document.createDocumentFragment();
@@ -1845,7 +1906,7 @@ var clayPay;
                         Utilities.Error_Show(ClientResponse.receiptSearchError, cr.Errors);
                     }
                     else {
-                        ClientResponse.ShowPaymentReceipt(cr);
+                        ClientResponse.ShowPaymentReceipt(cr, ClientResponse.PaymentReceiptContainer);
                     }
                     Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
                 }, function (errorText) {
@@ -1863,10 +1924,37 @@ var clayPay;
                 Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
             }
         }
+        static BalancingSearch(link = null) {
+            let cashierId = Utilities.Get_Value("receiptSearch");
+            let path = "/";
+            let qs = "";
+            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            if (i == 0) {
+                path = "/claypay/";
+            }
+            //DateTime DateToBalance, string PaymentType
+            qs = "?CashierId=" + cashierId;
+            Utilities.Get(path + "API/Balancing/Receipt" + qs)
+                .then(function (cr) {
+                console.log('client response', cr);
+                if (link !== null)
+                    Utilities.Set_Text(link, cashierId);
+                clayPay.ClientResponse.ShowPaymentReceipt(cr, Balancing.Payment.DJournalReceiptContainer);
+                // need to select the right box at the top
+                let menulist = Balancing.Menus.filter(function (j) { return j.id === "nav-receipts"; });
+                let receiptMenu = menulist[0];
+                Utilities.Update_Menu(receiptMenu);
+            }, function (error) {
+                console.log('error getting client response for cashier id: ' + cashierId, error);
+                if (link !== null)
+                    Utilities.Set_Text(link, cashierId); // change it back
+            });
+        }
     }
     ClientResponse.CashierErrorTarget = "paymentError";
     ClientResponse.PublicErrorTarget = "publicPaymentError";
-    ClientResponse.ReceiptContainer = "receipt";
+    ClientResponse.PaymentReceiptContainer = "receipt";
+    ClientResponse.BalancingReceiptContainer = "receiptView";
     //static ReceiptErrorContainer: string = "receiptTransactionErrorContainer"; // To be used for partial payments.
     // receiptSearchElements
     ClientResponse.receiptSearchInput = "receiptSearch";
@@ -1874,7 +1962,7 @@ var clayPay;
     ClientResponse.receiptSearchError = "receiptSearchError";
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ClientResponse.js.map
+//# sourceMappingURL=clientresponse.js.map
 /// <reference path="payment.ts" />
 /// <reference path="clientresponse.ts" />
 var clayPay;
@@ -2018,7 +2106,7 @@ var clayPay;
                     clayPay.Payment.ResetAll();
                     clayPay.CurrentTransaction = new NewTransaction(); // this will reset the entire object back to default.
                     clayPay.UI.updateCart();
-                    clayPay.ClientResponse.ShowPaymentReceipt(cr);
+                    clayPay.ClientResponse.ShowPaymentReceipt(cr, clayPay.ClientResponse.PaymentReceiptContainer);
                 }
                 Utilities.Toggle_Loading_Button(toggleButton, false);
                 // need to reset the form and transaction / payment objects
@@ -2040,7 +2128,7 @@ var clayPay;
     NewTransaction.paymentError = "paymentError";
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=NewTransaction.js.map
+//# sourceMappingURL=newtransaction.js.map
 var clayPay;
 (function (clayPay) {
     class AppType {
@@ -2071,18 +2159,42 @@ var clayPay;
         HandleUIEvents();
         clayPay.UI.buildMenuElements();
         loadDefaultValues();
-        // let's test the receipt view
-        // uncomment this to test the receipt view.
-        //let cr = new ClientResponse();
-        //cr.AmountPaid = 165;
-        //cr.CashierId = "18-55544";
-        //cr.ChangeDue = 0;
-        //cr.Errors = [];
-        //cr.TimeStamp = "7/13/2018 7:34 AM";
-        //cr.TransactionId = "555ff";
-        //ClientResponse.HandleResponse(cr, true);
+        window.onhashchange = HandleHash;
+        if (location.hash.substring(1).length > 0) {
+            HandleHash();
+        }
     }
     clayPay.start = start;
+    function HandleHash() {
+        let hash = location.hash;
+        let currentHash = new clayPay.LocationHash(location.hash.substring(1));
+        if (currentHash.Permit.length > 0) {
+            Utilities.Update_Menu(clayPay.UI.Menus[1]);
+            HandleSearch('permitSearchButton', 'permitSearch', currentHash.Permit);
+            return;
+        }
+        if (currentHash.CashierId.length > 0) {
+            Utilities.Update_Menu(clayPay.UI.Menus[5]);
+            HandleSearch('receiptSearchButton', 'receiptSearch', currentHash.CashierId);
+            return;
+        }
+        if (currentHash.ContractorId.length > 0) {
+            Utilities.Update_Menu(clayPay.UI.Menus[2]);
+            HandleSearch('contractorSearchButton', 'contractorSearch', currentHash.ContractorId);
+            return;
+        }
+        if (currentHash.ApplicationNumber.length > 0) {
+            Utilities.Update_Menu(clayPay.UI.Menus[3]);
+            HandleSearch('applicationSearchButton', 'applicationSearch', currentHash.ApplicationNumber);
+            return;
+        }
+    }
+    clayPay.HandleHash = HandleHash;
+    function HandleSearch(buttonId, inputId, value) {
+        let button = document.getElementById(buttonId);
+        Utilities.Set_Text(inputId, value);
+        button.click();
+    }
     function HandleUIEvents() {
         document.getElementById('permitSearch')
             .onkeydown = function (event) {
@@ -2629,4 +2741,4 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=UI.js.map
+//# sourceMappingURL=ui.js.map

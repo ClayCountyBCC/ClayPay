@@ -18,13 +18,14 @@ namespace clayPay
     public Charges: Array<Charge> = [];
     public ReceiptPayments: Array<ReceiptPayment> = [];
     public TransactionId: string = "";
-    public IsEditable: boolean;
+    public IsEditable: boolean = false;
     public Errors: Array<string> = []; // Errors are full stop, meaning the payment did not process.
     public PartialErrors: Array<string> = []; // Partial errors mean part of the transaction was completed, but something wasn't.
 
     static CashierErrorTarget: string = "paymentError";
     static PublicErrorTarget: string = "publicPaymentError";
-    static ReceiptContainer: string = "receipt";
+    static PaymentReceiptContainer: string = "receipt";
+    static BalancingReceiptContainer: string = "receiptView";
     //static ReceiptErrorContainer: string = "receiptTransactionErrorContainer"; // To be used for partial payments.
     // receiptSearchElements
     static receiptSearchInput: string = "receiptSearch";
@@ -35,14 +36,13 @@ namespace clayPay
     {
     }
 
-    public static ShowPaymentReceipt(cr: ClientResponse):void
+    public static ShowPaymentReceipt(cr: ClientResponse, target: string):void
     {
       console.log('client response ShowPaymentReceipt', cr);
-      let container = document.getElementById(ClientResponse.ReceiptContainer);
+      let container = document.getElementById(target);
       Utilities.Clear_Element(container);
       container.appendChild(ClientResponse.CreateReceiptView(cr));
-
-      Utilities.Show_Hide_Selector("#views > section", ClientResponse.ReceiptContainer);
+      Utilities.Show_Hide_Selector("#views > section", target);
     }
 
     private static CreateReceiptView(cr: ClientResponse): DocumentFragment
@@ -148,7 +148,7 @@ namespace clayPay
             }
             else
             {
-              ClientResponse.ShowPaymentReceipt(cr);
+              ClientResponse.ShowPaymentReceipt(cr, ClientResponse.PaymentReceiptContainer);
             }
             Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
           },
@@ -170,6 +170,35 @@ namespace clayPay
 
 
 
+    }
+
+    public static BalancingSearch(link: HTMLElement = null): void
+    {
+      let cashierId = Utilities.Get_Value("receiptSearch");
+      let path = "/";
+      let qs = "";
+      let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+      if (i == 0)
+      {
+        path = "/claypay/";
+      }
+      //DateTime DateToBalance, string PaymentType
+      qs = "?CashierId=" + cashierId;
+      Utilities.Get<clayPay.ClientResponse>(path + "API/Balancing/Receipt" + qs)
+        .then(function (cr)
+        {
+          console.log('client response', cr);
+          if (link !== null) Utilities.Set_Text(link, cashierId);          
+          clayPay.ClientResponse.ShowPaymentReceipt(cr, Balancing.Payment.DJournalReceiptContainer);
+          // need to select the right box at the top
+          let menulist = Balancing.Menus.filter(function (j) { return j.id === "nav-receipts" });
+          let receiptMenu = menulist[0];
+          Utilities.Update_Menu(receiptMenu)
+        }, function (error)
+          {
+          console.log('error getting client response for cashier id: ' + cashierId, error);
+          if (link !== null) Utilities.Set_Text(link, cashierId); // change it back
+          });
     }
 
   }

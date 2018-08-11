@@ -16,6 +16,7 @@ namespace ClayPay.Models.Balancing
     public List<CashierTotal> ProcessedPaymentTotals { get; set; } = new List<CashierTotal>();
     public List<CashierTotal> GUTotals { get; set; } = new List<CashierTotal>();
     public List<Account> GLAccountTotals { get; set; } = new List<Account>();
+    public List<CashierDetailData> CashierData { get; set; } = new List<CashierDetailData>();
     public DJournalLog Log { get; set; } = new DJournalLog();
     public List<string> Error { get; set; } = new List<string>();
     public DateTime DJournalDate { get; set; } = DateTime.MinValue;
@@ -33,12 +34,10 @@ namespace ClayPay.Models.Balancing
       this.ProcessedPaymentTotals = CashierTotal.ProcessPaymentTypeTotals(dateToProcess);
       this.GUTotals = CashierTotal.GetGUTotals(dateToProcess);
       this.GLAccountTotals = Account.GetGLAccountTotals(dateToProcess);
+      this.CashierData = CashierDetailData.Get(dateToProcess);
       CheckChargesWithNoGL();
       CheckIfDJournalIsBalanced();
-
-
       //
-
       Log = DJournalLog.Get(dateToProcess);
       if (finalize && Error.Count() == 0)
       {
@@ -107,7 +106,7 @@ namespace ClayPay.Models.Balancing
 
     public static bool IsDateFinalized(DateTime DateToCheck)
     {
-      return DateToCheck <= LastDateFinalized();
+      return DateToCheck.Date < LastDateFinalized().Date;
     }
 
     public static DateTime LastDateFinalized()
@@ -121,7 +120,6 @@ namespace ClayPay.Models.Balancing
       //return djournalDate.Date < DateToCheck.Date;
       //return i > 0;
     }
-
 
   }
 }

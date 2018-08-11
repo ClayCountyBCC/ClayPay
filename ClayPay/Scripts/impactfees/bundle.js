@@ -967,13 +967,14 @@ var Utilities;
         a.id = menuItem.id;
         a.href = "#";
         a.onclick = function () {
-            let title = document.getElementById("menuTitle");
-            let subTitle = document.getElementById("menuSubTitle");
-            Utilities.Clear_Element(title);
-            Utilities.Clear_Element(subTitle);
-            title.appendChild(document.createTextNode(menuItem.title));
-            subTitle.appendChild(document.createTextNode(menuItem.subTitle));
-            Utilities.Show_Menu(menuItem.id);
+            Update_Menu(menuItem);
+            //let title = document.getElementById("menuTitle");
+            //let subTitle = document.getElementById("menuSubTitle");
+            //Utilities.Clear_Element(title);
+            //Utilities.Clear_Element(subTitle);
+            //title.appendChild(document.createTextNode(menuItem.title));
+            //subTitle.appendChild(document.createTextNode(menuItem.subTitle));
+            //Utilities.Show_Menu(menuItem.id);
         };
         if (menuItem.icon.length > 0) {
             let span = document.createElement("span");
@@ -992,6 +993,12 @@ var Utilities;
         return li;
     }
     Utilities.Create_Menu_Element = Create_Menu_Element;
+    function Update_Menu(menuItem) {
+        Set_Text("menuTitle", menuItem.title);
+        Set_Text("menuSubTitle", menuItem.subTitle);
+        Show_Menu(menuItem.id);
+    }
+    Utilities.Update_Menu = Update_Menu;
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map
 var ImpactFees;

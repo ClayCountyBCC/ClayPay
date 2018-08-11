@@ -299,6 +299,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Balancing\Account.cs" />
+    <Compile Include="Models\Balancing\CashierDetailData.cs" />
     <Compile Include="Models\Balancing\CashierTotal.cs" />
     <Compile Include="Models\Balancing\DJournal.cs" />
     <Compile Include="Models\Balancing\DJournalLog.cs" />
@@ -378,6 +379,7 @@
     <TypeScriptCompile Include="Scripts\claypay\AppTypes.ts" />
     <TypeScriptCompile Include="Scripts\claypay\CCPayment.ts" />
     <TypeScriptCompile Include="Scripts\claypay\Charge.ts" />
+    <TypeScriptCompile Include="Scripts\claypay\LocationHash.ts" />
     <TypeScriptCompile Include="Scripts\claypay\NewTransaction.ts" />
     <TypeScriptCompile Include="Scripts\claypay\Payment.ts" />
     <TypeScriptCompile Include="Scripts\claypay\ReceiptPayment.ts" />

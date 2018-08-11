@@ -86,11 +86,13 @@ namespace ClayPay.Controllers
     [Route("Finalize")]
     public IHttpActionResult Post(DateTime DateToFinalize)
     {
+      // This gets the last date finalized, adds 1 day, and checks to make sure that DateToFinalize
+      // is that date.
       try
       {
         var ua = UserAccess.GetUserAccess(User.Identity.Name);
-
-        var finalize = ua.djournal_access && DateToFinalize.Date < DateTime.Now.Date;
+        var NextDateToFinalize = DJournal.LastDateFinalized().AddDays(1).Date;
+        var finalize = ua.djournal_access && DateToFinalize.Date == NextDateToFinalize;
         var dj = new DJournal(DateToFinalize, finalize, ua.user_name);
 
         if(!ua.djournal_access)
@@ -99,9 +101,9 @@ namespace ClayPay.Controllers
 
         }
 
-        if (DateToFinalize.Date >= DateTime.Now.Date)
+        if (DateToFinalize.Date != NextDateToFinalize)
         {
-          dj.Error.Add("Cannot finalize payments made on or after today. Please select a previous date.");
+          dj.Error.Add("The dates must be finalized in order.  You must finalize " + NextDateToFinalize.ToShortDateString() + "next.");
         }
         return Ok(dj);
       }
@@ -171,7 +173,8 @@ namespace ClayPay.Controllers
       // The difference in this receipt end point and the 
       // receipt end point in the payment controller is that this one 
       // will allow for editing the payment types if they have the necessary access.
-
+      // add in somethign that checks the date of this transaction and compares it to the 
+      // last date finalized to see if it is editable
       var cr = new ClientResponse(CashierId);
       if (cr == null)
       {
@@ -179,6 +182,8 @@ namespace ClayPay.Controllers
       }
       else
       {
+        bool IsDateFinalized = DJournal.IsDateFinalized(cr.ResponseCashierData.TransactionDate);
+        cr.IsEditable = !IsDateFinalized; // update this based on the previous test.
         return Ok(cr);
       }
     }
@@ -186,25 +191,28 @@ namespace ClayPay.Controllers
 
     [HttpPost]
     [Route("EditPayments")]
-    public IHttpActionResult Post(List<ReceiptPayment> editPaymentList)
+    public IHttpActionResult Post(ReceiptPayment editPayment)
     {
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      if (!ua.cashier_access) return Unauthorized();
 
-      if (editPaymentList != null && editPaymentList.Count() > 0)
+      if (editPayment != null)
       {
         var errors = new List<string>();
-        var originalPaymentList = ReceiptPayment.GetPaymentsByPayId((from p in editPaymentList
-                                                                     select p.PayId).ToList());
+        var originalPayment = ReceiptPayment.GetPaymentsByPayId(editPayment.PayId).DefaultIfEmpty(new ReceiptPayment()).First();
 
-        var cashierId = originalPaymentList[0].CashierId;
-        errors = ReceiptPayment.EditPaymentValidation(editPaymentList, originalPaymentList);
+        var cashierId = originalPayment.CashierId;
+        errors = ReceiptPayment.EditPaymentValidation(editPayment, originalPayment);
 
         if (errors.Count() == 0)
         {
-          errors = ReceiptPayment.UpdatePayments(editPaymentList, originalPaymentList, User.Identity.Name);
+          errors = ReceiptPayment.UpdatePayments(editPayment, originalPayment, ua.user_name);
         }
 
-        var response = new ClientResponse(cashierId);
-        response.Errors = errors;
+        var response = new ClientResponse(cashierId)
+        {
+          Errors = errors
+        };
 
         return Ok(response);
 

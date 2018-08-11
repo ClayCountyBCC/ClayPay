@@ -17,18 +17,42 @@ var clayPay;
         HandleUIEvents();
         clayPay.UI.buildMenuElements();
         loadDefaultValues();
-        // let's test the receipt view
-        // uncomment this to test the receipt view.
-        //let cr = new ClientResponse();
-        //cr.AmountPaid = 165;
-        //cr.CashierId = "18-55544";
-        //cr.ChangeDue = 0;
-        //cr.Errors = [];
-        //cr.TimeStamp = "7/13/2018 7:34 AM";
-        //cr.TransactionId = "555ff";
-        //ClientResponse.HandleResponse(cr, true);
+        window.onhashchange = HandleHash;
+        if (location.hash.substring(1).length > 0) {
+            HandleHash();
+        }
     }
     clayPay.start = start;
+    function HandleHash() {
+        let hash = location.hash;
+        let currentHash = new clayPay.LocationHash(location.hash.substring(1));
+        if (currentHash.Permit.length > 0) {
+            Utilities.Update_Menu(clayPay.UI.Menus[1]);
+            HandleSearch('permitSearchButton', 'permitSearch', currentHash.Permit);
+            return;
+        }
+        if (currentHash.CashierId.length > 0) {
+            Utilities.Update_Menu(clayPay.UI.Menus[5]);
+            HandleSearch('receiptSearchButton', 'receiptSearch', currentHash.CashierId);
+            return;
+        }
+        if (currentHash.ContractorId.length > 0) {
+            Utilities.Update_Menu(clayPay.UI.Menus[2]);
+            HandleSearch('contractorSearchButton', 'contractorSearch', currentHash.ContractorId);
+            return;
+        }
+        if (currentHash.ApplicationNumber.length > 0) {
+            Utilities.Update_Menu(clayPay.UI.Menus[3]);
+            HandleSearch('applicationSearchButton', 'applicationSearch', currentHash.ApplicationNumber);
+            return;
+        }
+    }
+    clayPay.HandleHash = HandleHash;
+    function HandleSearch(buttonId, inputId, value) {
+        let button = document.getElementById(buttonId);
+        Utilities.Set_Text(inputId, value);
+        button.click();
+    }
     function HandleUIEvents() {
         document.getElementById('permitSearch')
             .onkeydown = function (event) {

@@ -25,7 +25,6 @@
     public static DJournalDateInput: string = "djournalDate";
     public static DjournalContainer: string = "balancingDJournal";
     public static PaymentsContainer: string = "djournalPaymentsByType";
-    public static DJournalReceiptContainer: string = "djournalReceipt";
 
     constructor()
     {
@@ -222,7 +221,6 @@
             console.log('payments', payments);
             Balancing.Payment.ShowPayments(payments, value, djournalDate);
             Utilities.Hide(DJournal.DJournalTotalsContainer);
-            Utilities.Hide(DJournal.DJournalReceiptContainer);
             Utilities.Set_Text(link, value); // change it back
             Utilities.Show(DJournal.PaymentsContainer);
           }, function (error)

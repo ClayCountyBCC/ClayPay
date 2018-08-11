@@ -101,27 +101,8 @@ var Balancing;
             let link = document.createElement("a");
             link.onclick = () => {
                 Utilities.Set_Text(link, "loading...");
-                let path = "/";
-                let qs = "";
-                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
-                if (i == 0) {
-                    path = "/claypay/";
-                }
-                //DateTime DateToBalance, string PaymentType
-                qs = "?CashierId=" + value;
-                Utilities.Get(path + "API/Balancing/Receipt" + qs)
-                    .then(function (cr) {
-                    console.log('client response', cr);
-                    Utilities.Set_Text(link, value);
-                    //Balancing.Payment.ShowPayments(payments, value, djournalDate);
-                    //Utilities.Hide(DJournal.DJournalTotalsContainer);
-                    //Utilities.Hide(DJournal.DJournalReceiptContainer);
-                    //Utilities.Set_Text(link, value); // change it back
-                    //Utilities.Show(DJournal.PaymentsContainer);
-                }, function (error) {
-                    console.log('error getting client response for cashier id: ' + value, error);
-                    Utilities.Set_Text(link, value); // change it back
-                });
+                Utilities.Set_Value("receiptSearch", value);
+                clayPay.ClientResponse.BalancingSearch(link);
             };
             link.appendChild(document.createTextNode(value));
             cell.appendChild(link);
@@ -130,7 +111,7 @@ var Balancing;
     }
     Payment.PaymentsContainer = "djournalPaymentsByType";
     Payment.DJournalTotalsContainer = "djournalTotals";
-    Payment.DJournalReceiptContainer = "djournalReceipt";
+    Payment.DJournalReceiptContainer = "receiptView";
     Balancing.Payment = Payment;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=Payment.js.map
