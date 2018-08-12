@@ -14,19 +14,45 @@
       <div class="columns">
         <div class="column is-two-fifths">
           <div class="field">
-            <label class="label">DJournal Date</label>
-            <div class="control">
-              <input id="djournalDate"
-                     type="date"
-                     class="input" />
-              <button class="button is-success"
-                      type="button">
-                Search
-              </button>
+            <label class="label">
+              DJournal Date
+            </label>
+
+            <div class="field is-grouped">
+
+              <div class="control">
+                <input id="djournalDate"
+                       type="date"
+                       class="input" />
+
+              </div>
+              <div class="control">
+                <button onclick="Balancing.DJournalByDate();"
+                        id="BalanceByDate"
+                        class="button is-primary is-loading"
+                        type="button">
+                  Balance Date
+                </button>
+              </div>
+              <div class="control">
+                <button onclick="Balancing.DJournal.GetAndShow();"
+                        class="button is-warning is-loading"
+                        id="NextFinalizeDate"
+                        type="button">
+                  Get Next Day To Finalize
+                </button>
+              </div>
             </div>
+          </div>
+          <div class="hide"
+               id="djournalSearchError">
+
           </div>
         </div>
         <div class="column is-three-fifths">
+          <div id="djournalErrors">
+
+          </div>
           <div id="djournalTotals">
 
           </div>
@@ -79,6 +105,7 @@
         </div>
       </div>
     </div>
+
     <div class="columns">
       <div class="column is-offset-1">
         <div class="hide"
@@ -90,7 +117,8 @@
 
       </div>
     </div>
-    <div id="receiptView">
+    <div style="margin-bottom: 2em;"
+         id="receiptView">
 
     </div>
 

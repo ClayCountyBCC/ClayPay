@@ -9,8 +9,14 @@ var Balancing;
             this.Error = [];
             this.DJournalDate = new Date();
             this.DJournalDateFormatted = "";
+            this.CanDJournalBeFinalized = false;
+        }
+        static ToggleButtons(toggle) {
+            Utilities.Toggle_Loading_Button(DJournal.DJournalSearchDateButton, toggle);
+            Utilities.Toggle_Loading_Button(DJournal.DJournalSearchNextDateButton, toggle);
         }
         static GetAndShow(DJournalDate = "") {
+            DJournal.ToggleButtons(true);
             let path = "/";
             let i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
@@ -24,9 +30,18 @@ var Balancing;
                 console.log('djournal', dj);
                 let dateInput = document.getElementById(DJournal.DJournalDateInput);
                 Utilities.Set_Value(dateInput, dj.DJournalDateFormatted);
+                if (dj.Error.length === 0) {
+                    Utilities.Clear_Element(document.getElementById(DJournal.DJournalErrorContainer));
+                }
+                else {
+                    Utilities.Error_Show(DJournal.DJournalErrorContainer, dj.Error, false);
+                }
                 DJournal.BuildDJournalDisplay(dj);
+                DJournal.ToggleButtons(false);
             }, function (error) {
                 console.log('error', error);
+                Utilities.Error_Show(DJournal.DJournalErrorContainer, error, false);
+                DJournal.ToggleButtons(false);
             });
         }
         static BuildDJournalDisplay(dj) {
@@ -44,9 +59,9 @@ var Balancing;
             table.appendChild(DJournal.BuildDJournalHeader());
             let tbody = document.createElement("tbody");
             let tfoot = document.createElement("tfoot");
-            let totalCharges;
-            let totalDeposits;
-            let totalPayments;
+            let totalCharges = new Balancing.CashierTotal();
+            let totalDeposits = new Balancing.CashierTotal();
+            let totalPayments = new Balancing.CashierTotal();
             for (let payment of dj.ProcessedPaymentTotals) {
                 switch (payment.Type) {
                     case "Total Charges":
@@ -169,6 +184,10 @@ var Balancing;
     DJournal.DJournalDateInput = "djournalDate";
     DJournal.DjournalContainer = "balancingDJournal";
     DJournal.PaymentsContainer = "djournalPaymentsByType";
+    DJournal.DJournalSearchErrorContainer = "djournalSearchError";
+    DJournal.DJournalErrorContainer = "djournalErrors";
+    DJournal.DJournalSearchDateButton = "BalanceByDate";
+    DJournal.DJournalSearchNextDateButton = "NextFinalizeDate";
     Balancing.DJournal = DJournal;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=DJournal.js.map

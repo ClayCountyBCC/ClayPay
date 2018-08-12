@@ -9,6 +9,7 @@
     Error: Array<string>;
     DJournalDate: Date;
     DJournalDateFormatted: string;
+    CanDJournalBeFinalized: boolean;
   }
 
   export class DJournal implements IDJournal
@@ -20,11 +21,16 @@
     public Error: Array<string> = [];
     public DJournalDate: Date = new Date();
     public DJournalDateFormatted: string = "";
+    public CanDJournalBeFinalized: boolean = false;
 
     public static DJournalTotalsContainer: string = "djournalTotals";
     public static DJournalDateInput: string = "djournalDate";
     public static DjournalContainer: string = "balancingDJournal";
     public static PaymentsContainer: string = "djournalPaymentsByType";
+    public static DJournalSearchErrorContainer: string = "djournalSearchError";
+    public static DJournalErrorContainer: string = "djournalErrors";
+    public static DJournalSearchDateButton: string = "BalanceByDate";
+    public static DJournalSearchNextDateButton: string = "NextFinalizeDate";
 
     constructor()
     {
@@ -32,9 +38,15 @@
     }
 
 
+    private static ToggleButtons(toggle: boolean):void
+    {
+      Utilities.Toggle_Loading_Button(DJournal.DJournalSearchDateButton, toggle);
+      Utilities.Toggle_Loading_Button(DJournal.DJournalSearchNextDateButton, toggle);
+    }
 
     public static GetAndShow(DJournalDate: string = ""): void
     {
+      DJournal.ToggleButtons(true);
       let path = "/";
       let i = window.location.pathname.toLowerCase().indexOf("/claypay");
       if (i == 0)
@@ -52,10 +64,21 @@
           console.log('djournal', dj);
           let dateInput = <HTMLInputElement>document.getElementById(DJournal.DJournalDateInput);          
           Utilities.Set_Value(dateInput, dj.DJournalDateFormatted);
+          if (dj.Error.length === 0)
+          {
+            Utilities.Clear_Element(document.getElementById(DJournal.DJournalErrorContainer));
+          }
+          else
+          {
+            Utilities.Error_Show(DJournal.DJournalErrorContainer, dj.Error, false);
+          }
           DJournal.BuildDJournalDisplay(dj);
+          DJournal.ToggleButtons(false);
         }, function (error)
         {
           console.log('error', error);
+          Utilities.Error_Show(DJournal.DJournalErrorContainer, error, false);
+          DJournal.ToggleButtons(false);
         });
     }
 
@@ -77,10 +100,10 @@
       table.appendChild(DJournal.BuildDJournalHeader());
       let tbody = document.createElement("tbody");
       let tfoot = document.createElement("tfoot");
-      let totalCharges: CashierTotal;
+      let totalCharges: CashierTotal = new CashierTotal();
 
-      let totalDeposits: CashierTotal;
-      let totalPayments: CashierTotal;
+      let totalDeposits: CashierTotal = new CashierTotal();
+      let totalPayments: CashierTotal = new CashierTotal();
       for (let payment of dj.ProcessedPaymentTotals)
       {
         switch (payment.Type)

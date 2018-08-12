@@ -31,6 +31,16 @@ var Balancing;
         Balancing.DJournal.GetAndShow();
     }
     Balancing.Start = Start;
+    function DJournalByDate() {
+        let DJournalDate = Utilities.Get_Value(Balancing.DJournal.DJournalDateInput);
+        if (DJournalDate.length == 0) {
+            // invalid date entered
+            Utilities.Error_Show(Balancing.DJournal.DJournalSearchErrorContainer, "Invalid date entered, please try again.");
+            return;
+        }
+        Balancing.DJournal.GetAndShow(DJournalDate);
+    }
+    Balancing.DJournalByDate = DJournalByDate;
     function buildMenuElements() {
         let menu = document.getElementById("menuTabs");
         for (let menuItem of Balancing.Menus) {

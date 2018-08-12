@@ -26,8 +26,9 @@ namespace ClayPay.Models.Balancing
         return DJournalDate.ToString("yyyy-MM-dd");
       }
     }
+    public bool CanDJournalBeFinalized { get; set; } = false;
 
-    public DJournal(DateTime dateToProcess, bool finalize = false, string NTUser = "")
+    public DJournal(DateTime dateToProcess, UserAccess ua, bool finalize = false)
     {
       DJournalDate = dateToProcess;
       //check for dates not finalized after initial finalize date
@@ -35,26 +36,43 @@ namespace ClayPay.Models.Balancing
       this.GUTotals = CashierTotal.GetGUTotals(dateToProcess);
       this.GLAccountTotals = Account.GetGLAccountTotals(dateToProcess);
       this.CashierData = CashierDetailData.Get(dateToProcess);
-      CheckChargesWithNoGL();
+      CheckCatCodesAgainstGL();
       CheckIfDJournalIsBalanced();
+      
       //
       Log = DJournalLog.Get(dateToProcess);
-      if (finalize && Error.Count() == 0)
+      var NextDateToFinalize = LastDateFinalized().AddDays(1);
+      if (finalize)
       {
-        if (this.Log != null && !Log.IsCreated)
+        if (Log.IsCreated) Error.Add($"{dateToProcess.ToShortDateString()} has already been finalized.");
+        if (!ua.djournal_access) Error.Add("DJournal was not finalized. User does not have the correct level of access.");
+        if (DJournalDate.Date != NextDateToFinalize.Date) Error.Add("The dates must be finalized in order.  You must finalize " + NextDateToFinalize.ToShortDateString() + "next.");
+        if (NextDateToFinalize.Date == DateTime.Now.Date) Error.Add("You must wait until tomorrow to finalize today.");
+      }
+      
+
+      // in order for the Djournal to be able to be finalized, the following must be true
+      // 1) it can't already be finalized
+      // 2) The date be be prior to today
+      // 3) The date must be one day later than the most recent date finalized
+      // 4) The user must have DJournal access.
+      // 5) No errors can be present
+      CanDJournalBeFinalized =
+        !Log.IsCreated && // 1
+        DJournalDate.Date < DateTime.Now.Date && // 2
+        NextDateToFinalize.Date == DJournalDate.Date && // 3
+        ua.djournal_access && // 4
+        Error.Count == 0; // 5
+
+      if (finalize && CanDJournalBeFinalized)
+      {
+        if (DJournalLog.Create(dateToProcess, ua.user_name) != -1)
         {
-          if (DJournalLog.Create(dateToProcess, NTUser) != -1)
-          {
-            this.Log = DJournalLog.Get(dateToProcess);
-          }
-          else
-          {
-            this.Error.Add($"There was an issue saving the DJournal log for {dateToProcess.ToShortDateString()}.");
-          }
+          Log = DJournalLog.Get(dateToProcess);
         }
         else
         {
-          Error.Add($"{dateToProcess.ToShortDateString()} has already been finalized.");
+          Error.Add($"There was an issue saving the DJournal log for {dateToProcess.ToShortDateString()}.");
         }
       }
     }
@@ -71,27 +89,15 @@ namespace ClayPay.Models.Balancing
     }
 
 
-    private void CheckChargesWithNoGL()
+    private void CheckCatCodesAgainstGL()
     {
 
-      var chargesWithNoGLs = Charge.GetChargesWithNoGLByDate(DJournalDate);
-      if (chargesWithNoGLs.Count() > 0)
+      var catcodedetails = GetCAtCodesWithInvalidGLInformation();
+      if (catcodedetails == null) return;
+        foreach(string c in catcodedetails)
       {
-        var chargeString = "";
-        foreach (var c in chargesWithNoGLs)
-        {
-          chargeString += $"\n{c.AssocKey}\t{c.Description}";
-        }
-        Error.Add("The following assockeys have charges with category codes not associated with a GL account:\n" +
-                  "\nAssocKey\tCatCode - Descrtiption" +
-                  "\n********\t**********************\n" +
-                  chargeString +
-                  "\n\nThe Djournal for " +
-                  DJournalDate.ToShortDateString() +
-                  " cannot be finalized until all category codes are associated with a GL account.");
-
+        Error.Add(c);
       }
-
     }
 
     public void GetLog(DateTime dateToProcess)
@@ -119,6 +125,45 @@ namespace ClayPay.Models.Balancing
       return Constants.Exec_Scalar<DateTime>(sql);
       //return djournalDate.Date < DateToCheck.Date;
       //return i > 0;
+    }
+
+
+    public static List<string> GetCAtCodesWithInvalidGLInformation()
+    {
+      var sql = @"
+        SELECT DISTINCT
+          'Error in CatCode: ' +   
+          ISNULL(CONCAT(LTRIM(RTRIM(CC.CatCode)), ' - ' + CC.Description), '') + 
+          '.  GL - Credit Entry' +
+          ' - Fund: ' + ISNULL(GL.Fund, 'None') + 
+          ' - Account: ' + ISNULL(GL.Account, 'None') +
+          ' - Percent: ' + ISNULL(CAST(GL.[Percent] AS VARCHAR(4)), 'None') Detail
+        FROM ccCatCd CC
+        LEFT OUTER JOIN ccGL GL ON CC.CatCode = GL.CatCode AND GL.Type='c'
+        WHERE 
+          CC.CatCode != '1TRN'
+          AND (GL.Account IS NULL
+          OR GL.Account = ''
+          OR GL.[Percent] IS NULL
+          OR GL.Fund IS NULL)
+        UNION
+        SELECT DISTINCT
+          'Error in CatCode: ' +   
+          ISNULL(CONCAT(LTRIM(RTRIM(CC.CatCode)), ' - ' + CC.Description), '') + 
+          '.  GL - Debit Entry' +
+          ' - Fund: ' + ISNULL(GL.Fund, 'None') + 
+          ' - Account: ' + ISNULL(GL.Account, 'None') +
+          ' - Percent: ' + ISNULL(CAST(GL.[Percent] AS VARCHAR(4)), 'None') Detail
+        FROM ccCatCd CC
+        LEFT OUTER JOIN ccGL GL ON CC.CatCode = GL.CatCode AND GL.Type='d'
+        WHERE 
+          CC.CatCode != '1TRN'
+          AND (GL.Account IS NULL
+          OR GL.Account = ''
+          OR GL.[Percent] IS NULL
+          OR GL.Fund IS NULL)";
+      var c = Constants.Get_Data<string>(sql);
+      return c;
     }
 
   }

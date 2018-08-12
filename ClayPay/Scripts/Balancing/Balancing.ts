@@ -35,6 +35,18 @@ namespace Balancing
     DJournal.GetAndShow();
   }
 
+  export function DJournalByDate(): void
+  {
+    let DJournalDate = Utilities.Get_Value(DJournal.DJournalDateInput);
+    if (DJournalDate.length == 0)
+    {
+      // invalid date entered
+      Utilities.Error_Show(DJournal.DJournalSearchErrorContainer, "Invalid date entered, please try again.");
+      return;
+    }
+    DJournal.GetAndShow(DJournalDate);
+  }
+
   export function buildMenuElements(): void
   {
     let menu = document.getElementById("menuTabs");

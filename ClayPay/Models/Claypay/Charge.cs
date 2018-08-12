@@ -99,43 +99,5 @@ namespace ClayPay.Models
       return lc;
     }
 
-    public static List<Charge> GetChargesWithNoGLByDate(DateTime dateToProcess)
-    {
-
-      var param = new DynamicParameters();
-      param.Add("@DateToProcess", dateToProcess);
-
-      var sql = @"
-        USE WATSC;
-
-        WITH CashierIdsWithoutGL (CashierId) AS (
-        SELECT DISTINCT LEFT(CI.CashierId,9) CashierId
-        FROM ccCASHIER C
-        INNER JOIN ccCashierPayment CP ON CP.OTid = C.OTId
-        INNER JOIN ccCashierItem CI ON CI.CashierId = C.CashierId AND CI.OTId = CP.OTid
-        INNER JOIN ccLookUp L ON LEFT(UPPER(L.CODE),5) = LEFT(UPPER(CP.PmtType),5)
-        INNER JOIN ccGL GL ON CI.CatCode = GL.CatCode
-        WHERE CAST(C.TransDt AS DATE) = CAST(@DateToProcess AS DATE)
-          AND (GL.ACCOUNT IS NULL OR GL.ACCOUNT = '')
-        GROUP BY CI.CashierId)
-
-        SELECT DISTINCT
-	        vC.ItemId,
-	        ISNULL(CONCAT(LTRIM(RTRIM(CI.CatCode)), ' - ' + Description), '') [Description],
-	        vC.TimeStamp,
-	        vC.Assoc,
-	        vC.AssocKey,
-	        ISNULL(vC.Total, 0) Total,	
-	        Detail
-        FROM vwClaypayCharges vC
-        INNER JOIN ccCashierItem CI ON CI.ItemId = vC.ItemId
-        INNER JOIN ccGL GL ON GL.CatCode = CI.CatCode AND GL.Account IS NULL
-        WHERE vC.CashierId in (select CashierId from CashierIdsWithoutGL)
-        ORDER BY vC.AssocKey";
-
-
-      var c = Constants.Get_Data<Charge>(sql, param);
-      return c;
-    }
   }
 }

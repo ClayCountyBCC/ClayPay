@@ -33,7 +33,7 @@ namespace ClayPay.Models.Balancing
     {
       var param = new DynamicParameters();
       param.Add("@DateToFinalize", dateToFinalize);
-      param.Add("@created_by", username.Replace("CLAYBCC\\", ""));
+      param.Add("@created_by", username);
       var sql = $@"
         BEGIN TRY
           USE WATSC;

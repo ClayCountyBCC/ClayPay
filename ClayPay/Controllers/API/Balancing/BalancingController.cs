@@ -55,7 +55,8 @@ namespace ClayPay.Controllers
     {
       try
       {
-        var dj = new DJournal(DateToBalance ?? DJournal.LastDateFinalized().AddDays(1));
+        var ua = UserAccess.GetUserAccess(User.Identity.Name);
+        var dj = new DJournal(DateToBalance ?? DJournal.LastDateFinalized().AddDays(1), ua, false);
         return Ok(dj);
       }
       catch (Exception ex)
@@ -86,25 +87,10 @@ namespace ClayPay.Controllers
     [Route("Finalize")]
     public IHttpActionResult Post(DateTime DateToFinalize)
     {
-      // This gets the last date finalized, adds 1 day, and checks to make sure that DateToFinalize
-      // is that date.
       try
       {
         var ua = UserAccess.GetUserAccess(User.Identity.Name);
-        var NextDateToFinalize = DJournal.LastDateFinalized().AddDays(1).Date;
-        var finalize = ua.djournal_access && DateToFinalize.Date == NextDateToFinalize;
-        var dj = new DJournal(DateToFinalize, finalize, ua.user_name);
-
-        if(!ua.djournal_access)
-        {
-          dj.Error.Add("DJournal was not finalized. User does not have the correct level of access.");
-
-        }
-
-        if (DateToFinalize.Date != NextDateToFinalize)
-        {
-          dj.Error.Add("The dates must be finalized in order.  You must finalize " + NextDateToFinalize.ToShortDateString() + "next.");
-        }
+        var dj = new DJournal(DateToFinalize, ua, true);
         return Ok(dj);
       }
       catch (Exception ex)

@@ -368,6 +368,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\Balancing\Account.ts" />
     <TypeScriptCompile Include="Scripts\Balancing\Balancing.ts" />
+    <TypeScriptCompile Include="Scripts\Balancing\CashierDetailData.ts" />
     <TypeScriptCompile Include="Scripts\Balancing\CashierTotal.ts" />
     <TypeScriptCompile Include="Scripts\Balancing\DJournal.ts" />
     <TypeScriptCompile Include="Scripts\Balancing\DjournalLog.ts" />
