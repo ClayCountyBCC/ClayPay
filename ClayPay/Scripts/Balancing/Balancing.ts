@@ -14,7 +14,7 @@ namespace Balancing
     {
       id: "nav-onlinePayments",
       title: "Online Payments Handling",
-      subTitle: "The payments made online will be listed here.",
+      subTitle: "The payments made online will be listed here.  Assign them to yourself to indicate that you're going to handle it.",
       icon: "fas fa-credit-card",
       label: "Online Payments",
       selected: false
@@ -33,6 +33,7 @@ namespace Balancing
   {
     buildMenuElements();
     DJournal.GetAndShow();
+    AssignedOnlinePayment.GetAndDisplay();
   }
 
   export function DJournalByDate(): void

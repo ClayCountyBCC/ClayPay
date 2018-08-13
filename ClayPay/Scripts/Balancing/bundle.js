@@ -1241,13 +1241,27 @@ var clayPay;
             this.CheckNumber = "";
             this.TransactionId = "";
         }
-        static CreateReceiptPaymentView(receipts) {
+        static CreateReceiptPaymentView(receipts, IsEditable) {
             let df = document.createDocumentFragment();
             let table = ReceiptPayment.CreateTable();
             let tbody = document.createElement("TBODY");
             for (let receipt of receipts) {
                 let transaction = receipt.CheckNumber.length > 0 ? receipt.CheckNumber : receipt.TransactionId;
-                tbody.appendChild(ReceiptPayment.BuildPaymentRow(receipt.PaymentTypeDescription, receipt.Info, transaction, receipt.AmountTendered, receipt.AmountApplied));
+                if (IsEditable) {
+                    switch (receipt.PaymentTypeDescription.toLowerCase()) {
+                        case "cash":
+                            tbody.appendChild(ReceiptPayment.BuildCashPaymentRow(receipt));
+                            break;
+                        case "check":
+                            tbody.appendChild(ReceiptPayment.BuildCheckPaymentRow(receipt));
+                            break;
+                        default:
+                            tbody.appendChild(ReceiptPayment.BuildPaymentRow(receipt.PaymentTypeDescription, receipt.Info, transaction, receipt.AmountTendered, receipt.AmountApplied));
+                    }
+                }
+                else {
+                    tbody.appendChild(ReceiptPayment.BuildPaymentRow(receipt.PaymentTypeDescription, receipt.Info, transaction, receipt.AmountTendered, receipt.AmountApplied));
+                }
             }
             // Here we handle Change Due and Convenience fees.
             // We'll add a row for each of them that are > 0
@@ -1299,6 +1313,123 @@ var clayPay;
             }
             return tr;
         }
+        static BuildCashPaymentRow(receipt) {
+            let tr = document.createElement("tr");
+            tr.appendChild(clayPay.UI.createTableElement(receipt.PaymentTypeDescription));
+            tr.appendChild(clayPay.UI.createTableElement(receipt.Info));
+            // where the check number goes we're going to put a button labeled: "Change to Check"
+            // and if the user clicks it, the button will disappear
+            // and a text box will be added with the placeholder "Check Number"
+            // for the user to enter the check number, and a Save button next to it.
+            // We will need to check to make sure a check number is entered before we allow saving.
+            let td = document.createElement("td");
+            let container = document.createElement("div");
+            let fieldContainer = document.createElement("div");
+            fieldContainer.classList.add("hide");
+            let field = document.createElement("div");
+            field.classList.add("field");
+            field.classList.add("is-grouped");
+            let inputControl = document.createElement("div");
+            inputControl.classList.add("control");
+            let input = document.createElement("input");
+            input.classList.add("input");
+            input.placeholder = "Enter Check Number";
+            input.required = true;
+            input.type = "text";
+            let buttonControl = document.createElement("div");
+            buttonControl.classList.add("control");
+            let saveButton = document.createElement("button");
+            saveButton.type = "button";
+            saveButton.classList.add("button");
+            saveButton.classList.add("is-success");
+            saveButton.appendChild(document.createTextNode("Save"));
+            saveButton.onclick = () => {
+                let checkNumber = input.value;
+                if (checkNumber.length === 0) {
+                    alert("You must enter a check number before you can save.");
+                    return;
+                }
+                saveButton.classList.add("is-loading");
+                let changed = new ReceiptPayment();
+                changed.CashierId = receipt.CashierId;
+                changed.OTId = receipt.OTId;
+                changed.PaymentType = "CK";
+                changed.PayId = receipt.PayId;
+                changed.CheckNumber = checkNumber;
+                ReceiptPayment.SavePaymentChanges(changed);
+            };
+            let convertButton = document.createElement("button");
+            convertButton.type = "button";
+            convertButton.classList.add("button");
+            convertButton.classList.add("is-primary");
+            convertButton.appendChild(document.createTextNode("Convert To Check"));
+            convertButton.onclick = () => {
+                Utilities.Hide(convertButton);
+                Utilities.Show(fieldContainer);
+            };
+            inputControl.appendChild(input);
+            buttonControl.appendChild(saveButton);
+            field.appendChild(inputControl);
+            field.appendChild(buttonControl);
+            container.appendChild(convertButton);
+            fieldContainer.appendChild(field);
+            container.appendChild(fieldContainer);
+            td.appendChild(container);
+            tr.appendChild(td);
+            tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(receipt.AmountTendered)));
+            tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(receipt.AmountApplied)));
+            return tr;
+        }
+        static BuildCheckPaymentRow(receipt) {
+            let tr = document.createElement("tr");
+            tr.appendChild(clayPay.UI.createTableElement(receipt.PaymentTypeDescription));
+            tr.appendChild(clayPay.UI.createTableElement(receipt.Info));
+            let td = clayPay.UI.createTableElement(receipt.CheckNumber);
+            // where the check number goes we're going to put a button labeled: "Change to Check"
+            // and if the user clicks it, the button will disappear
+            // and a text box will be added with the placeholder "Check Number"
+            // for the user to enter the check number, and a Save button next to it.
+            // We will need to check to make sure a check number is entered before we allow saving.
+            let saveButton = document.createElement("button");
+            saveButton.type = "button";
+            saveButton.classList.add("button");
+            saveButton.classList.add("is-success");
+            saveButton.appendChild(document.createTextNode("Convert To Cash Payment"));
+            saveButton.onclick = () => {
+                saveButton.classList.add("is-loading");
+                let changed = new ReceiptPayment();
+                changed.CashierId = receipt.CashierId;
+                changed.OTId = receipt.OTId;
+                changed.PaymentType = "CA";
+                changed.PayId = receipt.PayId;
+                changed.CheckNumber = "";
+                ReceiptPayment.SavePaymentChanges(changed);
+            };
+            td.appendChild(saveButton);
+            tr.appendChild(td);
+            tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(receipt.AmountTendered)));
+            tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(receipt.AmountApplied)));
+            return tr;
+        }
+        static SavePaymentChanges(receipt) {
+            let path = "/";
+            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            if (i == 0) {
+                path = "/claypay/";
+            }
+            let editPayment = receipt;
+            Utilities.Post(path + "API/Balancing/EditPayments", editPayment)
+                .then(function (cr) {
+                console.log('cr returned', cr);
+                if (cr.Errors.length > 0) {
+                    alert("Errors occurred while attempting to save: " + cr.Errors[0]);
+                    return;
+                }
+                clayPay.ClientResponse.BalancingSearch();
+            }, function (error) {
+                console.log('Save Payment Changes error', error);
+            });
+        }
     }
     clayPay.ReceiptPayment = ReceiptPayment;
 })(clayPay || (clayPay = {}));
@@ -1329,7 +1460,7 @@ var clayPay;
             df.appendChild(ClientResponse.CreateReceiptHeader(cr));
             df.appendChild(ClientResponse.CreateReceiptPayerView(cr.ResponseCashierData));
             df.appendChild(clayPay.Charge.CreateChargesTable(cr.Charges, clayPay.ChargeView.receipt));
-            df.appendChild(clayPay.ReceiptPayment.CreateReceiptPaymentView(cr.ReceiptPayments));
+            df.appendChild(clayPay.ReceiptPayment.CreateReceiptPaymentView(cr.ReceiptPayments, cr.IsEditable));
             // show payment info
             return df;
         }
@@ -1988,6 +2119,120 @@ var Balancing;
 //# sourceMappingURL=CashierDetailData.js.map
 var Balancing;
 (function (Balancing) {
+    class AssignedOnlinePayment {
+        constructor() {
+            this.CashierId = "";
+            this.AmountApplied = 0;
+            this.AssignedTo = "";
+        }
+        static GetAndDisplay() {
+            let container = document.getElementById(AssignedOnlinePayment.OnlinePaymentsContainer);
+            Utilities.Clear_Element(container);
+            let path = "/";
+            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            if (i == 0) {
+                path = "/claypay/";
+            }
+            Utilities.Get(path + "API/Balancing/UnassignedPayments").then(function (payments) {
+                console.log('assigned online payments', payments);
+                if (payments.length === 0) {
+                    container.appendChild(document.createTextNode("No payments found, please check again later."));
+                    return;
+                }
+                container.appendChild(AssignedOnlinePayment.BuildTable(payments));
+            }, function (error) {
+                console.log('error', error);
+                Utilities.Error_Show(container, error, false);
+            });
+        }
+        static AssignAndDisplay(cashierId) {
+            let path = "/";
+            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            if (i == 0) {
+                path = "/claypay/";
+            }
+            let query = "?CashierId=" + cashierId;
+            Utilities.Post(path + "API/Balancing/AssignPayment" + query, null).then(function (response) {
+                console.log('assigned online payments', response);
+                if (response.length !== 0) {
+                    alert(response);
+                }
+                AssignedOnlinePayment.GetAndDisplay();
+            }, function (error) {
+                console.log('error', error);
+            });
+        }
+        static BuildTable(payments) {
+            let df = document.createDocumentFragment();
+            let table = document.createElement("table");
+            table.classList.add("table");
+            table.classList.add("is-fullwidth");
+            table.classList.add("is-bordered");
+            table.appendChild(AssignedOnlinePayment.BuildTableHeader());
+            let tbody = document.createElement("tbody");
+            for (let p of payments) {
+                tbody.appendChild(AssignedOnlinePayment.BuildTableRow(p));
+            }
+            table.appendChild(tbody);
+            df.appendChild(table);
+            return df;
+        }
+        static BuildTableHeader() {
+            let thead = document.createElement("thead");
+            let tr = document.createElement("tr");
+            tr.appendChild(AssignedOnlinePayment.CreateTableCell("th", "CashierId", "25%"));
+            tr.appendChild(AssignedOnlinePayment.CreateTableCell("th", "Date", "25%"));
+            tr.appendChild(AssignedOnlinePayment.CreateTableCell("th", "Amount", "25%"));
+            let th = AssignedOnlinePayment.CreateTableCell("th", "", "25%");
+            let refresh = document.createElement("button");
+            refresh.type = "button";
+            refresh.classList.add("is-primary");
+            refresh.classList.add("button");
+            refresh.appendChild(document.createTextNode("Refresh"));
+            refresh.onclick = () => {
+                refresh.classList.add("is-loading");
+                AssignedOnlinePayment.GetAndDisplay();
+            };
+            th.appendChild(refresh);
+            tr.appendChild(th);
+            thead.appendChild(tr);
+            return thead;
+        }
+        static BuildTableRow(payment) {
+            let tr = document.createElement("tr");
+            tr.appendChild(Balancing.Payment.createTableCellLink("td", payment.CashierId, "25%"));
+            tr.appendChild(AssignedOnlinePayment.CreateTableCell("td", Utilities.Format_Date(payment.TransactionDate)));
+            tr.appendChild(AssignedOnlinePayment.CreateTableCell("td", Utilities.Format_Amount(payment.AmountApplied), "", "has-text-right"));
+            let td = AssignedOnlinePayment.CreateTableCell("td", "");
+            let assign = document.createElement("button");
+            assign.type = "button";
+            assign.classList.add("is-primary");
+            assign.classList.add("button");
+            assign.appendChild(document.createTextNode("Assign to me"));
+            assign.onclick = () => {
+                assign.classList.add("is-loading");
+                AssignedOnlinePayment.AssignAndDisplay(payment.CashierId);
+            };
+            td.appendChild(assign);
+            tr.appendChild(td);
+            return tr;
+        }
+        static CreateTableCell(type, value, width = "", className = "has-text-centered") {
+            let cell = document.createElement(type);
+            if (width.length > 0)
+                cell.width = width;
+            if (className.length > 0)
+                cell.classList.add(className);
+            cell.appendChild(document.createTextNode(value));
+            return cell;
+        }
+    }
+    AssignedOnlinePayment.OnlinePaymentsContainer = "onlinePayments";
+    Balancing.AssignedOnlinePayment = AssignedOnlinePayment;
+})(Balancing || (Balancing = {}));
+//# sourceMappingURL=AssignedOnlinePayment.js.map
+var Balancing;
+(function (Balancing) {
     class Account {
         constructor() {
             this.Fund = "";
@@ -2536,7 +2781,7 @@ var Balancing;
         {
             id: "nav-onlinePayments",
             title: "Online Payments Handling",
-            subTitle: "The payments made online will be listed here.",
+            subTitle: "The payments made online will be listed here.  Assign them to yourself to indicate that you're going to handle it.",
             icon: "fas fa-credit-card",
             label: "Online Payments",
             selected: false
@@ -2553,6 +2798,7 @@ var Balancing;
     function Start() {
         buildMenuElements();
         Balancing.DJournal.GetAndShow();
+        Balancing.AssignedOnlinePayment.GetAndDisplay();
     }
     Balancing.Start = Start;
     function DJournalByDate() {

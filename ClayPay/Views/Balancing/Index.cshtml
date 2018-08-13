@@ -89,7 +89,8 @@
       <div class="field-body">
         <div class="field is-grouped">
           <div class="control">
-            <input id="receiptSearch"
+            <input 
+                   id="receiptSearch"
                    class="input"
                    type="text"
                    maxlength="9"
@@ -97,7 +98,8 @@
                    placeholder="18-000001" />
           </div>
           <div class="control">
-            <button id="receiptSearchButton"
+            <button onclick="clayPay.ClientResponse.BalancingSearch();"
+                    id="receiptSearchButton"
                     type="button"
                     class="button is-primary">
               Search

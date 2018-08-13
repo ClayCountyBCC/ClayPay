@@ -7,7 +7,7 @@ namespace ClayPay.Models.Balancing
 {
   public class AssignedOnlinePayment
   {
-    public string CasheirId { get; set; } = "";
+    public string CashierId { get; set; } = "";
     public DateTime TransactionDate { get; set; } = DateTime.MinValue;
     public string AssignedTo { get; set; } = "";
     public decimal AmountApplied { get; set; } = 0;
@@ -23,7 +23,7 @@ namespace ClayPay.Models.Balancing
     {
       var query = @"      
         USE WATSC;
-        DECLARE @MinDate DATE = CAST('2018-07-19' AS DATE);
+        DECLARE @MinDate DATE = CAST('2018-7-27' AS DATE);
 
         SELECT 
           C.CashierId, 

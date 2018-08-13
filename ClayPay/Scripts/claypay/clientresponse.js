@@ -24,7 +24,7 @@ var clayPay;
             df.appendChild(ClientResponse.CreateReceiptHeader(cr));
             df.appendChild(ClientResponse.CreateReceiptPayerView(cr.ResponseCashierData));
             df.appendChild(clayPay.Charge.CreateChargesTable(cr.Charges, clayPay.ChargeView.receipt));
-            df.appendChild(clayPay.ReceiptPayment.CreateReceiptPaymentView(cr.ReceiptPayments));
+            df.appendChild(clayPay.ReceiptPayment.CreateReceiptPaymentView(cr.ReceiptPayments, cr.IsEditable));
             // show payment info
             return df;
         }

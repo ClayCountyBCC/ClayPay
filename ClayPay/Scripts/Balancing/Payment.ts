@@ -140,7 +140,7 @@
       return cell;
     }
 
-    private static createTableCellLink(type: string, value: string, width: string): HTMLTableCellElement
+    public static createTableCellLink(type: string, value: string, width: string): HTMLTableCellElement
     {
       let cell = <HTMLTableCellElement>document.createElement(type);
       cell.width = width;

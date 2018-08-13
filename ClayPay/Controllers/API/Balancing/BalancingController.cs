@@ -72,7 +72,6 @@ namespace ClayPay.Controllers
     {
       try
       {
-        //var ua = new UserAccess(User.Identity.Name);
         var dj = Models.Balancing.Payment.GetPayments(DateToBalance, PaymentType);
         return Ok(dj);
       }
@@ -104,22 +103,16 @@ namespace ClayPay.Controllers
     [Route("UnassignedPayments")]
     public IHttpActionResult Get()
     {
-      var p = AssignedOnlinePayment.Get();
-      if (p != null)
-      {
-        return Ok(p);
-      }
-      else
-      {
-        return Ok(p);
-      }
+      return Ok(AssignedOnlinePayment.Get());
     }
 
     [HttpPost]
     [Route("AssignPayment")]
     public IHttpActionResult Post(string CashierId)
     {
-      return Ok(AssignedOnlinePayment.AssignPaymentToUser(CashierId, User.Identity.Name));
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      if (!ua.cashier_access) return Unauthorized();
+      return Ok(AssignedOnlinePayment.AssignPaymentToUser(CashierId, ua.user_name));
     }
 
     [HttpPost]
@@ -135,22 +128,6 @@ namespace ClayPay.Controllers
         return Ok("Could not update");
       }
     }
-
-    [HttpGet]
-    [Route("NextDateToFinalize")]
-    public IHttpActionResult GetNextFinalizeDate()
-    {
-      try
-      {
-        return Ok(DJournal.LastDateFinalized().AddDays(1));
-      }
-      catch(Exception ex)
-      {
-        Constants.Log(ex);
-        return Ok(DateTime.MinValue);
-      }
-    }
-
 
     [HttpGet]
     [Route("Receipt")]
@@ -182,31 +159,26 @@ namespace ClayPay.Controllers
       var ua = UserAccess.GetUserAccess(User.Identity.Name);
       if (!ua.cashier_access) return Unauthorized();
 
-      if (editPayment != null)
+      if (editPayment == null) return Ok(BadRequest("There are no payments to edit"));
+
+      var errors = new List<string>();
+      var originalPayment = ReceiptPayment.GetPaymentsByPayId(editPayment.PayId).DefaultIfEmpty(new ReceiptPayment()).First();
+
+      var cashierId = originalPayment.CashierId;
+      errors = ReceiptPayment.EditPaymentValidation(editPayment, originalPayment);
+
+      if (errors.Count() == 0)
       {
-        var errors = new List<string>();
-        var originalPayment = ReceiptPayment.GetPaymentsByPayId(editPayment.PayId).DefaultIfEmpty(new ReceiptPayment()).First();
-
-        var cashierId = originalPayment.CashierId;
-        errors = ReceiptPayment.EditPaymentValidation(editPayment, originalPayment);
-
-        if (errors.Count() == 0)
-        {
-          errors = ReceiptPayment.UpdatePayments(editPayment, originalPayment, ua.user_name);
-        }
-
-        var response = new ClientResponse(cashierId)
-        {
-          Errors = errors
-        };
-
-        return Ok(response);
-
+        errors = ReceiptPayment.UpdatePayments(editPayment, originalPayment, ua.user_name);
       }
-      else
+
+      var response = new ClientResponse(cashierId)
       {
-        return Ok(BadRequest("There are no payments to edit"));
-      }
+        Errors = errors
+      };
+
+      return Ok(response);
+
 
     }
 

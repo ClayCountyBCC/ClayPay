@@ -52,7 +52,7 @@ namespace clayPay
       df.appendChild(ClientResponse.CreateReceiptHeader(cr));
       df.appendChild(ClientResponse.CreateReceiptPayerView(cr.ResponseCashierData));
       df.appendChild(Charge.CreateChargesTable(cr.Charges, ChargeView.receipt));
-      df.appendChild(ReceiptPayment.CreateReceiptPaymentView(cr.ReceiptPayments));
+      df.appendChild(ReceiptPayment.CreateReceiptPaymentView(cr.ReceiptPayments, cr.IsEditable));
       // show payment info
       return df;
     }

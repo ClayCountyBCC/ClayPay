@@ -211,7 +211,7 @@ namespace ClayPay.Models.Claypay
         errors.Add("You can only edit cash or check payments");
       }
 
-      if (DateFinalized(originalPayment))
+      if (IsDateFinalized(originalPayment))
       {
         errors.Add("These payments have been finalized and can no longer be edited");
       }
@@ -241,9 +241,9 @@ namespace ClayPay.Models.Claypay
       return false;
     }
 
-    public static bool DateFinalized(ReceiptPayment originalPayment)
+    public static bool IsDateFinalized(ReceiptPayment originalPayment)
     {
-      return Balancing.DJournal.LastDateFinalized().AddDays(1).Date >= originalPayment.TransactionDate.Date;
+      return Balancing.DJournal.LastDateFinalized().Date >= originalPayment.TransactionDate.Date;
     }
 
     public static bool HasMatchingPayment(ReceiptPayment paymentToCheck, ReceiptPayment originalPayment)

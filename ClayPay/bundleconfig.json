@@ -44,6 +44,7 @@
       "Scripts/claypay/ClientResponse.js",
       "Scripts/claypay/UI.js",
       "Scripts/balancing/CashierDetailData.js",
+      "Scripts/balancing/AssignedOnlinePayment.js",
       "Scripts/balancing/Account.js",
       "Scripts/balancing/CashierTotal.js",
       "Scripts/balancing/Payment.js",
