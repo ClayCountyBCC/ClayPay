@@ -31,21 +31,24 @@
                         id="BalanceByDate"
                         class="button is-primary is-loading"
                         type="button">
-                  Balance Date
+                  Balance By Date
                 </button>
               </div>
-              <div class="control">
+              @*<div class="control">
                 <button onclick="Balancing.DJournal.GetAndShow();"
                         class="button is-warning is-loading"
                         id="NextFinalizeDate"
                         type="button">
                   Get Next Day To Finalize
                 </button>
-              </div>
+              </div>*@
             </div>
           </div>
           <div class="hide"
                id="djournalSearchError">
+
+          </div>
+          <div id="djournalFinalizeContainer">
 
           </div>
         </div>
@@ -62,6 +65,10 @@
           </div>
         </div>
       </div>
+    </div>
+    <div class="hide"
+         id="printingDJournal">
+
     </div>
 
 
@@ -131,10 +138,6 @@
   document.addEventListener("DOMContentLoaded", function (event)
   {
     Balancing.Start();
-
-
-
-
-    });
+  });
  
 </script>

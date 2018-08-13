@@ -15,8 +15,10 @@ namespace ClayPay.Models.Balancing
   {
     public string Fund { get; set; }
     public string AccountNumber { get; set; }
-    public string Project { get; set; } = "";
-    public string ProjectAccount { get; set; } = "";
+    // Project / Project Account are not going to be included
+    // because we do not use them here in Clay County
+    //public string Project { get; set; } = "";
+    //public string ProjectAccount { get; set; } = "";
     public string Total { get; set; }
     public string CashAccount { get; set; }
 
@@ -38,15 +40,15 @@ namespace ClayPay.Models.Balancing
       var dbArgs = new DynamicParameters();
 
       dbArgs.Add("@DateToBalance", dateToBalance.Date);
-
+      // Removed these columns per above.
+      //GL.Project,
+      //GL.ProjectAccount,
       var sql = @"
       USE WATSC;
       
       SELECT 
         left(GUI.Account, 3) Fund, 
         SUBSTRING(GUI.Account, 5,6) AccountNumber, 
-        GL.Project,
-        GL.ProjectAccount,
         FORMAT(SUM(GUI.Amount),'$000000000.00') Total
         ,FORMAT(CAST(LEFT(GUI.Account,3) AS INT), '000') + ' -104000' CashAccount
       FROM ccGU GU

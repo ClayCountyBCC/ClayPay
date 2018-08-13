@@ -10,6 +10,7 @@
     DJournalDate: Date;
     DJournalDateFormatted: string;
     CanDJournalBeFinalized: boolean;
+    CashierData: Array<CashierDetailData>;
   }
 
   export class DJournal implements IDJournal
@@ -22,15 +23,18 @@
     public DJournalDate: Date = new Date();
     public DJournalDateFormatted: string = "";
     public CanDJournalBeFinalized: boolean = false;
+    public CashierData: Array<CashierDetailData> = [];
 
     public static DJournalTotalsContainer: string = "djournalTotals";
     public static DJournalDateInput: string = "djournalDate";
-    public static DjournalContainer: string = "balancingDJournal";
+    public static BalancingContainer: string = "balancingDJournal";
+    public static PrintingContainer: string = "printingDJournal";
     public static PaymentsContainer: string = "djournalPaymentsByType";
     public static DJournalSearchErrorContainer: string = "djournalSearchError";
     public static DJournalErrorContainer: string = "djournalErrors";
     public static DJournalSearchDateButton: string = "BalanceByDate";
     public static DJournalSearchNextDateButton: string = "NextFinalizeDate";
+    public static DJournalFinalizeContainer: string = "djournalFinalizeContainer";
 
     constructor()
     {
@@ -41,12 +45,14 @@
     private static ToggleButtons(toggle: boolean):void
     {
       Utilities.Toggle_Loading_Button(DJournal.DJournalSearchDateButton, toggle);
-      Utilities.Toggle_Loading_Button(DJournal.DJournalSearchNextDateButton, toggle);
+      //Utilities.Toggle_Loading_Button(DJournal.DJournalSearchNextDateButton, toggle);
     }
 
     public static GetAndShow(DJournalDate: string = ""): void
     {
       DJournal.ToggleButtons(true);
+      Utilities.Hide(DJournal.PrintingContainer);
+      Utilities.Show(DJournal.BalancingContainer);
       let path = "/";
       let i = window.location.pathname.toLowerCase().indexOf("/claypay");
       if (i == 0)
@@ -73,6 +79,7 @@
             Utilities.Error_Show(DJournal.DJournalErrorContainer, dj.Error, false);
           }
           DJournal.BuildDJournalDisplay(dj);
+          
           DJournal.ToggleButtons(false);
         }, function (error)
         {
@@ -82,6 +89,130 @@
         });
     }
 
+    public static BuildDJournalFinalizeDisplay(dj: DJournal):void
+    {
+      // Rules:
+      // df.CanBeFinalized is true, we show the finalize button
+      // Otherwise:
+      // If the date is already finalized, we show who did it and when
+      // along with a "View Printable DJournal" button
+      // If it's not, we don't show anything.
+      let finalizeContainer = document.getElementById(DJournal.DJournalFinalizeContainer);
+      Utilities.Clear_Element(finalizeContainer);
+      let df = document.createDocumentFragment();
+      if (dj.CanDJournalBeFinalized)
+      {
+        console.log('showing finalize button');
+        df.appendChild(DJournal.BuildDJournalFinalizeButton(dj));
+      }
+      else
+      {
+        if (dj.Log.IsCreated)
+        {
+          console.log('showing finalize info');
+          df.appendChild(DJournal.BuildDJournalFinalizeInfo(dj));
+        }
+        else
+        {
+          console.log('no finalize to show');
+        }
+      }
+      finalizeContainer.appendChild(df);
+    }
+
+    public static BuildDJournalFinalizeButton(dj: DJournal):HTMLElement
+    {
+      let level = document.createElement("div");
+      level.classList.add("level");
+      level.style.marginTop = ".75em";
+      let button = document.createElement("button");
+      button.type = "button";
+      button.classList.add("button");
+      button.classList.add("is-success");
+      button.classList.add("level-item");
+      button.classList.add("is-large");
+      button.appendChild(document.createTextNode("Finalize Date"));
+      button.onclick = () =>
+      {
+        button.disabled = true;
+        button.classList.add("is-loading");
+        let path = "/";
+        let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        if (i == 0)
+        {
+          path = "/claypay/";
+        }
+        let query = "?DateToFinalize=" + dj.DJournalDate;        
+        Utilities.Post<DJournal>(path + "API/Balancing/Finalize" + query, null)
+          .then(function (dj: DJournal)
+          {
+            console.log('dj returned from finalize', dj);
+            DJournal.BuildDJournalDisplay(dj);
+            Utilities.Hide(DJournal.BalancingContainer);
+            Utilities.Show(DJournal.PrintingContainer);
+            button.disabled = false;
+            button.classList.remove("is-loading");
+          }, function (error)
+          {
+            console.log("error in finalize", error);
+            button.disabled = false;
+            button.classList.remove("is-loading");
+            });
+      }
+
+      level.appendChild(button);
+      return level;
+    }
+
+    public static BuildDJournalFinalizeInfo(dj: DJournal): HTMLElement
+    {
+      let container = document.createElement("div");
+      container.appendChild(DJournal.CreateDisplayField("Finalized On", Utilities.Format_Date(dj.Log.FinalizedOn)));
+      container.appendChild(DJournal.CreateDisplayField("Finalized By", dj.Log.CreatedBy));
+      let level = document.createElement("div");
+      level.classList.add("level");
+      level.style.marginTop = ".75em";
+      let button = document.createElement("button");
+      button.type = "button";
+      button.classList.add("button");
+      button.classList.add("is-success");
+      button.classList.add("level-item");
+      button.classList.add("is-large");
+      button.appendChild(document.createTextNode("View Printable DJournal"));
+      button.onclick = () =>
+      {
+        Utilities.Hide(DJournal.BalancingContainer);
+        Utilities.Show(DJournal.PrintingContainer);
+      }
+      level.appendChild(button);
+      container.appendChild(level);
+      return container;
+    }
+
+
+    private static CreateDisplayField(label: string, value: string): HTMLDivElement
+    {
+      let field = document.createElement("div");
+      field.classList.add("field");
+      field.classList.add("column");
+      let dataLabel = document.createElement("label");
+      dataLabel.classList.add("label");
+      dataLabel.appendChild(document.createTextNode(label));
+      let control = document.createElement("div");
+      control.classList.add("control");
+
+      let input = document.createElement("input");
+      input.classList.add("input");
+      input.classList.add("is-static");
+      input.readOnly = true;
+      input.type = "text";
+      input.value = value;
+      control.appendChild(input);
+      field.appendChild(dataLabel);
+      field.appendChild(control);
+      return field;
+    }
+
     public static BuildDJournalDisplay(dj: DJournal):void
     {
       let target = document.getElementById(DJournal.DJournalTotalsContainer);
@@ -89,15 +220,17 @@
       df.appendChild(DJournal.CreateDJournalTable(dj));
       Utilities.Clear_Element(target);
       target.appendChild(df);
+      DJournal.BuildDJournalFinalizeDisplay(dj);
+      DJournal.BuildPrintableDJournal(dj);
     }
 
-    private static CreateDJournalTable(dj: DJournal): HTMLTableElement
+    private static CreateDJournalTable(dj: DJournal, ShowClose: boolean = false): HTMLTableElement
     {
       let table = document.createElement("table");
       table.classList.add("table");
       table.classList.add("is-fullwidth");
       table.classList.add("is-bordered");
-      table.appendChild(DJournal.BuildDJournalHeader());
+      table.appendChild(DJournal.BuildDJournalHeader(dj, ShowClose));
       let tbody = document.createElement("tbody");
       let tfoot = document.createElement("tfoot");
       let totalCharges: CashierTotal = new CashierTotal();
@@ -135,17 +268,40 @@
       {
         tfoot.appendChild(DJournal.BuildDJournalRow(gutotal.Type, gutotal.TotalAmount, "", -1));
       }
-
-
-
       table.appendChild(tbody);
       table.appendChild(tfoot);
       return table;
     }
 
-    private static BuildDJournalHeader(): HTMLTableSectionElement
+    private static BuildDJournalHeader(dj: DJournal, ShowClose: boolean): HTMLTableSectionElement
     {
       let head = <HTMLTableSectionElement>document.createElement("THEAD");
+      let closeRow = document.createElement("tr");
+      let title = document.createElement("th");
+      title.colSpan = ShowClose ? 3 : 4;
+      title.classList.add("has-text-left");
+      title.appendChild(document.createTextNode("DJournal for " + dj.DJournalDateFormatted));
+      closeRow.appendChild(title);
+
+      if (ShowClose)
+      {
+        let close = document.createElement("th");
+        close.classList.add("has-text-centered");
+        let button = document.createElement("button");
+        button.type = "button";
+        button.classList.add("button");
+        button.classList.add("is-primary");
+        button.classList.add("hide-for-print");
+        button.appendChild(document.createTextNode("Close"));
+        button.onclick = () =>
+        {
+          Utilities.Hide(DJournal.PrintingContainer);
+          Utilities.Show(DJournal.BalancingContainer);
+        }
+        close.appendChild(button);
+        closeRow.appendChild(close);
+      }
+      head.appendChild(closeRow);
       let tr = document.createElement("tr");
       let payments = document.createElement("th");
       payments.colSpan = 2;
@@ -257,6 +413,20 @@
       td.appendChild(link);
       return td;
     }
+
+    private static BuildPrintableDJournal(dj: DJournal): void
+    {
+      let container = document.getElementById(DJournal.PrintingContainer);
+      Utilities.Clear_Element(container);
+      if (!dj.Log.IsCreated) return; // Let's not do anything if this thing isn't finalized
+      let df = document.createDocumentFragment();
+      df.appendChild(DJournal.CreateDJournalTable(dj, true));
+      df.appendChild(Account.BuildGLAccountTotals(dj.GLAccountTotals));
+      df.appendChild(CashierDetailData.BuildCashierDataTable(dj.CashierData));
+      container.appendChild(df);
+    }
+
+
 
   }
 

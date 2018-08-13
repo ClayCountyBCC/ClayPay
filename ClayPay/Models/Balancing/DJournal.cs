@@ -68,6 +68,7 @@ namespace ClayPay.Models.Balancing
       {
         if (DJournalLog.Create(dateToProcess, ua.user_name) != -1)
         {
+          CanDJournalBeFinalized = false; // It just was finalized
           Log = DJournalLog.Get(dateToProcess);
         }
         else

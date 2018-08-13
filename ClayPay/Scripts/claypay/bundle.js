@@ -999,6 +999,23 @@ var Utilities;
         Show_Menu(menuItem.id);
     }
     Utilities.Update_Menu = Update_Menu;
+    //private static BuildFancyLevelItem(label: string, value: string): HTMLElement
+    //{
+    //  let Container = document.createElement("div");
+    //  let innerContainer = document.createElement("div");
+    //  Container.classList.add("level-item");
+    //  Container.classList.add("has-text-centered");
+    //  let Label = document.createElement("p");
+    //  Label.classList.add("heading");
+    //  Label.appendChild(document.createTextNode(label));
+    //  let Value = document.createElement("p");
+    //  Value.classList.add("title");
+    //  Value.appendChild(document.createTextNode(value));
+    //  innerContainer.appendChild(Label);
+    //  innerContainer.appendChild(Value);
+    //  Container.appendChild(innerContainer);
+    //  return Container;
+    //}
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map
 var clayPay;
@@ -1962,7 +1979,7 @@ var clayPay;
     ClientResponse.receiptSearchError = "receiptSearchError";
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=clientresponse.js.map
+//# sourceMappingURL=ClientResponse.js.map
 /// <reference path="payment.ts" />
 /// <reference path="clientresponse.ts" />
 var clayPay;
@@ -2128,7 +2145,7 @@ var clayPay;
     NewTransaction.paymentError = "paymentError";
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=newtransaction.js.map
+//# sourceMappingURL=NewTransaction.js.map
 var clayPay;
 (function (clayPay) {
     class AppType {
@@ -2741,4 +2758,4 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map

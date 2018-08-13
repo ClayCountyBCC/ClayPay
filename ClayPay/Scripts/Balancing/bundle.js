@@ -999,6 +999,23 @@ var Utilities;
         Show_Menu(menuItem.id);
     }
     Utilities.Update_Menu = Update_Menu;
+    //private static BuildFancyLevelItem(label: string, value: string): HTMLElement
+    //{
+    //  let Container = document.createElement("div");
+    //  let innerContainer = document.createElement("div");
+    //  Container.classList.add("level-item");
+    //  Container.classList.add("has-text-centered");
+    //  let Label = document.createElement("p");
+    //  Label.classList.add("heading");
+    //  Label.appendChild(document.createTextNode(label));
+    //  let Value = document.createElement("p");
+    //  Value.classList.add("title");
+    //  Value.appendChild(document.createTextNode(value));
+    //  innerContainer.appendChild(Label);
+    //  innerContainer.appendChild(Value);
+    //  Container.appendChild(innerContainer);
+    //  return Container;
+    //}
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map
 var clayPay;
@@ -1444,7 +1461,7 @@ var clayPay;
     ClientResponse.receiptSearchError = "receiptSearchError";
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=clientresponse.js.map
+//# sourceMappingURL=ClientResponse.js.map
 /// <reference path="apptypes.ts" />
 /// <reference path="charge.ts" />
 /// <reference path="claypay.ts" />
@@ -1904,16 +1921,66 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map
 var Balancing;
 (function (Balancing) {
     class CashierDetailData {
         constructor() {
         }
-        static CreateView(cdd) {
+        static BuildCashierDataTable(cdd) {
             let df = document.createDocumentFragment();
-            console.log("You're missing the CashierDetailData view");
+            let table = document.createElement("table"); //<HTMLTableElement>
+            table.classList.add("table");
+            table.classList.add("is-bordered");
+            table.classList.add("is-fullwidth");
+            table.style.marginTop = "1em";
+            table.style.marginBottom = "1em";
+            table.appendChild(CashierDetailData.BuildTableHeader());
+            let tbody = document.createElement("tbody");
+            for (let cd of cdd) {
+                tbody.appendChild(CashierDetailData.BuildTableRow(cd));
+            }
+            table.appendChild(tbody);
+            df.appendChild(table);
             return df;
+        }
+        static BuildTableHeader() {
+            let thead = document.createElement("thead");
+            let tr = document.createElement("tr");
+            tr.appendChild(CashierDetailData.CreateTableCell("th", "CashierId", "10%", "has-text-centered"));
+            tr.appendChild(CashierDetailData.CreateTableCell("th", "Date", "15%", "has-text-centered"));
+            tr.appendChild(CashierDetailData.CreateTableCell("th", "Name", "15%", "has-text-centered"));
+            tr.appendChild(CashierDetailData.CreateTableCell("th", "Amount", "5%", "has-text-centered"));
+            tr.appendChild(CashierDetailData.CreateTableCell("th", "Type", "5%", "has-text-centered"));
+            tr.appendChild(CashierDetailData.CreateTableCell("th", "Ck/Trans#", "10%", "has-text-centered"));
+            tr.appendChild(CashierDetailData.CreateTableCell("th", "Info", "25%", "has-text-centered"));
+            tr.appendChild(CashierDetailData.CreateTableCell("th", "Key", "10%", "has-text-centered"));
+            tr.appendChild(CashierDetailData.CreateTableCell("th", "Charge", "5%", "has-text-centered"));
+            thead.appendChild(tr);
+            return thead;
+        }
+        static BuildTableRow(data) {
+            let tr = document.createElement("tr");
+            tr.appendChild(CashierDetailData.CreateTableCell("td", data.CashierId));
+            tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Date(data.TransactionDate), "10%", "has-text-centered"));
+            tr.appendChild(CashierDetailData.CreateTableCell("td", data.Name, "", "has-text-left"));
+            tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Amount(data.AmountApplied), "", "has-text-right"));
+            tr.appendChild(CashierDetailData.CreateTableCell("td", data.PaymentType));
+            let trans = data.CheckNumber.length > 0 ? data.CheckNumber : data.TransactionNumber;
+            tr.appendChild(CashierDetailData.CreateTableCell("td", trans));
+            tr.appendChild(CashierDetailData.CreateTableCell("td", data.Info));
+            tr.appendChild(CashierDetailData.CreateTableCell("td", data.AssocKey));
+            tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Amount(data.ChargeTotal), "", "has-text-right"));
+            return tr;
+        }
+        static CreateTableCell(type, value, width = "", className = "has-text-centered") {
+            let cell = document.createElement(type);
+            if (width.length > 0)
+                cell.width = width;
+            if (className.length > 0)
+                cell.classList.add(className);
+            cell.appendChild(document.createTextNode(value));
+            return cell;
         }
     }
     Balancing.CashierDetailData = CashierDetailData;
@@ -1929,6 +1996,49 @@ var Balancing;
             this.ProjectAccount = "";
             this.Total = "";
             this.CashAccount = "";
+        }
+        static BuildGLAccountTotals(accounts) {
+            let df = document.createDocumentFragment();
+            let table = document.createElement("table"); //<HTMLTableElement>
+            table.classList.add("table");
+            table.classList.add("is-bordered");
+            table.classList.add("is-fullwidth");
+            table.style.marginTop = "1em";
+            table.style.marginBottom = "1em";
+            table.appendChild(Account.BuildGLAccountHeader());
+            let tbody = document.createElement("tbody");
+            for (let account of accounts) {
+                tbody.appendChild(Account.BuildGLAccountRow(account));
+            }
+            table.appendChild(tbody);
+            df.appendChild(table);
+            return df;
+        }
+        static BuildGLAccountHeader() {
+            let thead = document.createElement("thead");
+            let tr = document.createElement("tr");
+            tr.appendChild(Account.CreateTableCell("th", "FUND", "25%", "has-text-centered"));
+            tr.appendChild(Account.CreateTableCell("th", "Account", "25%", "has-text-centered"));
+            tr.appendChild(Account.CreateTableCell("th", "Total", "25%", "has-text-centered"));
+            tr.appendChild(Account.CreateTableCell("th", "Cash Account", "25%", "has-text-centered"));
+            thead.appendChild(tr);
+            return thead;
+        }
+        static BuildGLAccountRow(account) {
+            let tr = document.createElement("tr");
+            tr.appendChild(Account.CreateTableCell("td", account.Fund, "25%", "has-text-centered"));
+            tr.appendChild(Account.CreateTableCell("td", account.AccountNumber, "25%", "has-text-centered"));
+            tr.appendChild(Account.CreateTableCell("td", account.Total, "25%", "has-text-right"));
+            tr.appendChild(Account.CreateTableCell("td", account.CashAccount, "25%", "has-text-centered"));
+            return tr;
+        }
+        static CreateTableCell(type, value, width, className = "") {
+            let cell = document.createElement(type);
+            cell.width = width;
+            if (className.length > 0)
+                cell.classList.add(className);
+            cell.appendChild(document.createTextNode(value));
+            return cell;
         }
     }
     Balancing.Account = Account;
@@ -2075,13 +2185,16 @@ var Balancing;
             this.DJournalDate = new Date();
             this.DJournalDateFormatted = "";
             this.CanDJournalBeFinalized = false;
+            this.CashierData = [];
         }
         static ToggleButtons(toggle) {
             Utilities.Toggle_Loading_Button(DJournal.DJournalSearchDateButton, toggle);
-            Utilities.Toggle_Loading_Button(DJournal.DJournalSearchNextDateButton, toggle);
+            //Utilities.Toggle_Loading_Button(DJournal.DJournalSearchNextDateButton, toggle);
         }
         static GetAndShow(DJournalDate = "") {
             DJournal.ToggleButtons(true);
+            Utilities.Hide(DJournal.PrintingContainer);
+            Utilities.Show(DJournal.BalancingContainer);
             let path = "/";
             let i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
@@ -2109,19 +2222,125 @@ var Balancing;
                 DJournal.ToggleButtons(false);
             });
         }
+        static BuildDJournalFinalizeDisplay(dj) {
+            // Rules:
+            // df.CanBeFinalized is true, we show the finalize button
+            // Otherwise:
+            // If the date is already finalized, we show who did it and when
+            // along with a "View Printable DJournal" button
+            // If it's not, we don't show anything.
+            let finalizeContainer = document.getElementById(DJournal.DJournalFinalizeContainer);
+            Utilities.Clear_Element(finalizeContainer);
+            let df = document.createDocumentFragment();
+            if (dj.CanDJournalBeFinalized) {
+                console.log('showing finalize button');
+                df.appendChild(DJournal.BuildDJournalFinalizeButton(dj));
+            }
+            else {
+                if (dj.Log.IsCreated) {
+                    console.log('showing finalize info');
+                    df.appendChild(DJournal.BuildDJournalFinalizeInfo(dj));
+                }
+                else {
+                    console.log('no finalize to show');
+                }
+            }
+            finalizeContainer.appendChild(df);
+        }
+        static BuildDJournalFinalizeButton(dj) {
+            let level = document.createElement("div");
+            level.classList.add("level");
+            level.style.marginTop = ".75em";
+            let button = document.createElement("button");
+            button.type = "button";
+            button.classList.add("button");
+            button.classList.add("is-success");
+            button.classList.add("level-item");
+            button.classList.add("is-large");
+            button.appendChild(document.createTextNode("Finalize Date"));
+            button.onclick = () => {
+                button.disabled = true;
+                button.classList.add("is-loading");
+                let path = "/";
+                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                if (i == 0) {
+                    path = "/claypay/";
+                }
+                let query = "?DateToFinalize=" + dj.DJournalDate;
+                Utilities.Post(path + "API/Balancing/Finalize" + query, null)
+                    .then(function (dj) {
+                    console.log('dj returned from finalize', dj);
+                    DJournal.BuildDJournalDisplay(dj);
+                    Utilities.Hide(DJournal.BalancingContainer);
+                    Utilities.Show(DJournal.PrintingContainer);
+                    button.disabled = false;
+                    button.classList.remove("is-loading");
+                }, function (error) {
+                    console.log("error in finalize", error);
+                    button.disabled = false;
+                    button.classList.remove("is-loading");
+                });
+            };
+            level.appendChild(button);
+            return level;
+        }
+        static BuildDJournalFinalizeInfo(dj) {
+            let container = document.createElement("div");
+            container.appendChild(DJournal.CreateDisplayField("Finalized On", Utilities.Format_Date(dj.Log.FinalizedOn)));
+            container.appendChild(DJournal.CreateDisplayField("Finalized By", dj.Log.CreatedBy));
+            let level = document.createElement("div");
+            level.classList.add("level");
+            level.style.marginTop = ".75em";
+            let button = document.createElement("button");
+            button.type = "button";
+            button.classList.add("button");
+            button.classList.add("is-success");
+            button.classList.add("level-item");
+            button.classList.add("is-large");
+            button.appendChild(document.createTextNode("View Printable DJournal"));
+            button.onclick = () => {
+                Utilities.Hide(DJournal.BalancingContainer);
+                Utilities.Show(DJournal.PrintingContainer);
+            };
+            level.appendChild(button);
+            container.appendChild(level);
+            return container;
+        }
+        static CreateDisplayField(label, value) {
+            let field = document.createElement("div");
+            field.classList.add("field");
+            field.classList.add("column");
+            let dataLabel = document.createElement("label");
+            dataLabel.classList.add("label");
+            dataLabel.appendChild(document.createTextNode(label));
+            let control = document.createElement("div");
+            control.classList.add("control");
+            let input = document.createElement("input");
+            input.classList.add("input");
+            input.classList.add("is-static");
+            input.readOnly = true;
+            input.type = "text";
+            input.value = value;
+            control.appendChild(input);
+            field.appendChild(dataLabel);
+            field.appendChild(control);
+            return field;
+        }
         static BuildDJournalDisplay(dj) {
             let target = document.getElementById(DJournal.DJournalTotalsContainer);
             let df = document.createDocumentFragment();
             df.appendChild(DJournal.CreateDJournalTable(dj));
             Utilities.Clear_Element(target);
             target.appendChild(df);
+            DJournal.BuildDJournalFinalizeDisplay(dj);
+            DJournal.BuildPrintableDJournal(dj);
         }
-        static CreateDJournalTable(dj) {
+        static CreateDJournalTable(dj, ShowClose = false) {
             let table = document.createElement("table");
             table.classList.add("table");
             table.classList.add("is-fullwidth");
             table.classList.add("is-bordered");
-            table.appendChild(DJournal.BuildDJournalHeader());
+            table.appendChild(DJournal.BuildDJournalHeader(dj, ShowClose));
             let tbody = document.createElement("tbody");
             let tfoot = document.createElement("tfoot");
             let totalCharges = new Balancing.CashierTotal();
@@ -2157,8 +2376,31 @@ var Balancing;
             table.appendChild(tfoot);
             return table;
         }
-        static BuildDJournalHeader() {
+        static BuildDJournalHeader(dj, ShowClose) {
             let head = document.createElement("THEAD");
+            let closeRow = document.createElement("tr");
+            let title = document.createElement("th");
+            title.colSpan = ShowClose ? 3 : 4;
+            title.classList.add("has-text-left");
+            title.appendChild(document.createTextNode("DJournal for " + dj.DJournalDateFormatted));
+            closeRow.appendChild(title);
+            if (ShowClose) {
+                let close = document.createElement("th");
+                close.classList.add("has-text-centered");
+                let button = document.createElement("button");
+                button.type = "button";
+                button.classList.add("button");
+                button.classList.add("is-primary");
+                button.classList.add("hide-for-print");
+                button.appendChild(document.createTextNode("Close"));
+                button.onclick = () => {
+                    Utilities.Hide(DJournal.PrintingContainer);
+                    Utilities.Show(DJournal.BalancingContainer);
+                };
+                close.appendChild(button);
+                closeRow.appendChild(close);
+            }
+            head.appendChild(closeRow);
             let tr = document.createElement("tr");
             let payments = document.createElement("th");
             payments.colSpan = 2;
@@ -2244,15 +2486,28 @@ var Balancing;
             td.appendChild(link);
             return td;
         }
+        static BuildPrintableDJournal(dj) {
+            let container = document.getElementById(DJournal.PrintingContainer);
+            Utilities.Clear_Element(container);
+            if (!dj.Log.IsCreated)
+                return; // Let's not do anything if this thing isn't finalized
+            let df = document.createDocumentFragment();
+            df.appendChild(DJournal.CreateDJournalTable(dj, true));
+            df.appendChild(Balancing.Account.BuildGLAccountTotals(dj.GLAccountTotals));
+            df.appendChild(Balancing.CashierDetailData.BuildCashierDataTable(dj.CashierData));
+            container.appendChild(df);
+        }
     }
     DJournal.DJournalTotalsContainer = "djournalTotals";
     DJournal.DJournalDateInput = "djournalDate";
-    DJournal.DjournalContainer = "balancingDJournal";
+    DJournal.BalancingContainer = "balancingDJournal";
+    DJournal.PrintingContainer = "printingDJournal";
     DJournal.PaymentsContainer = "djournalPaymentsByType";
     DJournal.DJournalSearchErrorContainer = "djournalSearchError";
     DJournal.DJournalErrorContainer = "djournalErrors";
     DJournal.DJournalSearchDateButton = "BalanceByDate";
     DJournal.DJournalSearchNextDateButton = "NextFinalizeDate";
+    DJournal.DJournalFinalizeContainer = "djournalFinalizeContainer";
     Balancing.DJournal = DJournal;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=DJournal.js.map
