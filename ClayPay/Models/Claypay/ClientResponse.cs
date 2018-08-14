@@ -56,13 +56,13 @@ namespace ClayPay.Models.Claypay
     public void SendPayerEmailReceipt(string EmailAddress)
     {
       if (EmailAddress.Length == 0) return;
-      Constants.SaveEmail(EmailAddress, "Clay County Payment Receipt", BuildEmailBody());
+      Constants.SaveEmail(EmailAddress, "Clay County Payment Receipt\n", BuildEmailBody());
     }
 
     private string BuildEmailBody()
     {
       var sb = new StringBuilder();
-      sb.Append(CustomerEmailHeaderString());
+      sb.Append(CustomerEmailHeaderString() + "\n");
       sb.Append(CustomerEmailChargesString());
       sb.Append(CustomerEmailPaymentsString());
       return sb.ToString();
@@ -71,7 +71,7 @@ namespace ClayPay.Models.Claypay
     public string CustomerEmailHeaderString()
     {
       var header = new StringBuilder();
-      header.Append(ResponseCashierData.PayerName).Append("\t\t\t").Append(ResponseCashierData.TransactionDate.ToString()).AppendLine()
+      header.AppendFormat("{0,-30} {1,34}\n", ResponseCashierData.PayerName,ResponseCashierData.TransactionDate.ToString())
            .Append(ResponseCashierData.PayerEmailAddress).AppendLine()
            .Append(ResponseCashierData.PayerCompanyName).AppendLine()
            .Append(ResponseCashierData.PayerStreetAddress).AppendLine()
@@ -85,14 +85,12 @@ namespace ClayPay.Models.Claypay
     {
 
       var cs = new StringBuilder();
-      cs.Append("Key\t\tDescription\tAmount");
+      cs.AppendFormat("{0,-19} {1,-35} {2,8}\n", "Key", "Description", "Amount");
+      cs.AppendFormat("{0,-19} {1,-35} {2,9}\n", "-------------", "-----------------------", "--------");
+      
       foreach (var c in Charges)
       {
-        cs.Append(c.AssocKey).
-        Append("\t")
-        .Append(c.Description)
-        .Append("\t")
-        .Append(c.TotalDisplay)
+        cs.AppendFormat("{0,-19} {1,-35} {2, 9}", c.AssocKey, c.Description, c.TotalDisplay)
         .AppendLine();
       }
 
@@ -106,18 +104,14 @@ namespace ClayPay.Models.Claypay
       var ps = new StringBuilder();
 
       ps.AppendLine()
-          .Append("\t\tCheck Number\n")
-          .Append("Payment Type\tTransaction ID\tAmount\tConvenience Fee(cc only)\n");
+        .AppendLine()
+        .AppendFormat("{0,29} {1,35}\n", "CheckNumber/", "Convenience")
+        .AppendFormat("{0} {1,17} {2,13} {3,21}\n", "Payment Type", "Transaction ID", "Amount", "Fee(cc only)")
+        .AppendFormat("{0} {1,17} {2,14} {3,20}\n", "------------", "--------------", "--------", "------------");
 
       foreach (var p in ReceiptPayments)
       {
-        ps.Append(p.PaymentTypeDescription)
-        .Append("\t")
-        .Append(p.CheckNumber + p.TransactionId)
-        .Append("\t\t")
-        .Append(p.AmountApplied)
-        .Append("\t")
-        .Append(p.ConvenienceFeeAmount)
+        ps.AppendFormat("{0,-15} {1,-20} {2,-19} {3,5}\n", p.PaymentType, p.TransactionId, p.AmountApplied, p.ConvenienceFeeAmount)
         .AppendLine();
       }
       return ps.ToString();
