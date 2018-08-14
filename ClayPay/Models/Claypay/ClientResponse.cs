@@ -111,7 +111,7 @@ namespace ClayPay.Models.Claypay
 
       foreach (var p in ReceiptPayments)
       {
-        ps.AppendFormat("{0,-15} {1,-20} {2,-19} {3,5}\n", p.PaymentType, p.TransactionId, p.AmountApplied, p.ConvenienceFeeAmount)
+        ps.AppendFormat("{0,-15} {1,-20} {2,-19} {3,5}", p.PaymentType, p.TransactionId, p.AmountApplied, p.ConvenienceFeeAmount)
         .AppendLine();
       }
       return ps.ToString();
