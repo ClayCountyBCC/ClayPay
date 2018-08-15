@@ -1559,14 +1559,16 @@ var clayPay;
             Utilities.Set_Value(CCPayment.FirstNameInput, "");
             Utilities.Set_Value(CCPayment.LastNameInput, "");
             Utilities.Set_Value(CCPayment.ZipCodeInput, "");
-            Utilities.Set_Value(CCPayment.EmailAddressInput, "");
+            //Utilities.Set_Value(CCPayment.EmailAddressInput, "");
             Utilities.Set_Value(CCPayment.ccNumberInput, "");
             document.getElementById(CCPayment.ccTypeSelect).selectedIndex = 0;
             document.getElementById(CCPayment.ccMonthSelect).selectedIndex = 0;
             document.getElementById(CCPayment.ccYearSelect).selectedIndex = 0;
             Utilities.Set_Value(CCPayment.ccCVCInput, "");
-            Utilities.Set_Value(CCPayment.AmountPaidInput, "");
-            Utilities.Hide(CCPayment.CreditCardForm);
+            if (clayPay.CurrentTransaction.IsCashier) {
+                Utilities.Set_Value(CCPayment.AmountPaidInput, "");
+                Utilities.Hide(CCPayment.CreditCardForm);
+            }
         }
         ResetData() {
             this.Amount = 0;
@@ -1585,7 +1587,7 @@ var clayPay;
             document.getElementById(CCPayment.FirstNameInput).classList.remove("is-danger");
             document.getElementById(CCPayment.LastNameInput).classList.remove("is-danger");
             document.getElementById(CCPayment.ZipCodeInput).classList.remove("is-danger");
-            document.getElementById(CCPayment.EmailAddressInput).classList.remove("is-danger");
+            //document.getElementById(CCPayment.EmailAddressInput).classList.remove("is-danger");
             document.getElementById(CCPayment.ccNumberInput).classList.remove("is-danger");
             document.getElementById(CCPayment.ccTypeSelect).parentElement.classList.remove("is-danger");
             document.getElementById(CCPayment.ccMonthSelect).parentElement.classList.remove("is-danger");
@@ -1616,15 +1618,16 @@ var clayPay;
                 element.scrollTo();
                 return;
             }
-            this.EmailAddress = Utilities.Get_Value(CCPayment.EmailAddressInput).trim();
-            if (this.EmailAddress.length > 0 && this.EmailAddress.indexOf("@") == -1) {
-                Utilities.Error_Show(CCPayment.ZipError, "The email address appears to be invalid. Please correct it to continue.");
-                let element = document.getElementById(CCPayment.EmailAddressInput);
-                element.classList.add("is-danger");
-                element.focus();
-                element.scrollTo();
-                return;
-            }
+            //this.EmailAddress = Utilities.Get_Value(CCPayment.EmailAddressInput).trim();
+            //if (this.EmailAddress.length > 0 && this.EmailAddress.indexOf("@") == -1)
+            //{
+            //  Utilities.Error_Show(CCPayment.ZipError, "The email address appears to be invalid. Please correct it to continue.");
+            //  let element = document.getElementById(CCPayment.EmailAddressInput);
+            //  element.classList.add("is-danger");
+            //  element.focus();
+            //  element.scrollTo();
+            //  return;
+            //}
             this.CardNumber = Utilities.Validate_Text(CCPayment.ccNumberInput, CCPayment.NumberError, "The Credit Card Number field is required.");
             if (this.CardNumber.length === 0)
                 return;
@@ -2249,9 +2252,10 @@ var clayPay;
                     Utilities.Error_Show(errorTarget, cr.Errors);
                 }
                 else {
+                    if (clayPay.CurrentTransaction.IsCashier)
+                        clayPay.Payment.ResetAll();
                     clayPay.CurrentTransaction.TransactionCashierData.ResetPayerForm();
                     clayPay.CurrentTransaction.CCData.ResetForm();
-                    clayPay.Payment.ResetAll();
                     clayPay.CurrentTransaction = new NewTransaction(); // this will reset the entire object back to default.
                     clayPay.UI.updateCart();
                     clayPay.ClientResponse.ShowPaymentReceipt(cr, clayPay.ClientResponse.PaymentReceiptContainer);

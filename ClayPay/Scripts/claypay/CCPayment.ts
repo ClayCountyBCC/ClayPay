@@ -31,7 +31,7 @@ namespace clayPay
     public Amount: number;
     public Validated: boolean = false;
     // credit card form container
-    static CreditCardForm: string = "creditCardPaymentType";
+    static CreditCardForm: string = "creditCardPaymentType";    
     // inputs
     static FirstNameInput: string = "creditCardFirstName";
     static LastNameInput: string = "creditCardLastName";
@@ -80,14 +80,17 @@ namespace clayPay
       Utilities.Set_Value(CCPayment.FirstNameInput, "");
       Utilities.Set_Value(CCPayment.LastNameInput, "");
       Utilities.Set_Value(CCPayment.ZipCodeInput, "");
-      Utilities.Set_Value(CCPayment.EmailAddressInput, "");
+      //Utilities.Set_Value(CCPayment.EmailAddressInput, "");
       Utilities.Set_Value(CCPayment.ccNumberInput, "");
       (<HTMLSelectElement>document.getElementById(CCPayment.ccTypeSelect)).selectedIndex = 0;
       (<HTMLSelectElement>document.getElementById(CCPayment.ccMonthSelect)).selectedIndex = 0;
       (<HTMLSelectElement>document.getElementById(CCPayment.ccYearSelect)).selectedIndex = 0;
       Utilities.Set_Value(CCPayment.ccCVCInput, "");
-      Utilities.Set_Value(CCPayment.AmountPaidInput, "");
-      Utilities.Hide(CCPayment.CreditCardForm);
+      if (clayPay.CurrentTransaction.IsCashier)
+      {
+        Utilities.Set_Value(CCPayment.AmountPaidInput, "");
+        Utilities.Hide(CCPayment.CreditCardForm);
+      }
     }
 
     public ResetData(): void
@@ -110,7 +113,7 @@ namespace clayPay
       document.getElementById(CCPayment.FirstNameInput).classList.remove("is-danger");
       document.getElementById(CCPayment.LastNameInput).classList.remove("is-danger");
       document.getElementById(CCPayment.ZipCodeInput).classList.remove("is-danger");
-      document.getElementById(CCPayment.EmailAddressInput).classList.remove("is-danger");
+      //document.getElementById(CCPayment.EmailAddressInput).classList.remove("is-danger");
       document.getElementById(CCPayment.ccNumberInput).classList.remove("is-danger");
       document.getElementById(CCPayment.ccTypeSelect).parentElement.classList.remove("is-danger");
       document.getElementById(CCPayment.ccMonthSelect).parentElement.classList.remove("is-danger");
@@ -147,16 +150,16 @@ namespace clayPay
         return;
       }
 
-      this.EmailAddress = Utilities.Get_Value(CCPayment.EmailAddressInput).trim();
-      if (this.EmailAddress.length > 0 && this.EmailAddress.indexOf("@") == -1)
-      {
-        Utilities.Error_Show(CCPayment.ZipError, "The email address appears to be invalid. Please correct it to continue.");
-        let element = document.getElementById(CCPayment.EmailAddressInput);
-        element.classList.add("is-danger");
-        element.focus();
-        element.scrollTo();
-        return;
-      }
+      //this.EmailAddress = Utilities.Get_Value(CCPayment.EmailAddressInput).trim();
+      //if (this.EmailAddress.length > 0 && this.EmailAddress.indexOf("@") == -1)
+      //{
+      //  Utilities.Error_Show(CCPayment.ZipError, "The email address appears to be invalid. Please correct it to continue.");
+      //  let element = document.getElementById(CCPayment.EmailAddressInput);
+      //  element.classList.add("is-danger");
+      //  element.focus();
+      //  element.scrollTo();
+      //  return;
+      //}
 
       this.CardNumber = Utilities.Validate_Text(CCPayment.ccNumberInput, CCPayment.NumberError, "The Credit Card Number field is required.");
       if (this.CardNumber.length === 0) return;

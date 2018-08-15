@@ -194,9 +194,9 @@ namespace clayPay
           }
           else
           {
+            if(clayPay.CurrentTransaction.IsCashier) Payment.ResetAll();
             clayPay.CurrentTransaction.TransactionCashierData.ResetPayerForm();
             clayPay.CurrentTransaction.CCData.ResetForm();
-            Payment.ResetAll();
             clayPay.CurrentTransaction = new NewTransaction(); // this will reset the entire object back to default.
             clayPay.UI.updateCart();
             ClientResponse.ShowPaymentReceipt(cr, ClientResponse.PaymentReceiptContainer);
