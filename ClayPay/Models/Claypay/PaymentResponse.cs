@@ -118,12 +118,17 @@ namespace ClayPay.Models
               break;
             case "MESSAGE":
             case "ERRORMSG":
-              ErrorText = val[1];
+              var i = val[1].Substring(1, 6);
+              if (val[1].Substring(1, 6) != "MFC-01" && !UseProduction)
+              {
+                Console.WriteLine("substring: ", val[1].Substring(1, 6));
+
+                ErrorText = val[1];
+              }
               break;
             case "CONV_FEE":
               ConvFee = (val[1]);
               break;
-
             default:
               break;
           }
@@ -219,19 +224,19 @@ namespace ClayPay.Models
       var sb = new StringBuilder();
       try
       {
-        sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL());
-        sb.Append("&BILL_TO_FNAME=").Append(CC.FirstName);
-        sb.Append("&BILL_TO_LNAME=").Append(CC.LastName); ;
-        sb.Append("&CARD_NUMBER=").Append(CC.CardNumber);
-        sb.Append("&CARD_TYPE=").Append(CC.CardType);
-        sb.Append("&CARD_EXP_MONTH=").Append(CC.ExpMonth);
-        sb.Append("&CARD_EXP_YEAR=").Append(CC.ExpYear);
-        sb.Append("&CVV=").Append(CC.CVVNumber);
-        sb.Append("&ZIPCODE=").Append(CC.ZipCode);
-        sb.Append("&PAYMENT_AMOUNT=").Append(CC.Amount);
-        sb.Append("&mode=AS");
-        sb.Append("&*EmailAddress=").Append(CC.EmailAddress);
-        sb.Append("&*IPAddress=").Append(ipAddress);
+        sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
+          .Append("&BILL_TO_FNAME=").Append(CC.FirstName)
+          .Append("&BILL_TO_LNAME=").Append(CC.LastName)
+          .Append("&CARD_NUMBER=").Append(CC.CardNumber)
+          .Append("&CARD_TYPE=").Append(CC.CardType)
+          .Append("&CARD_EXP_MONTH=").Append(CC.ExpMonth)
+          .Append("&CARD_EXP_YEAR=").Append(CC.ExpYear)
+          .Append("&CVV=").Append(CC.CVVNumber)
+          .Append("&ZIPCODE=").Append(CC.ZipCode)
+          .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
+          .Append("&mode=AS")
+          .Append("&*EmailAddress=").Append(CC.EmailAddress)
+          .Append("&*IPAddress=").Append(ipAddress);
         return sb.ToString();
       }
       catch(Exception ex)
@@ -244,8 +249,8 @@ namespace ClayPay.Models
     private string BuildProdURL()
     {
       var sb = new StringBuilder();
-      sb.Append("https://www.myfloridacounty.com/myflc-pay/OpenPay.do?UserID=");
-      sb.Append(Properties.Resources.Prod_User).Append("&serviceID=");
+      sb.Append("https://www.myfloridacounty.com/myflc-pay/OpenPay.do?UserID=")
+      .Append(Properties.Resources.Prod_User).Append("&serviceID=");
       switch (PaymentType)
       {
         case Constants.PaymentTypes.Building:
@@ -263,8 +268,9 @@ namespace ClayPay.Models
     private string BuildTestURL()
     {
       var sb = new StringBuilder();
-      sb.Append("https://test.myfloridacounty.com/myflc-pay/OpenPay.do?UserID=");
-      sb.Append(Properties.Resources.Test_User).Append("&serviceID=");
+      sb.Append("https://test.myfloridacounty.com/myflc-pay/OpenPay.do?UserID=")
+        .Append(Properties.Resources.Test_User)
+        .Append("&serviceID=");
       switch (PaymentType)
       {
         case Constants.PaymentTypes.Building:

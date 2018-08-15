@@ -70,7 +70,7 @@
           <div class="control">
             <input id="permitSearch"
                    class="input"
-                   type="number"                   
+                   type="number"
                    maxlength="8"
                    value="@(HttpContext.Current.IsDebuggingEnabled ? "11701545" : "")"
                    placeholder="18000001" />
@@ -265,7 +265,7 @@
       </div>
     </div>
     <div id="fullCart"
-           class="hide">
+         class="hide">
     </div>
 
     <div class="hide"
@@ -665,9 +665,7 @@
 
             </section>
             <section class="hide"
-                     id="paymentError">
-
-            </section>
+                     id="paymentError"></section>
             <section class="hide"
                      id="cashPaymentType">
               <div class="level">
@@ -729,11 +727,24 @@
   </section>
 
   <section class="hide"
-           id="receipt">
-
-  </section>
+           id="receipt"></section>
 </div>
-<script src="~/Scripts/claypay/bundle.js"></script>
+
+@*<script src="~/Scripts/claypay/bundle.js"></script>*@
+<script src="~/bower_components/promise-polyfill/dist/polyfill.js" ></script>
+      <script src="~/bower_components/fetch/fetch.js"></script>
+      <script src="~/Scripts/app/Utilities.js"></script>
+      <script src="~/Scripts/claypay/CashierData.js"></script>
+      <script src="~/Scripts/claypay/LocationHash.js"></script>
+      <script src="~/Scripts/claypay/Charge.js"></script>
+      <script src="~/Scripts/claypay/Payment.js"></script>
+      <script src="~/Scripts/claypay/CCPayment.js"></script>
+      <script src="~/Scripts/claypay/ReceiptPayment.js"></script>
+      <script src="~/Scripts/claypay/ClientResponse.js"></script>
+      <script src="~/Scripts/claypay/NewTransaction.js"></script>
+      <script src="~/Scripts/claypay/AppTypes.js"></script>
+      <script src="~/Scripts/claypay/claypay.js"></script>
+      <script src="~/Scripts/claypay/UI.js"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", function (event)

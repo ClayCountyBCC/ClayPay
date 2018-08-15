@@ -56,13 +56,13 @@ namespace ClayPay.Models.Claypay
     public void SendPayerEmailReceipt(string EmailAddress)
     {
       if (EmailAddress.Length == 0) return;
-      Constants.SaveEmail(EmailAddress, "Clay County Payment Receipt\n", BuildEmailBody());
+      Constants.SaveEmail(EmailAddress, "Clay County Payment Receipt", BuildEmailBody());
     }
 
     private string BuildEmailBody()
     {
       var sb = new StringBuilder();
-      sb.Append(CustomerEmailHeaderString() + "\n");
+      sb.Append(CustomerEmailHeaderString());
       sb.Append(CustomerEmailChargesString());
       sb.Append(CustomerEmailPaymentsString());
       return sb.ToString();
@@ -75,7 +75,7 @@ namespace ClayPay.Models.Claypay
            .Append(ResponseCashierData.PayerEmailAddress).AppendLine()
            .Append(ResponseCashierData.PayerCompanyName).AppendLine()
            .Append(ResponseCashierData.PayerStreetAddress).AppendLine()
-           .Append(ResponseCashierData.PayerStreet2).AppendLine()
+           .Append(ResponseCashierData.PayerStreet2)
            .AppendLine()
            .AppendLine();
       return header.ToString();
@@ -90,7 +90,7 @@ namespace ClayPay.Models.Claypay
       
       foreach (var c in Charges)
       {
-        cs.AppendFormat("{0,-19} {1,-35} {2, 9}", c.AssocKey, c.Description, c.TotalDisplay)
+        cs.AppendFormat("{0,-19} {1,-35} {2,9}", c.AssocKey, c.Description, c.TotalDisplay)
         .AppendLine();
       }
 
@@ -111,7 +111,7 @@ namespace ClayPay.Models.Claypay
 
       foreach (var p in ReceiptPayments)
       {
-        ps.AppendFormat("{0,-15} {1,-20} {2,-19} {3,5}", p.PaymentType, p.TransactionId, p.AmountApplied, p.ConvenienceFeeAmount)
+        ps.AppendFormat("{0,-15} {1,-20} {2,-19:$#.00} {3,5:$#.00}", p.PaymentType, p.TransactionId, p.AmountApplied, p.ConvenienceFeeAmount)
         .AppendLine();
       }
       return ps.ToString();
