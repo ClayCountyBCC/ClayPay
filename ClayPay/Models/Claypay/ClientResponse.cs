@@ -56,6 +56,8 @@ namespace ClayPay.Models.Claypay
     public void SendPayerEmailReceipt(string EmailAddress)
     {
       if (EmailAddress.Length == 0) return;
+      ResponseCashierData.PayerEmailAddress = ResponseCashierData.PayerEmailAddress == "" ? 
+                                                EmailAddress : ResponseCashierData.PayerEmailAddress;
       Constants.SaveEmail(EmailAddress, "Clay County Payment Receipt", BuildEmailBody());
     }
 
@@ -71,10 +73,10 @@ namespace ClayPay.Models.Claypay
     public string CustomerEmailHeaderString()
     {
       var header = new StringBuilder();
-      header.AppendFormat("{0,-30} {1,34}\n", ResponseCashierData.PayerName,ResponseCashierData.TransactionDate.ToString())
+      header.AppendFormat("{0,-40} {1,50}", ResponseCashierData.PayerName,ResponseCashierData.TransactionDate.ToString()).AppendLine()
            .Append(ResponseCashierData.PayerEmailAddress).AppendLine()
            .Append(ResponseCashierData.PayerCompanyName).AppendLine()
-           .Append(ResponseCashierData.PayerStreetAddress).AppendLine()
+           .Append(ResponseCashierData.PayerStreet1).AppendLine()
            .Append(ResponseCashierData.PayerStreet2)
            .AppendLine()
            .AppendLine();
@@ -85,12 +87,14 @@ namespace ClayPay.Models.Claypay
     {
 
       var cs = new StringBuilder();
-      cs.AppendFormat("{0,-19} {1,-35} {2,8}\n", "Key", "Description", "Amount");
-      cs.AppendFormat("{0,-19} {1,-35} {2,9}\n", "-------------", "-----------------------", "--------");
-      
+      cs.AppendFormat("{0,-36} {1,-70} {2,12}", "Key", "Description", "Amount")
+      .AppendLine()
+      .AppendFormat("{0,-32} {1,-60} {2,16}", "-------------", "---------------------------------", "-----------")
+      .AppendLine();
+
       foreach (var c in Charges)
       {
-        cs.AppendFormat("{0,-19} {1,-35} {2,9}", c.AssocKey, c.Description, c.TotalDisplay)
+        cs.AppendFormat("{0,-31} {1,-41} {2,30}", c.AssocKey, c.Description , c.TotalDisplay)
         .AppendLine();
       }
 
@@ -105,13 +109,13 @@ namespace ClayPay.Models.Claypay
 
       ps.AppendLine()
         .AppendLine()
-        .AppendFormat("{0,29} {1,35}\n", "CheckNumber/", "Convenience")
-        .AppendFormat("{0} {1,17} {2,13} {3,21}\n", "Payment Type", "Transaction ID", "Amount", "Fee(cc only)")
-        .AppendFormat("{0} {1,17} {2,14} {3,20}\n", "------------", "--------------", "--------", "------------");
+        .AppendFormat("{0,45} {1,52}\n", "CheckNumber/", "Convenience")
+        .AppendFormat("{0,-15} {1,-25} {2,-12} {3,21}\n", "Payment Type", "Transaction ID", "Amount", "Fee(cc only)")
+        .AppendFormat("{0,-20} {1,-29} {2,-15} {3,23}\n", "------------------", "-----------------", "-----------", "----------------");
 
       foreach (var p in ReceiptPayments)
       {
-        ps.AppendFormat("{0,-15} {1,-20} {2,-19:$#.00} {3,5:$#.00}", p.PaymentType, p.TransactionId, p.AmountApplied, p.ConvenienceFeeAmount)
+        ps.AppendFormat("{0,-26} {1,-42} {2,-25:$#.00} {3,12:$#.00}", p.PaymentTypeDescription, p.TransactionId, p.AmountApplied, p.ConvenienceFeeAmount)
         .AppendLine();
       }
       return ps.ToString();

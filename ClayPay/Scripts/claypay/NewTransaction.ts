@@ -152,7 +152,7 @@ namespace clayPay
       this.CCData.FirstName = this.TransactionCashierData.PayerFirstName;
       this.CCData.LastName = this.TransactionCashierData.PayerLastName;
       this.CCData.ZipCode = this.TransactionCashierData.PayerZip;
-      this.CCData.EmailAddress = this.TransactionCashierData.PayerEmailAddress;
+      // this.CCData.EmailAddress = this.TransactionCashierData.PayerEmailAddress;
       this.CCData.UpdatePayerData();
     }
 

@@ -7,7 +7,7 @@ var clayPay;
         UpdatePayerData() {
             Utilities.Set_Value(CCPayment.FirstNameInput, this.FirstName);
             Utilities.Set_Value(CCPayment.LastNameInput, this.LastName);
-            Utilities.Set_Value(CCPayment.EmailAddressInput, this.EmailAddress);
+            //Utilities.Set_Value(CCPayment.EmailAddressInput, this.EmailAddress);
             Utilities.Set_Value(CCPayment.ZipCodeInput, this.ZipCode);
         }
         UpdateTotal() {
@@ -187,7 +187,7 @@ var clayPay;
     CCPayment.FirstNameInput = "creditCardFirstName";
     CCPayment.LastNameInput = "creditCardLastName";
     CCPayment.ZipCodeInput = "creditCardZip";
-    CCPayment.EmailAddressInput = "creditCardEmailAddress";
+    // static EmailAddressInput: string = "creditCardEmailAddress";
     CCPayment.ccNumberInput = "creditCardNumber";
     CCPayment.ccTypeSelect = "creditCardType";
     CCPayment.ccMonthSelect = "creditCardMonth";

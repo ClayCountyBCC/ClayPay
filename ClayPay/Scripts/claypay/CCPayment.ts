@@ -36,7 +36,7 @@ namespace clayPay
     static FirstNameInput: string = "creditCardFirstName";
     static LastNameInput: string = "creditCardLastName";
     static ZipCodeInput: string = "creditCardZip";
-    static EmailAddressInput: string = "creditCardEmailAddress";
+    // static EmailAddressInput: string = "creditCardEmailAddress";
     static ccNumberInput: string = "creditCardNumber";
     static ccTypeSelect: string = "creditCardType";
     static ccMonthSelect: string = "creditCardMonth";
@@ -63,7 +63,7 @@ namespace clayPay
     {
       Utilities.Set_Value(CCPayment.FirstNameInput, this.FirstName);
       Utilities.Set_Value(CCPayment.LastNameInput, this.LastName);
-      Utilities.Set_Value(CCPayment.EmailAddressInput, this.EmailAddress);
+      //Utilities.Set_Value(CCPayment.EmailAddressInput, this.EmailAddress);
       Utilities.Set_Value(CCPayment.ZipCodeInput, this.ZipCode);
     }
 
