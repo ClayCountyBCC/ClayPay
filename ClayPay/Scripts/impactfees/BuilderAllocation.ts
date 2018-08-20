@@ -91,7 +91,8 @@
     {
       if (e.selectedIndex === 0)
       {
-        BuilderAllocation.LoadBuilder("", "", "", "$0.00");
+
+        BuilderAllocation.LoadBuilder("", "", "", "$0.00", false);
         return;
       }
       let parent = e.parentElement;
@@ -114,7 +115,12 @@
         });
     }
 
-    public static LoadBuilder(BuilderName: string, BuilderAmount: string, AuditLog: string, AlreadyAllocated: string): void
+    public static LoadBuilder(
+      BuilderName: string,
+      BuilderAmount: string,
+      AuditLog: string,
+      AlreadyAllocated: string,
+      ShowContainer: boolean = true): void
     {
       // hide Add New Builder button unless select index = 0
       let Name = <HTMLInputElement>document.getElementById("builderAllocationName");
@@ -124,7 +130,8 @@
       let container = document.getElementById("builderSelected");
       let existingContainer = document.getElementById("existingBuilderAllocation");
       Utilities.Hide(existingContainer);
-      Utilities.Show(container);
+      Utilities.Hide(container);
+      if (ShowContainer) Utilities.Show(container);
       Name.value = BuilderName;
       Amount.value = BuilderAmount;
       Log.value = AuditLog;

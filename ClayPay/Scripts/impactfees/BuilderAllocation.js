@@ -58,7 +58,7 @@ var ImpactFees;
         }
         static LoadSpecificBuilder(e) {
             if (e.selectedIndex === 0) {
-                BuilderAllocation.LoadBuilder("", "", "", "$0.00");
+                BuilderAllocation.LoadBuilder("", "", "", "$0.00", false);
                 return;
             }
             let parent = e.parentElement;
@@ -75,7 +75,7 @@ var ImpactFees;
                 console.log('Load Specific builder error happened', e);
             });
         }
-        static LoadBuilder(BuilderName, BuilderAmount, AuditLog, AlreadyAllocated) {
+        static LoadBuilder(BuilderName, BuilderAmount, AuditLog, AlreadyAllocated, ShowContainer = true) {
             // hide Add New Builder button unless select index = 0
             let Name = document.getElementById("builderAllocationName");
             let Amount = document.getElementById("builderAllocationAmount");
@@ -84,7 +84,9 @@ var ImpactFees;
             let container = document.getElementById("builderSelected");
             let existingContainer = document.getElementById("existingBuilderAllocation");
             Utilities.Hide(existingContainer);
-            Utilities.Show(container);
+            Utilities.Hide(container);
+            if (ShowContainer)
+                Utilities.Show(container);
             Name.value = BuilderName;
             Amount.value = BuilderAmount;
             Log.value = AuditLog;
