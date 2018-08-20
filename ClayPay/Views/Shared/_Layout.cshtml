@@ -30,7 +30,7 @@
           </div>
           @if (Model.authenticated)
           {
-            <div id="navbarMenuHeroA" class="navbar-menu">
+            <div id="navbarMenuHeroA" class="navbar-menu is-active">
               <div class="navbar-end">
                 <a href="~/Payments"
                    class="navbar-item @(ViewBag.Page == "payments" ? "is-active" : "")">
@@ -44,14 +44,14 @@
                    class="navbar-item @(ViewBag.Page == "impactfees" ? "is-active" : "")">
                   Impact Fees
                 </a>
-                <span class="navbar-item">
+                @*<span class="navbar-item">
                   <a class="button is-primary is-inverted">
                     <span class="icon">
                       <i class="fab fas fa-search"></i>
                     </span>
                     <span>Permit Search</span>
                   </a>
-                </span>
+                </span>*@
               </div>
             </div>
           }

@@ -31,10 +31,12 @@ namespace ClayPay.Models
       {
         user_name = "claypay";
         display_name = "Public User";
+        authenticated = false;
       }
       else
       {
         display_name = name;
+        authenticated = true; 
         using (PrincipalContext pc = new PrincipalContext(ContextType.Domain))
         {
           try

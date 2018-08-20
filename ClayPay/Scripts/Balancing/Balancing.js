@@ -52,6 +52,7 @@ var Balancing;
     function ClearReceipt() {
         let e = document.getElementById("receiptView");
         Utilities.Clear_Element(e);
+        Utilities.Set_Value("receiptSearch", "");
     }
     Balancing.ClearReceipt = ClearReceipt;
 })(Balancing || (Balancing = {}));

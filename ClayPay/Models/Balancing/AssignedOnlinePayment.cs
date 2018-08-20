@@ -68,7 +68,7 @@ namespace ClayPay.Models.Balancing
       
       var param = new DynamicParameters();
       param.Add("@CashierId", CashierId);
-      param.Add("@Username", UserName.Replace(@"CLAYBCC\", ""));
+      param.Add("@Username", UserName);
       var query = @"
       
         USE WATSC;

@@ -1546,7 +1546,7 @@ var clayPay;
         UpdatePayerData() {
             Utilities.Set_Value(CCPayment.FirstNameInput, this.FirstName);
             Utilities.Set_Value(CCPayment.LastNameInput, this.LastName);
-            Utilities.Set_Value(CCPayment.EmailAddressInput, this.EmailAddress);
+            //Utilities.Set_Value(CCPayment.EmailAddressInput, this.EmailAddress);
             Utilities.Set_Value(CCPayment.ZipCodeInput, this.ZipCode);
         }
         UpdateTotal() {
@@ -1726,7 +1726,7 @@ var clayPay;
     CCPayment.FirstNameInput = "creditCardFirstName";
     CCPayment.LastNameInput = "creditCardLastName";
     CCPayment.ZipCodeInput = "creditCardZip";
-    CCPayment.EmailAddressInput = "creditCardEmailAddress";
+    // static EmailAddressInput: string = "creditCardEmailAddress";
     CCPayment.ccNumberInput = "creditCardNumber";
     CCPayment.ccTypeSelect = "creditCardType";
     CCPayment.ccMonthSelect = "creditCardMonth";
@@ -2221,7 +2221,7 @@ var clayPay;
             this.CCData.FirstName = this.TransactionCashierData.PayerFirstName;
             this.CCData.LastName = this.TransactionCashierData.PayerLastName;
             this.CCData.ZipCode = this.TransactionCashierData.PayerZip;
-            this.CCData.EmailAddress = this.TransactionCashierData.PayerEmailAddress;
+            // this.CCData.EmailAddress = this.TransactionCashierData.PayerEmailAddress;
             this.CCData.UpdatePayerData();
         }
         Save() {
@@ -2309,7 +2309,7 @@ var clayPay;
     function start() {
         clayPay.CurrentTransaction.UpdateIsCashier();
         HandleUIEvents();
-        clayPay.UI.buildMenuElements();
+        clayPay.UI.buildMenuElements(clayPay.CurrentTransaction.IsCashier);
         loadDefaultValues();
         window.onhashchange = HandleHash;
         if (location.hash.substring(1).length > 0) {
@@ -2548,85 +2548,6 @@ var clayPay;
                 selected: false
             },
         ];
-        //export function Submit():boolean
-        //{
-        //  Disable('btnSubmit');
-        //  Utilities.Hide('errorList');
-        //  Utilities.Hide('PaymentPosting');
-        //  let f: HTMLFormElement = <HTMLFormElement>document.getElementById('paymentForm');
-        //  if (!f.checkValidity()) return false;
-        //  let itemIds: Array<number> = Cart.map(function (i)
-        //  {
-        //    return i.ItemId;
-        //  });
-        //  let total: number = Cart.reduce((total: number, b: Charge) =>
-        //  {
-        //    return total + b.Total;
-        //  }, 0);
-        //  total = parseFloat(total.toFixed(2));
-        //  let cc = new clayPay.CCPayment();
-        //  let errors: Array<string> = cc.Validate(); // clientside validation
-        //  if (errors.length === 0)
-        //  {
-        //    Utilities.Hide('CCForm'); // Hide the form
-        //    Utilities.Show('PaymentPosting'); // show swirly
-        //    //let save = cc.Save();
-        //    //save.then(function (response)
-        //    //{
-        //    //  let pr = JSON.parse(response);
-        //    //  resetApp();
-        //    //  PopulateReceipt(pr);
-        //    //},
-        //    //  function (reject)
-        //    //  {
-        //    //    Utilities.Show('errorList');
-        //    //    errors = [reject];
-        //    //    BuildErrors(errors);          
-        //    //    Utilities.Show('CCForm');
-        //    //    Utilities.Hide('PaymentPosting');
-        //    //    Enable('btnSubmit');
-        //    //  });
-        //  } else
-        //  {
-        //    // show errors section
-        //    Utilities.Show('errorList');
-        //    BuildErrors(errors);
-        //    Enable('btnSubmit');
-        //  }    
-        //  return false;
-        //}
-        //function resetApp():void
-        //{
-        //  CurrentCharges = [];
-        //  Cart = [];
-        //  updateCart();
-        //  updateCartNav();
-        //  // reset paymentForm
-        //  let f: HTMLFormElement = <HTMLFormElement>document.getElementById('paymentForm');
-        //  f.reset();
-        //  Enable('btnSubmit');
-        //  Utilities.Show('CCForm');
-        //  Utilities.Hide('PaymentPosting');
-        //}
-        //function PopulateReceipt(pr: {CashierId:string, TimeStamp_Display: string, Amount: number}):void
-        //{
-        //  //clayPay.toggleNavDisplay('receipt');
-        //  Utilities.Set_Value("receiptUniqueId", pr.CashierId);
-        //  Utilities.Set_Value("receiptTimestamp", pr.TimeStamp_Display);
-        //  Utilities.Set_Value("receiptAmount", pr.Amount.toFixed(2));
-        //}
-        //function ToggleDisabled(id: string, status: boolean): void
-        //{
-        //  (<HTMLButtonElement>document.getElementById(id)).disabled = status;
-        //}
-        //function Disable(id: string): void
-        //{
-        //  ToggleDisabled(id, true);
-        //}
-        //function Enable(id: string): void
-        //{
-        //  ToggleDisabled(id, false);
-        //}
         function BuildErrors(errors) {
             let errorList = document.getElementById("errorList");
             let df = document.createDocumentFragment();
@@ -2873,10 +2794,17 @@ var clayPay;
             updateCartNav();
         }
         UI.updateCart = updateCart;
-        function buildMenuElements() {
+        function buildMenuElements(IsCashier) {
             let menu = document.getElementById("menuTabs");
             for (let menuItem of UI.Menus) {
-                menu.appendChild(Utilities.Create_Menu_Element(menuItem));
+                if (IsCashier) {
+                    menu.appendChild(Utilities.Create_Menu_Element(menuItem));
+                }
+                else {
+                    if (menuItem.id !== "nav-existingReceipts") {
+                        menu.appendChild(Utilities.Create_Menu_Element(menuItem));
+                    }
+                }
             }
             createNavCart();
         }

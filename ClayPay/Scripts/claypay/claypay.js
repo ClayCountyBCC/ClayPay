@@ -15,7 +15,7 @@ var clayPay;
     function start() {
         clayPay.CurrentTransaction.UpdateIsCashier();
         HandleUIEvents();
-        clayPay.UI.buildMenuElements();
+        clayPay.UI.buildMenuElements(clayPay.CurrentTransaction.IsCashier);
         loadDefaultValues();
         window.onhashchange = HandleHash;
         if (location.hash.substring(1).length > 0) {

@@ -61,6 +61,7 @@ namespace Balancing
   {
     let e = document.getElementById("receiptView");
     Utilities.Clear_Element(e);
+    Utilities.Set_Value("receiptSearch", "");
   }
 
 

@@ -21,7 +21,7 @@ namespace clayPay
   {
     CurrentTransaction.UpdateIsCashier();
     HandleUIEvents();
-    UI.buildMenuElements();
+    UI.buildMenuElements(CurrentTransaction.IsCashier);
     loadDefaultValues();
     window.onhashchange = HandleHash;
     if (location.hash.substring(1).length > 0)
