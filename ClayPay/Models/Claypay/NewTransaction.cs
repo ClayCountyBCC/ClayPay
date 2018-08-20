@@ -633,7 +633,10 @@ namespace ClayPay.Models.Claypay
         WHERE CCI.OTId = @otid;
 
         INSERT INTO ccGUItem (GUID, Account, Amount, Type)
-          SELECT 
+          SELECT
+            GUId, Account, Amount, Type from (
+          SELECT DISTINCT
+          CCI.ItemId, 
             GU.GUId,
             GL.Fund + '*' + GL.Account + '**' AS Account,
           FORMAT(
@@ -668,7 +671,8 @@ namespace ClayPay.Models.Claypay
           INNER JOIN ccGU GU ON CCI.OTId = GU.OTId AND CCI.ItemId = GU.ItemId
           INNER JOIN ccCashierPayment CP ON CCI.OTId = CP.OTid
           WHERE CCI.OTId = @otid
-          ORDER BY CCI.ItemId, GL.Type";
+          ) as tmp
+          ORDER BY ItemId, Type";
 
       try
       {

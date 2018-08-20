@@ -231,38 +231,50 @@ namespace ClayPay.Models.Balancing
       return i;
     }
 
-    public static string IsDjournalBalanced(DateTime dateToBalance)
+    public static bool IsDjournalBalanced(List<CashierTotal> cs)
     {
-      
-      var param = new DynamicParameters();
-      param.Add("@DateToBalance", dateToBalance);
+      var totalCharges = (from t in cs
+                          where t.Type.ToLower() == "total charges"
+                          select t.TotalAmount).DefaultIfEmpty(0).First();
 
-      var query = @"
-        USE WATSC;
-        WITH GuTotal(TotalPayments) AS (
-        SELECT SUM(Amount) TotalAmount FROM (
-              SELECT otid, cashierid, cast(transdt AS DATE) transdt, account, amount, type
-        FROM dbo.ccGU INNER JOIN dbo.ccGUItem ON dbo.ccGU.GUId = dbo.ccGUItem.GUID
-        WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)
-          AND TYPE = 'd') AS tmp
-        GROUP BY type)
+      var totalPayments = (from t in cs
+                           where t.Type.ToLower() == "total payments"
+                           select t.TotalAmount).DefaultIfEmpty(0).First();
 
-        ,ChargeTotals ([TotalCharges]) AS 
-        ( SELECT SUM(CP.AmtApplied) 
-        FROM ccCashierPayment CP 
-        INNER JOIN ccCashier C ON CP.OTid = C.OTId
-        INNER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(CP.PmtType,5)) AND L.CdType='PMTTYPE'
-        WHERE CAST(C.TransDt AS DATE) = CAST(@DateToBalance AS DATE))
 
-        SELECT
-        CASE WHEN G.TotalPayments = C.TotalCharges THEN '' ELSE 'out of balance' END
-        FROM GuTotal G
-        INNER JOIN ChargeTotals C ON C.TotalCharges != 0 OR G.TotalPayments != 0
-      ";
+      if (totalCharges == totalPayments) return true;
 
-      var i = Constants.Get_Data<string>(query, param).DefaultIfEmpty("").First();
+      return false;
 
-      return i;
+      //var param = new DynamicParameters();
+
+  
+      //var query = @"
+      //  USE WATSC;
+      //  WITH GuTotal(TotalPayments) AS (
+      //  SELECT SUM(Amount) TotalAmount FROM (
+      //        SELECT otid, cashierid, cast(transdt AS DATE) transdt, account, amount, type
+      //  FROM dbo.ccGU INNER JOIN dbo.ccGUItem ON dbo.ccGU.GUId = dbo.ccGUItem.GUID
+      //  WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)
+      //    AND TYPE = 'd') AS tmp
+      //  GROUP BY type)
+
+      //  ,ChargeTotals ([TotalCharges]) AS 
+      //  ( SELECT SUM(CP.AmtApplied) 
+      //  FROM ccCashierPayment CP 
+      //  INNER JOIN ccCashier C ON CP.OTid = C.OTId
+      //  INNER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(CP.PmtType,5)) AND L.CdType='PMTTYPE'
+      //  WHERE CAST(C.TransDt AS DATE) = CAST(@DateToBalance AS DATE))
+
+      //  SELECT
+      //  CASE WHEN G.TotalPayments = C.TotalCharges THEN '' ELSE 'out of balance' END
+      //  FROM GuTotal G
+      //  INNER JOIN ChargeTotals C ON C.TotalCharges != 0 OR G.TotalPayments != 0
+      //";
+
+      //var i = Constants.Get_Data<string>(query, param).DefaultIfEmpty("").First();
+
+      //return i;
     }
   }
 }

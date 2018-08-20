@@ -6,6 +6,7 @@ using Dapper;
 using ClayPay.Controllers;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text;
 using System.Configuration;
 using ClayPay.Models.Claypay;
 
@@ -37,7 +38,7 @@ namespace ClayPay.Models.Balancing
       this.GLAccountTotals = Account.GetGLAccountTotals(dateToProcess);
       this.CashierData = CashierDetailData.Get(dateToProcess);
       CheckCatCodesAgainstGL();
-      CheckIfDJournalIsBalanced();
+      CheckIfDJournalIsBalanced(ProcessedPaymentTotals);
       
       //
       Log = DJournalLog.Get(dateToProcess);
@@ -78,14 +79,34 @@ namespace ClayPay.Models.Balancing
       }
     }
 
-    private void CheckIfDJournalIsBalanced()
+    //private void CheckIfDJournalIsBalanced(List<CashierTotal> ppt)
+    //{
+    //  var balanced = CashierTotal.IsDjournalBalanced(ppt);
+    //  if (balanced)
+    //  {
+    //    Error.Add("Djournal is " + balancedText);
+    //    var keys = String.Join(", \n", CashierTotal.GetOutOfBalanceCashierIds(DJournalDate));
+    //    Error.Add("The following keys have issues:\n" + keys);
+    //  }
+    //}
+
+    private void CheckIfDJournalIsBalanced(List<CashierTotal> ppt)
     {
-      var balancedText = CashierTotal.IsDjournalBalanced(DJournalDate);
-      if (balancedText.Length > 0)
+      var balanced = CashierTotal.IsDjournalBalanced(ppt);
+      if (!balanced)
       {
-        Error.Add("Djournal is " + balancedText);
         var keys = String.Join(", \n", CashierTotal.GetOutOfBalanceCashierIds(DJournalDate));
-        Error.Add("The following keys have issues:\n" + keys);
+        var errorString = new StringBuilder();
+
+        errorString.Append($"The DJournal for ")
+          .Append(this.DJournalDate.ToShortDateString())
+          .Append(" is out of balance.")
+          .AppendLine()
+          .Append("The following keys have issues:")
+          .AppendLine()
+          .Append(keys)
+          .AppendLine();
+        
       }
     }
 
