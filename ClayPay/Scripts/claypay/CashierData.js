@@ -41,12 +41,8 @@ var clayPay;
             this.PayerStreetAddress = Utilities.Validate_Text(CashierData.payerStreet, CashierData.payerStreetError, "The street address field is required.");
             if (this.PayerStreetAddress.length === 0)
                 return false;
-            this.PayerCity = Utilities.Validate_Text(CashierData.payerCity, CashierData.payerCityError, "The City field is required.");
-            if (this.PayerCity.length === 0)
-                return false;
-            this.PayerState = Utilities.Validate_Text(CashierData.payerState, CashierData.payerCityError, "The State field is required.");
-            if (this.PayerState.length === 0)
-                return false;
+            this.PayerCity = this.PayerState = Utilities.Get_Value(CashierData.payerCity).trim();
+            this.PayerState = Utilities.Get_Value(CashierData.payerState).trim();
             this.PayerZip = Utilities.Validate_Text(CashierData.payerZip, CashierData.payerCityError, "You must enter a Zip code of at least 5 digits.");
             if (this.PayerZip.length === 0)
                 return false;
