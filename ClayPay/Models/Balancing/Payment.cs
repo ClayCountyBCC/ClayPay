@@ -92,7 +92,8 @@ namespace ClayPay.Models.Balancing
       FROM ccCashierPayment CP
       LEFT OUTER JOIN CCCASHIER C ON CP.OTId = C.OTId
       WHERE CAST(C.TransDt AS DATE) = CAST(@DateToBalance AS DATE)
-        AND UPPER(CP.PmtType) = @PaymentType
+        AND UPPER(LEFT(CP.PmtType,5)) = UPPER(LEFT(@PaymentType,5))
+
       GROUP BY C.CashierId
         WITH ROLLUP
       )

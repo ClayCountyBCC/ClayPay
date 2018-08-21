@@ -198,6 +198,7 @@
       let dataLabel = document.createElement("label");
       dataLabel.classList.add("label");
       dataLabel.appendChild(document.createTextNode(label));
+
       let control = document.createElement("div");
       control.classList.add("control");
 
@@ -228,8 +229,10 @@
     {
       let table = document.createElement("table");
       table.classList.add("table");
-      table.classList.add("is-fullwidth");
       table.classList.add("is-bordered");
+      table.classList.add("is-fullwidth");
+      table.classList.add("print-with-no-border");
+
       table.appendChild(DJournal.BuildDJournalHeader(dj, ShowClose));
       let tbody = document.createElement("tbody");
       let tfoot = document.createElement("tfoot");
@@ -243,6 +246,7 @@
         {
           case "Total Charges":
             totalCharges = payment;
+            tbody.appendChild(DJournal.BuildPaymentRow(payment, dj.DJournalDateFormatted));
             break;
           case "Total Deposit":
             totalDeposits = payment;
@@ -250,20 +254,19 @@
           case "Total Payments":
             totalPayments = payment;
             break;
-
           case "Check":
           case "Cash":
             tbody.appendChild(DJournal.BuildShortDJournalRow(payment, dj.DJournalDateFormatted));
             break;
-
           default:
             tbody.appendChild(DJournal.BuildPaymentRow(payment, dj.DJournalDateFormatted));
+            break;
         }
       }
       let tr = DJournal.BuildDJournalRow(totalPayments.Type, totalPayments.TotalAmount, totalDeposits.Type, totalDeposits.TotalAmount);
       tr.style.backgroundColor = "#fafafa";
       tfoot.appendChild(tr);
-      tfoot.appendChild(DJournal.BuildDJournalRow(totalCharges.Type, totalCharges.TotalAmount, "", -1));
+      //tfoot.appendChild(DJournal.BuildDJournalRow(totalCharges.Type, totalCharges.TotalAmount, "", -1));
       for (let gutotal of dj.GUTotals)
       {
         tfoot.appendChild(DJournal.BuildDJournalRow(gutotal.Type, gutotal.TotalAmount, "", -1));
@@ -276,11 +279,19 @@
     private static BuildDJournalHeader(dj: DJournal, ShowClose: boolean): HTMLTableSectionElement
     {
       let head = <HTMLTableSectionElement>document.createElement("THEAD");
+      let bccTitle = document.createElement("div");
+      bccTitle.textContent = "Clay County, BCC";
+      bccTitle.classList.add("hide");
+      bccTitle.classList.add("show-for-print");
+      bccTitle.classList.add("print-title-size");
       let closeRow = document.createElement("tr");
       let title = document.createElement("th");
       title.colSpan = ShowClose ? 3 : 4;
       title.classList.add("has-text-left");
-      title.appendChild(document.createTextNode("DJournal for " + dj.DJournalDateFormatted));
+      title.classList.add("print-title-size");
+      title.appendChild(document.createTextNode("DJournal " + dj.DJournalDateFormatted));
+      title.appendChild(document.createElement("br"));
+      title.appendChild(bccTitle);
       closeRow.appendChild(title);
 
       if (ShowClose)
@@ -376,41 +387,50 @@
 
     private static CreateTableCellLink(value: string, paymentType: string, width: string, djournalDate: string): HTMLTableCellElement
     {
+      
       let td = document.createElement("td");
       td.classList.add("has-text-right");
       td.width = width;
-      let link = <HTMLAnchorElement>document.createElement("A");
-      link.onclick = () =>
+      if (paymentType.length > 0)
       {
-        
-        Utilities.Set_Text(link, "loading...");
-        // load data here
-        let path = "/";
-        let qs = "";
-        let i = window.location.pathname.toLowerCase().indexOf("/claypay");
-        if (i == 0)
+        let link = <HTMLAnchorElement>document.createElement("A");
+        link.onclick = () =>
         {
-          path = "/claypay/";
-        }
-        //DateTime DateToBalance, string PaymentType
-        qs = "?DateToBalance=" + djournalDate + "&PaymentType=" + paymentType
-        Utilities.Get<Array<Balancing.Payment>>(path + "API/Balancing/GetPayments" + qs)
-          .then(function (payments)
-          {
-            console.log('payments', payments);
-            Balancing.Payment.ShowPayments(payments, value, djournalDate);
-            Utilities.Hide(DJournal.DJournalTotalsContainer);
-            Utilities.Set_Text(link, value); // change it back
-            Utilities.Show(DJournal.PaymentsContainer);
-          }, function (error)
-          {
-            console.log('error getting payments for payment type: ' + paymentType, error);
-            Utilities.Set_Text(link, value); // change it back
-            });
 
+          Utilities.Set_Text(link, "loading...");
+          // load data here
+          let path = "/";
+          let qs = "";
+          let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+          if (i == 0)
+          {
+            path = "/claypay/";
+          }
+          //DateTime DateToBalance, string PaymentType
+          qs = "?DateToBalance=" + djournalDate + "&PaymentType=" + paymentType
+          Utilities.Get<Array<Balancing.Payment>>(path + "API/Balancing/GetPayments" + qs)
+            .then(function (payments)
+            {
+              console.log('payments', payments);
+              Balancing.Payment.ShowPayments(payments, value, djournalDate);
+              Utilities.Hide(DJournal.DJournalTotalsContainer);
+              Utilities.Set_Text(link, value); // change it back
+              Utilities.Show(DJournal.PaymentsContainer);
+            }, function (error)
+              {
+                console.log('error getting payments for payment type: ' + paymentType, error);
+                Utilities.Set_Text(link, value); // change it back
+              });
+
+        }
+        link.appendChild(document.createTextNode(value));
+        td.appendChild(link);
       }
-      link.appendChild(document.createTextNode(value));
-      td.appendChild(link);
+      else
+      {
+        td.appendChild(document.createTextNode(value));
+      }
+        
       return td;
     }
 

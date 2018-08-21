@@ -6,6 +6,7 @@ var Balancing;
         static BuildCashierDataTable(cdd) {
             let df = document.createDocumentFragment();
             let table = document.createElement("table"); //<HTMLTableElement>
+            table.classList.add("pagebreak");
             table.classList.add("table");
             table.classList.add("is-bordered");
             table.classList.add("is-fullwidth");

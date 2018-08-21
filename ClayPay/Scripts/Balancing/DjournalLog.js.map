@@ -1,1 +1,1 @@
-{"version":3,"file":"DjournalLog.js","sourceRoot":"","sources":["DjournalLog.ts"],"names":[],"mappings":"AAAA,IAAU,SAAS,CAyBlB;AAzBD,WAAU,SAAS;IAYjB;QAOE;YAHO,cAAS,GAAW,EAAE,CAAC;YACvB,cAAS,GAAY,KAAK,CAAC;QAKlC,CAAC;KACF;IAXY,qBAAW,cAWvB,CAAA;AAEH,CAAC,EAzBS,SAAS,KAAT,SAAS,QAyBlB"}
+{"version":3,"file":"DjournalLog.js","sourceRoot":"","sources":["DjournalLog.ts"],"names":[],"mappings":"AAAA,IAAU,SAAS,CAyBlB;AAzBD,WAAU,SAAS;IAYjB,MAAa,WAAW;QAOtB;YAHO,cAAS,GAAW,EAAE,CAAC;YACvB,cAAS,GAAY,KAAK,CAAC;QAKlC,CAAC;KACF;IAXY,qBAAW,cAWvB,CAAA;AAEH,CAAC,EAzBS,SAAS,KAAT,SAAS,QAyBlB"}

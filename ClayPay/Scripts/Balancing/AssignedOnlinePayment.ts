@@ -78,6 +78,8 @@
       let table = document.createElement("table");
       table.classList.add("table");
       table.classList.add("is-fullwidth");
+      table.classList.add("pagebreak");
+
       table.classList.add("is-bordered");
       table.appendChild(AssignedOnlinePayment.BuildTableHeader());
       let tbody = document.createElement("tbody");

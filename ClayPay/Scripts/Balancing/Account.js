@@ -15,6 +15,7 @@ var Balancing;
             table.classList.add("table");
             table.classList.add("is-bordered");
             table.classList.add("is-fullwidth");
+            table.classList.add("print-with-no-border");
             table.style.marginTop = "1em";
             table.style.marginBottom = "1em";
             table.appendChild(Account.BuildGLAccountHeader());

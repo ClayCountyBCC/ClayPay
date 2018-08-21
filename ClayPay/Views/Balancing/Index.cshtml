@@ -35,13 +35,13 @@
                 </button>
               </div>
               @*<div class="control">
-                <button onclick="Balancing.DJournal.GetAndShow();"
-                        class="button is-warning is-loading"
-                        id="NextFinalizeDate"
-                        type="button">
-                  Get Next Day To Finalize
-                </button>
-              </div>*@
+                  <button onclick="Balancing.DJournal.GetAndShow();"
+                          class="button is-warning is-loading"
+                          id="NextFinalizeDate"
+                          type="button">
+                    Get Next Day To Finalize
+                  </button>
+                </div>*@
             </div>
           </div>
           <div class="hide"
@@ -75,9 +75,7 @@
   </section>
 
   <section class="hide"
-           id="onlinePayments">
-    
-  </section>
+           id="onlinePayments"></section>
 
   <section class="hide"
            id="receipts">
@@ -89,8 +87,7 @@
       <div class="field-body">
         <div class="field is-grouped">
           <div class="control">
-            <input 
-                   id="receiptSearch"
+            <input id="receiptSearch"
                    class="input"
                    type="text"
                    maxlength="9"
@@ -134,12 +131,28 @@
   </section>
 
 </div>
-<script src="~/Scripts/Balancing/bundle.js"></script>
+@*<script src="~/Scripts/Balancing/bundle.js"></script>*@
+      <script src="~/bower_components/promise-polyfill/dist/polyfill.js"></script>
+      <script src="~/bower_components/fetch/fetch.js"></script>
+      <script src="~/Scripts/app/Utilities.js"></script>
+      <script src="~/Scripts/claypay/Charge.js"></script>
+      <script src="~/Scripts/claypay/ReceiptPayment.js"></script>
+      <script src="~/Scripts/claypay/ClientResponse.js"></script>
+      <script src="~/Scripts/claypay/UI.js"></script>
+      <script src="~/Scripts/balancing/CashierDetailData.js"></script>
+      <script src="~/Scripts/balancing/AssignedOnlinePayment.js"></script>
+      <script src="~/Scripts/balancing/Account.js"></script>
+      <script src="~/Scripts/balancing/CashierTotal.js"></script>
+      <script src="~/Scripts/balancing/Payment.js"></script>
+      <script src="~/Scripts/balancing/DJournal.js"></script>
+      <script src="~/Scripts/balancing/DJournalLog.js"></script>
+      <script src="~/Scripts/balancing/Balancing.js"></script>
+
 
 <script>
   document.addEventListener("DOMContentLoaded", function (event)
   {
     Balancing.Start();
   });
- 
+
 </script>
