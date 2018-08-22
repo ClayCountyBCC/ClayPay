@@ -781,24 +781,24 @@ var Utilities;
         if (errorText) {
             //Set_Text(e, errorText);
             Clear_Element(e);
-            let notification = document.createElement("div");
+            var notification = document.createElement("div");
             notification.classList.add("notification");
             notification.classList.add("is-danger");
-            let deleteButton = document.createElement("button");
+            var deleteButton = document.createElement("button");
             deleteButton.classList.add("delete");
-            deleteButton.onclick = () => {
+            deleteButton.onclick = function () {
                 Hide(e);
             };
             notification.appendChild(deleteButton);
             if (Array.isArray(errorText)) {
                 // we're assuming that errorText is an array if we get here.
-                let ul = document.createElement("ul");
-                errorText.forEach((et) => {
-                    let li = document.createElement("li");
+                var ul_1 = document.createElement("ul");
+                errorText.forEach(function (et) {
+                    var li = document.createElement("li");
                     li.appendChild(document.createTextNode(et));
-                    ul.appendChild(li);
+                    ul_1.appendChild(li);
                 });
-                notification.appendChild(ul);
+                notification.appendChild(ul_1);
             }
             else {
                 notification.appendChild(document.createTextNode(errorText));
@@ -821,8 +821,9 @@ var Utilities;
         }
     }
     Utilities.Clear_Element = Clear_Element;
-    function Create_Option(value, label, selected = false) {
-        let o = document.createElement("option");
+    function Create_Option(value, label, selected) {
+        if (selected === void 0) { selected = false; }
+        var o = document.createElement("option");
         o.value = value;
         o.text = label;
         o.selected = selected;
@@ -855,11 +856,11 @@ var Utilities;
         //let element = e.srcElement;
         // we expect the element's id to be in a "nav-XXX" name format, where 
         // XXX is the element we want to show 
-        let id = elementId.replace("nav-", "");
-        let menuItems = document.querySelectorAll("#menuTabs > li > a");
+        var id = elementId.replace("nav-", "");
+        var menuItems = document.querySelectorAll("#menuTabs > li > a");
         if (menuItems.length > 0) {
-            for (let i = 0; i < menuItems.length; i++) {
-                let item = menuItems.item(i);
+            for (var i = 0; i < menuItems.length; i++) {
+                var item = menuItems.item(i);
                 if (item.id === elementId) {
                     item.parentElement.classList.add("is-active");
                 }
@@ -872,10 +873,10 @@ var Utilities;
     }
     Utilities.Show_Menu = Show_Menu;
     function Show_Hide_Selector(selector, id) {
-        let sections = document.querySelectorAll(selector);
+        var sections = document.querySelectorAll(selector);
         if (sections.length > 0) {
-            for (let i = 0; i < sections.length; i++) {
-                let item = sections.item(i);
+            for (var i = 0; i < sections.length; i++) {
+                var item = sections.item(i);
                 if (item.id === id) {
                     Show(item);
                 }
@@ -895,7 +896,7 @@ var Utilities;
             cache: "no-cache",
             credentials: "include"
         })
-            .then(response => {
+            .then(function (response) {
             if (!response.ok) {
                 throw new Error(response.statusText);
             }
@@ -912,7 +913,7 @@ var Utilities;
                 "Content-Type": "application/json"
             },
             credentials: "include"
-        }).then(response => {
+        }).then(function (response) {
             console.log('Post Response', response);
             if (!response.ok) {
                 throw new Error(response.statusText);
@@ -937,9 +938,9 @@ var Utilities;
         if (typeof e == "string") {
             e = document.getElementById(e);
         }
-        let ele = e;
+        var ele = e;
         ele.tagName.toLowerCase() === "select" ? ele.parentElement.classList.remove("is-danger") : ele.classList.remove("is-danger");
-        let v = Get_Value(ele).trim();
+        var v = Get_Value(ele).trim();
         if (v.length == 0) {
             ele.tagName.toLowerCase() === "select" ? ele.parentElement.classList.add("is-danger") : ele.classList.add("is-danger");
             Error_Show(errorElementId, errorText);
@@ -954,16 +955,16 @@ var Utilities;
         if (typeof e == "string") {
             e = document.getElementById(e);
         }
-        let b = e;
+        var b = e;
         b.disabled = disabled;
         b.classList.toggle("is-loading", disabled);
     }
     Utilities.Toggle_Loading_Button = Toggle_Loading_Button;
     function Create_Menu_Element(menuItem) {
-        let li = document.createElement("li");
+        var li = document.createElement("li");
         if (menuItem.selected)
             li.classList.add("is-active");
-        let a = document.createElement("a");
+        var a = document.createElement("a");
         a.id = menuItem.id;
         a.href = "#";
         a.onclick = function () {
@@ -977,12 +978,13 @@ var Utilities;
             //Utilities.Show_Menu(menuItem.id);
         };
         if (menuItem.icon.length > 0) {
-            let span = document.createElement("span");
+            var span = document.createElement("span");
             span.classList.add("icon");
             span.classList.add("is-medium");
-            let i = document.createElement("i");
-            let icons = menuItem.icon.split(" ");
-            for (let icon of icons) {
+            var i = document.createElement("i");
+            var icons = menuItem.icon.split(" ");
+            for (var _i = 0, icons_1 = icons; _i < icons_1.length; _i++) {
+                var icon = icons_1[_i];
                 i.classList.add(icon);
             }
             span.appendChild(i);
@@ -1020,47 +1022,51 @@ var Utilities;
 //# sourceMappingURL=Utilities.js.map
 var ImpactFees;
 (function (ImpactFees) {
-    class PermitWaiver {
-        constructor() {
+    var PermitWaiver = /** @class */ (function () {
+        function PermitWaiver() {
         }
-    }
+        return PermitWaiver;
+    }());
     ImpactFees.PermitWaiver = PermitWaiver;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=PermitWaiver.js.map
 var ImpactFees;
 (function (ImpactFees) {
-    class PermitImpactFee {
-        constructor() {
+    var PermitImpactFee = /** @class */ (function () {
+        function PermitImpactFee() {
         }
-        static Get(Permit_Number, Agreement_Number = "", Search_Type) {
-            let path = "/";
-            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        PermitImpactFee.Get = function (Permit_Number, Agreement_Number, Search_Type) {
+            if (Agreement_Number === void 0) { Agreement_Number = ""; }
+            var path = "/";
+            var i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
                 path = "/claypay/";
             }
-            let qs = "?permit_number=" + Permit_Number.trim();
+            var qs = "?permit_number=" + Permit_Number.trim();
             qs += "&search_type=" + Search_Type;
             if (Agreement_Number.length > 0) {
                 qs += "&agreement_number=" + Agreement_Number;
             }
             return Utilities.Get(path + "API/ImpactFees/GetPermit" + qs);
-        }
-    }
+        };
+        return PermitImpactFee;
+    }());
     ImpactFees.PermitImpactFee = PermitImpactFee;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=PermitImpactFee.js.map
 var ImpactFees;
 (function (ImpactFees) {
-    class PermitAllocation {
-        constructor() {
+    var PermitAllocation = /** @class */ (function () {
+        function PermitAllocation() {
         }
-        static LoadBuilders(e, selectedBuilder = -1) {
-            let parent = e.parentElement;
+        PermitAllocation.LoadBuilders = function (e, selectedBuilder) {
+            if (selectedBuilder === void 0) { selectedBuilder = -1; }
+            var parent = e.parentElement;
             parent.classList.add("is-loading");
-            let id = e.id.replace("Add", "");
-            let permitBuilderContainer = document.getElementById("permitBuilderContainer");
-            let developerAmount = document.getElementById("permitDeveloperAmount");
-            let developerAllocated = document.getElementById("permitDeveloperCurrentlyAllocated");
+            var id = e.id.replace("Add", "");
+            var permitBuilderContainer = document.getElementById("permitBuilderContainer");
+            var developerAmount = document.getElementById("permitDeveloperAmount");
+            var developerAllocated = document.getElementById("permitDeveloperCurrentlyAllocated");
             if (e.selectedIndex === 0) {
                 Utilities.Hide(permitBuilderContainer);
                 developerAllocated.value = "";
@@ -1069,17 +1075,18 @@ var ImpactFees;
                 return; // no agreement selected.
             }
             Utilities.Show(permitBuilderContainer);
-            let agreementNumber = e.options[e.selectedIndex].value;
+            var agreementNumber = e.options[e.selectedIndex].value;
             ImpactFees.CombinedAllocation.GetAll(agreementNumber, -1, "").then(function (builders) {
-                let selectBuilder = document.getElementById("permitSelectBuilder");
+                var selectBuilder = document.getElementById("permitSelectBuilder");
                 Utilities.Clear_Element(selectBuilder);
                 builders = builders.filter(function (b) { return b.Builder_Name.trim().length > 0 && b.Builder_Allocation_Amount > 0; });
                 if (builders.length > 0) {
                     developerAmount.value = builders[0].Agreement_Amount_Formatted;
                     developerAllocated.value = builders[0].Developer_Amount_Currently_Allocated_Formatted;
                     selectBuilder.add(Utilities.Create_Option("", "Select Builder", selectedBuilder === -1));
-                    let distinctBuilder = [];
-                    for (let b of builders) {
+                    var distinctBuilder = [];
+                    for (var _i = 0, builders_1 = builders; _i < builders_1.length; _i++) {
+                        var b = builders_1[_i];
                         if (distinctBuilder.indexOf(b.Builder_Id) === -1 && b.Builder_Name.trim() !== "") {
                             distinctBuilder.push(b.Builder_Id);
                             selectBuilder.add(Utilities.Create_Option(b.Builder_Id.toString(), b.Builder_Name, b.Builder_Id === selectedBuilder));
@@ -1094,8 +1101,8 @@ var ImpactFees;
                 parent.classList.remove("is-loading");
                 // some kind of error occurred.
             });
-        }
-        static Reset() {
+        };
+        PermitAllocation.Reset = function () {
             // this function will unselect all dropdowns and clear every text box
             document.getElementById("formPermitAllocations").reset();
             document.getElementById("permitSelectAgreement").selectedIndex = 0;
@@ -1106,18 +1113,18 @@ var ImpactFees;
             Utilities.Hide(document.getElementById("permitInfo"));
             Utilities.Hide(document.getElementById("permitErrorContainer"));
             Utilities.Hide(document.getElementById("permitSelectDeveloper"));
-        }
-        static BuilderSelected(e) {
+        };
+        PermitAllocation.BuilderSelected = function (e) {
             // once they get to this place, I need to do a final validation on the permit
             // to check to make sure that this permit is inside the agreement's boundary      
-            let parent = e.parentElement;
+            var parent = e.parentElement;
             parent.classList.add("is-loading");
-            let id = e.id.replace("Add", "");
-            let builderSelectedContainer = document.getElementById("permitBuilderSelected");
-            let builderAmount = document.getElementById("permitBuilderAmount");
-            let builderAllocated = document.getElementById("permitBuilderCurrentlyAllocated");
-            let builderAllocationRemaining = document.getElementById("permitBuilderAllocationRemaining");
-            let permitCreditAmount = document.getElementById("permitCreditAmount");
+            var id = e.id.replace("Add", "");
+            var builderSelectedContainer = document.getElementById("permitBuilderSelected");
+            var builderAmount = document.getElementById("permitBuilderAmount");
+            var builderAllocated = document.getElementById("permitBuilderCurrentlyAllocated");
+            var builderAllocationRemaining = document.getElementById("permitBuilderAllocationRemaining");
+            var permitCreditAmount = document.getElementById("permitCreditAmount");
             permitCreditAmount.value = "";
             if (e.selectedIndex === 0) {
                 Utilities.Hide(builderSelectedContainer);
@@ -1126,13 +1133,13 @@ var ImpactFees;
                 builderAllocated.value = "";
                 return; // no agreement selected.
             }
-            let builderId = e.options[e.selectedIndex].value;
+            var builderId = e.options[e.selectedIndex].value;
             ImpactFees.CombinedAllocation.GetAll("", parseInt(builderId), "").then(function (builders) {
                 builderAmount.value = builders[0].Builder_Allocation_Amount_Formatted;
                 builderAllocated.value = builders[0].Builder_Amount_Currently_Allocated_Formatted;
-                let difference = (builders[0].Builder_Allocation_Amount - builders[0].Builder_Amount_Currently_Allocated);
-                let fee = document.getElementById("permitRoadImpactFee").value.replace("$", "").replace(",", "");
-                let parsedFee = parseFloat(fee);
+                var difference = (builders[0].Builder_Allocation_Amount - builders[0].Builder_Amount_Currently_Allocated);
+                var fee = document.getElementById("permitRoadImpactFee").value.replace("$", "").replace(",", "");
+                var parsedFee = parseFloat(fee);
                 builderAllocationRemaining.value = difference.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
                 permitCreditAmount.value = Math.min(parsedFee, difference).toFixed();
                 parent.classList.remove("is-loading");
@@ -1141,37 +1148,37 @@ var ImpactFees;
                 parent.classList.remove("is-loading");
                 // some kind of error occurred.
             });
-        }
-        static SearchPermit() {
+        };
+        PermitAllocation.SearchPermit = function () {
             // this function will take the contents of the permit input and query it against the webservice.
-            let permitErrorContainer = document.getElementById("permitErrorContainer");
-            let permitErrorText = document.getElementById("permitErrorText");
-            let permitInfo = document.getElementById("permitInfo");
+            var permitErrorContainer = document.getElementById("permitErrorContainer");
+            var permitErrorText = document.getElementById("permitErrorText");
+            var permitInfo = document.getElementById("permitInfo");
             Utilities.Hide(permitErrorContainer);
             Utilities.Hide(permitInfo);
-            let permitInput = document.getElementById("permitNumber");
-            let permitNumber = permitInput.value.trim();
-            let searchType = document.querySelector('input[name="searchType"]:checked').value;
+            var permitInput = document.getElementById("permitNumber");
+            var permitNumber = permitInput.value.trim();
+            var searchType = document.querySelector('input[name="searchType"]:checked').value;
             PermitAllocation.Reset();
             permitInput.value = permitNumber;
-            let searchTypeInput = document.querySelector('input[name="searchType"][value="' + searchType + '"]');
+            var searchTypeInput = document.querySelector('input[name="searchType"][value="' + searchType + '"]');
             searchTypeInput.checked = true;
             if (permitNumber.length !== 8) {
                 // show error
-                let permitNumberLengthError = document.getElementById("permitNumberLengthError");
+                var permitNumberLengthError = document.getElementById("permitNumberLengthError");
                 Utilities.Error_Show(permitNumberLengthError);
                 return;
             }
             if (isNaN(parseInt(permitNumber))) {
-                let permitNumberNumericError = document.getElementById("permitNumberNumericError");
+                var permitNumberNumericError = document.getElementById("permitNumberNumericError");
                 Utilities.Error_Show(permitNumberNumericError);
                 return;
             }
             ImpactFees.PermitImpactFee.Get(permitNumber, "", "IFCR").then(function (pif) {
-                let ImpactFee = document.getElementById("permitRoadImpactFee");
-                let ContractorNumber = document.getElementById("permitContractorNumber");
-                let ContractorName = document.getElementById("permitContractorName");
-                let CashierId = document.getElementById("permitCashierId");
+                var ImpactFee = document.getElementById("permitRoadImpactFee");
+                var ContractorNumber = document.getElementById("permitContractorNumber");
+                var ContractorName = document.getElementById("permitContractorName");
+                var CashierId = document.getElementById("permitCashierId");
                 ImpactFee.value = pif.ImpactFee_Amount_Formatted;
                 ContractorNumber.value = pif.Contractor_Id;
                 ContractorName.value = pif.Contractor_Name;
@@ -1185,9 +1192,9 @@ var ImpactFees;
                 // if we made it here, let's query the combined allocations for this permit number
                 // to see if it is already associated to any agreements/ builders.
                 ImpactFees.CombinedAllocation.GetAll("", -1, permitNumber).then(function (comb) {
-                    let selectDeveloperContainer = document.getElementById("permitSelectDeveloper");
+                    var selectDeveloperContainer = document.getElementById("permitSelectDeveloper");
                     Utilities.Show(selectDeveloperContainer);
-                    let selectAgreement = document.getElementById("permitSelectAgreement");
+                    var selectAgreement = document.getElementById("permitSelectAgreement");
                     selectAgreement.selectedIndex = 0;
                     if (comb.length == 1) {
                         // let's select the right agreement
@@ -1220,30 +1227,30 @@ var ImpactFees;
                 permitErrorText.value = e;
                 Utilities.Show(permitErrorContainer);
             });
-        }
-        static SearchPermitOther() {
+        };
+        PermitAllocation.SearchPermitOther = function () {
             // this function will take the contents of the permit input and query it against the webservice.
             Utilities.Hide("permitOtherApplyWaiver"); // hide the button, we'll show it if we make it there.
-            let permitErrorContainer = document.getElementById("permitOtherErrorContainer");
-            let permitErrorText = document.getElementById("permitOtherErrorText");
+            var permitErrorContainer = document.getElementById("permitOtherErrorContainer");
+            var permitErrorText = document.getElementById("permitOtherErrorText");
             Utilities.Hide(permitErrorContainer);
-            let permitInput = document.getElementById("permitNumberOther");
-            let permitNumber = permitInput.value.trim();
+            var permitInput = document.getElementById("permitNumberOther");
+            var permitNumber = permitInput.value.trim();
             permitInput.value = permitNumber;
             if (permitNumber.length !== 8) {
                 // show error
-                let permitNumberLengthError = document.getElementById("permitNumberOtherLengthError");
+                var permitNumberLengthError = document.getElementById("permitNumberOtherLengthError");
                 Utilities.Error_Show(permitNumberLengthError);
                 return;
             }
             if (isNaN(parseInt(permitNumber))) {
-                let permitNumberNumericError = document.getElementById("permitNumberOtherNumericError");
+                var permitNumberNumericError = document.getElementById("permitNumberOtherNumericError");
                 Utilities.Error_Show(permitNumberNumericError);
                 return;
             }
-            let searchType = document.querySelector('input[name="searchType"]:checked').value;
+            var searchType = document.querySelector('input[name="searchType"]:checked').value;
             ImpactFees.PermitImpactFee.Get(permitNumber, "", searchType).then(function (pif) {
-                let ImpactFee = document.getElementById("permitOtherImpactFee");
+                var ImpactFee = document.getElementById("permitOtherImpactFee");
                 ImpactFee.value = pif.ImpactFee_Amount_Formatted;
                 if (pif.Error_Text.length > 0) {
                     permitErrorText.value = pif.Error_Text;
@@ -1255,42 +1262,42 @@ var ImpactFees;
                 permitErrorText.value = e;
                 Utilities.Show(permitErrorContainer);
             });
-        }
-        static SavePermitAllocation() {
+        };
+        PermitAllocation.SavePermitAllocation = function () {
             // need permit number, builder Id, and allocation amount
-            let permitNumber = document.getElementById("permitNumber");
-            let selectedBuilder = document.getElementById("permitSelectBuilder");
-            let allocationAmount = document.getElementById("permitCreditAmount");
+            var permitNumber = document.getElementById("permitNumber");
+            var selectedBuilder = document.getElementById("permitSelectBuilder");
+            var allocationAmount = document.getElementById("permitCreditAmount");
             allocationAmount.classList.remove("is-danger");
             // we're going to add this extra line here just to handle if anyone 
             // tries to use more than 2 digits after the decimal point.
             allocationAmount.value = parseFloat(allocationAmount.value).toFixed(2);
-            let Amount = parseFloat(allocationAmount.value);
+            var Amount = parseFloat(allocationAmount.value);
             if (isNaN(Amount) || Amount < 0) {
                 allocationAmount.classList.add("is-danger");
                 allocationAmount.focus();
-                let amountError = document.getElementById("permitCreditAmountError");
+                var amountError = document.getElementById("permitCreditAmountError");
                 Utilities.Error_Show(amountError);
                 return;
             }
-            let pa = new PermitAllocation();
+            var pa = new PermitAllocation();
             pa.Amount_Allocated = Amount;
             pa.Builder_Id = parseInt(selectedBuilder.options[selectedBuilder.selectedIndex].value);
             pa.Permit_Number = permitNumber.value.trim();
             pa.Save();
-        }
-        static SavePermitWaiver() {
-            let permitNumber = document.getElementById("permitNumberOther");
-            let permitErrorContainer = document.getElementById("permitOtherErrorContainer");
-            let permitErrorText = document.getElementById("permitOtherErrorText");
-            let searchType = document.querySelector('input[name="searchType"]:checked').value;
-            let path = "/";
-            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        };
+        PermitAllocation.SavePermitWaiver = function () {
+            var permitNumber = document.getElementById("permitNumberOther");
+            var permitErrorContainer = document.getElementById("permitOtherErrorContainer");
+            var permitErrorText = document.getElementById("permitOtherErrorText");
+            var searchType = document.querySelector('input[name="searchType"]:checked').value;
+            var path = "/";
+            var i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
                 path = "/claypay/";
             }
-            let pw = new ImpactFees.PermitWaiver();
-            let amount = document.getElementById("permitOtherImpactFee").value.replace("$", "").replace(",", "");
+            var pw = new ImpactFees.PermitWaiver();
+            var amount = document.getElementById("permitOtherImpactFee").value.replace("$", "").replace(",", "");
             console.log('amount', amount);
             pw.Amount = parseFloat(amount);
             pw.Permit_Number = permitNumber.value.trim();
@@ -1316,12 +1323,12 @@ var ImpactFees;
                 Utilities.Show(permitErrorContainer);
                 permitErrorText.value = e;
             });
-        }
-        Save() {
-            let permitAllocationErrorContainer = document.getElementById("permitAllocationError");
-            let permitAllocationError = document.getElementById("permitAllocationErrorList");
-            let path = "/";
-            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        };
+        PermitAllocation.prototype.Save = function () {
+            var permitAllocationErrorContainer = document.getElementById("permitAllocationError");
+            var permitAllocationError = document.getElementById("permitAllocationErrorList");
+            var path = "/";
+            var i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
                 path = "/claypay/";
             }
@@ -1340,8 +1347,9 @@ var ImpactFees;
                 Utilities.Show(permitAllocationErrorContainer);
                 permitAllocationError.value = e;
             });
-        }
-    }
+        };
+        return PermitAllocation;
+    }());
     ImpactFees.PermitAllocation = PermitAllocation;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=PermitAllocation.js.map
@@ -1349,7 +1357,7 @@ var ImpactFees;
 var ImpactFees;
 (function (ImpactFees) {
     ImpactFees.CombinedAllocations = [];
-    let Menus = [
+    var Menus = [
         {
             id: "nav-existingAllocations",
             title: "Existing Agreements and Allocations",
@@ -1392,7 +1400,7 @@ var ImpactFees;
         Utilities.Hide("permitOtherApplyWaiver");
         Utilities.Set_Value("permitNumberOther", "");
         Utilities.Set_Value("permitNumber", "");
-        let actionType = document.querySelector('input[name="searchType"]:checked').value;
+        var actionType = document.querySelector('input[name="searchType"]:checked').value;
         if (actionType === null || actionType === undefined)
             return;
         Utilities.Hide("permitCredits");
@@ -1412,14 +1420,15 @@ var ImpactFees;
         });
     }
     function PopulateAgreementDropdowns(agreements) {
-        let added = [];
-        let developer = document.getElementById("developerAgreementAdd");
-        let builder = document.getElementById("builderAllocationAgreementAdd");
-        let permit = document.getElementById("permitSelectAgreement");
-        for (let a of agreements) {
+        var added = [];
+        var developer = document.getElementById("developerAgreementAdd");
+        var builder = document.getElementById("builderAllocationAgreementAdd");
+        var permit = document.getElementById("permitSelectAgreement");
+        for (var _i = 0, agreements_1 = agreements; _i < agreements_1.length; _i++) {
+            var a = agreements_1[_i];
             if (added.indexOf(a.Agreement_Number) === -1) {
                 added.push(a.Agreement_Number);
-                let label = a.Agreement_Number + ' - ' + a.Developer_Name;
+                var label = a.Agreement_Number + ' - ' + a.Developer_Name;
                 developer.add(Utilities.Create_Option(a.Agreement_Number, label));
                 if (a.Agreement_Amount > 0) { // we don't need to make them selectable if there is no money allocated to this developer.
                     builder.add(Utilities.Create_Option(a.Agreement_Number, label));
@@ -1432,17 +1441,19 @@ var ImpactFees;
         }
     }
     function PopulateExistingAllocations(df) {
-        let container = document.getElementById("existingAllocationsContainer");
+        var container = document.getElementById("existingAllocationsContainer");
         Utilities.Clear_Element(container);
         Utilities.Show(container);
         container.appendChild(df);
     }
-    function BuildBreadCrumbs(Agreement_Number = "", Builder_Name = "") {
-        let bc = document.getElementById("breadcrumbs");
+    function BuildBreadCrumbs(Agreement_Number, Builder_Name) {
+        if (Agreement_Number === void 0) { Agreement_Number = ""; }
+        if (Builder_Name === void 0) { Builder_Name = ""; }
+        var bc = document.getElementById("breadcrumbs");
         Utilities.Clear_Element(bc);
-        let baseLI = document.createElement("li");
+        var baseLI = document.createElement("li");
         bc.appendChild(baseLI);
-        let baseA = document.createElement("a");
+        var baseA = document.createElement("a");
         baseA.href = "#";
         baseA.appendChild(document.createTextNode("Agreements"));
         baseA.onclick = function () {
@@ -1454,8 +1465,8 @@ var ImpactFees;
             baseLI.classList.add("is-active");
         }
         else {
-            let agreementLI = document.createElement("li");
-            let agreementA = document.createElement("a");
+            var agreementLI = document.createElement("li");
+            var agreementA = document.createElement("a");
             agreementA.href = "#";
             agreementA.appendChild(document.createTextNode(Agreement_Number));
             agreementA.onclick = function () {
@@ -1465,9 +1476,9 @@ var ImpactFees;
             agreementLI.appendChild(agreementA);
             bc.appendChild(agreementLI);
             if (Builder_Name.length > 0) {
-                let builderLI = document.createElement("li");
+                var builderLI = document.createElement("li");
                 builderLI.classList.add("is-active");
-                let builderA = document.createElement("a");
+                var builderA = document.createElement("a");
                 builderA.appendChild(document.createTextNode(Builder_Name));
                 builderA.onclick = function () {
                     console.log("test");
@@ -1483,15 +1494,16 @@ var ImpactFees;
     }
     function BuildDeveloperTable() {
         BuildBreadCrumbs();
-        let df = new DocumentFragment();
-        let t = document.createElement("table");
+        var df = new DocumentFragment();
+        var t = document.createElement("table");
         t.classList.add("table");
         t.width = "100%";
-        let tHead = document.createElement("thead");
+        var tHead = document.createElement("thead");
         tHead.appendChild(DeveloperHeaderRow());
-        let tBody = document.createElement("tbody");
-        let distinct = [];
-        for (let ca of ImpactFees.CombinedAllocations) {
+        var tBody = document.createElement("tbody");
+        var distinct = [];
+        for (var _i = 0, CombinedAllocations_1 = ImpactFees.CombinedAllocations; _i < CombinedAllocations_1.length; _i++) {
+            var ca = CombinedAllocations_1[_i];
             if (distinct.indexOf(ca.Agreement_Number) === -1) {
                 distinct.push(ca.Agreement_Number);
                 tBody.appendChild(BuildRow(ca.Agreement_Number, "", ca.Agreement_Number, ca.Developer_Name, ca.Agreement_Amount_Formatted, ca.Developer_Amount_Currently_Allocated_Formatted));
@@ -1518,15 +1530,16 @@ var ImpactFees;
     ImpactFees.View = View;
     function BuildBuilderTable(Agreement_Number) {
         BuildBreadCrumbs(Agreement_Number);
-        let df = new DocumentFragment();
-        let t = document.createElement("table");
+        var df = new DocumentFragment();
+        var t = document.createElement("table");
         t.classList.add("table");
         t.width = "100%";
-        let tHead = document.createElement("thead");
+        var tHead = document.createElement("thead");
         tHead.appendChild(BuilderHeaderRow());
-        let tBody = document.createElement("tbody");
-        let distinct = [];
-        for (let ca of ImpactFees.CombinedAllocations) {
+        var tBody = document.createElement("tbody");
+        var distinct = [];
+        for (var _i = 0, CombinedAllocations_2 = ImpactFees.CombinedAllocations; _i < CombinedAllocations_2.length; _i++) {
+            var ca = CombinedAllocations_2[_i];
             if (ca.Agreement_Number === Agreement_Number && distinct.indexOf(ca.Builder_Name) === -1) {
                 distinct.push(ca.Builder_Name);
                 tBody.appendChild(BuildRow(ca.Agreement_Number, ca.Builder_Name, ca.Builder_Name, ca.Builder_Allocation_Amount_Formatted, ca.Builder_Amount_Currently_Allocated_Formatted));
@@ -1539,14 +1552,15 @@ var ImpactFees;
     }
     function BuildPermitTable(Agreement_Number, Builder_Name) {
         BuildBreadCrumbs(Agreement_Number, Builder_Name);
-        let df = new DocumentFragment();
-        let t = document.createElement("table");
+        var df = new DocumentFragment();
+        var t = document.createElement("table");
         t.classList.add("table");
         t.width = "100%";
-        let tHead = document.createElement("thead");
+        var tHead = document.createElement("thead");
         tHead.appendChild(PermitHeaderRow());
-        let tBody = document.createElement("tbody");
-        for (let ca of ImpactFees.CombinedAllocations) {
+        var tBody = document.createElement("tbody");
+        for (var _i = 0, CombinedAllocations_3 = ImpactFees.CombinedAllocations; _i < CombinedAllocations_3.length; _i++) {
+            var ca = CombinedAllocations_3[_i];
             if (ca.Agreement_Number === Agreement_Number && ca.Builder_Name === Builder_Name) {
                 tBody.appendChild(BuildRow(ca.Agreement_Number, "", ca.Permit_Number, ca.Permit_Amount_Allocated.toLocaleString('en-US', { style: 'currency', currency: 'USD' })));
             }
@@ -1557,18 +1571,18 @@ var ImpactFees;
         return df;
     }
     function DeveloperHeaderRow() {
-        let tr = document.createElement("tr");
+        var tr = document.createElement("tr");
         tr.classList.add("tr");
-        let an = document.createElement("th");
+        var an = document.createElement("th");
         an.appendChild(document.createTextNode("Agreement Number"));
         an.width = "25%";
-        let dn = document.createElement("th");
+        var dn = document.createElement("th");
         dn.appendChild(document.createTextNode("Developer Name"));
         dn.width = "25%";
-        let aa = document.createElement("th");
+        var aa = document.createElement("th");
         aa.appendChild(document.createTextNode("Agreement Amount"));
         aa.width = "25%";
-        let ca = document.createElement("th");
+        var ca = document.createElement("th");
         ca.appendChild(document.createTextNode("Currently Allocated"));
         ca.width = "25%";
         tr.appendChild(an);
@@ -1578,15 +1592,15 @@ var ImpactFees;
         return tr;
     }
     function BuilderHeaderRow() {
-        let tr = document.createElement("tr");
+        var tr = document.createElement("tr");
         tr.classList.add("tr");
-        let bn = document.createElement("th");
+        var bn = document.createElement("th");
         bn.appendChild(document.createTextNode("Builder Name"));
         bn.width = "33%";
-        let aa = document.createElement("th");
+        var aa = document.createElement("th");
         aa.appendChild(document.createTextNode("Amount Allocated"));
         aa.width = "33%";
-        let ca = document.createElement("th");
+        var ca = document.createElement("th");
         ca.appendChild(document.createTextNode("Currently Allocated"));
         ca.width = "33%";
         tr.appendChild(bn);
@@ -1595,27 +1609,32 @@ var ImpactFees;
         return tr;
     }
     function PermitHeaderRow() {
-        let tr = document.createElement("tr");
+        var tr = document.createElement("tr");
         tr.classList.add("tr");
-        let bn = document.createElement("th");
+        var bn = document.createElement("th");
         bn.appendChild(document.createTextNode("Permit Name"));
         bn.width = "50%";
-        let aa = document.createElement("th");
+        var aa = document.createElement("th");
         aa.appendChild(document.createTextNode("Amount Allocated"));
         aa.width = "50%";
         tr.appendChild(bn);
         tr.appendChild(aa);
         return tr;
     }
-    function BuildRow(key1, key2, ...values) {
-        let tr = document.createElement("tr");
+    function BuildRow(key1, key2) {
+        var values = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            values[_i - 2] = arguments[_i];
+        }
+        var tr = document.createElement("tr");
         tr.style.cursor = "pointer";
         tr.classList.add("tr");
         tr.onclick = function () {
             View(key1, key2);
         };
-        for (let v of values) {
-            let td = document.createElement("td");
+        for (var _a = 0, values_1 = values; _a < values_1.length; _a++) {
+            var v = values_1[_a];
+            var td = document.createElement("td");
             td.classList.add("td");
             td.appendChild(document.createTextNode(v));
             tr.appendChild(td);
@@ -1623,8 +1642,9 @@ var ImpactFees;
         return tr;
     }
     function buildMenuElements() {
-        let menu = document.getElementById("menuTabs");
-        for (let menuItem of Menus) {
+        var menu = document.getElementById("menuTabs");
+        for (var _i = 0, Menus_1 = Menus; _i < Menus_1.length; _i++) {
+            var menuItem = Menus_1[_i];
             menu.appendChild(Utilities.Create_Menu_Element(menuItem));
         }
     }
@@ -1633,33 +1653,33 @@ var ImpactFees;
 //# sourceMappingURL=ImpactFees.js.map
 var ImpactFees;
 (function (ImpactFees) {
-    class DeveloperAgreement {
-        constructor() {
+    var DeveloperAgreement = /** @class */ (function () {
+        function DeveloperAgreement() {
             this.Developer_Name = "";
             this.Amount_Currently_Allocated = 0;
             this.Audit_Log = "";
         }
-        static Load(e) {
-            let parent = e.parentElement;
+        DeveloperAgreement.Load = function (e) {
+            var parent = e.parentElement;
             parent.classList.add("is-loading");
-            let id = e.id.replace("Add", "");
-            let container = document.getElementById(id + "Selected");
+            var id = e.id.replace("Add", "");
+            var container = document.getElementById(id + "Selected");
             Utilities.Hide(container);
             if (e.selectedIndex === 0) {
                 parent.classList.remove("is-loading");
                 return; // no agreement selected.
             }
-            let agreementNumber = e.options[e.selectedIndex].value;
+            var agreementNumber = e.options[e.selectedIndex].value;
             ImpactFees.CombinedAllocation.GetAll(agreementNumber, -1, "").then(function (agreements) {
                 if (agreements.length > 0) {
-                    let da = agreements[0];
+                    var da = agreements[0];
                     // Load this object's data into the html form.
-                    let Amount = document.getElementById("developerAgreementAmount");
+                    var Amount = document.getElementById("developerAgreementAmount");
                     Amount.classList.remove("is-danger");
-                    let AllocatedAmount = document.getElementById("developerCurrentlyAllocated");
-                    let AuditLog = document.getElementById("developerAgreementAuditLog");
-                    let existingAgreement = document.getElementById("existingDeveloperAgreement");
-                    let existingAmountAllocated = document.getElementById("existingAgreementAmountAllocated");
+                    var AllocatedAmount = document.getElementById("developerCurrentlyAllocated");
+                    var AuditLog = document.getElementById("developerAgreementAuditLog");
+                    var existingAgreement = document.getElementById("existingDeveloperAgreement");
+                    var existingAmountAllocated = document.getElementById("existingAgreementAmountAllocated");
                     Amount.value = da.Agreement_Amount.toString();
                     AllocatedAmount.value = da.Developer_Amount_Currently_Allocated_Formatted;
                     AuditLog.value = da.Developer_Audit_Log;
@@ -1678,23 +1698,23 @@ var ImpactFees;
                 parent.classList.remove("is-loading");
                 // some kind of error occurred.
             });
-        }
-        static SaveAgreement() {
-            let developerAgreementError = document.getElementById("developerAgreementErrorList");
-            let developerAgreementErrorContainer = document.getElementById("developerAgreementError");
+        };
+        DeveloperAgreement.SaveAgreement = function () {
+            var developerAgreementError = document.getElementById("developerAgreementErrorList");
+            var developerAgreementErrorContainer = document.getElementById("developerAgreementError");
             Utilities.Hide(developerAgreementErrorContainer);
-            let agreementSelect = document.getElementById("developerAgreementAdd");
-            let agreementNumber = agreementSelect.options[agreementSelect.selectedIndex].value;
-            let AmountElement = document.getElementById("developerAgreementAmount");
+            var agreementSelect = document.getElementById("developerAgreementAdd");
+            var agreementNumber = agreementSelect.options[agreementSelect.selectedIndex].value;
+            var AmountElement = document.getElementById("developerAgreementAmount");
             AmountElement.classList.remove("is-danger");
-            let Amount = parseFloat(AmountElement.value);
+            var Amount = parseFloat(AmountElement.value);
             if (!isNaN(Amount) && Amount >= 0) { // cursory validation, main validation will be the backend.
-                let d = new DeveloperAgreement();
+                var d = new DeveloperAgreement();
                 d.Agreement_Amount = Amount;
                 d.Agreement_Number = agreementNumber;
                 //XHR.SaveObject<DeveloperAgreement>("../API/ImpactFees/SaveDeveloperAgreement", d)
-                let path = "/";
-                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                var path = "/";
+                var i = window.location.pathname.toLowerCase().indexOf("/claypay");
                 if (i == 0) {
                     path = "/claypay/";
                 }
@@ -1719,26 +1739,27 @@ var ImpactFees;
                 // show error messages
                 AmountElement.focus();
                 AmountElement.classList.add("is-danger");
-                let errorElement = document.getElementById("developerAgreementAmountError");
+                var errorElement = document.getElementById("developerAgreementAmountError");
                 Utilities.Error_Show(errorElement);
             }
-        }
-    }
+        };
+        return DeveloperAgreement;
+    }());
     ImpactFees.DeveloperAgreement = DeveloperAgreement;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=DeveloperAgreement.js.map
 var ImpactFees;
 (function (ImpactFees) {
-    class CombinedAllocation {
-        constructor() {
+    var CombinedAllocation = /** @class */ (function () {
+        function CombinedAllocation() {
         }
-        static GetAll(agreementNumber, builderId, permitNumber) {
-            let path = "/";
-            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        CombinedAllocation.GetAll = function (agreementNumber, builderId, permitNumber) {
+            var path = "/";
+            var i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
                 path = "/claypay/";
             }
-            let qs = "";
+            var qs = "";
             if (agreementNumber.length > 0) {
                 qs = "&agreementNumber=" + agreementNumber;
             }
@@ -1754,26 +1775,27 @@ var ImpactFees;
             return Utilities.Get(path + "API/ImpactFees/GetAgreements" + qs);
             //return fetch("./API/ImpactFees/GetAgreements" + qs) : Promise<Array<CombinedAllocation>>;
             //return XHR.GetArray<CombinedAllocation>("./API/ImpactFees/GetAgreements", qs);
-        }
-    }
+        };
+        return CombinedAllocation;
+    }());
     ImpactFees.CombinedAllocation = CombinedAllocation;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=CombinedAllocation.js.map
 var ImpactFees;
 (function (ImpactFees) {
-    class BuilderAllocation {
-        constructor() {
+    var BuilderAllocation = /** @class */ (function () {
+        function BuilderAllocation() {
             this.Amount_Currently_Allocated = 0;
             this.Audit_Log = "";
         }
-        static LoadBuilders(e) {
-            let parent = e.parentElement;
+        BuilderAllocation.LoadBuilders = function (e) {
+            var parent = e.parentElement;
             parent.classList.add("is-loading");
-            let id = e.id.replace("Add", "");
-            let container = document.getElementById(id + "Selected");
-            let agreementSelectedDeveloperAmount = document.getElementById("builderDeveloperSelectedAmount");
-            let agreementSelectedDeveloperCurrentlyAllocated = document.getElementById("builderDeveloperSelectedCurrentlyAllocated");
-            let builderSelectedContainer = document.getElementById("builderSelected");
+            var id = e.id.replace("Add", "");
+            var container = document.getElementById(id + "Selected");
+            var agreementSelectedDeveloperAmount = document.getElementById("builderDeveloperSelectedAmount");
+            var agreementSelectedDeveloperCurrentlyAllocated = document.getElementById("builderDeveloperSelectedCurrentlyAllocated");
+            var builderSelectedContainer = document.getElementById("builderSelected");
             BuilderAllocation.LoadBuilder("", "", "", "$0.00");
             Utilities.Hide(builderSelectedContainer);
             Utilities.Hide(container);
@@ -1783,23 +1805,24 @@ var ImpactFees;
                 parent.classList.remove("is-loading");
                 return; // no agreement selected.
             }
-            let agreementNumber = e.options[e.selectedIndex].value;
+            var agreementNumber = e.options[e.selectedIndex].value;
             ImpactFees.CombinedAllocation.GetAll(agreementNumber, -1, "").then(function (builders) {
                 // let's load the dropdown
-                let selectBuilder = document.getElementById("existingBuilders");
+                var selectBuilder = document.getElementById("existingBuilders");
                 Utilities.Clear_Element(selectBuilder);
                 builders = builders.filter(function (b) { return b.Builder_Name.trim().length > 0; });
                 if (builders.length > 0) {
                     Utilities.Show(container);
                     Utilities.Show(agreementSelectedDeveloperAmount);
                     Utilities.Show(agreementSelectedDeveloperCurrentlyAllocated);
-                    let DeveloperAmount = document.getElementById("buildersDeveloperAgreementAmount");
-                    let DeveloperAllocated = document.getElementById("buildersDeveloperCurrentlyAllocated");
+                    var DeveloperAmount = document.getElementById("buildersDeveloperAgreementAmount");
+                    var DeveloperAllocated = document.getElementById("buildersDeveloperCurrentlyAllocated");
                     DeveloperAmount.value = builders[0].Agreement_Amount_Formatted;
                     DeveloperAllocated.value = builders[0].Developer_Amount_Currently_Allocated_Formatted;
                     selectBuilder.add(Utilities.Create_Option("", "Select Builder or Add New", true));
-                    let distinctBuilder = [];
-                    for (let b of builders) {
+                    var distinctBuilder = [];
+                    for (var _i = 0, builders_1 = builders; _i < builders_1.length; _i++) {
+                        var b = builders_1[_i];
                         if (distinctBuilder.indexOf(b.Builder_Id) === -1 && b.Builder_Name.trim() !== "") {
                             distinctBuilder.push(b.Builder_Id);
                             selectBuilder.add(Utilities.Create_Option(b.Builder_Id.toString(), b.Builder_Name));
@@ -1816,18 +1839,18 @@ var ImpactFees;
                 parent.classList.remove("is-loading");
                 // some kind of error occurred.
             });
-        }
-        static LoadSpecificBuilder(e) {
+        };
+        BuilderAllocation.LoadSpecificBuilder = function (e) {
             if (e.selectedIndex === 0) {
                 BuilderAllocation.LoadBuilder("", "", "", "$0.00", false);
                 return;
             }
-            let parent = e.parentElement;
+            var parent = e.parentElement;
             parent.classList.add("is-loading");
-            let builderId = parseInt(e.options[e.selectedIndex].value);
+            var builderId = parseInt(e.options[e.selectedIndex].value);
             ImpactFees.CombinedAllocation.GetAll("", builderId, "").then(function (builders) {
                 if (builders.length > 0) {
-                    let builder = builders[0];
+                    var builder = builders[0];
                     BuilderAllocation.LoadBuilder(builder.Builder_Name, builder.Builder_Allocation_Amount.toString(), builder.Builder_Audit_Log, builder.Builder_Amount_Currently_Allocated_Formatted);
                 }
                 parent.classList.remove("is-loading");
@@ -1835,15 +1858,16 @@ var ImpactFees;
                 parent.classList.remove("is-loading");
                 console.log('Load Specific builder error happened', e);
             });
-        }
-        static LoadBuilder(BuilderName, BuilderAmount, AuditLog, AlreadyAllocated, ShowContainer = true) {
+        };
+        BuilderAllocation.LoadBuilder = function (BuilderName, BuilderAmount, AuditLog, AlreadyAllocated, ShowContainer) {
+            if (ShowContainer === void 0) { ShowContainer = true; }
             // hide Add New Builder button unless select index = 0
-            let Name = document.getElementById("builderAllocationName");
-            let Amount = document.getElementById("builderAllocationAmount");
-            let Log = document.getElementById("builderAllocationAuditLog");
-            let Allocated = document.getElementById("buildersAmountAllocatedToPermits");
-            let container = document.getElementById("builderSelected");
-            let existingContainer = document.getElementById("existingBuilderAllocation");
+            var Name = document.getElementById("builderAllocationName");
+            var Amount = document.getElementById("builderAllocationAmount");
+            var Log = document.getElementById("builderAllocationAuditLog");
+            var Allocated = document.getElementById("buildersAmountAllocatedToPermits");
+            var container = document.getElementById("builderSelected");
+            var existingContainer = document.getElementById("existingBuilderAllocation");
             Utilities.Hide(existingContainer);
             Utilities.Hide(container);
             if (ShowContainer)
@@ -1856,36 +1880,36 @@ var ImpactFees;
                 Utilities.Show(existingContainer);
             }
             // load the values into the form and show it
-        }
-        static AddNewBuilder() {
+        };
+        BuilderAllocation.AddNewBuilder = function () {
             // clear out the form and show it
-            let builderSelect = document.getElementById("existingBuilders");
+            var builderSelect = document.getElementById("existingBuilders");
             if (builderSelect.options.length > 0)
                 builderSelect.selectedIndex = 0;
             BuilderAllocation.LoadBuilder("", "", "", "$0.00");
-        }
-        static SaveAllocation() {
+        };
+        BuilderAllocation.SaveAllocation = function () {
             //builderAllocationErrorList
-            let builderAllocationErrorContainer = document.getElementById("builderAllocationError");
-            let builderAllocationError = document.getElementById("builderAllocationErrorList");
+            var builderAllocationErrorContainer = document.getElementById("builderAllocationError");
+            var builderAllocationError = document.getElementById("builderAllocationErrorList");
             Utilities.Hide(builderAllocationErrorContainer);
-            let agreementSelect = document.getElementById("builderAllocationAgreementAdd");
-            let agreementNumber = agreementSelect.options[agreementSelect.selectedIndex].value;
-            let builderSelect = document.getElementById("existingBuilders");
-            let builderId = null;
+            var agreementSelect = document.getElementById("builderAllocationAgreementAdd");
+            var agreementNumber = agreementSelect.options[agreementSelect.selectedIndex].value;
+            var builderSelect = document.getElementById("existingBuilders");
+            var builderId = null;
             if (builderSelect.options.length > 0 && builderSelect.selectedIndex > 0) {
                 builderId = builderSelect.options[builderSelect.selectedIndex].value;
             }
-            let NameElement = document.getElementById("builderAllocationName");
-            let AmountElement = document.getElementById("builderAllocationAmount");
+            var NameElement = document.getElementById("builderAllocationName");
+            var AmountElement = document.getElementById("builderAllocationAmount");
             AmountElement.classList.remove("is-danger");
             NameElement.classList.remove("is-danger");
-            let Amount = parseFloat(AmountElement.value);
-            let BuilderName = NameElement.value.trim().toUpperCase();
+            var Amount = parseFloat(AmountElement.value);
+            var BuilderName = NameElement.value.trim().toUpperCase();
             if (BuilderName.length < 3) {
                 NameElement.focus();
                 NameElement.classList.add("is-danger");
-                let NameErrorElement = document.getElementById("builderAllocationNameError");
+                var NameErrorElement = document.getElementById("builderAllocationNameError");
                 Utilities.Error_Show(NameErrorElement);
                 return;
             }
@@ -1893,18 +1917,18 @@ var ImpactFees;
                 // show error messages
                 AmountElement.focus();
                 AmountElement.classList.add("is-danger");
-                let errorElement = document.getElementById("builderAllocationAmountError");
+                var errorElement = document.getElementById("builderAllocationAmountError");
                 Utilities.Error_Show(errorElement);
                 return;
             }
-            let b = new BuilderAllocation();
+            var b = new BuilderAllocation();
             b.Agreement_Number = agreementNumber;
             b.Builder_Name = BuilderName;
             b.Allocation_Amount = Amount;
             b.Id = builderId;
             //XHR.SaveObject<BuilderAllocation>("./.API/ImpactFees/SaveBuilderAllocation", b)
-            let path = "/";
-            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            var path = "/";
+            var i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
                 path = "/claypay/";
             }
@@ -1923,8 +1947,9 @@ var ImpactFees;
                 Utilities.Show(builderAllocationErrorContainer);
                 builderAllocationError.value = e;
             });
-        }
-    }
+        };
+        return BuilderAllocation;
+    }());
     ImpactFees.BuilderAllocation = BuilderAllocation;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=BuilderAllocation.js.map

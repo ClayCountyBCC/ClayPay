@@ -2,8 +2,8 @@
 /// <reference path="clientresponse.ts" />
 var clayPay;
 (function (clayPay) {
-    class NewTransaction {
-        constructor() {
+    var NewTransaction = /** @class */ (function () {
+        function NewTransaction() {
             // CurrentCharges are the search results (charges) returned and displayed
             // in the results container.
             this.CurrentCharges = [];
@@ -24,12 +24,12 @@ var clayPay;
             this.TotalAmountRemaining = 0;
             this.TotalChangeDue = 0;
         }
-        UpdateIsCashier() {
-            let e = document.getElementById(clayPay.Payment.checkPaymentContainer);
+        NewTransaction.prototype.UpdateIsCashier = function () {
+            var e = document.getElementById(clayPay.Payment.checkPaymentContainer);
             this.IsCashier = e !== undefined && e !== null;
-        }
-        Validate() {
-            let payer = this.TransactionCashierData.ValidatePayer();
+        };
+        NewTransaction.prototype.Validate = function () {
+            var payer = this.TransactionCashierData.ValidatePayer();
             if (!payer) {
                 Utilities.Show("validatePayer");
                 Utilities.Hide("paymentData");
@@ -41,20 +41,20 @@ var clayPay;
             }
             if (this.IsCashier) {
                 this.UpdateTotals();
-                let payments = this.ValidatePayments();
-                let button = document.getElementById(NewTransaction.PayNowCashierButton);
+                var payments = this.ValidatePayments();
+                var button = document.getElementById(NewTransaction.PayNowCashierButton);
                 button.disabled = !(payer && payments);
                 return (payer && payments);
             }
             return true;
-        }
-        UpdateTotals() {
+        };
+        NewTransaction.prototype.UpdateTotals = function () {
             if (!this.IsCashier)
                 return;
             this.TotalAmountPaid = 0;
             this.TotalAmountRemaining = 0;
             this.TotalChangeDue = 0;
-            let TotalPaid = 0;
+            var TotalPaid = 0;
             if (this.CheckPayment.Validated)
                 TotalPaid += this.CheckPayment.Amount;
             if (this.CashPayment.Validated)
@@ -67,21 +67,21 @@ var clayPay;
                 this.TotalChangeDue = this.TotalAmountPaid - this.TotalAmountDue;
             }
             this.UpdateForm();
-        }
-        UpdateForm() {
+        };
+        NewTransaction.prototype.UpdateForm = function () {
             Utilities.Set_Text(NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(this.TotalAmountDue));
             Utilities.Set_Text(NewTransaction.TotalAmountPaidMenu, Utilities.Format_Amount(this.TotalAmountPaid));
             Utilities.Set_Text(NewTransaction.TotalChangeDueMenu, Utilities.Format_Amount(this.TotalChangeDue));
             Utilities.Set_Text(NewTransaction.TotalAmountRemainingMenu, Utilities.Format_Amount(this.TotalAmountRemaining));
-            let amount = this.TotalAmountRemaining.toFixed(2);
+            var amount = this.TotalAmountRemaining.toFixed(2);
             if (!this.CCData.Validated)
                 Utilities.Set_Value(clayPay.CCPayment.AmountPaidInput, amount);
             if (!this.CheckPayment.Validated)
                 Utilities.Set_Value(clayPay.Payment.checkAmountInput, amount);
             if (!this.CashPayment.Validated)
                 Utilities.Set_Value(clayPay.Payment.cashAmountInput, amount);
-        }
-        ValidatePayments() {
+        };
+        NewTransaction.prototype.ValidatePayments = function () {
             if (this.IsCashier) {
                 if (this.CashPayment.Validated && this.CashPayment.Amount > 0) {
                     if (this.TotalChangeDue >= this.CashPayment.Amount) {
@@ -97,8 +97,8 @@ var clayPay;
                     return false;
             }
             return true;
-        }
-        CopyPayerData() {
+        };
+        NewTransaction.prototype.CopyPayerData = function () {
             // this function is used when the user clicks the "This is the same as Payer Information"
             // checkbox in the credit card data.  It takes the information in that form and
             // updates the CCData with it and then the CCData object will update the CCData form.
@@ -107,24 +107,24 @@ var clayPay;
             this.CCData.ZipCode = this.TransactionCashierData.PayerZip;
             // this.CCData.EmailAddress = this.TransactionCashierData.PayerEmailAddress;
             this.CCData.UpdatePayerData();
-        }
-        Save() {
+        };
+        NewTransaction.prototype.Save = function () {
             // Disable the button that was just used so that it can't be clicked multiple times.
-            let loadingButton = this.IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
+            var loadingButton = this.IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
             Utilities.Toggle_Loading_Button(loadingButton, true);
             if (!this.Validate()) {
                 Utilities.Toggle_Loading_Button(loadingButton, false);
                 return;
             }
-            this.ItemIds = clayPay.CurrentTransaction.Cart.map((c) => {
+            this.ItemIds = clayPay.CurrentTransaction.Cart.map(function (c) {
                 return c.ItemId;
             });
             this.Payments = [];
-            let IsCashier = this.IsCashier;
-            let toggleButton = IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
-            let errorTarget = IsCashier ? clayPay.ClientResponse.CashierErrorTarget : clayPay.ClientResponse.PublicErrorTarget;
-            let path = "/";
-            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            var IsCashier = this.IsCashier;
+            var toggleButton = IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
+            var errorTarget = IsCashier ? clayPay.ClientResponse.CashierErrorTarget : clayPay.ClientResponse.PublicErrorTarget;
+            var path = "/";
+            var i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
                 path = "/claypay/";
             }
@@ -151,17 +151,18 @@ var clayPay;
                 Utilities.Error_Show(errorTarget, e);
                 Utilities.Toggle_Loading_Button(toggleButton, false);
             });
-        }
-    }
-    // Menu Ids
-    NewTransaction.TotalAmountPaidMenu = "cartTotalAmountPaid";
-    NewTransaction.TotalAmountDueMenu = "cartTotalAmountDue";
-    NewTransaction.TotalAmountRemainingMenu = "cartTotalAmountRemaining";
-    NewTransaction.TotalChangeDueMenu = "cartTotalChangeDue";
-    NewTransaction.PayNowCashierButton = "processPayments";
-    NewTransaction.PayNowPublicButton = "processCCPayment";
-    // Transaction Error container
-    NewTransaction.paymentError = "paymentError";
+        };
+        // Menu Ids
+        NewTransaction.TotalAmountPaidMenu = "cartTotalAmountPaid";
+        NewTransaction.TotalAmountDueMenu = "cartTotalAmountDue";
+        NewTransaction.TotalAmountRemainingMenu = "cartTotalAmountRemaining";
+        NewTransaction.TotalChangeDueMenu = "cartTotalChangeDue";
+        NewTransaction.PayNowCashierButton = "processPayments";
+        NewTransaction.PayNowPublicButton = "processCCPayment";
+        // Transaction Error container
+        NewTransaction.paymentError = "paymentError";
+        return NewTransaction;
+    }());
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=newtransaction.js.map

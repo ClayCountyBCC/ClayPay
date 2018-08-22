@@ -1,9 +1,10 @@
 var ImpactFees;
 (function (ImpactFees) {
-    class PermitWaiver {
-        constructor() {
+    var PermitWaiver = /** @class */ (function () {
+        function PermitWaiver() {
         }
-    }
+        return PermitWaiver;
+    }());
     ImpactFees.PermitWaiver = PermitWaiver;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=PermitWaiver.js.map

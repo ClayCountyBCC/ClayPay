@@ -1,18 +1,18 @@
 var ImpactFees;
 (function (ImpactFees) {
-    class BuilderAllocation {
-        constructor() {
+    var BuilderAllocation = /** @class */ (function () {
+        function BuilderAllocation() {
             this.Amount_Currently_Allocated = 0;
             this.Audit_Log = "";
         }
-        static LoadBuilders(e) {
-            let parent = e.parentElement;
+        BuilderAllocation.LoadBuilders = function (e) {
+            var parent = e.parentElement;
             parent.classList.add("is-loading");
-            let id = e.id.replace("Add", "");
-            let container = document.getElementById(id + "Selected");
-            let agreementSelectedDeveloperAmount = document.getElementById("builderDeveloperSelectedAmount");
-            let agreementSelectedDeveloperCurrentlyAllocated = document.getElementById("builderDeveloperSelectedCurrentlyAllocated");
-            let builderSelectedContainer = document.getElementById("builderSelected");
+            var id = e.id.replace("Add", "");
+            var container = document.getElementById(id + "Selected");
+            var agreementSelectedDeveloperAmount = document.getElementById("builderDeveloperSelectedAmount");
+            var agreementSelectedDeveloperCurrentlyAllocated = document.getElementById("builderDeveloperSelectedCurrentlyAllocated");
+            var builderSelectedContainer = document.getElementById("builderSelected");
             BuilderAllocation.LoadBuilder("", "", "", "$0.00");
             Utilities.Hide(builderSelectedContainer);
             Utilities.Hide(container);
@@ -22,23 +22,24 @@ var ImpactFees;
                 parent.classList.remove("is-loading");
                 return; // no agreement selected.
             }
-            let agreementNumber = e.options[e.selectedIndex].value;
+            var agreementNumber = e.options[e.selectedIndex].value;
             ImpactFees.CombinedAllocation.GetAll(agreementNumber, -1, "").then(function (builders) {
                 // let's load the dropdown
-                let selectBuilder = document.getElementById("existingBuilders");
+                var selectBuilder = document.getElementById("existingBuilders");
                 Utilities.Clear_Element(selectBuilder);
                 builders = builders.filter(function (b) { return b.Builder_Name.trim().length > 0; });
                 if (builders.length > 0) {
                     Utilities.Show(container);
                     Utilities.Show(agreementSelectedDeveloperAmount);
                     Utilities.Show(agreementSelectedDeveloperCurrentlyAllocated);
-                    let DeveloperAmount = document.getElementById("buildersDeveloperAgreementAmount");
-                    let DeveloperAllocated = document.getElementById("buildersDeveloperCurrentlyAllocated");
+                    var DeveloperAmount = document.getElementById("buildersDeveloperAgreementAmount");
+                    var DeveloperAllocated = document.getElementById("buildersDeveloperCurrentlyAllocated");
                     DeveloperAmount.value = builders[0].Agreement_Amount_Formatted;
                     DeveloperAllocated.value = builders[0].Developer_Amount_Currently_Allocated_Formatted;
                     selectBuilder.add(Utilities.Create_Option("", "Select Builder or Add New", true));
-                    let distinctBuilder = [];
-                    for (let b of builders) {
+                    var distinctBuilder = [];
+                    for (var _i = 0, builders_1 = builders; _i < builders_1.length; _i++) {
+                        var b = builders_1[_i];
                         if (distinctBuilder.indexOf(b.Builder_Id) === -1 && b.Builder_Name.trim() !== "") {
                             distinctBuilder.push(b.Builder_Id);
                             selectBuilder.add(Utilities.Create_Option(b.Builder_Id.toString(), b.Builder_Name));
@@ -55,18 +56,18 @@ var ImpactFees;
                 parent.classList.remove("is-loading");
                 // some kind of error occurred.
             });
-        }
-        static LoadSpecificBuilder(e) {
+        };
+        BuilderAllocation.LoadSpecificBuilder = function (e) {
             if (e.selectedIndex === 0) {
                 BuilderAllocation.LoadBuilder("", "", "", "$0.00", false);
                 return;
             }
-            let parent = e.parentElement;
+            var parent = e.parentElement;
             parent.classList.add("is-loading");
-            let builderId = parseInt(e.options[e.selectedIndex].value);
+            var builderId = parseInt(e.options[e.selectedIndex].value);
             ImpactFees.CombinedAllocation.GetAll("", builderId, "").then(function (builders) {
                 if (builders.length > 0) {
-                    let builder = builders[0];
+                    var builder = builders[0];
                     BuilderAllocation.LoadBuilder(builder.Builder_Name, builder.Builder_Allocation_Amount.toString(), builder.Builder_Audit_Log, builder.Builder_Amount_Currently_Allocated_Formatted);
                 }
                 parent.classList.remove("is-loading");
@@ -74,15 +75,16 @@ var ImpactFees;
                 parent.classList.remove("is-loading");
                 console.log('Load Specific builder error happened', e);
             });
-        }
-        static LoadBuilder(BuilderName, BuilderAmount, AuditLog, AlreadyAllocated, ShowContainer = true) {
+        };
+        BuilderAllocation.LoadBuilder = function (BuilderName, BuilderAmount, AuditLog, AlreadyAllocated, ShowContainer) {
+            if (ShowContainer === void 0) { ShowContainer = true; }
             // hide Add New Builder button unless select index = 0
-            let Name = document.getElementById("builderAllocationName");
-            let Amount = document.getElementById("builderAllocationAmount");
-            let Log = document.getElementById("builderAllocationAuditLog");
-            let Allocated = document.getElementById("buildersAmountAllocatedToPermits");
-            let container = document.getElementById("builderSelected");
-            let existingContainer = document.getElementById("existingBuilderAllocation");
+            var Name = document.getElementById("builderAllocationName");
+            var Amount = document.getElementById("builderAllocationAmount");
+            var Log = document.getElementById("builderAllocationAuditLog");
+            var Allocated = document.getElementById("buildersAmountAllocatedToPermits");
+            var container = document.getElementById("builderSelected");
+            var existingContainer = document.getElementById("existingBuilderAllocation");
             Utilities.Hide(existingContainer);
             Utilities.Hide(container);
             if (ShowContainer)
@@ -95,36 +97,36 @@ var ImpactFees;
                 Utilities.Show(existingContainer);
             }
             // load the values into the form and show it
-        }
-        static AddNewBuilder() {
+        };
+        BuilderAllocation.AddNewBuilder = function () {
             // clear out the form and show it
-            let builderSelect = document.getElementById("existingBuilders");
+            var builderSelect = document.getElementById("existingBuilders");
             if (builderSelect.options.length > 0)
                 builderSelect.selectedIndex = 0;
             BuilderAllocation.LoadBuilder("", "", "", "$0.00");
-        }
-        static SaveAllocation() {
+        };
+        BuilderAllocation.SaveAllocation = function () {
             //builderAllocationErrorList
-            let builderAllocationErrorContainer = document.getElementById("builderAllocationError");
-            let builderAllocationError = document.getElementById("builderAllocationErrorList");
+            var builderAllocationErrorContainer = document.getElementById("builderAllocationError");
+            var builderAllocationError = document.getElementById("builderAllocationErrorList");
             Utilities.Hide(builderAllocationErrorContainer);
-            let agreementSelect = document.getElementById("builderAllocationAgreementAdd");
-            let agreementNumber = agreementSelect.options[agreementSelect.selectedIndex].value;
-            let builderSelect = document.getElementById("existingBuilders");
-            let builderId = null;
+            var agreementSelect = document.getElementById("builderAllocationAgreementAdd");
+            var agreementNumber = agreementSelect.options[agreementSelect.selectedIndex].value;
+            var builderSelect = document.getElementById("existingBuilders");
+            var builderId = null;
             if (builderSelect.options.length > 0 && builderSelect.selectedIndex > 0) {
                 builderId = builderSelect.options[builderSelect.selectedIndex].value;
             }
-            let NameElement = document.getElementById("builderAllocationName");
-            let AmountElement = document.getElementById("builderAllocationAmount");
+            var NameElement = document.getElementById("builderAllocationName");
+            var AmountElement = document.getElementById("builderAllocationAmount");
             AmountElement.classList.remove("is-danger");
             NameElement.classList.remove("is-danger");
-            let Amount = parseFloat(AmountElement.value);
-            let BuilderName = NameElement.value.trim().toUpperCase();
+            var Amount = parseFloat(AmountElement.value);
+            var BuilderName = NameElement.value.trim().toUpperCase();
             if (BuilderName.length < 3) {
                 NameElement.focus();
                 NameElement.classList.add("is-danger");
-                let NameErrorElement = document.getElementById("builderAllocationNameError");
+                var NameErrorElement = document.getElementById("builderAllocationNameError");
                 Utilities.Error_Show(NameErrorElement);
                 return;
             }
@@ -132,18 +134,18 @@ var ImpactFees;
                 // show error messages
                 AmountElement.focus();
                 AmountElement.classList.add("is-danger");
-                let errorElement = document.getElementById("builderAllocationAmountError");
+                var errorElement = document.getElementById("builderAllocationAmountError");
                 Utilities.Error_Show(errorElement);
                 return;
             }
-            let b = new BuilderAllocation();
+            var b = new BuilderAllocation();
             b.Agreement_Number = agreementNumber;
             b.Builder_Name = BuilderName;
             b.Allocation_Amount = Amount;
             b.Id = builderId;
             //XHR.SaveObject<BuilderAllocation>("./.API/ImpactFees/SaveBuilderAllocation", b)
-            let path = "/";
-            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            var path = "/";
+            var i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
                 path = "/claypay/";
             }
@@ -162,8 +164,9 @@ var ImpactFees;
                 Utilities.Show(builderAllocationErrorContainer);
                 builderAllocationError.value = e;
             });
-        }
-    }
+        };
+        return BuilderAllocation;
+    }());
     ImpactFees.BuilderAllocation = BuilderAllocation;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=BuilderAllocation.js.map

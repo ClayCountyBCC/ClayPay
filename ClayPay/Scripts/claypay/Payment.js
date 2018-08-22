@@ -1,9 +1,6 @@
-Number.isNaN = Number.isNaN || function (value) {
-    return value !== value;
-};
 var clayPay;
 (function (clayPay) {
-    let payment_type;
+    var payment_type;
     (function (payment_type) {
         payment_type[payment_type["cash"] = 0] = "cash";
         payment_type[payment_type["check"] = 1] = "check";
@@ -14,8 +11,8 @@ var clayPay;
         payment_type[payment_type["impact_fee_waiver_road"] = 6] = "impact_fee_waiver_road";
         payment_type[payment_type["credit_card_cashier"] = 7] = "credit_card_cashier";
     })(payment_type = clayPay.payment_type || (clayPay.payment_type = {}));
-    class Payment {
-        constructor(paymentType) {
+    var Payment = /** @class */ (function () {
+        function Payment(paymentType) {
             this.Editable = false;
             this.Amount = 0;
             this.CheckNumber = "";
@@ -24,11 +21,11 @@ var clayPay;
             this.Error = "";
             this.PaymentType = paymentType;
         }
-        UpdateTotal() {
-            let input = this.PaymentType === payment_type.cash ? Payment.cashAmountInput : Payment.checkAmountInput;
+        Payment.prototype.UpdateTotal = function () {
+            var input = this.PaymentType === payment_type.cash ? Payment.cashAmountInput : Payment.checkAmountInput;
             Utilities.Set_Value(input, this.Amount.toFixed(2));
-        }
-        Validate() {
+        };
+        Payment.prototype.Validate = function () {
             this.Validated == false;
             this.Amount = 0;
             this.CheckNumber = "";
@@ -41,20 +38,20 @@ var clayPay;
             else {
                 return this.ValidateCheck();
             }
-        }
-        ValidateCash() {
+        };
+        Payment.prototype.ValidateCash = function () {
             this.Validated = false;
-            let cashAmount = document.getElementById(Payment.cashAmountInput);
+            var cashAmount = document.getElementById(Payment.cashAmountInput);
             // check that an amount was entered.
             // It must be 0 or greater.
-            let testAmount = Utilities.Validate_Text(Payment.cashAmountInput, Payment.cashErrorElement, "You must enter an amount of 0 or greater in order to continue.");
+            var testAmount = Utilities.Validate_Text(Payment.cashAmountInput, Payment.cashErrorElement, "You must enter an amount of 0 or greater in order to continue.");
             if (testAmount.length === 0)
                 return;
             // check that it's a valid amount.
             // 0 is valid because they could've set it to greater than 0
             // and are now wanting to revert it back to 0.      
             this.Amount = parseFloat(testAmount);
-            if (Number.isNaN(this.Amount) || this.Amount < 0) {
+            if (clayPay.isNaN(this.Amount) || this.Amount < 0) {
                 cashAmount.classList.add("is-danger");
                 cashAmount.focus();
                 cashAmount.scrollTo();
@@ -71,16 +68,16 @@ var clayPay;
             Utilities.Hide(Payment.cashPaymentContainer);
             clayPay.CurrentTransaction.Validate();
             return this.Validated;
-        }
-        ValidateCheck() {
+        };
+        Payment.prototype.ValidateCheck = function () {
             this.Validated = false;
-            let checkAmount = document.getElementById(Payment.checkAmountInput);
+            var checkAmount = document.getElementById(Payment.checkAmountInput);
             //let checkNumber = <HTMLInputElement>document.getElementById(Payment.checkNumberInput);
             //let checkError = document.getElementById(Payment.checkErrorElement);
             //checkAmount.classList.remove("is-danger");
             //checkNumber.classList.remove("is-danger");
             // check that an amount was entered.
-            let testAmount = Utilities.Validate_Text(Payment.checkAmountInput, Payment.checkErrorElement, "You must enter an amount of 0 or greater in order to continue.");
+            var testAmount = Utilities.Validate_Text(Payment.checkAmountInput, Payment.checkErrorElement, "You must enter an amount of 0 or greater in order to continue.");
             if (testAmount.length === 0)
                 return;
             // check that it's a valid amount.
@@ -88,7 +85,7 @@ var clayPay;
             // and are now wanting to revert it back to 0.
             // We are also going to make sure that the amount is >= 0.
             this.Amount = parseFloat(testAmount);
-            if (Number.isNaN(this.Amount) || this.Amount < 0) {
+            if (clayPay.isNaN(this.Amount) || this.Amount < 0) {
                 checkAmount.classList.add("is-danger");
                 checkAmount.focus();
                 checkAmount.scrollTo();
@@ -116,44 +113,45 @@ var clayPay;
             Utilities.Hide(Payment.checkPaymentContainer);
             clayPay.CurrentTransaction.Validate();
             return this.Validated;
-        }
-        static ResetAll() {
+        };
+        Payment.ResetAll = function () {
             Payment.ResetCash();
             Payment.ResetCheck();
-        }
-        static ResetCash() {
+        };
+        Payment.ResetCash = function () {
             clayPay.CurrentTransaction.CashPayment = new Payment(payment_type.cash);
-            let e = document.getElementById(Payment.cashAmountInput);
+            var e = document.getElementById(Payment.cashAmountInput);
             Utilities.Set_Value(e, "");
             e.classList.remove("is-danger");
-            let menu = document.getElementById(Payment.cashPaymentTotalMenu);
+            var menu = document.getElementById(Payment.cashPaymentTotalMenu);
             Utilities.Set_Text(menu, "Add");
             Utilities.Hide(Payment.cashPaymentContainer);
             clayPay.CurrentTransaction.Validate();
-        }
-        static ResetCheck() {
+        };
+        Payment.ResetCheck = function () {
             clayPay.CurrentTransaction.CheckPayment = new Payment(payment_type.check);
-            let amount = document.getElementById(Payment.checkAmountInput);
+            var amount = document.getElementById(Payment.checkAmountInput);
             Utilities.Set_Value(amount, "");
             amount.classList.remove("is-danger");
-            let number = document.getElementById(Payment.checkNumberInput);
+            var number = document.getElementById(Payment.checkNumberInput);
             Utilities.Set_Value(number, "");
             number.classList.remove("is-danger");
-            let menu = document.getElementById(Payment.checkPaymentTotalMenu);
+            var menu = document.getElementById(Payment.checkPaymentTotalMenu);
             Utilities.Set_Text(menu, "Add");
             Utilities.Hide(Payment.checkPaymentContainer);
             clayPay.CurrentTransaction.Validate();
-        }
-    }
-    Payment.checkErrorElement = "checkPaymentError";
-    Payment.checkAmountInput = "checkPaymentAmount";
-    Payment.checkNumberInput = "checkNumber";
-    Payment.checkPaymentTotalMenu = "checkPaymentTotal";
-    Payment.checkPaymentContainer = "checkPaymentType";
-    Payment.cashErrorElement = "cashPaymentError";
-    Payment.cashAmountInput = "cashPaymentAmount";
-    Payment.cashPaymentTotalMenu = "cashPaymentTotal";
-    Payment.cashPaymentContainer = "cashPaymentType";
+        };
+        Payment.checkErrorElement = "checkPaymentError";
+        Payment.checkAmountInput = "checkPaymentAmount";
+        Payment.checkNumberInput = "checkNumber";
+        Payment.checkPaymentTotalMenu = "checkPaymentTotal";
+        Payment.checkPaymentContainer = "checkPaymentType";
+        Payment.cashErrorElement = "cashPaymentError";
+        Payment.cashAmountInput = "cashPaymentAmount";
+        Payment.cashPaymentTotalMenu = "cashPaymentTotal";
+        Payment.cashPaymentContainer = "cashPaymentType";
+        return Payment;
+    }());
     clayPay.Payment = Payment;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=payment.js.map

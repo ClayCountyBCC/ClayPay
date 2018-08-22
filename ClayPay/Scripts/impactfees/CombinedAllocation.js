@@ -1,15 +1,15 @@
 var ImpactFees;
 (function (ImpactFees) {
-    class CombinedAllocation {
-        constructor() {
+    var CombinedAllocation = /** @class */ (function () {
+        function CombinedAllocation() {
         }
-        static GetAll(agreementNumber, builderId, permitNumber) {
-            let path = "/";
-            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        CombinedAllocation.GetAll = function (agreementNumber, builderId, permitNumber) {
+            var path = "/";
+            var i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
                 path = "/claypay/";
             }
-            let qs = "";
+            var qs = "";
             if (agreementNumber.length > 0) {
                 qs = "&agreementNumber=" + agreementNumber;
             }
@@ -25,8 +25,9 @@ var ImpactFees;
             return Utilities.Get(path + "API/ImpactFees/GetAgreements" + qs);
             //return fetch("./API/ImpactFees/GetAgreements" + qs) : Promise<Array<CombinedAllocation>>;
             //return XHR.GetArray<CombinedAllocation>("./API/ImpactFees/GetAgreements", qs);
-        }
-    }
+        };
+        return CombinedAllocation;
+    }());
     ImpactFees.CombinedAllocation = CombinedAllocation;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=CombinedAllocation.js.map

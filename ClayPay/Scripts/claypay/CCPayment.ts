@@ -228,7 +228,7 @@ namespace clayPay
         let testAmount = Utilities.Validate_Text(CCPayment.AmountPaidInput, CCPayment.AmountError, "The Amount field is required.");
         if (testAmount.length === 0) return;
         this.Amount = parseFloat(testAmount);
-        if (Number.isNaN(this.Amount) || this.Amount < 0)
+        if (clayPay.isNaN(this.Amount) || this.Amount < 0)
         {
           this.Amount = 0;
           Utilities.Error_Show(CCPayment.AmountError, "An invalid amount was entered.");

@@ -1,7 +1,7 @@
 var clayPay;
 (function (clayPay) {
-    class ReceiptPayment {
-        constructor() {
+    var ReceiptPayment = /** @class */ (function () {
+        function ReceiptPayment() {
             this.CashierId = "";
             this.PayId = -1;
             this.OTId = -1;
@@ -16,12 +16,13 @@ var clayPay;
             this.CheckNumber = "";
             this.TransactionId = "";
         }
-        static CreateReceiptPaymentView(receipts, IsEditable) {
-            let df = document.createDocumentFragment();
-            let table = ReceiptPayment.CreateTable();
-            let tbody = document.createElement("TBODY");
-            for (let receipt of receipts) {
-                let transaction = receipt.CheckNumber.length > 0 ? receipt.CheckNumber : receipt.TransactionId;
+        ReceiptPayment.CreateReceiptPaymentView = function (receipts, IsEditable) {
+            var df = document.createDocumentFragment();
+            var table = ReceiptPayment.CreateTable();
+            var tbody = document.createElement("TBODY");
+            for (var _i = 0, receipts_1 = receipts; _i < receipts_1.length; _i++) {
+                var receipt = receipts_1[_i];
+                var transaction = receipt.CheckNumber.length > 0 ? receipt.CheckNumber : receipt.TransactionId;
                 if (IsEditable) {
                     switch (receipt.PaymentTypeDescription.toLowerCase()) {
                         case "cash":
@@ -40,15 +41,15 @@ var clayPay;
             }
             // Here we handle Change Due and Convenience fees.
             // We'll add a row for each of them that are > 0
-            let changeDueTmp = receipts.filter(function (j) { return j.ChangeDue > 0; });
-            let TotalChangeDue = changeDueTmp.reduce((ChangeDue, b) => {
+            var changeDueTmp = receipts.filter(function (j) { return j.ChangeDue > 0; });
+            var TotalChangeDue = changeDueTmp.reduce(function (ChangeDue, b) {
                 return ChangeDue + b.ChangeDue;
             }, 0);
             if (TotalChangeDue > 0) {
                 tbody.appendChild(ReceiptPayment.BuildPaymentRow("Total Change Due", "", "", TotalChangeDue, 0));
             }
-            let convenienceFeeTmp = receipts.filter(function (j) { return j.ConvenienceFeeAmount > 0; });
-            let TotalConvenienceFee = convenienceFeeTmp.reduce((ConvenienceFeeAmount, b) => {
+            var convenienceFeeTmp = receipts.filter(function (j) { return j.ConvenienceFeeAmount > 0; });
+            var TotalConvenienceFee = convenienceFeeTmp.reduce(function (ConvenienceFeeAmount, b) {
                 return ConvenienceFeeAmount + b.ConvenienceFeeAmount;
             }, 0);
             if (TotalConvenienceFee > 0) {
@@ -57,14 +58,14 @@ var clayPay;
             table.appendChild(tbody);
             df.appendChild(table);
             return df;
-        }
-        static CreateTable() {
-            let table = document.createElement("table");
+        };
+        ReceiptPayment.CreateTable = function () {
+            var table = document.createElement("table");
             table.classList.add("table");
             table.classList.add("table");
             table.classList.add("is-fullwidth");
-            let thead = document.createElement("THEAD");
-            let tr = document.createElement("tr");
+            var thead = document.createElement("THEAD");
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableHeaderElement("Payment Type", "15%"));
             tr.appendChild(clayPay.UI.createTableHeaderElement("Info", "35%"));
             tr.appendChild(clayPay.UI.createTableHeaderElement("Check/Trans#", "20%"));
@@ -73,9 +74,9 @@ var clayPay;
             thead.appendChild(tr);
             table.appendChild(thead);
             return table;
-        }
-        static BuildPaymentRow(paymentType, info, checkNumber, tendered, applied) {
-            let tr = document.createElement("tr");
+        };
+        ReceiptPayment.BuildPaymentRow = function (paymentType, info, checkNumber, tendered, applied) {
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableElement(paymentType));
             tr.appendChild(clayPay.UI.createTableElement(info));
             tr.appendChild(clayPay.UI.createTableElement(checkNumber));
@@ -87,9 +88,9 @@ var clayPay;
                 tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(applied)));
             }
             return tr;
-        }
-        static BuildCashPaymentRow(receipt) {
-            let tr = document.createElement("tr");
+        };
+        ReceiptPayment.BuildCashPaymentRow = function (receipt) {
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableElement(receipt.PaymentTypeDescription));
             tr.appendChild(clayPay.UI.createTableElement(receipt.Info));
             // where the check number goes we're going to put a button labeled: "Change to Check"
@@ -97,35 +98,35 @@ var clayPay;
             // and a text box will be added with the placeholder "Check Number"
             // for the user to enter the check number, and a Save button next to it.
             // We will need to check to make sure a check number is entered before we allow saving.
-            let td = document.createElement("td");
-            let container = document.createElement("div");
-            let fieldContainer = document.createElement("div");
+            var td = document.createElement("td");
+            var container = document.createElement("div");
+            var fieldContainer = document.createElement("div");
             fieldContainer.classList.add("hide");
-            let field = document.createElement("div");
+            var field = document.createElement("div");
             field.classList.add("field");
             field.classList.add("is-grouped");
-            let inputControl = document.createElement("div");
+            var inputControl = document.createElement("div");
             inputControl.classList.add("control");
-            let input = document.createElement("input");
+            var input = document.createElement("input");
             input.classList.add("input");
             input.placeholder = "Enter Check Number";
             input.required = true;
             input.type = "text";
-            let buttonControl = document.createElement("div");
+            var buttonControl = document.createElement("div");
             buttonControl.classList.add("control");
-            let saveButton = document.createElement("button");
+            var saveButton = document.createElement("button");
             saveButton.type = "button";
             saveButton.classList.add("button");
             saveButton.classList.add("is-success");
             saveButton.appendChild(document.createTextNode("Save"));
-            saveButton.onclick = () => {
-                let checkNumber = input.value;
+            saveButton.onclick = function () {
+                var checkNumber = input.value;
                 if (checkNumber.length === 0) {
                     alert("You must enter a check number before you can save.");
                     return;
                 }
                 saveButton.classList.add("is-loading");
-                let changed = new ReceiptPayment();
+                var changed = new ReceiptPayment();
                 changed.CashierId = receipt.CashierId;
                 changed.OTId = receipt.OTId;
                 changed.PaymentType = "CK";
@@ -133,12 +134,12 @@ var clayPay;
                 changed.CheckNumber = checkNumber;
                 ReceiptPayment.SavePaymentChanges(changed);
             };
-            let convertButton = document.createElement("button");
+            var convertButton = document.createElement("button");
             convertButton.type = "button";
             convertButton.classList.add("button");
             convertButton.classList.add("is-primary");
             convertButton.appendChild(document.createTextNode("Convert To Check"));
-            convertButton.onclick = () => {
+            convertButton.onclick = function () {
                 Utilities.Hide(convertButton);
                 Utilities.Show(fieldContainer);
             };
@@ -154,25 +155,25 @@ var clayPay;
             tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(receipt.AmountTendered)));
             tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(receipt.AmountApplied)));
             return tr;
-        }
-        static BuildCheckPaymentRow(receipt) {
-            let tr = document.createElement("tr");
+        };
+        ReceiptPayment.BuildCheckPaymentRow = function (receipt) {
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableElement(receipt.PaymentTypeDescription));
             tr.appendChild(clayPay.UI.createTableElement(receipt.Info));
-            let td = clayPay.UI.createTableElement(receipt.CheckNumber);
+            var td = clayPay.UI.createTableElement(receipt.CheckNumber);
             // where the check number goes we're going to put a button labeled: "Change to Check"
             // and if the user clicks it, the button will disappear
             // and a text box will be added with the placeholder "Check Number"
             // for the user to enter the check number, and a Save button next to it.
             // We will need to check to make sure a check number is entered before we allow saving.
-            let saveButton = document.createElement("button");
+            var saveButton = document.createElement("button");
             saveButton.type = "button";
             saveButton.classList.add("button");
             saveButton.classList.add("is-success");
             saveButton.appendChild(document.createTextNode("Convert To Cash Payment"));
-            saveButton.onclick = () => {
+            saveButton.onclick = function () {
                 saveButton.classList.add("is-loading");
-                let changed = new ReceiptPayment();
+                var changed = new ReceiptPayment();
                 changed.CashierId = receipt.CashierId;
                 changed.OTId = receipt.OTId;
                 changed.PaymentType = "CA";
@@ -185,14 +186,14 @@ var clayPay;
             tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(receipt.AmountTendered)));
             tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(receipt.AmountApplied)));
             return tr;
-        }
-        static SavePaymentChanges(receipt) {
-            let path = "/";
-            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        };
+        ReceiptPayment.SavePaymentChanges = function (receipt) {
+            var path = "/";
+            var i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
                 path = "/claypay/";
             }
-            let editPayment = receipt;
+            var editPayment = receipt;
             Utilities.Post(path + "API/Balancing/EditPayments", editPayment)
                 .then(function (cr) {
                 console.log('cr returned', cr);
@@ -204,8 +205,9 @@ var clayPay;
             }, function (error) {
                 console.log('Save Payment Changes error', error);
             });
-        }
-    }
+        };
+        return ReceiptPayment;
+    }());
     clayPay.ReceiptPayment = ReceiptPayment;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=ReceiptPayment.js.map

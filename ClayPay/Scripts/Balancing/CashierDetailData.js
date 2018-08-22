@@ -1,11 +1,11 @@
 var Balancing;
 (function (Balancing) {
-    class CashierDetailData {
-        constructor() {
+    var CashierDetailData = /** @class */ (function () {
+        function CashierDetailData() {
         }
-        static BuildCashierDataTable(cdd) {
-            let df = document.createDocumentFragment();
-            let table = document.createElement("table"); //<HTMLTableElement>
+        CashierDetailData.BuildCashierDataTable = function (cdd) {
+            var df = document.createDocumentFragment();
+            var table = document.createElement("table"); //<HTMLTableElement>
             table.classList.add("pagebreak");
             table.classList.add("table");
             table.classList.add("is-bordered");
@@ -13,17 +13,18 @@ var Balancing;
             table.style.marginTop = "1em";
             table.style.marginBottom = "1em";
             table.appendChild(CashierDetailData.BuildTableHeader());
-            let tbody = document.createElement("tbody");
-            for (let cd of cdd) {
+            var tbody = document.createElement("tbody");
+            for (var _i = 0, cdd_1 = cdd; _i < cdd_1.length; _i++) {
+                var cd = cdd_1[_i];
                 tbody.appendChild(CashierDetailData.BuildTableRow(cd));
             }
             table.appendChild(tbody);
             df.appendChild(table);
             return df;
-        }
-        static BuildTableHeader() {
-            let thead = document.createElement("thead");
-            let tr = document.createElement("tr");
+        };
+        CashierDetailData.BuildTableHeader = function () {
+            var thead = document.createElement("thead");
+            var tr = document.createElement("tr");
             tr.appendChild(CashierDetailData.CreateTableCell("th", "CashierId", "10%", "has-text-centered"));
             tr.appendChild(CashierDetailData.CreateTableCell("th", "Date", "15%", "has-text-centered"));
             tr.appendChild(CashierDetailData.CreateTableCell("th", "Name", "15%", "has-text-centered"));
@@ -35,31 +36,34 @@ var Balancing;
             tr.appendChild(CashierDetailData.CreateTableCell("th", "Charge", "5%", "has-text-centered"));
             thead.appendChild(tr);
             return thead;
-        }
-        static BuildTableRow(data) {
-            let tr = document.createElement("tr");
+        };
+        CashierDetailData.BuildTableRow = function (data) {
+            var tr = document.createElement("tr");
             tr.appendChild(CashierDetailData.CreateTableCell("td", data.CashierId));
             tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Date(data.TransactionDate), "10%", "has-text-centered"));
             tr.appendChild(CashierDetailData.CreateTableCell("td", data.Name, "", "has-text-left"));
             tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Amount(data.AmountApplied), "", "has-text-right"));
             tr.appendChild(CashierDetailData.CreateTableCell("td", data.PaymentType));
-            let trans = data.CheckNumber.length > 0 ? data.CheckNumber : data.TransactionNumber;
+            var trans = data.CheckNumber.length > 0 ? data.CheckNumber : data.TransactionNumber;
             tr.appendChild(CashierDetailData.CreateTableCell("td", trans));
             tr.appendChild(CashierDetailData.CreateTableCell("td", data.Info));
             tr.appendChild(CashierDetailData.CreateTableCell("td", data.AssocKey));
             tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Amount(data.ChargeTotal), "", "has-text-right"));
             return tr;
-        }
-        static CreateTableCell(type, value, width = "", className = "has-text-centered") {
-            let cell = document.createElement(type);
+        };
+        CashierDetailData.CreateTableCell = function (type, value, width, className) {
+            if (width === void 0) { width = ""; }
+            if (className === void 0) { className = "has-text-centered"; }
+            var cell = document.createElement(type);
             if (width.length > 0)
                 cell.width = width;
             if (className.length > 0)
                 cell.classList.add(className);
             cell.appendChild(document.createTextNode(value));
             return cell;
-        }
-    }
+        };
+        return CashierDetailData;
+    }());
     Balancing.CashierDetailData = CashierDetailData;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=CashierDetailData.js.map

@@ -1,4 +1,4 @@
-﻿/// <reference path="transport.ts" />
+﻿
 /// <reference path="apptypes.ts" />
 /// <reference path="charge.ts" />
 /// <reference path="ui.ts" />
@@ -188,6 +188,11 @@ namespace clayPay
           console.log('error getting application types', e);
           // do something with the error here
         });
+  }
+
+  export function isNaN(value): boolean
+  {
+    return value !== value;
   }
 
 

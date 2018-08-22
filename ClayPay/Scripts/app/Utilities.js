@@ -47,24 +47,24 @@ var Utilities;
         if (errorText) {
             //Set_Text(e, errorText);
             Clear_Element(e);
-            let notification = document.createElement("div");
+            var notification = document.createElement("div");
             notification.classList.add("notification");
             notification.classList.add("is-danger");
-            let deleteButton = document.createElement("button");
+            var deleteButton = document.createElement("button");
             deleteButton.classList.add("delete");
-            deleteButton.onclick = () => {
+            deleteButton.onclick = function () {
                 Hide(e);
             };
             notification.appendChild(deleteButton);
             if (Array.isArray(errorText)) {
                 // we're assuming that errorText is an array if we get here.
-                let ul = document.createElement("ul");
-                errorText.forEach((et) => {
-                    let li = document.createElement("li");
+                var ul_1 = document.createElement("ul");
+                errorText.forEach(function (et) {
+                    var li = document.createElement("li");
                     li.appendChild(document.createTextNode(et));
-                    ul.appendChild(li);
+                    ul_1.appendChild(li);
                 });
-                notification.appendChild(ul);
+                notification.appendChild(ul_1);
             }
             else {
                 notification.appendChild(document.createTextNode(errorText));
@@ -87,8 +87,9 @@ var Utilities;
         }
     }
     Utilities.Clear_Element = Clear_Element;
-    function Create_Option(value, label, selected = false) {
-        let o = document.createElement("option");
+    function Create_Option(value, label, selected) {
+        if (selected === void 0) { selected = false; }
+        var o = document.createElement("option");
         o.value = value;
         o.text = label;
         o.selected = selected;
@@ -121,11 +122,11 @@ var Utilities;
         //let element = e.srcElement;
         // we expect the element's id to be in a "nav-XXX" name format, where 
         // XXX is the element we want to show 
-        let id = elementId.replace("nav-", "");
-        let menuItems = document.querySelectorAll("#menuTabs > li > a");
+        var id = elementId.replace("nav-", "");
+        var menuItems = document.querySelectorAll("#menuTabs > li > a");
         if (menuItems.length > 0) {
-            for (let i = 0; i < menuItems.length; i++) {
-                let item = menuItems.item(i);
+            for (var i = 0; i < menuItems.length; i++) {
+                var item = menuItems.item(i);
                 if (item.id === elementId) {
                     item.parentElement.classList.add("is-active");
                 }
@@ -138,10 +139,10 @@ var Utilities;
     }
     Utilities.Show_Menu = Show_Menu;
     function Show_Hide_Selector(selector, id) {
-        let sections = document.querySelectorAll(selector);
+        var sections = document.querySelectorAll(selector);
         if (sections.length > 0) {
-            for (let i = 0; i < sections.length; i++) {
-                let item = sections.item(i);
+            for (var i = 0; i < sections.length; i++) {
+                var item = sections.item(i);
                 if (item.id === id) {
                     Show(item);
                 }
@@ -161,7 +162,7 @@ var Utilities;
             cache: "no-cache",
             credentials: "include"
         })
-            .then(response => {
+            .then(function (response) {
             if (!response.ok) {
                 throw new Error(response.statusText);
             }
@@ -178,7 +179,7 @@ var Utilities;
                 "Content-Type": "application/json"
             },
             credentials: "include"
-        }).then(response => {
+        }).then(function (response) {
             console.log('Post Response', response);
             if (!response.ok) {
                 throw new Error(response.statusText);
@@ -203,9 +204,9 @@ var Utilities;
         if (typeof e == "string") {
             e = document.getElementById(e);
         }
-        let ele = e;
+        var ele = e;
         ele.tagName.toLowerCase() === "select" ? ele.parentElement.classList.remove("is-danger") : ele.classList.remove("is-danger");
-        let v = Get_Value(ele).trim();
+        var v = Get_Value(ele).trim();
         if (v.length == 0) {
             ele.tagName.toLowerCase() === "select" ? ele.parentElement.classList.add("is-danger") : ele.classList.add("is-danger");
             Error_Show(errorElementId, errorText);
@@ -220,16 +221,16 @@ var Utilities;
         if (typeof e == "string") {
             e = document.getElementById(e);
         }
-        let b = e;
+        var b = e;
         b.disabled = disabled;
         b.classList.toggle("is-loading", disabled);
     }
     Utilities.Toggle_Loading_Button = Toggle_Loading_Button;
     function Create_Menu_Element(menuItem) {
-        let li = document.createElement("li");
+        var li = document.createElement("li");
         if (menuItem.selected)
             li.classList.add("is-active");
-        let a = document.createElement("a");
+        var a = document.createElement("a");
         a.id = menuItem.id;
         a.href = "#";
         a.onclick = function () {
@@ -243,12 +244,13 @@ var Utilities;
             //Utilities.Show_Menu(menuItem.id);
         };
         if (menuItem.icon.length > 0) {
-            let span = document.createElement("span");
+            var span = document.createElement("span");
             span.classList.add("icon");
             span.classList.add("is-medium");
-            let i = document.createElement("i");
-            let icons = menuItem.icon.split(" ");
-            for (let icon of icons) {
+            var i = document.createElement("i");
+            var icons = menuItem.icon.split(" ");
+            for (var _i = 0, icons_1 = icons; _i < icons_1.length; _i++) {
+                var icon = icons_1[_i];
                 i.classList.add(icon);
             }
             span.appendChild(i);

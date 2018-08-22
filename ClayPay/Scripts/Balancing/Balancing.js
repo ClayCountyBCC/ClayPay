@@ -33,7 +33,7 @@ var Balancing;
     }
     Balancing.Start = Start;
     function DJournalByDate() {
-        let DJournalDate = Utilities.Get_Value(Balancing.DJournal.DJournalDateInput);
+        var DJournalDate = Utilities.Get_Value(Balancing.DJournal.DJournalDateInput);
         if (DJournalDate.length == 0) {
             // invalid date entered
             Utilities.Error_Show(Balancing.DJournal.DJournalSearchErrorContainer, "Invalid date entered, please try again.");
@@ -43,14 +43,15 @@ var Balancing;
     }
     Balancing.DJournalByDate = DJournalByDate;
     function buildMenuElements() {
-        let menu = document.getElementById("menuTabs");
-        for (let menuItem of Balancing.Menus) {
+        var menu = document.getElementById("menuTabs");
+        for (var _i = 0, Menus_1 = Balancing.Menus; _i < Menus_1.length; _i++) {
+            var menuItem = Menus_1[_i];
             menu.appendChild(Utilities.Create_Menu_Element(menuItem));
         }
     }
     Balancing.buildMenuElements = buildMenuElements;
     function ClearReceipt() {
-        let e = document.getElementById("receiptView");
+        var e = document.getElementById("receiptView");
         Utilities.Clear_Element(e);
         Utilities.Set_Value("receiptSearch", "");
     }

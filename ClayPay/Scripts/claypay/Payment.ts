@@ -1,7 +1,4 @@
-﻿Number.isNaN = Number.isNaN || function (value)
-{
-  return value !== value;
-}
+﻿
 
 namespace clayPay
 {
@@ -96,7 +93,7 @@ namespace clayPay
       // 0 is valid because they could've set it to greater than 0
       // and are now wanting to revert it back to 0.      
       this.Amount = parseFloat(testAmount);
-      if (Number.isNaN(this.Amount) || this.Amount < 0)
+      if (clayPay.isNaN(this.Amount) || this.Amount < 0)
       {
         cashAmount.classList.add("is-danger");
         cashAmount.focus();
@@ -138,7 +135,7 @@ namespace clayPay
       // and are now wanting to revert it back to 0.
       // We are also going to make sure that the amount is >= 0.
       this.Amount = parseFloat(testAmount);
-      if (Number.isNaN(this.Amount) || this.Amount < 0)
+      if (clayPay.isNaN(this.Amount) || this.Amount < 0)
       {
         checkAmount.classList.add("is-danger");
         checkAmount.focus();

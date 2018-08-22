@@ -1,11 +1,12 @@
 var clayPay;
 (function (clayPay) {
-    class AppType {
-        constructor(Label, Value) {
+    var AppType = /** @class */ (function () {
+        function AppType(Label, Value) {
             this.Label = Label;
             this.Value = Value;
         }
-    }
+        return AppType;
+    }());
     clayPay.AppType = AppType;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=AppTypes.js.map

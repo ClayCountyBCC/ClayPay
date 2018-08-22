@@ -113,18 +113,19 @@ var clayPay;
             },
         ];
         function BuildErrors(errors) {
-            let errorList = document.getElementById("errorList");
-            let df = document.createDocumentFragment();
+            var errorList = document.getElementById("errorList");
+            var df = document.createDocumentFragment();
             Utilities.Clear_Element(errorList);
-            for (let error of errors) {
-                let li = document.createElement("li");
+            for (var _i = 0, errors_1 = errors; _i < errors_1.length; _i++) {
+                var error = errors_1[_i];
+                var li = document.createElement("li");
                 li.textContent = error;
                 df.appendChild(li);
             }
             errorList.appendChild(df);
         }
         function BuildPayerStates(States, id) {
-            let stateSelect = document.getElementById(id);
+            var stateSelect = document.getElementById(id);
             if (stateSelect === undefined)
                 return;
             Utilities.Clear_Element(stateSelect);
@@ -135,7 +136,7 @@ var clayPay;
         }
         UI.BuildPayerStates = BuildPayerStates;
         function BuildAppTypes(appTypes) {
-            let appSelect = document.getElementById("applicationSearchType");
+            var appSelect = document.getElementById("applicationSearchType");
             Utilities.Clear_Element(appSelect);
             appSelect.appendChild(Utilities.Create_Option("-1", "Select Application Type", true));
             appTypes.forEach(function (a) {
@@ -145,22 +146,23 @@ var clayPay;
         }
         UI.BuildAppTypes = BuildAppTypes;
         function BuildExpMonths(id) {
-            let expMonth = document.getElementById(id);
+            var expMonth = document.getElementById(id);
             if (expMonth === undefined)
                 return;
             Utilities.Clear_Element(expMonth);
-            for (let month of UI.ExpMonths) {
+            for (var _i = 0, ExpMonths_1 = UI.ExpMonths; _i < ExpMonths_1.length; _i++) {
+                var month = ExpMonths_1[_i];
                 expMonth.appendChild(Utilities.Create_Option(month, month));
             }
             expMonth.selectedIndex = 0;
         }
         UI.BuildExpMonths = BuildExpMonths;
         function BuildExpYears(id) {
-            let expYear = document.getElementById(id);
+            var expYear = document.getElementById(id);
             Utilities.Clear_Element(expYear);
             var year = new Date().getFullYear();
             for (var i = 0; i < 10; i++) {
-                let y = (year + i).toString();
+                var y = (year + i).toString();
                 expYear.appendChild(Utilities.Create_Option(y, y));
                 UI.ExpYears.push(y); // save the year we're adding for later when we do some basic validation
             }
@@ -168,13 +170,13 @@ var clayPay;
         UI.BuildExpYears = BuildExpYears;
         function Search(buttonId, inputId, errorId) {
             Utilities.Toggle_Loading_Button(buttonId, true);
-            let input = document.getElementById(inputId);
-            let k = input.value.trim().toUpperCase();
+            var input = document.getElementById(inputId);
+            var k = input.value.trim().toUpperCase();
             if (inputId.indexOf("application") > -1) {
                 // we'll need to validate the application data
                 // the user needs to select a valid application type 
                 // and enter a valid application number.
-                let appType = document.getElementById(inputId + "Type").value;
+                var appType = document.getElementById(inputId + "Type").value;
                 if (appType === "-1" || appType.length === 0) {
                     Utilities.Error_Show(errorId, "You must select an Application Type in order to search by Application Number.");
                     Utilities.Toggle_Loading_Button(buttonId, false);
@@ -183,8 +185,8 @@ var clayPay;
                 k = appType.toUpperCase() + "-" + input.value.trim().toUpperCase();
             }
             if (k.length > 0) {
-                let path = "/";
-                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                var path = "/";
+                var i = window.location.pathname.toLowerCase().indexOf("/claypay");
                 if (i == 0) {
                     path = "/claypay/";
                 }
@@ -218,7 +220,7 @@ var clayPay;
         }
         UI.Search = Search;
         function ProcessSearchResults(charges) {
-            let container = document.getElementById('Charges');
+            var container = document.getElementById('Charges');
             Utilities.Clear_Element(container);
             container.appendChild(clayPay.Charge.CreateChargesTable(charges, clayPay.ChargeView.search_results));
             Utilities.Set_Text('ChargesKey', charges[0].AssocKey);
@@ -226,7 +228,7 @@ var clayPay;
         }
         UI.ProcessSearchResults = ProcessSearchResults;
         function IsItemInCart(itemId) {
-            let item = clayPay.CurrentTransaction.Cart.filter((c) => {
+            var item = clayPay.CurrentTransaction.Cart.filter(function (c) {
                 return c.ItemId == itemId;
             });
             return item.length !== 0;
@@ -248,14 +250,14 @@ var clayPay;
         //  //AddCharges(clayPay.CurrentTransaction.CurrentCharges);
         //}
         function createTableHeaderElement(value, width) {
-            let th = document.createElement("th");
+            var th = document.createElement("th");
             th.width = width;
             th.appendChild(document.createTextNode(value));
             return th;
         }
         UI.createTableHeaderElement = createTableHeaderElement;
         function createTableElement(value, className, colspan) {
-            let d = document.createElement("td");
+            var d = document.createElement("td");
             if (className !== undefined) {
                 d.className = className;
             }
@@ -267,28 +269,28 @@ var clayPay;
         }
         UI.createTableElement = createTableElement;
         function createTableElementButton(value, itemId, className, toggle, addOnClickFunction, removeOnClickFunction) {
-            let IsInCart = IsItemInCart(itemId);
-            let d = document.createElement("td");
+            var IsInCart = IsItemInCart(itemId);
+            var d = document.createElement("td");
             d.className = className;
-            let add = document.createElement("button");
+            var add = document.createElement("button");
             add.style.display = IsInCart ? "none" : "inline-block";
             add.type = "button";
             add.id = "btnAdd" + itemId.toString();
             add.className = "button is-primary";
-            add.onclick = (ev) => {
+            add.onclick = function (ev) {
                 addOnClickFunction(ev, itemId);
             };
-            let remove = document.createElement("div");
+            var remove = document.createElement("div");
             remove.id = "btnRemove" + itemId.toString();
             remove.style.display = IsInCart ? "inline-block" : "none";
             remove.appendChild(document.createTextNode('Added ('));
-            let removeButton = document.createElement("a");
+            var removeButton = document.createElement("a");
             //removeButton
             removeButton.classList.add("is-warning");
             //removeButton.style.color = "darkgoldenrod";
             removeButton.style.cursor = "pointer";
             removeButton.appendChild(document.createTextNode('remove'));
-            removeButton.onclick = (ev) => {
+            removeButton.onclick = function (ev) {
                 removeOnClickFunction(ev, itemId, toggle);
             };
             remove.appendChild(removeButton);
@@ -300,11 +302,11 @@ var clayPay;
         }
         UI.createTableElementButton = createTableElementButton;
         function createAddAllTableElementButton(value, ViewCartClickFunction) {
-            let d = document.createElement("td");
-            let add = document.createElement("button");
+            var d = document.createElement("td");
+            var add = document.createElement("button");
             add.type = "button";
             add.className = "btn btn-primary";
-            add.onclick = (ev) => {
+            add.onclick = function (ev) {
                 ViewCartClickFunction('cart');
             };
             add.appendChild(document.createTextNode(value));
@@ -317,14 +319,14 @@ var clayPay;
             // it's also going to make some changes to the cart Div, 
             // specifically it's going to hide and unhide the CartEmpty Div
             // based on the size of the array.
-            let CartNav = document.getElementById('nav-cart-total');
+            var CartNav = document.getElementById('nav-cart-total');
             // emptyCart / fullCart is used when displaying the Cart
             // if there are no charges, we show emptyCart.
             // if there are charges, we show fullCart.
-            let emptyCart = document.getElementById("emptyCart");
-            let fullCart = document.getElementById("fullCart");
-            let payerData = document.getElementById("payerData");
-            let paymentData = document.getElementById("paymentData");
+            var emptyCart = document.getElementById("emptyCart");
+            var fullCart = document.getElementById("fullCart");
+            var payerData = document.getElementById("payerData");
+            var paymentData = document.getElementById("paymentData");
             Utilities.Hide(emptyCart);
             Utilities.Hide(fullCart);
             Utilities.Hide(payerData);
@@ -336,7 +338,7 @@ var clayPay;
                 Utilities.Show(emptyCart);
             }
             else {
-                let cartLength = clayPay.CurrentTransaction.Cart.length;
+                var cartLength = clayPay.CurrentTransaction.Cart.length;
                 CartNav.appendChild(document.createTextNode(+cartLength.toString() + (cartLength === 1 ? ' item' : ' items')));
                 Utilities.Show(fullCart);
                 Utilities.Show(payerData);
@@ -344,7 +346,7 @@ var clayPay;
             }
         }
         function updateCart() {
-            let CartCharges = document.getElementById('fullCart');
+            var CartCharges = document.getElementById('fullCart');
             Utilities.Clear_Element(CartCharges);
             //let df = document.createDocumentFragment();
             //for (let charge of clayPay.CurrentTransaction.Cart)
@@ -359,8 +361,9 @@ var clayPay;
         }
         UI.updateCart = updateCart;
         function buildMenuElements(IsCashier) {
-            let menu = document.getElementById("menuTabs");
-            for (let menuItem of UI.Menus) {
+            var menu = document.getElementById("menuTabs");
+            for (var _i = 0, Menus_1 = UI.Menus; _i < Menus_1.length; _i++) {
+                var menuItem = Menus_1[_i];
                 if (IsCashier) {
                     menu.appendChild(Utilities.Create_Menu_Element(menuItem));
                 }
@@ -374,8 +377,8 @@ var clayPay;
         }
         UI.buildMenuElements = buildMenuElements;
         function createNavCart() {
-            let cart = document.getElementById("nav-cart");
-            let cartTotal = document.createElement("span");
+            var cart = document.getElementById("nav-cart");
+            var cartTotal = document.createElement("span");
             cartTotal.id = "nav-cart-total";
             cartTotal.style.fontSize = "larger";
             cartTotal.style.fontWeight = "bolder";

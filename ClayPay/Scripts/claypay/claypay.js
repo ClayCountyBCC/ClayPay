@@ -1,4 +1,3 @@
-/// <reference path="transport.ts" />
 /// <reference path="apptypes.ts" />
 /// <reference path="charge.ts" />
 /// <reference path="ui.ts" />
@@ -24,8 +23,8 @@ var clayPay;
     }
     clayPay.start = start;
     function HandleHash() {
-        let hash = location.hash;
-        let currentHash = new clayPay.LocationHash(location.hash.substring(1));
+        var hash = location.hash;
+        var currentHash = new clayPay.LocationHash(location.hash.substring(1));
         if (currentHash.Permit.length > 0) {
             Utilities.Update_Menu(clayPay.UI.Menus[1]);
             HandleSearch('permitSearchButton', 'permitSearch', currentHash.Permit);
@@ -49,7 +48,7 @@ var clayPay;
     }
     clayPay.HandleHash = HandleHash;
     function HandleSearch(buttonId, inputId, value) {
-        let button = document.getElementById(buttonId);
+        var button = document.getElementById(buttonId);
         Utilities.Set_Text(inputId, value);
         button.click();
     }
@@ -62,7 +61,7 @@ var clayPay;
             }
         };
         document.getElementById("permitSearchButton")
-            .onclick = () => {
+            .onclick = function () {
             clayPay.UI.Search('permitSearchButton', 'permitSearch', 'permitSearchError');
         };
         document.getElementById('contractorSearch')
@@ -73,7 +72,7 @@ var clayPay;
             }
         };
         document.getElementById("contractorSearchButton")
-            .onclick = () => {
+            .onclick = function () {
             clayPay.UI.Search('contractorSearchButton', 'contractorSearch', 'contractorSearchError');
         };
         document.getElementById('applicationSearch')
@@ -84,7 +83,7 @@ var clayPay;
             }
         };
         document.getElementById("applicationSearchButton")
-            .onclick = () => {
+            .onclick = function () {
             clayPay.UI.Search('applicationSearchButton', 'applicationSearch', 'applicationSearchError');
         };
         document.getElementById('receiptSearch')
@@ -95,7 +94,7 @@ var clayPay;
             }
         };
         document.getElementById("receiptSearchButton")
-            .onclick = () => {
+            .onclick = function () {
             clayPay.ClientResponse.Search();
         };
     }
@@ -110,8 +109,8 @@ var clayPay;
         clayPay.UI.BuildExpYears("creditCardYear");
     }
     function loadCreditCardFee() {
-        let path = "/";
-        let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        var path = "/";
+        var i = window.location.pathname.toLowerCase().indexOf("/claypay");
         if (i == 0) {
             path = "/claypay/";
         }
@@ -125,8 +124,8 @@ var clayPay;
         });
     }
     function loadApplicationTypes() {
-        let path = "/";
-        let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        var path = "/";
+        var i = window.location.pathname.toLowerCase().indexOf("/claypay");
         if (i == 0) {
             path = "/claypay/";
         }
@@ -138,5 +137,9 @@ var clayPay;
             // do something with the error here
         });
     }
+    function isNaN(value) {
+        return value !== value;
+    }
+    clayPay.isNaN = isNaN;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=claypay.js.map

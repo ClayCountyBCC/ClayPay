@@ -1,32 +1,32 @@
 var ImpactFees;
 (function (ImpactFees) {
-    class DeveloperAgreement {
-        constructor() {
+    var DeveloperAgreement = /** @class */ (function () {
+        function DeveloperAgreement() {
             this.Developer_Name = "";
             this.Amount_Currently_Allocated = 0;
             this.Audit_Log = "";
         }
-        static Load(e) {
-            let parent = e.parentElement;
+        DeveloperAgreement.Load = function (e) {
+            var parent = e.parentElement;
             parent.classList.add("is-loading");
-            let id = e.id.replace("Add", "");
-            let container = document.getElementById(id + "Selected");
+            var id = e.id.replace("Add", "");
+            var container = document.getElementById(id + "Selected");
             Utilities.Hide(container);
             if (e.selectedIndex === 0) {
                 parent.classList.remove("is-loading");
                 return; // no agreement selected.
             }
-            let agreementNumber = e.options[e.selectedIndex].value;
+            var agreementNumber = e.options[e.selectedIndex].value;
             ImpactFees.CombinedAllocation.GetAll(agreementNumber, -1, "").then(function (agreements) {
                 if (agreements.length > 0) {
-                    let da = agreements[0];
+                    var da = agreements[0];
                     // Load this object's data into the html form.
-                    let Amount = document.getElementById("developerAgreementAmount");
+                    var Amount = document.getElementById("developerAgreementAmount");
                     Amount.classList.remove("is-danger");
-                    let AllocatedAmount = document.getElementById("developerCurrentlyAllocated");
-                    let AuditLog = document.getElementById("developerAgreementAuditLog");
-                    let existingAgreement = document.getElementById("existingDeveloperAgreement");
-                    let existingAmountAllocated = document.getElementById("existingAgreementAmountAllocated");
+                    var AllocatedAmount = document.getElementById("developerCurrentlyAllocated");
+                    var AuditLog = document.getElementById("developerAgreementAuditLog");
+                    var existingAgreement = document.getElementById("existingDeveloperAgreement");
+                    var existingAmountAllocated = document.getElementById("existingAgreementAmountAllocated");
                     Amount.value = da.Agreement_Amount.toString();
                     AllocatedAmount.value = da.Developer_Amount_Currently_Allocated_Formatted;
                     AuditLog.value = da.Developer_Audit_Log;
@@ -45,23 +45,23 @@ var ImpactFees;
                 parent.classList.remove("is-loading");
                 // some kind of error occurred.
             });
-        }
-        static SaveAgreement() {
-            let developerAgreementError = document.getElementById("developerAgreementErrorList");
-            let developerAgreementErrorContainer = document.getElementById("developerAgreementError");
+        };
+        DeveloperAgreement.SaveAgreement = function () {
+            var developerAgreementError = document.getElementById("developerAgreementErrorList");
+            var developerAgreementErrorContainer = document.getElementById("developerAgreementError");
             Utilities.Hide(developerAgreementErrorContainer);
-            let agreementSelect = document.getElementById("developerAgreementAdd");
-            let agreementNumber = agreementSelect.options[agreementSelect.selectedIndex].value;
-            let AmountElement = document.getElementById("developerAgreementAmount");
+            var agreementSelect = document.getElementById("developerAgreementAdd");
+            var agreementNumber = agreementSelect.options[agreementSelect.selectedIndex].value;
+            var AmountElement = document.getElementById("developerAgreementAmount");
             AmountElement.classList.remove("is-danger");
-            let Amount = parseFloat(AmountElement.value);
+            var Amount = parseFloat(AmountElement.value);
             if (!isNaN(Amount) && Amount >= 0) { // cursory validation, main validation will be the backend.
-                let d = new DeveloperAgreement();
+                var d = new DeveloperAgreement();
                 d.Agreement_Amount = Amount;
                 d.Agreement_Number = agreementNumber;
                 //XHR.SaveObject<DeveloperAgreement>("../API/ImpactFees/SaveDeveloperAgreement", d)
-                let path = "/";
-                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                var path = "/";
+                var i = window.location.pathname.toLowerCase().indexOf("/claypay");
                 if (i == 0) {
                     path = "/claypay/";
                 }
@@ -86,11 +86,12 @@ var ImpactFees;
                 // show error messages
                 AmountElement.focus();
                 AmountElement.classList.add("is-danger");
-                let errorElement = document.getElementById("developerAgreementAmountError");
+                var errorElement = document.getElementById("developerAgreementAmountError");
                 Utilities.Error_Show(errorElement);
             }
-        }
-    }
+        };
+        return DeveloperAgreement;
+    }());
     ImpactFees.DeveloperAgreement = DeveloperAgreement;
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=DeveloperAgreement.js.map

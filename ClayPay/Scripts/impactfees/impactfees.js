@@ -2,7 +2,7 @@
 var ImpactFees;
 (function (ImpactFees) {
     ImpactFees.CombinedAllocations = [];
-    let Menus = [
+    var Menus = [
         {
             id: "nav-existingAllocations",
             title: "Existing Agreements and Allocations",
@@ -45,7 +45,7 @@ var ImpactFees;
         Utilities.Hide("permitOtherApplyWaiver");
         Utilities.Set_Value("permitNumberOther", "");
         Utilities.Set_Value("permitNumber", "");
-        let actionType = document.querySelector('input[name="searchType"]:checked').value;
+        var actionType = document.querySelector('input[name="searchType"]:checked').value;
         if (actionType === null || actionType === undefined)
             return;
         Utilities.Hide("permitCredits");
@@ -65,14 +65,15 @@ var ImpactFees;
         });
     }
     function PopulateAgreementDropdowns(agreements) {
-        let added = [];
-        let developer = document.getElementById("developerAgreementAdd");
-        let builder = document.getElementById("builderAllocationAgreementAdd");
-        let permit = document.getElementById("permitSelectAgreement");
-        for (let a of agreements) {
+        var added = [];
+        var developer = document.getElementById("developerAgreementAdd");
+        var builder = document.getElementById("builderAllocationAgreementAdd");
+        var permit = document.getElementById("permitSelectAgreement");
+        for (var _i = 0, agreements_1 = agreements; _i < agreements_1.length; _i++) {
+            var a = agreements_1[_i];
             if (added.indexOf(a.Agreement_Number) === -1) {
                 added.push(a.Agreement_Number);
-                let label = a.Agreement_Number + ' - ' + a.Developer_Name;
+                var label = a.Agreement_Number + ' - ' + a.Developer_Name;
                 developer.add(Utilities.Create_Option(a.Agreement_Number, label));
                 if (a.Agreement_Amount > 0) { // we don't need to make them selectable if there is no money allocated to this developer.
                     builder.add(Utilities.Create_Option(a.Agreement_Number, label));
@@ -85,17 +86,19 @@ var ImpactFees;
         }
     }
     function PopulateExistingAllocations(df) {
-        let container = document.getElementById("existingAllocationsContainer");
+        var container = document.getElementById("existingAllocationsContainer");
         Utilities.Clear_Element(container);
         Utilities.Show(container);
         container.appendChild(df);
     }
-    function BuildBreadCrumbs(Agreement_Number = "", Builder_Name = "") {
-        let bc = document.getElementById("breadcrumbs");
+    function BuildBreadCrumbs(Agreement_Number, Builder_Name) {
+        if (Agreement_Number === void 0) { Agreement_Number = ""; }
+        if (Builder_Name === void 0) { Builder_Name = ""; }
+        var bc = document.getElementById("breadcrumbs");
         Utilities.Clear_Element(bc);
-        let baseLI = document.createElement("li");
+        var baseLI = document.createElement("li");
         bc.appendChild(baseLI);
-        let baseA = document.createElement("a");
+        var baseA = document.createElement("a");
         baseA.href = "#";
         baseA.appendChild(document.createTextNode("Agreements"));
         baseA.onclick = function () {
@@ -107,8 +110,8 @@ var ImpactFees;
             baseLI.classList.add("is-active");
         }
         else {
-            let agreementLI = document.createElement("li");
-            let agreementA = document.createElement("a");
+            var agreementLI = document.createElement("li");
+            var agreementA = document.createElement("a");
             agreementA.href = "#";
             agreementA.appendChild(document.createTextNode(Agreement_Number));
             agreementA.onclick = function () {
@@ -118,9 +121,9 @@ var ImpactFees;
             agreementLI.appendChild(agreementA);
             bc.appendChild(agreementLI);
             if (Builder_Name.length > 0) {
-                let builderLI = document.createElement("li");
+                var builderLI = document.createElement("li");
                 builderLI.classList.add("is-active");
-                let builderA = document.createElement("a");
+                var builderA = document.createElement("a");
                 builderA.appendChild(document.createTextNode(Builder_Name));
                 builderA.onclick = function () {
                     console.log("test");
@@ -136,15 +139,16 @@ var ImpactFees;
     }
     function BuildDeveloperTable() {
         BuildBreadCrumbs();
-        let df = new DocumentFragment();
-        let t = document.createElement("table");
+        var df = new DocumentFragment();
+        var t = document.createElement("table");
         t.classList.add("table");
         t.width = "100%";
-        let tHead = document.createElement("thead");
+        var tHead = document.createElement("thead");
         tHead.appendChild(DeveloperHeaderRow());
-        let tBody = document.createElement("tbody");
-        let distinct = [];
-        for (let ca of ImpactFees.CombinedAllocations) {
+        var tBody = document.createElement("tbody");
+        var distinct = [];
+        for (var _i = 0, CombinedAllocations_1 = ImpactFees.CombinedAllocations; _i < CombinedAllocations_1.length; _i++) {
+            var ca = CombinedAllocations_1[_i];
             if (distinct.indexOf(ca.Agreement_Number) === -1) {
                 distinct.push(ca.Agreement_Number);
                 tBody.appendChild(BuildRow(ca.Agreement_Number, "", ca.Agreement_Number, ca.Developer_Name, ca.Agreement_Amount_Formatted, ca.Developer_Amount_Currently_Allocated_Formatted));
@@ -171,15 +175,16 @@ var ImpactFees;
     ImpactFees.View = View;
     function BuildBuilderTable(Agreement_Number) {
         BuildBreadCrumbs(Agreement_Number);
-        let df = new DocumentFragment();
-        let t = document.createElement("table");
+        var df = new DocumentFragment();
+        var t = document.createElement("table");
         t.classList.add("table");
         t.width = "100%";
-        let tHead = document.createElement("thead");
+        var tHead = document.createElement("thead");
         tHead.appendChild(BuilderHeaderRow());
-        let tBody = document.createElement("tbody");
-        let distinct = [];
-        for (let ca of ImpactFees.CombinedAllocations) {
+        var tBody = document.createElement("tbody");
+        var distinct = [];
+        for (var _i = 0, CombinedAllocations_2 = ImpactFees.CombinedAllocations; _i < CombinedAllocations_2.length; _i++) {
+            var ca = CombinedAllocations_2[_i];
             if (ca.Agreement_Number === Agreement_Number && distinct.indexOf(ca.Builder_Name) === -1) {
                 distinct.push(ca.Builder_Name);
                 tBody.appendChild(BuildRow(ca.Agreement_Number, ca.Builder_Name, ca.Builder_Name, ca.Builder_Allocation_Amount_Formatted, ca.Builder_Amount_Currently_Allocated_Formatted));
@@ -192,14 +197,15 @@ var ImpactFees;
     }
     function BuildPermitTable(Agreement_Number, Builder_Name) {
         BuildBreadCrumbs(Agreement_Number, Builder_Name);
-        let df = new DocumentFragment();
-        let t = document.createElement("table");
+        var df = new DocumentFragment();
+        var t = document.createElement("table");
         t.classList.add("table");
         t.width = "100%";
-        let tHead = document.createElement("thead");
+        var tHead = document.createElement("thead");
         tHead.appendChild(PermitHeaderRow());
-        let tBody = document.createElement("tbody");
-        for (let ca of ImpactFees.CombinedAllocations) {
+        var tBody = document.createElement("tbody");
+        for (var _i = 0, CombinedAllocations_3 = ImpactFees.CombinedAllocations; _i < CombinedAllocations_3.length; _i++) {
+            var ca = CombinedAllocations_3[_i];
             if (ca.Agreement_Number === Agreement_Number && ca.Builder_Name === Builder_Name) {
                 tBody.appendChild(BuildRow(ca.Agreement_Number, "", ca.Permit_Number, ca.Permit_Amount_Allocated.toLocaleString('en-US', { style: 'currency', currency: 'USD' })));
             }
@@ -210,18 +216,18 @@ var ImpactFees;
         return df;
     }
     function DeveloperHeaderRow() {
-        let tr = document.createElement("tr");
+        var tr = document.createElement("tr");
         tr.classList.add("tr");
-        let an = document.createElement("th");
+        var an = document.createElement("th");
         an.appendChild(document.createTextNode("Agreement Number"));
         an.width = "25%";
-        let dn = document.createElement("th");
+        var dn = document.createElement("th");
         dn.appendChild(document.createTextNode("Developer Name"));
         dn.width = "25%";
-        let aa = document.createElement("th");
+        var aa = document.createElement("th");
         aa.appendChild(document.createTextNode("Agreement Amount"));
         aa.width = "25%";
-        let ca = document.createElement("th");
+        var ca = document.createElement("th");
         ca.appendChild(document.createTextNode("Currently Allocated"));
         ca.width = "25%";
         tr.appendChild(an);
@@ -231,15 +237,15 @@ var ImpactFees;
         return tr;
     }
     function BuilderHeaderRow() {
-        let tr = document.createElement("tr");
+        var tr = document.createElement("tr");
         tr.classList.add("tr");
-        let bn = document.createElement("th");
+        var bn = document.createElement("th");
         bn.appendChild(document.createTextNode("Builder Name"));
         bn.width = "33%";
-        let aa = document.createElement("th");
+        var aa = document.createElement("th");
         aa.appendChild(document.createTextNode("Amount Allocated"));
         aa.width = "33%";
-        let ca = document.createElement("th");
+        var ca = document.createElement("th");
         ca.appendChild(document.createTextNode("Currently Allocated"));
         ca.width = "33%";
         tr.appendChild(bn);
@@ -248,27 +254,32 @@ var ImpactFees;
         return tr;
     }
     function PermitHeaderRow() {
-        let tr = document.createElement("tr");
+        var tr = document.createElement("tr");
         tr.classList.add("tr");
-        let bn = document.createElement("th");
+        var bn = document.createElement("th");
         bn.appendChild(document.createTextNode("Permit Name"));
         bn.width = "50%";
-        let aa = document.createElement("th");
+        var aa = document.createElement("th");
         aa.appendChild(document.createTextNode("Amount Allocated"));
         aa.width = "50%";
         tr.appendChild(bn);
         tr.appendChild(aa);
         return tr;
     }
-    function BuildRow(key1, key2, ...values) {
-        let tr = document.createElement("tr");
+    function BuildRow(key1, key2) {
+        var values = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            values[_i - 2] = arguments[_i];
+        }
+        var tr = document.createElement("tr");
         tr.style.cursor = "pointer";
         tr.classList.add("tr");
         tr.onclick = function () {
             View(key1, key2);
         };
-        for (let v of values) {
-            let td = document.createElement("td");
+        for (var _a = 0, values_1 = values; _a < values_1.length; _a++) {
+            var v = values_1[_a];
+            var td = document.createElement("td");
             td.classList.add("td");
             td.appendChild(document.createTextNode(v));
             tr.appendChild(td);
@@ -276,11 +287,12 @@ var ImpactFees;
         return tr;
     }
     function buildMenuElements() {
-        let menu = document.getElementById("menuTabs");
-        for (let menuItem of Menus) {
+        var menu = document.getElementById("menuTabs");
+        for (var _i = 0, Menus_1 = Menus; _i < Menus_1.length; _i++) {
+            var menuItem = Menus_1[_i];
             menu.appendChild(Utilities.Create_Menu_Element(menuItem));
         }
     }
     ImpactFees.buildMenuElements = buildMenuElements;
 })(ImpactFees || (ImpactFees = {}));
-//# sourceMappingURL=impactfees.js.map
+//# sourceMappingURL=ImpactFees.js.map

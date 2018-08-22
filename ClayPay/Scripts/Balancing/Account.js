@@ -1,7 +1,7 @@
 var Balancing;
 (function (Balancing) {
-    class Account {
-        constructor() {
+    var Account = /** @class */ (function () {
+        function Account() {
             this.Fund = "";
             this.AccountNumber = "";
             this.Project = "";
@@ -9,9 +9,9 @@ var Balancing;
             this.Total = "";
             this.CashAccount = "";
         }
-        static BuildGLAccountTotals(accounts) {
-            let df = document.createDocumentFragment();
-            let table = document.createElement("table"); //<HTMLTableElement>
+        Account.BuildGLAccountTotals = function (accounts) {
+            var df = document.createDocumentFragment();
+            var table = document.createElement("table"); //<HTMLTableElement>
             table.classList.add("table");
             table.classList.add("is-bordered");
             table.classList.add("is-fullwidth");
@@ -19,41 +19,44 @@ var Balancing;
             table.style.marginTop = "1em";
             table.style.marginBottom = "1em";
             table.appendChild(Account.BuildGLAccountHeader());
-            let tbody = document.createElement("tbody");
-            for (let account of accounts) {
+            var tbody = document.createElement("tbody");
+            for (var _i = 0, accounts_1 = accounts; _i < accounts_1.length; _i++) {
+                var account = accounts_1[_i];
                 tbody.appendChild(Account.BuildGLAccountRow(account));
             }
             table.appendChild(tbody);
             df.appendChild(table);
             return df;
-        }
-        static BuildGLAccountHeader() {
-            let thead = document.createElement("thead");
-            let tr = document.createElement("tr");
+        };
+        Account.BuildGLAccountHeader = function () {
+            var thead = document.createElement("thead");
+            var tr = document.createElement("tr");
             tr.appendChild(Account.CreateTableCell("th", "FUND", "25%", "has-text-centered"));
             tr.appendChild(Account.CreateTableCell("th", "Account", "25%", "has-text-centered"));
             tr.appendChild(Account.CreateTableCell("th", "Total", "25%", "has-text-centered"));
             tr.appendChild(Account.CreateTableCell("th", "Cash Account", "25%", "has-text-centered"));
             thead.appendChild(tr);
             return thead;
-        }
-        static BuildGLAccountRow(account) {
-            let tr = document.createElement("tr");
+        };
+        Account.BuildGLAccountRow = function (account) {
+            var tr = document.createElement("tr");
             tr.appendChild(Account.CreateTableCell("td", account.Fund, "25%", "has-text-centered"));
             tr.appendChild(Account.CreateTableCell("td", account.AccountNumber, "25%", "has-text-centered"));
             tr.appendChild(Account.CreateTableCell("td", account.Total, "25%", "has-text-right"));
             tr.appendChild(Account.CreateTableCell("td", account.CashAccount, "25%", "has-text-centered"));
             return tr;
-        }
-        static CreateTableCell(type, value, width, className = "") {
-            let cell = document.createElement(type);
+        };
+        Account.CreateTableCell = function (type, value, width, className) {
+            if (className === void 0) { className = ""; }
+            var cell = document.createElement(type);
             cell.width = width;
             if (className.length > 0)
                 cell.classList.add(className);
             cell.appendChild(document.createTextNode(value));
             return cell;
-        }
-    }
+        };
+        return Account;
+    }());
     Balancing.Account = Account;
 })(Balancing || (Balancing = {}));
 //# sourceMappingURL=Account.js.map

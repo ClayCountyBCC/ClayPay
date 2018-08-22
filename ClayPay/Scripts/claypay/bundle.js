@@ -781,24 +781,24 @@ var Utilities;
         if (errorText) {
             //Set_Text(e, errorText);
             Clear_Element(e);
-            let notification = document.createElement("div");
+            var notification = document.createElement("div");
             notification.classList.add("notification");
             notification.classList.add("is-danger");
-            let deleteButton = document.createElement("button");
+            var deleteButton = document.createElement("button");
             deleteButton.classList.add("delete");
-            deleteButton.onclick = () => {
+            deleteButton.onclick = function () {
                 Hide(e);
             };
             notification.appendChild(deleteButton);
             if (Array.isArray(errorText)) {
                 // we're assuming that errorText is an array if we get here.
-                let ul = document.createElement("ul");
-                errorText.forEach((et) => {
-                    let li = document.createElement("li");
+                var ul_1 = document.createElement("ul");
+                errorText.forEach(function (et) {
+                    var li = document.createElement("li");
                     li.appendChild(document.createTextNode(et));
-                    ul.appendChild(li);
+                    ul_1.appendChild(li);
                 });
-                notification.appendChild(ul);
+                notification.appendChild(ul_1);
             }
             else {
                 notification.appendChild(document.createTextNode(errorText));
@@ -821,8 +821,9 @@ var Utilities;
         }
     }
     Utilities.Clear_Element = Clear_Element;
-    function Create_Option(value, label, selected = false) {
-        let o = document.createElement("option");
+    function Create_Option(value, label, selected) {
+        if (selected === void 0) { selected = false; }
+        var o = document.createElement("option");
         o.value = value;
         o.text = label;
         o.selected = selected;
@@ -855,11 +856,11 @@ var Utilities;
         //let element = e.srcElement;
         // we expect the element's id to be in a "nav-XXX" name format, where 
         // XXX is the element we want to show 
-        let id = elementId.replace("nav-", "");
-        let menuItems = document.querySelectorAll("#menuTabs > li > a");
+        var id = elementId.replace("nav-", "");
+        var menuItems = document.querySelectorAll("#menuTabs > li > a");
         if (menuItems.length > 0) {
-            for (let i = 0; i < menuItems.length; i++) {
-                let item = menuItems.item(i);
+            for (var i = 0; i < menuItems.length; i++) {
+                var item = menuItems.item(i);
                 if (item.id === elementId) {
                     item.parentElement.classList.add("is-active");
                 }
@@ -872,10 +873,10 @@ var Utilities;
     }
     Utilities.Show_Menu = Show_Menu;
     function Show_Hide_Selector(selector, id) {
-        let sections = document.querySelectorAll(selector);
+        var sections = document.querySelectorAll(selector);
         if (sections.length > 0) {
-            for (let i = 0; i < sections.length; i++) {
-                let item = sections.item(i);
+            for (var i = 0; i < sections.length; i++) {
+                var item = sections.item(i);
                 if (item.id === id) {
                     Show(item);
                 }
@@ -895,7 +896,7 @@ var Utilities;
             cache: "no-cache",
             credentials: "include"
         })
-            .then(response => {
+            .then(function (response) {
             if (!response.ok) {
                 throw new Error(response.statusText);
             }
@@ -912,7 +913,7 @@ var Utilities;
                 "Content-Type": "application/json"
             },
             credentials: "include"
-        }).then(response => {
+        }).then(function (response) {
             console.log('Post Response', response);
             if (!response.ok) {
                 throw new Error(response.statusText);
@@ -937,9 +938,9 @@ var Utilities;
         if (typeof e == "string") {
             e = document.getElementById(e);
         }
-        let ele = e;
+        var ele = e;
         ele.tagName.toLowerCase() === "select" ? ele.parentElement.classList.remove("is-danger") : ele.classList.remove("is-danger");
-        let v = Get_Value(ele).trim();
+        var v = Get_Value(ele).trim();
         if (v.length == 0) {
             ele.tagName.toLowerCase() === "select" ? ele.parentElement.classList.add("is-danger") : ele.classList.add("is-danger");
             Error_Show(errorElementId, errorText);
@@ -954,16 +955,16 @@ var Utilities;
         if (typeof e == "string") {
             e = document.getElementById(e);
         }
-        let b = e;
+        var b = e;
         b.disabled = disabled;
         b.classList.toggle("is-loading", disabled);
     }
     Utilities.Toggle_Loading_Button = Toggle_Loading_Button;
     function Create_Menu_Element(menuItem) {
-        let li = document.createElement("li");
+        var li = document.createElement("li");
         if (menuItem.selected)
             li.classList.add("is-active");
-        let a = document.createElement("a");
+        var a = document.createElement("a");
         a.id = menuItem.id;
         a.href = "#";
         a.onclick = function () {
@@ -977,12 +978,13 @@ var Utilities;
             //Utilities.Show_Menu(menuItem.id);
         };
         if (menuItem.icon.length > 0) {
-            let span = document.createElement("span");
+            var span = document.createElement("span");
             span.classList.add("icon");
             span.classList.add("is-medium");
-            let i = document.createElement("i");
-            let icons = menuItem.icon.split(" ");
-            for (let icon of icons) {
+            var i = document.createElement("i");
+            var icons = menuItem.icon.split(" ");
+            for (var _i = 0, icons_1 = icons; _i < icons_1.length; _i++) {
+                var icon = icons_1[_i];
                 i.classList.add(icon);
             }
             span.appendChild(i);
@@ -1020,8 +1022,8 @@ var Utilities;
 //# sourceMappingURL=Utilities.js.map
 var clayPay;
 (function (clayPay) {
-    class CashierData {
-        constructor() {
+    var CashierData = /** @class */ (function () {
+        function CashierData() {
             this.PayerFirstName = "";
             this.PayerLastName = "";
             this.PayerName = "";
@@ -1037,7 +1039,7 @@ var clayPay;
             this.UserName = "";
             this.TransactionDate = new Date();
         }
-        ValidatePayer() {
+        CashierData.prototype.ValidatePayer = function () {
             this.ResetPayerData();
             this.PayerFirstName = Utilities.Validate_Text(CashierData.payerFirstName, CashierData.payerNameError, "The Firstname field is required.");
             if (this.PayerFirstName.length === 0)
@@ -1050,7 +1052,7 @@ var clayPay;
                 return false;
             if (this.PayerPhoneNumber.length < 10) {
                 Utilities.Error_Show(CashierData.payerPhoneError, "The Phone Number should include area code and a 7 digit number.");
-                let element = document.getElementById(CashierData.payerPhone);
+                var element = document.getElementById(CashierData.payerPhone);
                 element.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
@@ -1068,15 +1070,15 @@ var clayPay;
                 return false;
             if (this.PayerZip.length < 5) {
                 Utilities.Error_Show(CashierData.payerCityError, "You must enter a Zip code of at least 5 digits.");
-                let element = document.getElementById(CashierData.payerZip);
+                var element = document.getElementById(CashierData.payerZip);
                 element.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
                 return false;
             }
             return true;
-        }
-        ResetPayerForm() {
+        };
+        CashierData.prototype.ResetPayerForm = function () {
             Utilities.Set_Value(CashierData.payerCity, "");
             Utilities.Set_Value(CashierData.payerCompany, "");
             Utilities.Set_Value(CashierData.payerFirstName, "");
@@ -1085,8 +1087,8 @@ var clayPay;
             Utilities.Set_Value(CashierData.payerEmail, "");
             Utilities.Set_Value(CashierData.payerStreet, "");
             document.getElementById(CashierData.payerState).selectedIndex = 0;
-        }
-        ResetPayerData() {
+        };
+        CashierData.prototype.ResetPayerData = function () {
             this.PayerFirstName = "";
             this.PayerLastName = "";
             this.PayerPhoneNumber = "";
@@ -1096,37 +1098,38 @@ var clayPay;
             this.PayerCity = "";
             this.PayerStreetAddress = "";
             this.PayerZip = "";
-        }
-    }
-    // Payer Inputs
-    CashierData.payerFirstName = "payerFirstName";
-    CashierData.payerLastName = "payerLastName";
-    CashierData.payerPhone = "payerPhone";
-    CashierData.payerEmail = "payerEmailAddress";
-    CashierData.payerCompany = "payerCompany";
-    CashierData.payerStreet = "payerStreetAddress";
-    CashierData.payerCity = "payerCity";
-    CashierData.payerState = "payerState";
-    CashierData.payerZip = "payerZip";
-    // Payer error text elemnets
-    CashierData.payerNameError = "payerNameError";
-    CashierData.payerPhoneError = "payerPhoneError";
-    CashierData.payerStreetError = "payerStreetError";
-    CashierData.payerCityError = "payerCityError";
+        };
+        // Payer Inputs
+        CashierData.payerFirstName = "payerFirstName";
+        CashierData.payerLastName = "payerLastName";
+        CashierData.payerPhone = "payerPhone";
+        CashierData.payerEmail = "payerEmailAddress";
+        CashierData.payerCompany = "payerCompany";
+        CashierData.payerStreet = "payerStreetAddress";
+        CashierData.payerCity = "payerCity";
+        CashierData.payerState = "payerState";
+        CashierData.payerZip = "payerZip";
+        // Payer error text elemnets
+        CashierData.payerNameError = "payerNameError";
+        CashierData.payerPhoneError = "payerPhoneError";
+        CashierData.payerStreetError = "payerStreetError";
+        CashierData.payerCityError = "payerCityError";
+        return CashierData;
+    }());
     clayPay.CashierData = CashierData;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=CashierData.js.map
 var clayPay;
 (function (clayPay) {
-    class LocationHash {
-        constructor(locationHash) {
+    var LocationHash = /** @class */ (function () {
+        function LocationHash(locationHash) {
             this.Permit = "";
             this.CashierId = "";
             this.ContractorId = "";
             this.ApplicationNumber = "";
-            let ha = locationHash.split("&");
-            for (let i = 0; i < ha.length; i++) {
-                let k = ha[i].split("=");
+            var ha = locationHash.split("&");
+            for (var i = 0; i < ha.length; i++) {
+                var k = ha[i].split("=");
                 switch (k[0].toLowerCase()) {
                     case "application":
                         this.ApplicationNumber = k[1];
@@ -1151,8 +1154,8 @@ var clayPay;
         //  if (permit.length > 0) h += "&permit=" + permit;
         //  return h.substring(1);
         //}
-        ToHash() {
-            let h = "";
+        LocationHash.prototype.ToHash = function () {
+            var h = "";
             if (this.Permit.length > 0)
                 h += "&permit=" + this.Permit;
             if (this.ApplicationNumber.length > 0)
@@ -1164,31 +1167,32 @@ var clayPay;
             if (h.length > 0)
                 h = "#" + h.substring(1);
             return h;
-        }
-    }
+        };
+        return LocationHash;
+    }());
     clayPay.LocationHash = LocationHash;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=LocationHash.js.map
 var clayPay;
 (function (clayPay) {
-    let ChargeView;
+    var ChargeView;
     (function (ChargeView) {
         ChargeView[ChargeView["search_results"] = 0] = "search_results";
         ChargeView[ChargeView["cart"] = 1] = "cart";
         ChargeView[ChargeView["receipt"] = 2] = "receipt";
     })(ChargeView = clayPay.ChargeView || (clayPay.ChargeView = {}));
-    class Charge {
-        constructor() {
+    var Charge = /** @class */ (function () {
+        function Charge() {
             this.ItemId = 0;
             this.Description = "";
             this.TimeStampDisplay = "";
         }
-        static CreateTable(view) {
-            let table = document.createElement("table");
+        Charge.CreateTable = function (view) {
+            var table = document.createElement("table");
             table.classList.add("table");
             table.classList.add("is-fullwidth");
-            let thead = document.createElement("THEAD");
-            let tr = document.createElement("tr");
+            var thead = document.createElement("THEAD");
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableHeaderElement("Key", "20%"));
             if (view !== ChargeView.receipt) {
                 tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "40%"));
@@ -1203,22 +1207,22 @@ var clayPay;
             thead.appendChild(tr);
             table.appendChild(thead);
             return table;
-        }
-        static CreateChargesTable(charges, view) {
-            let df = document.createDocumentFragment();
-            let table = Charge.CreateTable(view);
-            let tbody = document.createElement("TBODY");
+        };
+        Charge.CreateChargesTable = function (charges, view) {
+            var df = document.createDocumentFragment();
+            var table = Charge.CreateTable(view);
+            var tbody = document.createElement("TBODY");
             charges.forEach(function (charge) {
                 tbody.appendChild(Charge.buildChargeRow(charge, view));
             });
-            let tfoot = document.createElement("TFOOT");
+            var tfoot = document.createElement("TFOOT");
             tfoot.appendChild(Charge.buildChargeFooterRow(charges, view));
             table.appendChild(tbody);
             table.appendChild(tfoot);
             df.appendChild(table);
             return df;
-        }
-        static buildChargeFooterRow(charges, view) {
+        };
+        Charge.buildChargeFooterRow = function (charges, view) {
             // Based on ChargeView:
             // Search Results Footer should show: 
             //  1. Total Charges
@@ -1229,11 +1233,11 @@ var clayPay;
             //  2. Convenience Fee
             // Receipt Footer should show:
             //  1. Total Charges
-            let df = document.createDocumentFragment();
-            let trTotal = document.createElement("tr");
+            var df = document.createDocumentFragment();
+            var trTotal = document.createElement("tr");
             trTotal.appendChild(clayPay.UI.createTableElement("", "", view === ChargeView.receipt ? 1 : 2));
             trTotal.appendChild(clayPay.UI.createTableElement("Total", "has-text-weight-bold has-text-right", 1));
-            let TotalAmount = charges.reduce((total, b) => {
+            var TotalAmount = charges.reduce(function (total, b) {
                 return total + b.Total;
             }, 0);
             trTotal.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(TotalAmount), ""));
@@ -1259,18 +1263,18 @@ var clayPay;
                     break;
             }
             return df;
-        }
-        static buildConvFeeFooterRow() {
-            let tr = document.createElement("tr");
+        };
+        Charge.buildConvFeeFooterRow = function () {
+            var tr = document.createElement("tr");
             tr.style.fontWeight = "bolder";
             tr.appendChild(clayPay.UI.createTableElement("There is a nonrefundable transaction fee charged for Credit Card Payments by our payment provider. This is charged in addition to the total above.", "", 2));
             tr.appendChild(clayPay.UI.createTableElement("Conv. Fee", "center", 1));
             tr.appendChild(clayPay.UI.createTableElement(clayPay.ConvenienceFee, "", 1));
             tr.appendChild(clayPay.UI.createTableElement("", "", 1));
             return tr;
-        }
-        static buildChargeRow(charge, view) {
-            let tr = document.createElement("tr");
+        };
+        Charge.buildChargeRow = function (charge, view) {
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableElement(charge.AssocKey));
             tr.appendChild(clayPay.UI.createTableElement(charge.Description, "left"));
             if (view !== ChargeView.receipt) {
@@ -1281,16 +1285,17 @@ var clayPay;
                 tr.appendChild(Charge.createChargeCartButtonToggle("Add to Cart", charge.ItemId, "center", true));
             }
             return tr;
-        }
-        static createAddAllChargesToCartButton() {
-            let td = document.createElement("td");
-            let button = document.createElement("button");
+        };
+        Charge.createAddAllChargesToCartButton = function () {
+            var td = document.createElement("td");
+            var button = document.createElement("button");
             button.type = "button";
             button.classList.add("button");
             button.classList.add("is-primary");
             button.appendChild(document.createTextNode("Add All To Cart"));
-            button.onclick = (ev) => {
-                for (let charge of clayPay.CurrentTransaction.CurrentCharges) {
+            button.onclick = function (ev) {
+                for (var _i = 0, _a = clayPay.CurrentTransaction.CurrentCharges; _i < _a.length; _i++) {
+                    var charge = _a[_i];
                     if (!clayPay.UI.IsItemInCart(charge.ItemId)) {
                         clayPay.CurrentTransaction.Cart.push(charge);
                     }
@@ -1303,19 +1308,19 @@ var clayPay;
             };
             td.appendChild(button);
             return td;
-        }
-        static createChargeCartButtonToggle(value, itemId, className, toggle) {
-            let removeButton = document.createElement("a");
-            let remove = document.createElement("div");
-            let addButton = document.createElement("button");
-            let IsInCart = clayPay.UI.IsItemInCart(itemId);
-            let d = document.createElement("td");
+        };
+        Charge.createChargeCartButtonToggle = function (value, itemId, className, toggle) {
+            var removeButton = document.createElement("a");
+            var remove = document.createElement("div");
+            var addButton = document.createElement("button");
+            var IsInCart = clayPay.UI.IsItemInCart(itemId);
+            var d = document.createElement("td");
             d.className = className;
             addButton.style.display = IsInCart ? "none" : "inline-block";
             addButton.type = "button";
             addButton.className = "button is-primary";
-            addButton.onclick = (ev) => {
-                let item = clayPay.CurrentTransaction.CurrentCharges.filter((c) => {
+            addButton.onclick = function (ev) {
+                var item = clayPay.CurrentTransaction.CurrentCharges.filter(function (c) {
                     return c.ItemId == itemId;
                 });
                 if (item.length === 1 && clayPay.CurrentTransaction.Cart.indexOf(item[0]) === -1) {
@@ -1330,8 +1335,8 @@ var clayPay;
             removeButton.classList.add("is-warning");
             removeButton.style.cursor = "pointer";
             removeButton.appendChild(document.createTextNode('remove'));
-            removeButton.onclick = (ev) => {
-                let newCart = clayPay.CurrentTransaction.Cart.filter((c) => {
+            removeButton.onclick = function (ev) {
+                var newCart = clayPay.CurrentTransaction.Cart.filter(function (c) {
                     return c.ItemId !== itemId;
                 });
                 clayPay.CurrentTransaction.Cart = newCart;
@@ -1345,20 +1350,20 @@ var clayPay;
             d.appendChild(addButton);
             d.appendChild(remove);
             return d;
-        }
-        static createViewCartFooterRow() {
-            let tr = document.createElement("tr");
+        };
+        Charge.createViewCartFooterRow = function () {
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableElement("", "", 4));
-            let td = document.createElement("td");
-            let button = document.createElement("button");
+            var td = document.createElement("td");
+            var button = document.createElement("button");
             button.type = "button";
             button.classList.add("button");
             button.classList.add("is-success");
-            button.onclick = (ev) => {
-                let menulist = clayPay.UI.Menus.filter(function (j) { return j.id === "nav-cart"; });
-                let cartMenu = menulist[0];
-                let title = document.getElementById("menuTitle");
-                let subTitle = document.getElementById("menuSubTitle");
+            button.onclick = function (ev) {
+                var menulist = clayPay.UI.Menus.filter(function (j) { return j.id === "nav-cart"; });
+                var cartMenu = menulist[0];
+                var title = document.getElementById("menuTitle");
+                var subTitle = document.getElementById("menuSubTitle");
                 Utilities.Clear_Element(title);
                 Utilities.Clear_Element(subTitle);
                 title.appendChild(document.createTextNode(cartMenu.title));
@@ -1369,17 +1374,15 @@ var clayPay;
             td.appendChild(button);
             tr.appendChild(td);
             return tr;
-        }
-    }
+        };
+        return Charge;
+    }());
     clayPay.Charge = Charge;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=Charge.js.map
-Number.isNaN = Number.isNaN || function (value) {
-    return value !== value;
-};
 var clayPay;
 (function (clayPay) {
-    let payment_type;
+    var payment_type;
     (function (payment_type) {
         payment_type[payment_type["cash"] = 0] = "cash";
         payment_type[payment_type["check"] = 1] = "check";
@@ -1390,8 +1393,8 @@ var clayPay;
         payment_type[payment_type["impact_fee_waiver_road"] = 6] = "impact_fee_waiver_road";
         payment_type[payment_type["credit_card_cashier"] = 7] = "credit_card_cashier";
     })(payment_type = clayPay.payment_type || (clayPay.payment_type = {}));
-    class Payment {
-        constructor(paymentType) {
+    var Payment = /** @class */ (function () {
+        function Payment(paymentType) {
             this.Editable = false;
             this.Amount = 0;
             this.CheckNumber = "";
@@ -1400,11 +1403,11 @@ var clayPay;
             this.Error = "";
             this.PaymentType = paymentType;
         }
-        UpdateTotal() {
-            let input = this.PaymentType === payment_type.cash ? Payment.cashAmountInput : Payment.checkAmountInput;
+        Payment.prototype.UpdateTotal = function () {
+            var input = this.PaymentType === payment_type.cash ? Payment.cashAmountInput : Payment.checkAmountInput;
             Utilities.Set_Value(input, this.Amount.toFixed(2));
-        }
-        Validate() {
+        };
+        Payment.prototype.Validate = function () {
             this.Validated == false;
             this.Amount = 0;
             this.CheckNumber = "";
@@ -1417,20 +1420,20 @@ var clayPay;
             else {
                 return this.ValidateCheck();
             }
-        }
-        ValidateCash() {
+        };
+        Payment.prototype.ValidateCash = function () {
             this.Validated = false;
-            let cashAmount = document.getElementById(Payment.cashAmountInput);
+            var cashAmount = document.getElementById(Payment.cashAmountInput);
             // check that an amount was entered.
             // It must be 0 or greater.
-            let testAmount = Utilities.Validate_Text(Payment.cashAmountInput, Payment.cashErrorElement, "You must enter an amount of 0 or greater in order to continue.");
+            var testAmount = Utilities.Validate_Text(Payment.cashAmountInput, Payment.cashErrorElement, "You must enter an amount of 0 or greater in order to continue.");
             if (testAmount.length === 0)
                 return;
             // check that it's a valid amount.
             // 0 is valid because they could've set it to greater than 0
             // and are now wanting to revert it back to 0.      
             this.Amount = parseFloat(testAmount);
-            if (Number.isNaN(this.Amount) || this.Amount < 0) {
+            if (clayPay.isNaN(this.Amount) || this.Amount < 0) {
                 cashAmount.classList.add("is-danger");
                 cashAmount.focus();
                 cashAmount.scrollTo();
@@ -1447,16 +1450,16 @@ var clayPay;
             Utilities.Hide(Payment.cashPaymentContainer);
             clayPay.CurrentTransaction.Validate();
             return this.Validated;
-        }
-        ValidateCheck() {
+        };
+        Payment.prototype.ValidateCheck = function () {
             this.Validated = false;
-            let checkAmount = document.getElementById(Payment.checkAmountInput);
+            var checkAmount = document.getElementById(Payment.checkAmountInput);
             //let checkNumber = <HTMLInputElement>document.getElementById(Payment.checkNumberInput);
             //let checkError = document.getElementById(Payment.checkErrorElement);
             //checkAmount.classList.remove("is-danger");
             //checkNumber.classList.remove("is-danger");
             // check that an amount was entered.
-            let testAmount = Utilities.Validate_Text(Payment.checkAmountInput, Payment.checkErrorElement, "You must enter an amount of 0 or greater in order to continue.");
+            var testAmount = Utilities.Validate_Text(Payment.checkAmountInput, Payment.checkErrorElement, "You must enter an amount of 0 or greater in order to continue.");
             if (testAmount.length === 0)
                 return;
             // check that it's a valid amount.
@@ -1464,7 +1467,7 @@ var clayPay;
             // and are now wanting to revert it back to 0.
             // We are also going to make sure that the amount is >= 0.
             this.Amount = parseFloat(testAmount);
-            if (Number.isNaN(this.Amount) || this.Amount < 0) {
+            if (clayPay.isNaN(this.Amount) || this.Amount < 0) {
                 checkAmount.classList.add("is-danger");
                 checkAmount.focus();
                 checkAmount.scrollTo();
@@ -1492,63 +1495,64 @@ var clayPay;
             Utilities.Hide(Payment.checkPaymentContainer);
             clayPay.CurrentTransaction.Validate();
             return this.Validated;
-        }
-        static ResetAll() {
+        };
+        Payment.ResetAll = function () {
             Payment.ResetCash();
             Payment.ResetCheck();
-        }
-        static ResetCash() {
+        };
+        Payment.ResetCash = function () {
             clayPay.CurrentTransaction.CashPayment = new Payment(payment_type.cash);
-            let e = document.getElementById(Payment.cashAmountInput);
+            var e = document.getElementById(Payment.cashAmountInput);
             Utilities.Set_Value(e, "");
             e.classList.remove("is-danger");
-            let menu = document.getElementById(Payment.cashPaymentTotalMenu);
+            var menu = document.getElementById(Payment.cashPaymentTotalMenu);
             Utilities.Set_Text(menu, "Add");
             Utilities.Hide(Payment.cashPaymentContainer);
             clayPay.CurrentTransaction.Validate();
-        }
-        static ResetCheck() {
+        };
+        Payment.ResetCheck = function () {
             clayPay.CurrentTransaction.CheckPayment = new Payment(payment_type.check);
-            let amount = document.getElementById(Payment.checkAmountInput);
+            var amount = document.getElementById(Payment.checkAmountInput);
             Utilities.Set_Value(amount, "");
             amount.classList.remove("is-danger");
-            let number = document.getElementById(Payment.checkNumberInput);
+            var number = document.getElementById(Payment.checkNumberInput);
             Utilities.Set_Value(number, "");
             number.classList.remove("is-danger");
-            let menu = document.getElementById(Payment.checkPaymentTotalMenu);
+            var menu = document.getElementById(Payment.checkPaymentTotalMenu);
             Utilities.Set_Text(menu, "Add");
             Utilities.Hide(Payment.checkPaymentContainer);
             clayPay.CurrentTransaction.Validate();
-        }
-    }
-    Payment.checkErrorElement = "checkPaymentError";
-    Payment.checkAmountInput = "checkPaymentAmount";
-    Payment.checkNumberInput = "checkNumber";
-    Payment.checkPaymentTotalMenu = "checkPaymentTotal";
-    Payment.checkPaymentContainer = "checkPaymentType";
-    Payment.cashErrorElement = "cashPaymentError";
-    Payment.cashAmountInput = "cashPaymentAmount";
-    Payment.cashPaymentTotalMenu = "cashPaymentTotal";
-    Payment.cashPaymentContainer = "cashPaymentType";
+        };
+        Payment.checkErrorElement = "checkPaymentError";
+        Payment.checkAmountInput = "checkPaymentAmount";
+        Payment.checkNumberInput = "checkNumber";
+        Payment.checkPaymentTotalMenu = "checkPaymentTotal";
+        Payment.checkPaymentContainer = "checkPaymentType";
+        Payment.cashErrorElement = "cashPaymentError";
+        Payment.cashAmountInput = "cashPaymentAmount";
+        Payment.cashPaymentTotalMenu = "cashPaymentTotal";
+        Payment.cashPaymentContainer = "cashPaymentType";
+        return Payment;
+    }());
     clayPay.Payment = Payment;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=payment.js.map
 var clayPay;
 (function (clayPay) {
-    class CCPayment {
-        constructor() {
+    var CCPayment = /** @class */ (function () {
+        function CCPayment() {
             this.Validated = false;
         }
-        UpdatePayerData() {
+        CCPayment.prototype.UpdatePayerData = function () {
             Utilities.Set_Value(CCPayment.FirstNameInput, this.FirstName);
             Utilities.Set_Value(CCPayment.LastNameInput, this.LastName);
             //Utilities.Set_Value(CCPayment.EmailAddressInput, this.EmailAddress);
             Utilities.Set_Value(CCPayment.ZipCodeInput, this.ZipCode);
-        }
-        UpdateTotal() {
+        };
+        CCPayment.prototype.UpdateTotal = function () {
             Utilities.Set_Value(CCPayment.AmountPaidInput, this.Amount.toFixed(2));
-        }
-        ResetForm() {
+        };
+        CCPayment.prototype.ResetForm = function () {
             this.ResetData();
             this.ResetFormErrors();
             // now clear the form
@@ -1565,8 +1569,8 @@ var clayPay;
                 Utilities.Set_Value(CCPayment.AmountPaidInput, "");
                 Utilities.Hide(CCPayment.CreditCardForm);
             }
-        }
-        ResetData() {
+        };
+        CCPayment.prototype.ResetData = function () {
             this.Amount = 0;
             this.Validated = false;
             this.FirstName = "";
@@ -1578,8 +1582,8 @@ var clayPay;
             this.ExpMonth = "";
             this.ExpYear = "";
             this.CVVNumber = "";
-        }
-        ResetFormErrors() {
+        };
+        CCPayment.prototype.ResetFormErrors = function () {
             document.getElementById(CCPayment.FirstNameInput).classList.remove("is-danger");
             document.getElementById(CCPayment.LastNameInput).classList.remove("is-danger");
             document.getElementById(CCPayment.ZipCodeInput).classList.remove("is-danger");
@@ -1592,8 +1596,8 @@ var clayPay;
             if (clayPay.CurrentTransaction.IsCashier) {
                 document.getElementById(CCPayment.AmountPaidInput).classList.remove("is-danger");
             }
-        }
-        Validate() {
+        };
+        CCPayment.prototype.Validate = function () {
             this.ResetData();
             this.ResetFormErrors();
             this.Validated = false;
@@ -1608,7 +1612,7 @@ var clayPay;
                 return;
             if (this.ZipCode.length < 5) {
                 Utilities.Error_Show(CCPayment.ZipError, "You must enter a Zip code of at least 5 digits.");
-                let element = document.getElementById(CCPayment.ZipCodeInput);
+                var element = document.getElementById(CCPayment.ZipCodeInput);
                 element.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
@@ -1630,10 +1634,10 @@ var clayPay;
             this.CardType = Utilities.Validate_Text(CCPayment.ccTypeSelect, CCPayment.NumberError, "You must select a Card Type.");
             if (this.CardType.length === 0)
                 return;
-            let cardTypes = ['AMEX', 'DISCOVER', 'MASTERCARD', 'VISA'];
+            var cardTypes = ['AMEX', 'DISCOVER', 'MASTERCARD', 'VISA'];
             if (cardTypes.indexOf(this.CardType) === -1) {
                 Utilities.Error_Show(CCPayment.NumberError, "The credit card type appears to be invalid, please correct it and try again.");
-                let element = document.getElementById(CCPayment.ccTypeSelect);
+                var element = document.getElementById(CCPayment.ccTypeSelect);
                 element.parentElement.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
@@ -1646,7 +1650,7 @@ var clayPay;
                 return;
             if (clayPay.UI.ExpMonths.indexOf(this.ExpMonth) === -1) {
                 Utilities.Error_Show(CCPayment.ExpirationError, "The Expiration Month appears to be invalid, please correct it and try again.");
-                let element = document.getElementById(CCPayment.ccMonthSelect);
+                var element = document.getElementById(CCPayment.ccMonthSelect);
                 element.parentElement.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
@@ -1657,7 +1661,7 @@ var clayPay;
                 return;
             if (clayPay.UI.ExpYears.indexOf(this.ExpYear) === -1) {
                 Utilities.Error_Show(CCPayment.ExpirationError, "The Expiration Year appears to be invalid, please correct it and try again.");
-                let element = document.getElementById(CCPayment.ccYearSelect);
+                var element = document.getElementById(CCPayment.ccYearSelect);
                 element.parentElement.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
@@ -1665,14 +1669,14 @@ var clayPay;
             }
             // here we're checking to make sure that the expiration date they put in is
             // greater than or equal to this month/year.
-            let year = parseInt(this.ExpYear);
-            let month = parseInt(this.ExpMonth);
-            let expD = new Date(year, month - 1, 1); // subtracting 1 from month because Date's month is Base 0
-            let tmpD = new Date();
-            let thisMonth = new Date(tmpD.getFullYear(), tmpD.getMonth(), 1);
+            var year = parseInt(this.ExpYear);
+            var month = parseInt(this.ExpMonth);
+            var expD = new Date(year, month - 1, 1); // subtracting 1 from month because Date's month is Base 0
+            var tmpD = new Date();
+            var thisMonth = new Date(tmpD.getFullYear(), tmpD.getMonth(), 1);
             if (expD < thisMonth) {
                 Utilities.Error_Show(CCPayment.ExpirationError, "The expiration date entered has passed.  Please check it and try again.");
-                let element = document.getElementById(CCPayment.ccYearSelect);
+                var element = document.getElementById(CCPayment.ccYearSelect);
                 element.parentElement.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
@@ -1682,17 +1686,17 @@ var clayPay;
             if (this.CVVNumber.length === 0)
                 return;
             if (clayPay.CurrentTransaction.IsCashier) {
-                let testAmount = Utilities.Validate_Text(CCPayment.AmountPaidInput, CCPayment.AmountError, "The Amount field is required.");
+                var testAmount = Utilities.Validate_Text(CCPayment.AmountPaidInput, CCPayment.AmountError, "The Amount field is required.");
                 if (testAmount.length === 0)
                     return;
                 this.Amount = parseFloat(testAmount);
-                if (Number.isNaN(this.Amount) || this.Amount < 0) {
+                if (clayPay.isNaN(this.Amount) || this.Amount < 0) {
                     this.Amount = 0;
                     Utilities.Error_Show(CCPayment.AmountError, "An invalid amount was entered.");
                     return false;
                 }
                 if (this.Amount > clayPay.CurrentTransaction.TotalAmountDue) {
-                    let element = document.getElementById(CCPayment.AmountPaidInput);
+                    var element = document.getElementById(CCPayment.AmountPaidInput);
                     element.classList.add("is-danger");
                     element.focus();
                     element.scrollTo();
@@ -1709,41 +1713,42 @@ var clayPay;
                 Utilities.Hide(CCPayment.CreditCardForm);
             }
             return clayPay.CurrentTransaction.Validate();
-        }
-        ValidateAndSave() {
+        };
+        CCPayment.prototype.ValidateAndSave = function () {
             if (!this.Validate())
                 return;
             clayPay.CurrentTransaction.Save();
-        }
-    }
-    // credit card form container
-    CCPayment.CreditCardForm = "creditCardPaymentType";
-    // inputs
-    CCPayment.FirstNameInput = "creditCardFirstName";
-    CCPayment.LastNameInput = "creditCardLastName";
-    CCPayment.ZipCodeInput = "creditCardZip";
-    // static EmailAddressInput: string = "creditCardEmailAddress";
-    CCPayment.ccNumberInput = "creditCardNumber";
-    CCPayment.ccTypeSelect = "creditCardType";
-    CCPayment.ccMonthSelect = "creditCardMonth";
-    CCPayment.ccYearSelect = "creditCardYear";
-    CCPayment.ccCVCInput = "creditCardCVV";
-    CCPayment.AmountPaidInput = "creditCardPaymentAmount";
-    // Error Inputs
-    CCPayment.NameError = "creditCardNameError";
-    CCPayment.ZipError = "creditCardZipError";
-    CCPayment.NumberError = "creditCardNumberError";
-    CCPayment.ExpirationError = "creditCardExpirationError";
-    CCPayment.AmountError = "creditCardPaymentAmountError";
-    // Menus
-    CCPayment.creditCardTotalMenu = "creditCardPaymentTotal";
+        };
+        // credit card form container
+        CCPayment.CreditCardForm = "creditCardPaymentType";
+        // inputs
+        CCPayment.FirstNameInput = "creditCardFirstName";
+        CCPayment.LastNameInput = "creditCardLastName";
+        CCPayment.ZipCodeInput = "creditCardZip";
+        // static EmailAddressInput: string = "creditCardEmailAddress";
+        CCPayment.ccNumberInput = "creditCardNumber";
+        CCPayment.ccTypeSelect = "creditCardType";
+        CCPayment.ccMonthSelect = "creditCardMonth";
+        CCPayment.ccYearSelect = "creditCardYear";
+        CCPayment.ccCVCInput = "creditCardCVV";
+        CCPayment.AmountPaidInput = "creditCardPaymentAmount";
+        // Error Inputs
+        CCPayment.NameError = "creditCardNameError";
+        CCPayment.ZipError = "creditCardZipError";
+        CCPayment.NumberError = "creditCardNumberError";
+        CCPayment.ExpirationError = "creditCardExpirationError";
+        CCPayment.AmountError = "creditCardPaymentAmountError";
+        // Menus
+        CCPayment.creditCardTotalMenu = "creditCardPaymentTotal";
+        return CCPayment;
+    }());
     clayPay.CCPayment = CCPayment;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=CCPayment.js.map
 var clayPay;
 (function (clayPay) {
-    class ReceiptPayment {
-        constructor() {
+    var ReceiptPayment = /** @class */ (function () {
+        function ReceiptPayment() {
             this.CashierId = "";
             this.PayId = -1;
             this.OTId = -1;
@@ -1758,12 +1763,13 @@ var clayPay;
             this.CheckNumber = "";
             this.TransactionId = "";
         }
-        static CreateReceiptPaymentView(receipts, IsEditable) {
-            let df = document.createDocumentFragment();
-            let table = ReceiptPayment.CreateTable();
-            let tbody = document.createElement("TBODY");
-            for (let receipt of receipts) {
-                let transaction = receipt.CheckNumber.length > 0 ? receipt.CheckNumber : receipt.TransactionId;
+        ReceiptPayment.CreateReceiptPaymentView = function (receipts, IsEditable) {
+            var df = document.createDocumentFragment();
+            var table = ReceiptPayment.CreateTable();
+            var tbody = document.createElement("TBODY");
+            for (var _i = 0, receipts_1 = receipts; _i < receipts_1.length; _i++) {
+                var receipt = receipts_1[_i];
+                var transaction = receipt.CheckNumber.length > 0 ? receipt.CheckNumber : receipt.TransactionId;
                 if (IsEditable) {
                     switch (receipt.PaymentTypeDescription.toLowerCase()) {
                         case "cash":
@@ -1782,15 +1788,15 @@ var clayPay;
             }
             // Here we handle Change Due and Convenience fees.
             // We'll add a row for each of them that are > 0
-            let changeDueTmp = receipts.filter(function (j) { return j.ChangeDue > 0; });
-            let TotalChangeDue = changeDueTmp.reduce((ChangeDue, b) => {
+            var changeDueTmp = receipts.filter(function (j) { return j.ChangeDue > 0; });
+            var TotalChangeDue = changeDueTmp.reduce(function (ChangeDue, b) {
                 return ChangeDue + b.ChangeDue;
             }, 0);
             if (TotalChangeDue > 0) {
                 tbody.appendChild(ReceiptPayment.BuildPaymentRow("Total Change Due", "", "", TotalChangeDue, 0));
             }
-            let convenienceFeeTmp = receipts.filter(function (j) { return j.ConvenienceFeeAmount > 0; });
-            let TotalConvenienceFee = convenienceFeeTmp.reduce((ConvenienceFeeAmount, b) => {
+            var convenienceFeeTmp = receipts.filter(function (j) { return j.ConvenienceFeeAmount > 0; });
+            var TotalConvenienceFee = convenienceFeeTmp.reduce(function (ConvenienceFeeAmount, b) {
                 return ConvenienceFeeAmount + b.ConvenienceFeeAmount;
             }, 0);
             if (TotalConvenienceFee > 0) {
@@ -1799,14 +1805,14 @@ var clayPay;
             table.appendChild(tbody);
             df.appendChild(table);
             return df;
-        }
-        static CreateTable() {
-            let table = document.createElement("table");
+        };
+        ReceiptPayment.CreateTable = function () {
+            var table = document.createElement("table");
             table.classList.add("table");
             table.classList.add("table");
             table.classList.add("is-fullwidth");
-            let thead = document.createElement("THEAD");
-            let tr = document.createElement("tr");
+            var thead = document.createElement("THEAD");
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableHeaderElement("Payment Type", "15%"));
             tr.appendChild(clayPay.UI.createTableHeaderElement("Info", "35%"));
             tr.appendChild(clayPay.UI.createTableHeaderElement("Check/Trans#", "20%"));
@@ -1815,9 +1821,9 @@ var clayPay;
             thead.appendChild(tr);
             table.appendChild(thead);
             return table;
-        }
-        static BuildPaymentRow(paymentType, info, checkNumber, tendered, applied) {
-            let tr = document.createElement("tr");
+        };
+        ReceiptPayment.BuildPaymentRow = function (paymentType, info, checkNumber, tendered, applied) {
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableElement(paymentType));
             tr.appendChild(clayPay.UI.createTableElement(info));
             tr.appendChild(clayPay.UI.createTableElement(checkNumber));
@@ -1829,9 +1835,9 @@ var clayPay;
                 tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(applied)));
             }
             return tr;
-        }
-        static BuildCashPaymentRow(receipt) {
-            let tr = document.createElement("tr");
+        };
+        ReceiptPayment.BuildCashPaymentRow = function (receipt) {
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableElement(receipt.PaymentTypeDescription));
             tr.appendChild(clayPay.UI.createTableElement(receipt.Info));
             // where the check number goes we're going to put a button labeled: "Change to Check"
@@ -1839,35 +1845,35 @@ var clayPay;
             // and a text box will be added with the placeholder "Check Number"
             // for the user to enter the check number, and a Save button next to it.
             // We will need to check to make sure a check number is entered before we allow saving.
-            let td = document.createElement("td");
-            let container = document.createElement("div");
-            let fieldContainer = document.createElement("div");
+            var td = document.createElement("td");
+            var container = document.createElement("div");
+            var fieldContainer = document.createElement("div");
             fieldContainer.classList.add("hide");
-            let field = document.createElement("div");
+            var field = document.createElement("div");
             field.classList.add("field");
             field.classList.add("is-grouped");
-            let inputControl = document.createElement("div");
+            var inputControl = document.createElement("div");
             inputControl.classList.add("control");
-            let input = document.createElement("input");
+            var input = document.createElement("input");
             input.classList.add("input");
             input.placeholder = "Enter Check Number";
             input.required = true;
             input.type = "text";
-            let buttonControl = document.createElement("div");
+            var buttonControl = document.createElement("div");
             buttonControl.classList.add("control");
-            let saveButton = document.createElement("button");
+            var saveButton = document.createElement("button");
             saveButton.type = "button";
             saveButton.classList.add("button");
             saveButton.classList.add("is-success");
             saveButton.appendChild(document.createTextNode("Save"));
-            saveButton.onclick = () => {
-                let checkNumber = input.value;
+            saveButton.onclick = function () {
+                var checkNumber = input.value;
                 if (checkNumber.length === 0) {
                     alert("You must enter a check number before you can save.");
                     return;
                 }
                 saveButton.classList.add("is-loading");
-                let changed = new ReceiptPayment();
+                var changed = new ReceiptPayment();
                 changed.CashierId = receipt.CashierId;
                 changed.OTId = receipt.OTId;
                 changed.PaymentType = "CK";
@@ -1875,12 +1881,12 @@ var clayPay;
                 changed.CheckNumber = checkNumber;
                 ReceiptPayment.SavePaymentChanges(changed);
             };
-            let convertButton = document.createElement("button");
+            var convertButton = document.createElement("button");
             convertButton.type = "button";
             convertButton.classList.add("button");
             convertButton.classList.add("is-primary");
             convertButton.appendChild(document.createTextNode("Convert To Check"));
-            convertButton.onclick = () => {
+            convertButton.onclick = function () {
                 Utilities.Hide(convertButton);
                 Utilities.Show(fieldContainer);
             };
@@ -1896,25 +1902,25 @@ var clayPay;
             tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(receipt.AmountTendered)));
             tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(receipt.AmountApplied)));
             return tr;
-        }
-        static BuildCheckPaymentRow(receipt) {
-            let tr = document.createElement("tr");
+        };
+        ReceiptPayment.BuildCheckPaymentRow = function (receipt) {
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableElement(receipt.PaymentTypeDescription));
             tr.appendChild(clayPay.UI.createTableElement(receipt.Info));
-            let td = clayPay.UI.createTableElement(receipt.CheckNumber);
+            var td = clayPay.UI.createTableElement(receipt.CheckNumber);
             // where the check number goes we're going to put a button labeled: "Change to Check"
             // and if the user clicks it, the button will disappear
             // and a text box will be added with the placeholder "Check Number"
             // for the user to enter the check number, and a Save button next to it.
             // We will need to check to make sure a check number is entered before we allow saving.
-            let saveButton = document.createElement("button");
+            var saveButton = document.createElement("button");
             saveButton.type = "button";
             saveButton.classList.add("button");
             saveButton.classList.add("is-success");
             saveButton.appendChild(document.createTextNode("Convert To Cash Payment"));
-            saveButton.onclick = () => {
+            saveButton.onclick = function () {
                 saveButton.classList.add("is-loading");
-                let changed = new ReceiptPayment();
+                var changed = new ReceiptPayment();
                 changed.CashierId = receipt.CashierId;
                 changed.OTId = receipt.OTId;
                 changed.PaymentType = "CA";
@@ -1927,14 +1933,14 @@ var clayPay;
             tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(receipt.AmountTendered)));
             tr.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(receipt.AmountApplied)));
             return tr;
-        }
-        static SavePaymentChanges(receipt) {
-            let path = "/";
-            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        };
+        ReceiptPayment.SavePaymentChanges = function (receipt) {
+            var path = "/";
+            var i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
                 path = "/claypay/";
             }
-            let editPayment = receipt;
+            var editPayment = receipt;
             Utilities.Post(path + "API/Balancing/EditPayments", editPayment)
                 .then(function (cr) {
                 console.log('cr returned', cr);
@@ -1946,15 +1952,16 @@ var clayPay;
             }, function (error) {
                 console.log('Save Payment Changes error', error);
             });
-        }
-    }
+        };
+        return ReceiptPayment;
+    }());
     clayPay.ReceiptPayment = ReceiptPayment;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=ReceiptPayment.js.map
 var clayPay;
 (function (clayPay) {
-    class ClientResponse {
-        constructor() {
+    var ClientResponse = /** @class */ (function () {
+        function ClientResponse() {
             this.ResponseCashierData = new clayPay.CashierData();
             this.Charges = [];
             this.ReceiptPayments = [];
@@ -1963,15 +1970,15 @@ var clayPay;
             this.Errors = []; // Errors are full stop, meaning the payment did not process.
             this.PartialErrors = []; // Partial errors mean part of the transaction was completed, but something wasn't.
         }
-        static ShowPaymentReceipt(cr, target) {
+        ClientResponse.ShowPaymentReceipt = function (cr, target) {
             console.log('client response ShowPaymentReceipt', cr);
-            let container = document.getElementById(target);
+            var container = document.getElementById(target);
             Utilities.Clear_Element(container);
             container.appendChild(ClientResponse.CreateReceiptView(cr));
             Utilities.Show_Hide_Selector("#views > section", target);
-        }
-        static CreateReceiptView(cr) {
-            let df = document.createDocumentFragment();
+        };
+        ClientResponse.CreateReceiptView = function (cr) {
+            var df = document.createDocumentFragment();
             if (cr.ReceiptPayments.length === 0)
                 return df;
             df.appendChild(ClientResponse.CreateReceiptHeader(cr));
@@ -1980,49 +1987,49 @@ var clayPay;
             df.appendChild(clayPay.ReceiptPayment.CreateReceiptPaymentView(cr.ReceiptPayments, cr.IsEditable));
             // show payment info
             return df;
-        }
-        static CreateReceiptHeader(cr) {
-            let div = document.createElement("div");
+        };
+        ClientResponse.CreateReceiptHeader = function (cr) {
+            var div = document.createElement("div");
             div.classList.add("level");
-            let title = document.createElement("span");
+            var title = document.createElement("span");
             title.classList.add("level-item");
             title.classList.add("title");
             title.appendChild(document.createTextNode("Payment Receipt for: " + cr.ReceiptPayments[0].CashierId));
-            let receiptDate = document.createElement("span");
+            var receiptDate = document.createElement("span");
             receiptDate.classList.add("level-item");
             receiptDate.classList.add("subtitle");
             receiptDate.appendChild(document.createTextNode("Transaction Date: " + Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
             div.appendChild(title);
             div.appendChild(receiptDate);
-            let timestamp = cr.ResponseCashierData.TransactionDate;
+            var timestamp = cr.ResponseCashierData.TransactionDate;
             return div;
-        }
-        static CreateReceiptPayerView(cd) {
-            let df = document.createDocumentFragment();
+        };
+        ClientResponse.CreateReceiptPayerView = function (cd) {
+            var df = document.createDocumentFragment();
             df.appendChild(ClientResponse.CreatePayerDataColumns("Name", cd.PayerName, "Company Name", cd.PayerCompanyName));
             df.appendChild(ClientResponse.CreatePayerDataColumns("Phone Number", cd.PayerPhoneNumber, "Email Address", cd.PayerEmailAddress));
             df.appendChild(ClientResponse.CreatePayerDataColumns("Street Address", cd.PayerStreet1, "Address 2", cd.PayerStreet2));
             df.appendChild(ClientResponse.CreatePayerDataColumns("Processed By", cd.UserName, "", ""));
             return df;
-        }
-        static CreatePayerDataColumns(label1, value1, label2, value2) {
-            let div = document.createElement("div");
+        };
+        ClientResponse.CreatePayerDataColumns = function (label1, value1, label2, value2) {
+            var div = document.createElement("div");
             div.classList.add("columns");
             div.style.marginBottom = "0";
             div.appendChild(ClientResponse.CreatePayerData(label1, value1));
             div.appendChild(ClientResponse.CreatePayerData(label2, value2));
             return div;
-        }
-        static CreatePayerData(label, value) {
-            let field = document.createElement("div");
+        };
+        ClientResponse.CreatePayerData = function (label, value) {
+            var field = document.createElement("div");
             field.classList.add("field");
             field.classList.add("column");
-            let dataLabel = document.createElement("label");
+            var dataLabel = document.createElement("label");
             dataLabel.classList.add("label");
             dataLabel.appendChild(document.createTextNode(label));
-            let control = document.createElement("div");
+            var control = document.createElement("div");
             control.classList.add("control");
-            let input = document.createElement("input");
+            var input = document.createElement("input");
             input.classList.add("input");
             input.classList.add("is-static");
             input.readOnly = true;
@@ -2032,18 +2039,18 @@ var clayPay;
             field.appendChild(dataLabel);
             field.appendChild(control);
             return field;
-        }
-        static Search() {
+        };
+        ClientResponse.Search = function () {
             Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, true);
-            let input = document.getElementById(ClientResponse.receiptSearchInput);
-            let k = input.value.trim().toUpperCase();
+            var input = document.getElementById(ClientResponse.receiptSearchInput);
+            var k = input.value.trim().toUpperCase();
             if (k.length !== 9) {
                 Utilities.Error_Show(ClientResponse.receiptSearchError, "Receipts must be 8 digits and a dash, like 18-000001.");
                 return;
             }
             if (k.length > 0) {
-                let path = "/";
-                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                var path = "/";
+                var i = window.location.pathname.toLowerCase().indexOf("/claypay");
                 if (i == 0) {
                     path = "/claypay/";
                 }
@@ -2070,12 +2077,13 @@ var clayPay;
                 input.focus();
                 Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
             }
-        }
-        static BalancingSearch(link = null) {
-            let cashierId = Utilities.Get_Value("receiptSearch");
-            let path = "/";
-            let qs = "";
-            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        };
+        ClientResponse.BalancingSearch = function (link) {
+            if (link === void 0) { link = null; }
+            var cashierId = Utilities.Get_Value("receiptSearch");
+            var path = "/";
+            var qs = "";
+            var i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
                 path = "/claypay/";
             }
@@ -2088,25 +2096,26 @@ var clayPay;
                     Utilities.Set_Text(link, cashierId);
                 clayPay.ClientResponse.ShowPaymentReceipt(cr, Balancing.Payment.DJournalReceiptContainer);
                 // need to select the right box at the top
-                let menulist = Balancing.Menus.filter(function (j) { return j.id === "nav-receipts"; });
-                let receiptMenu = menulist[0];
+                var menulist = Balancing.Menus.filter(function (j) { return j.id === "nav-receipts"; });
+                var receiptMenu = menulist[0];
                 Utilities.Update_Menu(receiptMenu);
             }, function (error) {
                 console.log('error getting client response for cashier id: ' + cashierId, error);
                 if (link !== null)
                     Utilities.Set_Text(link, cashierId); // change it back
             });
-        }
-    }
-    ClientResponse.CashierErrorTarget = "paymentError";
-    ClientResponse.PublicErrorTarget = "publicPaymentError";
-    ClientResponse.PaymentReceiptContainer = "receipt";
-    ClientResponse.BalancingReceiptContainer = "receiptView";
-    //static ReceiptErrorContainer: string = "receiptTransactionErrorContainer"; // To be used for partial payments.
-    // receiptSearchElements
-    ClientResponse.receiptSearchInput = "receiptSearch";
-    ClientResponse.receiptSearchButton = "receiptSearchButton";
-    ClientResponse.receiptSearchError = "receiptSearchError";
+        };
+        ClientResponse.CashierErrorTarget = "paymentError";
+        ClientResponse.PublicErrorTarget = "publicPaymentError";
+        ClientResponse.PaymentReceiptContainer = "receipt";
+        ClientResponse.BalancingReceiptContainer = "receiptView";
+        //static ReceiptErrorContainer: string = "receiptTransactionErrorContainer"; // To be used for partial payments.
+        // receiptSearchElements
+        ClientResponse.receiptSearchInput = "receiptSearch";
+        ClientResponse.receiptSearchButton = "receiptSearchButton";
+        ClientResponse.receiptSearchError = "receiptSearchError";
+        return ClientResponse;
+    }());
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=clientresponse.js.map
@@ -2114,8 +2123,8 @@ var clayPay;
 /// <reference path="clientresponse.ts" />
 var clayPay;
 (function (clayPay) {
-    class NewTransaction {
-        constructor() {
+    var NewTransaction = /** @class */ (function () {
+        function NewTransaction() {
             // CurrentCharges are the search results (charges) returned and displayed
             // in the results container.
             this.CurrentCharges = [];
@@ -2136,12 +2145,12 @@ var clayPay;
             this.TotalAmountRemaining = 0;
             this.TotalChangeDue = 0;
         }
-        UpdateIsCashier() {
-            let e = document.getElementById(clayPay.Payment.checkPaymentContainer);
+        NewTransaction.prototype.UpdateIsCashier = function () {
+            var e = document.getElementById(clayPay.Payment.checkPaymentContainer);
             this.IsCashier = e !== undefined && e !== null;
-        }
-        Validate() {
-            let payer = this.TransactionCashierData.ValidatePayer();
+        };
+        NewTransaction.prototype.Validate = function () {
+            var payer = this.TransactionCashierData.ValidatePayer();
             if (!payer) {
                 Utilities.Show("validatePayer");
                 Utilities.Hide("paymentData");
@@ -2153,20 +2162,20 @@ var clayPay;
             }
             if (this.IsCashier) {
                 this.UpdateTotals();
-                let payments = this.ValidatePayments();
-                let button = document.getElementById(NewTransaction.PayNowCashierButton);
+                var payments = this.ValidatePayments();
+                var button = document.getElementById(NewTransaction.PayNowCashierButton);
                 button.disabled = !(payer && payments);
                 return (payer && payments);
             }
             return true;
-        }
-        UpdateTotals() {
+        };
+        NewTransaction.prototype.UpdateTotals = function () {
             if (!this.IsCashier)
                 return;
             this.TotalAmountPaid = 0;
             this.TotalAmountRemaining = 0;
             this.TotalChangeDue = 0;
-            let TotalPaid = 0;
+            var TotalPaid = 0;
             if (this.CheckPayment.Validated)
                 TotalPaid += this.CheckPayment.Amount;
             if (this.CashPayment.Validated)
@@ -2179,21 +2188,21 @@ var clayPay;
                 this.TotalChangeDue = this.TotalAmountPaid - this.TotalAmountDue;
             }
             this.UpdateForm();
-        }
-        UpdateForm() {
+        };
+        NewTransaction.prototype.UpdateForm = function () {
             Utilities.Set_Text(NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(this.TotalAmountDue));
             Utilities.Set_Text(NewTransaction.TotalAmountPaidMenu, Utilities.Format_Amount(this.TotalAmountPaid));
             Utilities.Set_Text(NewTransaction.TotalChangeDueMenu, Utilities.Format_Amount(this.TotalChangeDue));
             Utilities.Set_Text(NewTransaction.TotalAmountRemainingMenu, Utilities.Format_Amount(this.TotalAmountRemaining));
-            let amount = this.TotalAmountRemaining.toFixed(2);
+            var amount = this.TotalAmountRemaining.toFixed(2);
             if (!this.CCData.Validated)
                 Utilities.Set_Value(clayPay.CCPayment.AmountPaidInput, amount);
             if (!this.CheckPayment.Validated)
                 Utilities.Set_Value(clayPay.Payment.checkAmountInput, amount);
             if (!this.CashPayment.Validated)
                 Utilities.Set_Value(clayPay.Payment.cashAmountInput, amount);
-        }
-        ValidatePayments() {
+        };
+        NewTransaction.prototype.ValidatePayments = function () {
             if (this.IsCashier) {
                 if (this.CashPayment.Validated && this.CashPayment.Amount > 0) {
                     if (this.TotalChangeDue >= this.CashPayment.Amount) {
@@ -2209,8 +2218,8 @@ var clayPay;
                     return false;
             }
             return true;
-        }
-        CopyPayerData() {
+        };
+        NewTransaction.prototype.CopyPayerData = function () {
             // this function is used when the user clicks the "This is the same as Payer Information"
             // checkbox in the credit card data.  It takes the information in that form and
             // updates the CCData with it and then the CCData object will update the CCData form.
@@ -2219,24 +2228,24 @@ var clayPay;
             this.CCData.ZipCode = this.TransactionCashierData.PayerZip;
             // this.CCData.EmailAddress = this.TransactionCashierData.PayerEmailAddress;
             this.CCData.UpdatePayerData();
-        }
-        Save() {
+        };
+        NewTransaction.prototype.Save = function () {
             // Disable the button that was just used so that it can't be clicked multiple times.
-            let loadingButton = this.IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
+            var loadingButton = this.IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
             Utilities.Toggle_Loading_Button(loadingButton, true);
             if (!this.Validate()) {
                 Utilities.Toggle_Loading_Button(loadingButton, false);
                 return;
             }
-            this.ItemIds = clayPay.CurrentTransaction.Cart.map((c) => {
+            this.ItemIds = clayPay.CurrentTransaction.Cart.map(function (c) {
                 return c.ItemId;
             });
             this.Payments = [];
-            let IsCashier = this.IsCashier;
-            let toggleButton = IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
-            let errorTarget = IsCashier ? clayPay.ClientResponse.CashierErrorTarget : clayPay.ClientResponse.PublicErrorTarget;
-            let path = "/";
-            let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+            var IsCashier = this.IsCashier;
+            var toggleButton = IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
+            var errorTarget = IsCashier ? clayPay.ClientResponse.CashierErrorTarget : clayPay.ClientResponse.PublicErrorTarget;
+            var path = "/";
+            var i = window.location.pathname.toLowerCase().indexOf("/claypay");
             if (i == 0) {
                 path = "/claypay/";
             }
@@ -2263,32 +2272,33 @@ var clayPay;
                 Utilities.Error_Show(errorTarget, e);
                 Utilities.Toggle_Loading_Button(toggleButton, false);
             });
-        }
-    }
-    // Menu Ids
-    NewTransaction.TotalAmountPaidMenu = "cartTotalAmountPaid";
-    NewTransaction.TotalAmountDueMenu = "cartTotalAmountDue";
-    NewTransaction.TotalAmountRemainingMenu = "cartTotalAmountRemaining";
-    NewTransaction.TotalChangeDueMenu = "cartTotalChangeDue";
-    NewTransaction.PayNowCashierButton = "processPayments";
-    NewTransaction.PayNowPublicButton = "processCCPayment";
-    // Transaction Error container
-    NewTransaction.paymentError = "paymentError";
+        };
+        // Menu Ids
+        NewTransaction.TotalAmountPaidMenu = "cartTotalAmountPaid";
+        NewTransaction.TotalAmountDueMenu = "cartTotalAmountDue";
+        NewTransaction.TotalAmountRemainingMenu = "cartTotalAmountRemaining";
+        NewTransaction.TotalChangeDueMenu = "cartTotalChangeDue";
+        NewTransaction.PayNowCashierButton = "processPayments";
+        NewTransaction.PayNowPublicButton = "processCCPayment";
+        // Transaction Error container
+        NewTransaction.paymentError = "paymentError";
+        return NewTransaction;
+    }());
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=newtransaction.js.map
 var clayPay;
 (function (clayPay) {
-    class AppType {
-        constructor(Label, Value) {
+    var AppType = /** @class */ (function () {
+        function AppType(Label, Value) {
             this.Label = Label;
             this.Value = Value;
         }
-    }
+        return AppType;
+    }());
     clayPay.AppType = AppType;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=AppTypes.js.map
-/// <reference path="transport.ts" />
 /// <reference path="apptypes.ts" />
 /// <reference path="charge.ts" />
 /// <reference path="ui.ts" />
@@ -2314,8 +2324,8 @@ var clayPay;
     }
     clayPay.start = start;
     function HandleHash() {
-        let hash = location.hash;
-        let currentHash = new clayPay.LocationHash(location.hash.substring(1));
+        var hash = location.hash;
+        var currentHash = new clayPay.LocationHash(location.hash.substring(1));
         if (currentHash.Permit.length > 0) {
             Utilities.Update_Menu(clayPay.UI.Menus[1]);
             HandleSearch('permitSearchButton', 'permitSearch', currentHash.Permit);
@@ -2339,7 +2349,7 @@ var clayPay;
     }
     clayPay.HandleHash = HandleHash;
     function HandleSearch(buttonId, inputId, value) {
-        let button = document.getElementById(buttonId);
+        var button = document.getElementById(buttonId);
         Utilities.Set_Text(inputId, value);
         button.click();
     }
@@ -2352,7 +2362,7 @@ var clayPay;
             }
         };
         document.getElementById("permitSearchButton")
-            .onclick = () => {
+            .onclick = function () {
             clayPay.UI.Search('permitSearchButton', 'permitSearch', 'permitSearchError');
         };
         document.getElementById('contractorSearch')
@@ -2363,7 +2373,7 @@ var clayPay;
             }
         };
         document.getElementById("contractorSearchButton")
-            .onclick = () => {
+            .onclick = function () {
             clayPay.UI.Search('contractorSearchButton', 'contractorSearch', 'contractorSearchError');
         };
         document.getElementById('applicationSearch')
@@ -2374,7 +2384,7 @@ var clayPay;
             }
         };
         document.getElementById("applicationSearchButton")
-            .onclick = () => {
+            .onclick = function () {
             clayPay.UI.Search('applicationSearchButton', 'applicationSearch', 'applicationSearchError');
         };
         document.getElementById('receiptSearch')
@@ -2385,7 +2395,7 @@ var clayPay;
             }
         };
         document.getElementById("receiptSearchButton")
-            .onclick = () => {
+            .onclick = function () {
             clayPay.ClientResponse.Search();
         };
     }
@@ -2400,8 +2410,8 @@ var clayPay;
         clayPay.UI.BuildExpYears("creditCardYear");
     }
     function loadCreditCardFee() {
-        let path = "/";
-        let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        var path = "/";
+        var i = window.location.pathname.toLowerCase().indexOf("/claypay");
         if (i == 0) {
             path = "/claypay/";
         }
@@ -2415,8 +2425,8 @@ var clayPay;
         });
     }
     function loadApplicationTypes() {
-        let path = "/";
-        let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+        var path = "/";
+        var i = window.location.pathname.toLowerCase().indexOf("/claypay");
         if (i == 0) {
             path = "/claypay/";
         }
@@ -2428,6 +2438,10 @@ var clayPay;
             // do something with the error here
         });
     }
+    function isNaN(value) {
+        return value !== value;
+    }
+    clayPay.isNaN = isNaN;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=claypay.js.map
 /// <reference path="apptypes.ts" />
@@ -2545,18 +2559,19 @@ var clayPay;
             },
         ];
         function BuildErrors(errors) {
-            let errorList = document.getElementById("errorList");
-            let df = document.createDocumentFragment();
+            var errorList = document.getElementById("errorList");
+            var df = document.createDocumentFragment();
             Utilities.Clear_Element(errorList);
-            for (let error of errors) {
-                let li = document.createElement("li");
+            for (var _i = 0, errors_1 = errors; _i < errors_1.length; _i++) {
+                var error = errors_1[_i];
+                var li = document.createElement("li");
                 li.textContent = error;
                 df.appendChild(li);
             }
             errorList.appendChild(df);
         }
         function BuildPayerStates(States, id) {
-            let stateSelect = document.getElementById(id);
+            var stateSelect = document.getElementById(id);
             if (stateSelect === undefined)
                 return;
             Utilities.Clear_Element(stateSelect);
@@ -2567,7 +2582,7 @@ var clayPay;
         }
         UI.BuildPayerStates = BuildPayerStates;
         function BuildAppTypes(appTypes) {
-            let appSelect = document.getElementById("applicationSearchType");
+            var appSelect = document.getElementById("applicationSearchType");
             Utilities.Clear_Element(appSelect);
             appSelect.appendChild(Utilities.Create_Option("-1", "Select Application Type", true));
             appTypes.forEach(function (a) {
@@ -2577,22 +2592,23 @@ var clayPay;
         }
         UI.BuildAppTypes = BuildAppTypes;
         function BuildExpMonths(id) {
-            let expMonth = document.getElementById(id);
+            var expMonth = document.getElementById(id);
             if (expMonth === undefined)
                 return;
             Utilities.Clear_Element(expMonth);
-            for (let month of UI.ExpMonths) {
+            for (var _i = 0, ExpMonths_1 = UI.ExpMonths; _i < ExpMonths_1.length; _i++) {
+                var month = ExpMonths_1[_i];
                 expMonth.appendChild(Utilities.Create_Option(month, month));
             }
             expMonth.selectedIndex = 0;
         }
         UI.BuildExpMonths = BuildExpMonths;
         function BuildExpYears(id) {
-            let expYear = document.getElementById(id);
+            var expYear = document.getElementById(id);
             Utilities.Clear_Element(expYear);
             var year = new Date().getFullYear();
             for (var i = 0; i < 10; i++) {
-                let y = (year + i).toString();
+                var y = (year + i).toString();
                 expYear.appendChild(Utilities.Create_Option(y, y));
                 UI.ExpYears.push(y); // save the year we're adding for later when we do some basic validation
             }
@@ -2600,13 +2616,13 @@ var clayPay;
         UI.BuildExpYears = BuildExpYears;
         function Search(buttonId, inputId, errorId) {
             Utilities.Toggle_Loading_Button(buttonId, true);
-            let input = document.getElementById(inputId);
-            let k = input.value.trim().toUpperCase();
+            var input = document.getElementById(inputId);
+            var k = input.value.trim().toUpperCase();
             if (inputId.indexOf("application") > -1) {
                 // we'll need to validate the application data
                 // the user needs to select a valid application type 
                 // and enter a valid application number.
-                let appType = document.getElementById(inputId + "Type").value;
+                var appType = document.getElementById(inputId + "Type").value;
                 if (appType === "-1" || appType.length === 0) {
                     Utilities.Error_Show(errorId, "You must select an Application Type in order to search by Application Number.");
                     Utilities.Toggle_Loading_Button(buttonId, false);
@@ -2615,8 +2631,8 @@ var clayPay;
                 k = appType.toUpperCase() + "-" + input.value.trim().toUpperCase();
             }
             if (k.length > 0) {
-                let path = "/";
-                let i = window.location.pathname.toLowerCase().indexOf("/claypay");
+                var path = "/";
+                var i = window.location.pathname.toLowerCase().indexOf("/claypay");
                 if (i == 0) {
                     path = "/claypay/";
                 }
@@ -2650,7 +2666,7 @@ var clayPay;
         }
         UI.Search = Search;
         function ProcessSearchResults(charges) {
-            let container = document.getElementById('Charges');
+            var container = document.getElementById('Charges');
             Utilities.Clear_Element(container);
             container.appendChild(clayPay.Charge.CreateChargesTable(charges, clayPay.ChargeView.search_results));
             Utilities.Set_Text('ChargesKey', charges[0].AssocKey);
@@ -2658,7 +2674,7 @@ var clayPay;
         }
         UI.ProcessSearchResults = ProcessSearchResults;
         function IsItemInCart(itemId) {
-            let item = clayPay.CurrentTransaction.Cart.filter((c) => {
+            var item = clayPay.CurrentTransaction.Cart.filter(function (c) {
                 return c.ItemId == itemId;
             });
             return item.length !== 0;
@@ -2680,14 +2696,14 @@ var clayPay;
         //  //AddCharges(clayPay.CurrentTransaction.CurrentCharges);
         //}
         function createTableHeaderElement(value, width) {
-            let th = document.createElement("th");
+            var th = document.createElement("th");
             th.width = width;
             th.appendChild(document.createTextNode(value));
             return th;
         }
         UI.createTableHeaderElement = createTableHeaderElement;
         function createTableElement(value, className, colspan) {
-            let d = document.createElement("td");
+            var d = document.createElement("td");
             if (className !== undefined) {
                 d.className = className;
             }
@@ -2699,28 +2715,28 @@ var clayPay;
         }
         UI.createTableElement = createTableElement;
         function createTableElementButton(value, itemId, className, toggle, addOnClickFunction, removeOnClickFunction) {
-            let IsInCart = IsItemInCart(itemId);
-            let d = document.createElement("td");
+            var IsInCart = IsItemInCart(itemId);
+            var d = document.createElement("td");
             d.className = className;
-            let add = document.createElement("button");
+            var add = document.createElement("button");
             add.style.display = IsInCart ? "none" : "inline-block";
             add.type = "button";
             add.id = "btnAdd" + itemId.toString();
             add.className = "button is-primary";
-            add.onclick = (ev) => {
+            add.onclick = function (ev) {
                 addOnClickFunction(ev, itemId);
             };
-            let remove = document.createElement("div");
+            var remove = document.createElement("div");
             remove.id = "btnRemove" + itemId.toString();
             remove.style.display = IsInCart ? "inline-block" : "none";
             remove.appendChild(document.createTextNode('Added ('));
-            let removeButton = document.createElement("a");
+            var removeButton = document.createElement("a");
             //removeButton
             removeButton.classList.add("is-warning");
             //removeButton.style.color = "darkgoldenrod";
             removeButton.style.cursor = "pointer";
             removeButton.appendChild(document.createTextNode('remove'));
-            removeButton.onclick = (ev) => {
+            removeButton.onclick = function (ev) {
                 removeOnClickFunction(ev, itemId, toggle);
             };
             remove.appendChild(removeButton);
@@ -2732,11 +2748,11 @@ var clayPay;
         }
         UI.createTableElementButton = createTableElementButton;
         function createAddAllTableElementButton(value, ViewCartClickFunction) {
-            let d = document.createElement("td");
-            let add = document.createElement("button");
+            var d = document.createElement("td");
+            var add = document.createElement("button");
             add.type = "button";
             add.className = "btn btn-primary";
-            add.onclick = (ev) => {
+            add.onclick = function (ev) {
                 ViewCartClickFunction('cart');
             };
             add.appendChild(document.createTextNode(value));
@@ -2749,14 +2765,14 @@ var clayPay;
             // it's also going to make some changes to the cart Div, 
             // specifically it's going to hide and unhide the CartEmpty Div
             // based on the size of the array.
-            let CartNav = document.getElementById('nav-cart-total');
+            var CartNav = document.getElementById('nav-cart-total');
             // emptyCart / fullCart is used when displaying the Cart
             // if there are no charges, we show emptyCart.
             // if there are charges, we show fullCart.
-            let emptyCart = document.getElementById("emptyCart");
-            let fullCart = document.getElementById("fullCart");
-            let payerData = document.getElementById("payerData");
-            let paymentData = document.getElementById("paymentData");
+            var emptyCart = document.getElementById("emptyCart");
+            var fullCart = document.getElementById("fullCart");
+            var payerData = document.getElementById("payerData");
+            var paymentData = document.getElementById("paymentData");
             Utilities.Hide(emptyCart);
             Utilities.Hide(fullCart);
             Utilities.Hide(payerData);
@@ -2768,7 +2784,7 @@ var clayPay;
                 Utilities.Show(emptyCart);
             }
             else {
-                let cartLength = clayPay.CurrentTransaction.Cart.length;
+                var cartLength = clayPay.CurrentTransaction.Cart.length;
                 CartNav.appendChild(document.createTextNode(+cartLength.toString() + (cartLength === 1 ? ' item' : ' items')));
                 Utilities.Show(fullCart);
                 Utilities.Show(payerData);
@@ -2776,7 +2792,7 @@ var clayPay;
             }
         }
         function updateCart() {
-            let CartCharges = document.getElementById('fullCart');
+            var CartCharges = document.getElementById('fullCart');
             Utilities.Clear_Element(CartCharges);
             //let df = document.createDocumentFragment();
             //for (let charge of clayPay.CurrentTransaction.Cart)
@@ -2791,8 +2807,9 @@ var clayPay;
         }
         UI.updateCart = updateCart;
         function buildMenuElements(IsCashier) {
-            let menu = document.getElementById("menuTabs");
-            for (let menuItem of UI.Menus) {
+            var menu = document.getElementById("menuTabs");
+            for (var _i = 0, Menus_1 = UI.Menus; _i < Menus_1.length; _i++) {
+                var menuItem = Menus_1[_i];
                 if (IsCashier) {
                     menu.appendChild(Utilities.Create_Menu_Element(menuItem));
                 }
@@ -2806,8 +2823,8 @@ var clayPay;
         }
         UI.buildMenuElements = buildMenuElements;
         function createNavCart() {
-            let cart = document.getElementById("nav-cart");
-            let cartTotal = document.createElement("span");
+            var cart = document.getElementById("nav-cart");
+            var cartTotal = document.createElement("span");
             cartTotal.id = "nav-cart-total";
             cartTotal.style.fontSize = "larger";
             cartTotal.style.fontWeight = "bolder";

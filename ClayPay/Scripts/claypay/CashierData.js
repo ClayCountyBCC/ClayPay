@@ -1,7 +1,7 @@
 var clayPay;
 (function (clayPay) {
-    class CashierData {
-        constructor() {
+    var CashierData = /** @class */ (function () {
+        function CashierData() {
             this.PayerFirstName = "";
             this.PayerLastName = "";
             this.PayerName = "";
@@ -17,7 +17,7 @@ var clayPay;
             this.UserName = "";
             this.TransactionDate = new Date();
         }
-        ValidatePayer() {
+        CashierData.prototype.ValidatePayer = function () {
             this.ResetPayerData();
             this.PayerFirstName = Utilities.Validate_Text(CashierData.payerFirstName, CashierData.payerNameError, "The Firstname field is required.");
             if (this.PayerFirstName.length === 0)
@@ -30,7 +30,7 @@ var clayPay;
                 return false;
             if (this.PayerPhoneNumber.length < 10) {
                 Utilities.Error_Show(CashierData.payerPhoneError, "The Phone Number should include area code and a 7 digit number.");
-                let element = document.getElementById(CashierData.payerPhone);
+                var element = document.getElementById(CashierData.payerPhone);
                 element.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
@@ -48,15 +48,15 @@ var clayPay;
                 return false;
             if (this.PayerZip.length < 5) {
                 Utilities.Error_Show(CashierData.payerCityError, "You must enter a Zip code of at least 5 digits.");
-                let element = document.getElementById(CashierData.payerZip);
+                var element = document.getElementById(CashierData.payerZip);
                 element.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
                 return false;
             }
             return true;
-        }
-        ResetPayerForm() {
+        };
+        CashierData.prototype.ResetPayerForm = function () {
             Utilities.Set_Value(CashierData.payerCity, "");
             Utilities.Set_Value(CashierData.payerCompany, "");
             Utilities.Set_Value(CashierData.payerFirstName, "");
@@ -65,8 +65,8 @@ var clayPay;
             Utilities.Set_Value(CashierData.payerEmail, "");
             Utilities.Set_Value(CashierData.payerStreet, "");
             document.getElementById(CashierData.payerState).selectedIndex = 0;
-        }
-        ResetPayerData() {
+        };
+        CashierData.prototype.ResetPayerData = function () {
             this.PayerFirstName = "";
             this.PayerLastName = "";
             this.PayerPhoneNumber = "";
@@ -76,23 +76,24 @@ var clayPay;
             this.PayerCity = "";
             this.PayerStreetAddress = "";
             this.PayerZip = "";
-        }
-    }
-    // Payer Inputs
-    CashierData.payerFirstName = "payerFirstName";
-    CashierData.payerLastName = "payerLastName";
-    CashierData.payerPhone = "payerPhone";
-    CashierData.payerEmail = "payerEmailAddress";
-    CashierData.payerCompany = "payerCompany";
-    CashierData.payerStreet = "payerStreetAddress";
-    CashierData.payerCity = "payerCity";
-    CashierData.payerState = "payerState";
-    CashierData.payerZip = "payerZip";
-    // Payer error text elemnets
-    CashierData.payerNameError = "payerNameError";
-    CashierData.payerPhoneError = "payerPhoneError";
-    CashierData.payerStreetError = "payerStreetError";
-    CashierData.payerCityError = "payerCityError";
+        };
+        // Payer Inputs
+        CashierData.payerFirstName = "payerFirstName";
+        CashierData.payerLastName = "payerLastName";
+        CashierData.payerPhone = "payerPhone";
+        CashierData.payerEmail = "payerEmailAddress";
+        CashierData.payerCompany = "payerCompany";
+        CashierData.payerStreet = "payerStreetAddress";
+        CashierData.payerCity = "payerCity";
+        CashierData.payerState = "payerState";
+        CashierData.payerZip = "payerZip";
+        // Payer error text elemnets
+        CashierData.payerNameError = "payerNameError";
+        CashierData.payerPhoneError = "payerPhoneError";
+        CashierData.payerStreetError = "payerStreetError";
+        CashierData.payerCityError = "payerCityError";
+        return CashierData;
+    }());
     clayPay.CashierData = CashierData;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=CashierData.js.map

@@ -1,14 +1,14 @@
 var clayPay;
 (function (clayPay) {
-    class LocationHash {
-        constructor(locationHash) {
+    var LocationHash = /** @class */ (function () {
+        function LocationHash(locationHash) {
             this.Permit = "";
             this.CashierId = "";
             this.ContractorId = "";
             this.ApplicationNumber = "";
-            let ha = locationHash.split("&");
-            for (let i = 0; i < ha.length; i++) {
-                let k = ha[i].split("=");
+            var ha = locationHash.split("&");
+            for (var i = 0; i < ha.length; i++) {
+                var k = ha[i].split("=");
                 switch (k[0].toLowerCase()) {
                     case "application":
                         this.ApplicationNumber = k[1];
@@ -33,8 +33,8 @@ var clayPay;
         //  if (permit.length > 0) h += "&permit=" + permit;
         //  return h.substring(1);
         //}
-        ToHash() {
-            let h = "";
+        LocationHash.prototype.ToHash = function () {
+            var h = "";
             if (this.Permit.length > 0)
                 h += "&permit=" + this.Permit;
             if (this.ApplicationNumber.length > 0)
@@ -46,8 +46,9 @@ var clayPay;
             if (h.length > 0)
                 h = "#" + h.substring(1);
             return h;
-        }
-    }
+        };
+        return LocationHash;
+    }());
     clayPay.LocationHash = LocationHash;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=LocationHash.js.map

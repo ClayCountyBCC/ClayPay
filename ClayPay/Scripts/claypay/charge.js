@@ -1,23 +1,23 @@
 var clayPay;
 (function (clayPay) {
-    let ChargeView;
+    var ChargeView;
     (function (ChargeView) {
         ChargeView[ChargeView["search_results"] = 0] = "search_results";
         ChargeView[ChargeView["cart"] = 1] = "cart";
         ChargeView[ChargeView["receipt"] = 2] = "receipt";
     })(ChargeView = clayPay.ChargeView || (clayPay.ChargeView = {}));
-    class Charge {
-        constructor() {
+    var Charge = /** @class */ (function () {
+        function Charge() {
             this.ItemId = 0;
             this.Description = "";
             this.TimeStampDisplay = "";
         }
-        static CreateTable(view) {
-            let table = document.createElement("table");
+        Charge.CreateTable = function (view) {
+            var table = document.createElement("table");
             table.classList.add("table");
             table.classList.add("is-fullwidth");
-            let thead = document.createElement("THEAD");
-            let tr = document.createElement("tr");
+            var thead = document.createElement("THEAD");
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableHeaderElement("Key", "20%"));
             if (view !== ChargeView.receipt) {
                 tr.appendChild(clayPay.UI.createTableHeaderElement("Description", "40%"));
@@ -32,22 +32,22 @@ var clayPay;
             thead.appendChild(tr);
             table.appendChild(thead);
             return table;
-        }
-        static CreateChargesTable(charges, view) {
-            let df = document.createDocumentFragment();
-            let table = Charge.CreateTable(view);
-            let tbody = document.createElement("TBODY");
+        };
+        Charge.CreateChargesTable = function (charges, view) {
+            var df = document.createDocumentFragment();
+            var table = Charge.CreateTable(view);
+            var tbody = document.createElement("TBODY");
             charges.forEach(function (charge) {
                 tbody.appendChild(Charge.buildChargeRow(charge, view));
             });
-            let tfoot = document.createElement("TFOOT");
+            var tfoot = document.createElement("TFOOT");
             tfoot.appendChild(Charge.buildChargeFooterRow(charges, view));
             table.appendChild(tbody);
             table.appendChild(tfoot);
             df.appendChild(table);
             return df;
-        }
-        static buildChargeFooterRow(charges, view) {
+        };
+        Charge.buildChargeFooterRow = function (charges, view) {
             // Based on ChargeView:
             // Search Results Footer should show: 
             //  1. Total Charges
@@ -58,11 +58,11 @@ var clayPay;
             //  2. Convenience Fee
             // Receipt Footer should show:
             //  1. Total Charges
-            let df = document.createDocumentFragment();
-            let trTotal = document.createElement("tr");
+            var df = document.createDocumentFragment();
+            var trTotal = document.createElement("tr");
             trTotal.appendChild(clayPay.UI.createTableElement("", "", view === ChargeView.receipt ? 1 : 2));
             trTotal.appendChild(clayPay.UI.createTableElement("Total", "has-text-weight-bold has-text-right", 1));
-            let TotalAmount = charges.reduce((total, b) => {
+            var TotalAmount = charges.reduce(function (total, b) {
                 return total + b.Total;
             }, 0);
             trTotal.appendChild(clayPay.UI.createTableElement(Utilities.Format_Amount(TotalAmount), ""));
@@ -88,18 +88,18 @@ var clayPay;
                     break;
             }
             return df;
-        }
-        static buildConvFeeFooterRow() {
-            let tr = document.createElement("tr");
+        };
+        Charge.buildConvFeeFooterRow = function () {
+            var tr = document.createElement("tr");
             tr.style.fontWeight = "bolder";
             tr.appendChild(clayPay.UI.createTableElement("There is a nonrefundable transaction fee charged for Credit Card Payments by our payment provider. This is charged in addition to the total above.", "", 2));
             tr.appendChild(clayPay.UI.createTableElement("Conv. Fee", "center", 1));
             tr.appendChild(clayPay.UI.createTableElement(clayPay.ConvenienceFee, "", 1));
             tr.appendChild(clayPay.UI.createTableElement("", "", 1));
             return tr;
-        }
-        static buildChargeRow(charge, view) {
-            let tr = document.createElement("tr");
+        };
+        Charge.buildChargeRow = function (charge, view) {
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableElement(charge.AssocKey));
             tr.appendChild(clayPay.UI.createTableElement(charge.Description, "left"));
             if (view !== ChargeView.receipt) {
@@ -110,16 +110,17 @@ var clayPay;
                 tr.appendChild(Charge.createChargeCartButtonToggle("Add to Cart", charge.ItemId, "center", true));
             }
             return tr;
-        }
-        static createAddAllChargesToCartButton() {
-            let td = document.createElement("td");
-            let button = document.createElement("button");
+        };
+        Charge.createAddAllChargesToCartButton = function () {
+            var td = document.createElement("td");
+            var button = document.createElement("button");
             button.type = "button";
             button.classList.add("button");
             button.classList.add("is-primary");
             button.appendChild(document.createTextNode("Add All To Cart"));
-            button.onclick = (ev) => {
-                for (let charge of clayPay.CurrentTransaction.CurrentCharges) {
+            button.onclick = function (ev) {
+                for (var _i = 0, _a = clayPay.CurrentTransaction.CurrentCharges; _i < _a.length; _i++) {
+                    var charge = _a[_i];
                     if (!clayPay.UI.IsItemInCart(charge.ItemId)) {
                         clayPay.CurrentTransaction.Cart.push(charge);
                     }
@@ -132,19 +133,19 @@ var clayPay;
             };
             td.appendChild(button);
             return td;
-        }
-        static createChargeCartButtonToggle(value, itemId, className, toggle) {
-            let removeButton = document.createElement("a");
-            let remove = document.createElement("div");
-            let addButton = document.createElement("button");
-            let IsInCart = clayPay.UI.IsItemInCart(itemId);
-            let d = document.createElement("td");
+        };
+        Charge.createChargeCartButtonToggle = function (value, itemId, className, toggle) {
+            var removeButton = document.createElement("a");
+            var remove = document.createElement("div");
+            var addButton = document.createElement("button");
+            var IsInCart = clayPay.UI.IsItemInCart(itemId);
+            var d = document.createElement("td");
             d.className = className;
             addButton.style.display = IsInCart ? "none" : "inline-block";
             addButton.type = "button";
             addButton.className = "button is-primary";
-            addButton.onclick = (ev) => {
-                let item = clayPay.CurrentTransaction.CurrentCharges.filter((c) => {
+            addButton.onclick = function (ev) {
+                var item = clayPay.CurrentTransaction.CurrentCharges.filter(function (c) {
                     return c.ItemId == itemId;
                 });
                 if (item.length === 1 && clayPay.CurrentTransaction.Cart.indexOf(item[0]) === -1) {
@@ -159,8 +160,8 @@ var clayPay;
             removeButton.classList.add("is-warning");
             removeButton.style.cursor = "pointer";
             removeButton.appendChild(document.createTextNode('remove'));
-            removeButton.onclick = (ev) => {
-                let newCart = clayPay.CurrentTransaction.Cart.filter((c) => {
+            removeButton.onclick = function (ev) {
+                var newCart = clayPay.CurrentTransaction.Cart.filter(function (c) {
                     return c.ItemId !== itemId;
                 });
                 clayPay.CurrentTransaction.Cart = newCart;
@@ -174,20 +175,20 @@ var clayPay;
             d.appendChild(addButton);
             d.appendChild(remove);
             return d;
-        }
-        static createViewCartFooterRow() {
-            let tr = document.createElement("tr");
+        };
+        Charge.createViewCartFooterRow = function () {
+            var tr = document.createElement("tr");
             tr.appendChild(clayPay.UI.createTableElement("", "", 4));
-            let td = document.createElement("td");
-            let button = document.createElement("button");
+            var td = document.createElement("td");
+            var button = document.createElement("button");
             button.type = "button";
             button.classList.add("button");
             button.classList.add("is-success");
-            button.onclick = (ev) => {
-                let menulist = clayPay.UI.Menus.filter(function (j) { return j.id === "nav-cart"; });
-                let cartMenu = menulist[0];
-                let title = document.getElementById("menuTitle");
-                let subTitle = document.getElementById("menuSubTitle");
+            button.onclick = function (ev) {
+                var menulist = clayPay.UI.Menus.filter(function (j) { return j.id === "nav-cart"; });
+                var cartMenu = menulist[0];
+                var title = document.getElementById("menuTitle");
+                var subTitle = document.getElementById("menuSubTitle");
                 Utilities.Clear_Element(title);
                 Utilities.Clear_Element(subTitle);
                 title.appendChild(document.createTextNode(cartMenu.title));
@@ -198,8 +199,9 @@ var clayPay;
             td.appendChild(button);
             tr.appendChild(td);
             return tr;
-        }
-    }
+        };
+        return Charge;
+    }());
     clayPay.Charge = Charge;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=Charge.js.map

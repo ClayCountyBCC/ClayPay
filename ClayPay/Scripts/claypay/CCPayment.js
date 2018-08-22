@@ -1,19 +1,19 @@
 var clayPay;
 (function (clayPay) {
-    class CCPayment {
-        constructor() {
+    var CCPayment = /** @class */ (function () {
+        function CCPayment() {
             this.Validated = false;
         }
-        UpdatePayerData() {
+        CCPayment.prototype.UpdatePayerData = function () {
             Utilities.Set_Value(CCPayment.FirstNameInput, this.FirstName);
             Utilities.Set_Value(CCPayment.LastNameInput, this.LastName);
             //Utilities.Set_Value(CCPayment.EmailAddressInput, this.EmailAddress);
             Utilities.Set_Value(CCPayment.ZipCodeInput, this.ZipCode);
-        }
-        UpdateTotal() {
+        };
+        CCPayment.prototype.UpdateTotal = function () {
             Utilities.Set_Value(CCPayment.AmountPaidInput, this.Amount.toFixed(2));
-        }
-        ResetForm() {
+        };
+        CCPayment.prototype.ResetForm = function () {
             this.ResetData();
             this.ResetFormErrors();
             // now clear the form
@@ -30,8 +30,8 @@ var clayPay;
                 Utilities.Set_Value(CCPayment.AmountPaidInput, "");
                 Utilities.Hide(CCPayment.CreditCardForm);
             }
-        }
-        ResetData() {
+        };
+        CCPayment.prototype.ResetData = function () {
             this.Amount = 0;
             this.Validated = false;
             this.FirstName = "";
@@ -43,8 +43,8 @@ var clayPay;
             this.ExpMonth = "";
             this.ExpYear = "";
             this.CVVNumber = "";
-        }
-        ResetFormErrors() {
+        };
+        CCPayment.prototype.ResetFormErrors = function () {
             document.getElementById(CCPayment.FirstNameInput).classList.remove("is-danger");
             document.getElementById(CCPayment.LastNameInput).classList.remove("is-danger");
             document.getElementById(CCPayment.ZipCodeInput).classList.remove("is-danger");
@@ -57,8 +57,8 @@ var clayPay;
             if (clayPay.CurrentTransaction.IsCashier) {
                 document.getElementById(CCPayment.AmountPaidInput).classList.remove("is-danger");
             }
-        }
-        Validate() {
+        };
+        CCPayment.prototype.Validate = function () {
             this.ResetData();
             this.ResetFormErrors();
             this.Validated = false;
@@ -73,7 +73,7 @@ var clayPay;
                 return;
             if (this.ZipCode.length < 5) {
                 Utilities.Error_Show(CCPayment.ZipError, "You must enter a Zip code of at least 5 digits.");
-                let element = document.getElementById(CCPayment.ZipCodeInput);
+                var element = document.getElementById(CCPayment.ZipCodeInput);
                 element.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
@@ -95,10 +95,10 @@ var clayPay;
             this.CardType = Utilities.Validate_Text(CCPayment.ccTypeSelect, CCPayment.NumberError, "You must select a Card Type.");
             if (this.CardType.length === 0)
                 return;
-            let cardTypes = ['AMEX', 'DISCOVER', 'MASTERCARD', 'VISA'];
+            var cardTypes = ['AMEX', 'DISCOVER', 'MASTERCARD', 'VISA'];
             if (cardTypes.indexOf(this.CardType) === -1) {
                 Utilities.Error_Show(CCPayment.NumberError, "The credit card type appears to be invalid, please correct it and try again.");
-                let element = document.getElementById(CCPayment.ccTypeSelect);
+                var element = document.getElementById(CCPayment.ccTypeSelect);
                 element.parentElement.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
@@ -111,7 +111,7 @@ var clayPay;
                 return;
             if (clayPay.UI.ExpMonths.indexOf(this.ExpMonth) === -1) {
                 Utilities.Error_Show(CCPayment.ExpirationError, "The Expiration Month appears to be invalid, please correct it and try again.");
-                let element = document.getElementById(CCPayment.ccMonthSelect);
+                var element = document.getElementById(CCPayment.ccMonthSelect);
                 element.parentElement.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
@@ -122,7 +122,7 @@ var clayPay;
                 return;
             if (clayPay.UI.ExpYears.indexOf(this.ExpYear) === -1) {
                 Utilities.Error_Show(CCPayment.ExpirationError, "The Expiration Year appears to be invalid, please correct it and try again.");
-                let element = document.getElementById(CCPayment.ccYearSelect);
+                var element = document.getElementById(CCPayment.ccYearSelect);
                 element.parentElement.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
@@ -130,14 +130,14 @@ var clayPay;
             }
             // here we're checking to make sure that the expiration date they put in is
             // greater than or equal to this month/year.
-            let year = parseInt(this.ExpYear);
-            let month = parseInt(this.ExpMonth);
-            let expD = new Date(year, month - 1, 1); // subtracting 1 from month because Date's month is Base 0
-            let tmpD = new Date();
-            let thisMonth = new Date(tmpD.getFullYear(), tmpD.getMonth(), 1);
+            var year = parseInt(this.ExpYear);
+            var month = parseInt(this.ExpMonth);
+            var expD = new Date(year, month - 1, 1); // subtracting 1 from month because Date's month is Base 0
+            var tmpD = new Date();
+            var thisMonth = new Date(tmpD.getFullYear(), tmpD.getMonth(), 1);
             if (expD < thisMonth) {
                 Utilities.Error_Show(CCPayment.ExpirationError, "The expiration date entered has passed.  Please check it and try again.");
-                let element = document.getElementById(CCPayment.ccYearSelect);
+                var element = document.getElementById(CCPayment.ccYearSelect);
                 element.parentElement.classList.add("is-danger");
                 element.focus();
                 element.scrollTo();
@@ -147,17 +147,17 @@ var clayPay;
             if (this.CVVNumber.length === 0)
                 return;
             if (clayPay.CurrentTransaction.IsCashier) {
-                let testAmount = Utilities.Validate_Text(CCPayment.AmountPaidInput, CCPayment.AmountError, "The Amount field is required.");
+                var testAmount = Utilities.Validate_Text(CCPayment.AmountPaidInput, CCPayment.AmountError, "The Amount field is required.");
                 if (testAmount.length === 0)
                     return;
                 this.Amount = parseFloat(testAmount);
-                if (Number.isNaN(this.Amount) || this.Amount < 0) {
+                if (clayPay.isNaN(this.Amount) || this.Amount < 0) {
                     this.Amount = 0;
                     Utilities.Error_Show(CCPayment.AmountError, "An invalid amount was entered.");
                     return false;
                 }
                 if (this.Amount > clayPay.CurrentTransaction.TotalAmountDue) {
-                    let element = document.getElementById(CCPayment.AmountPaidInput);
+                    var element = document.getElementById(CCPayment.AmountPaidInput);
                     element.classList.add("is-danger");
                     element.focus();
                     element.scrollTo();
@@ -174,34 +174,35 @@ var clayPay;
                 Utilities.Hide(CCPayment.CreditCardForm);
             }
             return clayPay.CurrentTransaction.Validate();
-        }
-        ValidateAndSave() {
+        };
+        CCPayment.prototype.ValidateAndSave = function () {
             if (!this.Validate())
                 return;
             clayPay.CurrentTransaction.Save();
-        }
-    }
-    // credit card form container
-    CCPayment.CreditCardForm = "creditCardPaymentType";
-    // inputs
-    CCPayment.FirstNameInput = "creditCardFirstName";
-    CCPayment.LastNameInput = "creditCardLastName";
-    CCPayment.ZipCodeInput = "creditCardZip";
-    // static EmailAddressInput: string = "creditCardEmailAddress";
-    CCPayment.ccNumberInput = "creditCardNumber";
-    CCPayment.ccTypeSelect = "creditCardType";
-    CCPayment.ccMonthSelect = "creditCardMonth";
-    CCPayment.ccYearSelect = "creditCardYear";
-    CCPayment.ccCVCInput = "creditCardCVV";
-    CCPayment.AmountPaidInput = "creditCardPaymentAmount";
-    // Error Inputs
-    CCPayment.NameError = "creditCardNameError";
-    CCPayment.ZipError = "creditCardZipError";
-    CCPayment.NumberError = "creditCardNumberError";
-    CCPayment.ExpirationError = "creditCardExpirationError";
-    CCPayment.AmountError = "creditCardPaymentAmountError";
-    // Menus
-    CCPayment.creditCardTotalMenu = "creditCardPaymentTotal";
+        };
+        // credit card form container
+        CCPayment.CreditCardForm = "creditCardPaymentType";
+        // inputs
+        CCPayment.FirstNameInput = "creditCardFirstName";
+        CCPayment.LastNameInput = "creditCardLastName";
+        CCPayment.ZipCodeInput = "creditCardZip";
+        // static EmailAddressInput: string = "creditCardEmailAddress";
+        CCPayment.ccNumberInput = "creditCardNumber";
+        CCPayment.ccTypeSelect = "creditCardType";
+        CCPayment.ccMonthSelect = "creditCardMonth";
+        CCPayment.ccYearSelect = "creditCardYear";
+        CCPayment.ccCVCInput = "creditCardCVV";
+        CCPayment.AmountPaidInput = "creditCardPaymentAmount";
+        // Error Inputs
+        CCPayment.NameError = "creditCardNameError";
+        CCPayment.ZipError = "creditCardZipError";
+        CCPayment.NumberError = "creditCardNumberError";
+        CCPayment.ExpirationError = "creditCardExpirationError";
+        CCPayment.AmountError = "creditCardPaymentAmountError";
+        // Menus
+        CCPayment.creditCardTotalMenu = "creditCardPaymentTotal";
+        return CCPayment;
+    }());
     clayPay.CCPayment = CCPayment;
 })(clayPay || (clayPay = {}));
 //# sourceMappingURL=CCPayment.js.map
