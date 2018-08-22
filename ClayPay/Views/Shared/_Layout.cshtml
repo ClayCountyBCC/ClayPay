@@ -112,7 +112,7 @@
   <div class="is-danger hide notification hide-for-print "id="danger-ie">
     <div class="is-large container ">
       <p>This application has been designed to work with the most recent version of Chrome, FireFox, and Edge.<br />
-      If you are using Internet Explorer, please switch to one of those browsers. Thank you.</p>
+      If you are seeing this message, please switch to one of those browsers. Thank you.</p>
     </div>
   </div>
 
@@ -148,7 +148,7 @@
     }
     let browser = Utilities.CheckBrowser();
 
-    if (browser === "IE")
+    if (browser === "IE" || browser === "unknown")
     {
       let browserError = document.getElementById('danger-ie');
       browserError.classList.remove("hide");
