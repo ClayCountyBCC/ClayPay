@@ -108,6 +108,25 @@
     </div>
   </section>
 
+
+  <div class="is-danger hide notification hide-for-print "id="danger-ie">
+    <div class="is-large container ">
+      <p>This application has been designed to work with the most recent version of Chrome, FireFox, and Edge.<br />
+      If you are using Internet Explorer, please switch to one of those browsers. Thank you.</p>
+    </div>
+  </div>
+
+  <script>
+    let browser = Utilities.CheckBrowser();
+
+    if (browser === "IE")
+    {
+      let browserError = document.getElementById('danger-ie');
+      browserError.classList.remove("hide");
+    }
+  </script>
+
+
   @RenderBody()
 
 
