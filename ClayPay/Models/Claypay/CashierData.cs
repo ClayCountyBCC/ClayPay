@@ -81,17 +81,14 @@ namespace ClayPay.Models.Claypay
       if (PayerFirstName.Length == 0)
       {
         errors.Add("The Payer's First name is a required field.");
-
       }
       if (PayerLastName.Length == 0)
       {
         errors.Add("The Payer's Last name is a required field.");
-
       }
       if (PayerPhoneNumber.Length == 0)
       {
         errors.Add("The Payer's phone number is a required field.");
-
       }
       if (PayerEmailAddress.Length > 0)
       {
@@ -109,18 +106,6 @@ namespace ClayPay.Models.Claypay
       if (PayerStreetAddress.Length == 0)
       {
         errors.Add("The Payer's Street Address must be provided.");
-
-      }
-
-      if (PayerCity.Length == 0)
-      {
-        errors.Add("The Payer's City must be provided.");
-        
-      }
-      if (PayerState.Length == 0)
-      {
-        errors.Add("The Payer's State must be provided.");
-
       }
       if (PayerZip.Length == 0)
       {
