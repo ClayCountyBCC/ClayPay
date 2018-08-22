@@ -56,8 +56,6 @@ namespace ClayPay.Models.Claypay
     public void SendPayerEmailReceipt(string EmailAddress)
     {
       if (EmailAddress.Length == 0) return;
-      ResponseCashierData.PayerEmailAddress = ResponseCashierData.PayerEmailAddress == "" ? 
-                                                EmailAddress : ResponseCashierData.PayerEmailAddress;
       Constants.SaveEmail(EmailAddress, "Clay County Payment Receipt", BuildEmailBody());
     }
 
