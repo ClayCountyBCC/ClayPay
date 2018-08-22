@@ -117,38 +117,12 @@
   </div>
 
   <script>
-    function CheckBrowser()
-    {
-      
-      if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) !== -1) 
-      {
-        browser = 'Opera';
-      }
-      else if (navigator.userAgent.indexOf("Chrome") !== -1)
-      {
-        browser = 'Chrome';
-      }
-      else if (navigator.userAgent.indexOf("Safari") !== -1)
-      {
-        browser = 'Safari';
-      }
-      else if (navigator.userAgent.indexOf("Firefox") !== -1) 
-      {
-        browser = 'Firefox';
-      }
-      else if (navigator.userAgent.indexOf("MSIE") !== -1 || !!document.DOCUMENT_NODE === true) //IF IE > 10
-      {
-        browser = 'IE';
-      }
-      else 
-      {
-        browser = 'unknown';
-      }
-      return browser;
-    }
-    let browser = Utilities.CheckBrowser();
 
-    if (browser === "IE" || browser === "unknown")
+    function CheckBrowser()
+    {      return navigator.userAgent.indexOf("MSIE") !== -1 || !!document.DOCUMENT_NODE === true); //IF IE > 10
+    }
+
+    if (CheckBrowser())
     {
       let browserError = document.getElementById('danger-ie');
       browserError.classList.remove("hide");
