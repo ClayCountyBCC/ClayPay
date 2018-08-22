@@ -109,23 +109,26 @@
   </section>
 
 
-  <div class="is-danger hide notification hide-for-print "id="danger-ie">
+  <div class="is-danger hide notification hide-for-print"
+       id="danger-ie">
     <div class="is-large container ">
-      <p>This application has been designed to work with the most recent version of Chrome, FireFox, and Edge.<br />
-      If you are seeing this message, please switch to one of those browsers. Thank you.</p>
+      <p>This application has been designed to work recent versions of Chrome, FireFox, and Edge.<br />
+      To use this application, please switch to one of those browsers. Thank you.</p>
     </div>
   </div>
 
   <script>
 
     function CheckBrowser()
-    {      return navigator.userAgent.indexOf("MSIE") !== -1 || !!document.DOCUMENT_NODE === true); //IF IE > 10
+    {
+      console.log('MSIE check 1', navigator.userAgent.indexOf("MSIE"));
+      console.log('MSIE check 2', navigator.appVersion.indexOf('Trident/'));
+      return (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0); 
     }
 
     if (CheckBrowser())
     {
-      let browserError = document.getElementById('danger-ie');
-      browserError.classList.remove("hide");
+      document.getElementById('danger-ie').classList.remove("hide");
     }
   </script>
 
