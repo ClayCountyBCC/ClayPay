@@ -23,7 +23,7 @@ namespace ClayPay.Models.Balancing
     {
       var query = @"      
         USE WATSC;
-        DECLARE @MinDate DATE = CAST('2018-7-27' AS DATE);
+        DECLARE @MinDate DATETIME = '2018-8-22 4:00:00 PM';
 
         SELECT 
           C.CashierId, 
