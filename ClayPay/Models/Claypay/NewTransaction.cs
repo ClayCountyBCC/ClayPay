@@ -484,6 +484,7 @@ namespace ClayPay.Models.Claypay
                               TransactionCashierData.PayerState + ", " + 
                               TransactionCashierData.PayerZip);
       dp.Add("@IPAddress", TransactionCashierData.ipAddress);
+      dp.Add("@PayerEmailAddress", TransactionCashierData.PayerEmailAddress);
 
 
       string query = @"
@@ -499,7 +500,8 @@ namespace ClayPay.Models.Claypay
             @Addr1 = @PayerStreetAddress,
             @Addr2 = @PayerCity + ' ' + @PayerState + ', ' + @PayerZip,
             @NTUser = @UserName, 
-            @IPAddress = @IPAddress";
+            @IPAddress = @IPAddress,
+            @EmailAddress = @PayerEmailAddress";
       try
       {
         var i = Constants.Exec_Query(query, dp);
