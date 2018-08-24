@@ -2580,7 +2580,6 @@ var Balancing;
                 switch (payment.Type) {
                     case "Total Charges":
                         totalCharges = payment;
-                        tbody.appendChild(DJournal.BuildPaymentRow(payment, dj.DJournalDateFormatted));
                         break;
                     case "Total Deposit":
                         totalDeposits = payment;
@@ -2594,13 +2593,12 @@ var Balancing;
                         break;
                     default:
                         tbody.appendChild(DJournal.BuildPaymentRow(payment, dj.DJournalDateFormatted));
-                        break;
                 }
             }
             var tr = DJournal.BuildDJournalRow(totalPayments.Type, totalPayments.TotalAmount, totalDeposits.Type, totalDeposits.TotalAmount);
             tr.style.backgroundColor = "#fafafa";
             tfoot.appendChild(tr);
-            //tfoot.appendChild(DJournal.BuildDJournalRow(totalCharges.Type, totalCharges.TotalAmount, "", -1));
+            tfoot.appendChild(DJournal.BuildDJournalRow(totalCharges.Type, totalCharges.TotalAmount, "", -1));
             for (var _b = 0, _c = dj.GUTotals; _b < _c.length; _b++) {
                 var gutotal = _c[_b];
                 tfoot.appendChild(DJournal.BuildDJournalRow(gutotal.Type, gutotal.TotalAmount, "", -1));

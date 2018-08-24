@@ -29,10 +29,7 @@
     margin: .5em;
   }
 
-  .hide-for-print 
-  {
-    display: none;
-  }
+
   a 
   {
     text-decoration: none;
@@ -70,5 +67,11 @@
   }
   .show-for-print{
     display: flex;
+
+  } 
+  
+  .hide-for-print 
+  {
+    display: none;
   }
 }

@@ -246,7 +246,6 @@
         {
           case "Total Charges":
             totalCharges = payment;
-            tbody.appendChild(DJournal.BuildPaymentRow(payment, dj.DJournalDateFormatted));
             break;
           case "Total Deposit":
             totalDeposits = payment;
@@ -254,19 +253,20 @@
           case "Total Payments":
             totalPayments = payment;
             break;
+
           case "Check":
           case "Cash":
             tbody.appendChild(DJournal.BuildShortDJournalRow(payment, dj.DJournalDateFormatted));
             break;
+
           default:
             tbody.appendChild(DJournal.BuildPaymentRow(payment, dj.DJournalDateFormatted));
-            break;
         }
       }
       let tr = DJournal.BuildDJournalRow(totalPayments.Type, totalPayments.TotalAmount, totalDeposits.Type, totalDeposits.TotalAmount);
       tr.style.backgroundColor = "#fafafa";
       tfoot.appendChild(tr);
-      //tfoot.appendChild(DJournal.BuildDJournalRow(totalCharges.Type, totalCharges.TotalAmount, "", -1));
+      tfoot.appendChild(DJournal.BuildDJournalRow(totalCharges.Type, totalCharges.TotalAmount, "", -1));
       for (let gutotal of dj.GUTotals)
       {
         tfoot.appendChild(DJournal.BuildDJournalRow(gutotal.Type, gutotal.TotalAmount, "", -1));

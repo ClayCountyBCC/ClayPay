@@ -16,8 +16,6 @@
 @media print {
   @page {
     margin: .5em; }
-  .hide-for-print {
-    display: none; }
   a {
     text-decoration: none;
     color: black; }
@@ -43,4 +41,6 @@
     width: auto;
     margin: 0; }
   .show-for-print {
-    display: flex; } }
+    display: flex; }
+  .hide-for-print {
+    display: none; } }
