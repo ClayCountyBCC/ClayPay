@@ -98,7 +98,8 @@
       let tr = document.createElement("tr");
       tr.appendChild(AssignedOnlinePayment.CreateTableCell("th", "CashierId", "25%"));
       tr.appendChild(AssignedOnlinePayment.CreateTableCell("th", "Date", "25%"));
-      tr.appendChild(AssignedOnlinePayment.CreateTableCell("th", "Amount", "25%"));
+      tr.appendChild(AssignedOnlinePayment.CreateTableCell("th", "Amount", "10%"));
+      tr.appendChild(AssignedOnlinePayment.CreateTableCell("th", "Assigned To", "15%"));
       let th = AssignedOnlinePayment.CreateTableCell("th", "", "25%");
       let refresh = document.createElement("button");
       refresh.type = "button";
@@ -122,6 +123,8 @@
       tr.appendChild(Balancing.Payment.createTableCellLink("td", payment.CashierId, "25%"));
       tr.appendChild(AssignedOnlinePayment.CreateTableCell("td", Utilities.Format_Date(payment.TransactionDate)));
       tr.appendChild(AssignedOnlinePayment.CreateTableCell("td", Utilities.Format_Amount(payment.AmountApplied), "", "has-text-right"));
+      tr.appendChild(AssignedOnlinePayment.CreateTableCell("td", payment.AssignedTo == "" ? "Unassigned" : payment.AssignedTo, "has-text-right"));
+
       let td = AssignedOnlinePayment.CreateTableCell("td", "");
       let assign = document.createElement("button");
       assign.type = "button";
