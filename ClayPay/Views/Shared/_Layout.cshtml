@@ -121,8 +121,6 @@
 
     function CheckBrowser()
     {
-      console.log('MSIE check 1', navigator.userAgent.indexOf("MSIE"));
-      console.log('MSIE check 2', navigator.appVersion.indexOf('Trident/'));
       return (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0); 
     }
 
