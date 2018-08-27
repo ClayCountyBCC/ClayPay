@@ -118,11 +118,8 @@ namespace ClayPay.Models
               break;
             case "MESSAGE":
             case "ERRORMSG":
-              var i = val[1].Substring(1, 6);
-              if (val[1].Substring(1, 6) != "MFC-01" && !UseProduction)
+              if ((!UseProduction && val[1].Substring(1, 6) != "MFC-01") || UseProduction)
               {
-                Console.WriteLine("substring: ", val[1].Substring(1, 6));
-
                 ErrorText = val[1];
               }
               break;
