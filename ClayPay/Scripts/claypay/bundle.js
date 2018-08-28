@@ -1062,6 +1062,7 @@ var clayPay;
             this.PayerZip = "";
             this.UserName = "";
             this.TransactionDate = new Date();
+            this.IsVoided = false;
         }
         CashierData.prototype.ValidatePayer = function () {
             this.ResetPayerData();
@@ -2030,6 +2031,21 @@ var clayPay;
         };
         ClientResponse.CreateReceiptPayerView = function (cd) {
             var df = document.createDocumentFragment();
+            if (cd.IsVoided) {
+                var level = document.createElement("div");
+                level.classList.add("level");
+                level.classList.add("notification");
+                level.classList.add("is-danger");
+                var levelitem = document.createElement("p");
+                levelitem.classList.add("level-item");
+                levelitem.classList.add("title");
+                //levelitem.style.alignContent = "center";
+                //levelitem.style.alignItems = "center";
+                //levelitem.style.justifyContent = "center";
+                levelitem.appendChild(document.createTextNode("This transaction has been voided."));
+                level.appendChild(levelitem);
+                df.appendChild(level);
+            }
             df.appendChild(ClientResponse.CreatePayerDataColumns("Name", cd.PayerName, "Company Name", cd.PayerCompanyName));
             df.appendChild(ClientResponse.CreatePayerDataColumns("Phone Number", cd.PayerPhoneNumber, "Email Address", cd.PayerEmailAddress));
             df.appendChild(ClientResponse.CreatePayerDataColumns("Street Address", cd.PayerStreet1, "Address 2", cd.PayerStreet2));
@@ -2142,7 +2158,7 @@ var clayPay;
     }());
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=clientresponse.js.map
+//# sourceMappingURL=ClientResponse.js.map
 /// <reference path="payment.ts" />
 /// <reference path="clientresponse.ts" />
 var clayPay;
@@ -2310,7 +2326,7 @@ var clayPay;
     }());
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=newtransaction.js.map
+//# sourceMappingURL=NewTransaction.js.map
 var clayPay;
 (function (clayPay) {
     var AppType = /** @class */ (function () {
@@ -2858,4 +2874,4 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map

@@ -80,6 +80,23 @@ namespace clayPay
     private static CreateReceiptPayerView(cd: CashierData): DocumentFragment
     {
       let df = document.createDocumentFragment();
+      if (cd.IsVoided)
+      {
+        let level = document.createElement("div");
+        level.classList.add("level");
+        level.classList.add("notification");
+        level.classList.add("is-danger");
+        let levelitem = document.createElement("p");
+        levelitem.classList.add("level-item");        
+        levelitem.classList.add("title");
+        //levelitem.style.alignContent = "center";
+        //levelitem.style.alignItems = "center";
+        //levelitem.style.justifyContent = "center";
+        levelitem.appendChild(document.createTextNode("This transaction has been voided."));
+        level.appendChild(levelitem);
+        df.appendChild(level);
+
+      }
       df.appendChild(ClientResponse.CreatePayerDataColumns("Name", cd.PayerName, "Company Name", cd.PayerCompanyName));
       df.appendChild(ClientResponse.CreatePayerDataColumns("Phone Number", cd.PayerPhoneNumber, "Email Address", cd.PayerEmailAddress));
       df.appendChild(ClientResponse.CreatePayerDataColumns("Street Address", cd.PayerStreet1, "Address 2", cd.PayerStreet2));

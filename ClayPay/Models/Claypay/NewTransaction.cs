@@ -374,6 +374,7 @@ namespace ClayPay.Models.Claypay
       dp.Add("@PayerStreetAddress", TransactionCashierData.PayerStreetAddress);
       dp.Add("@PayerStreet2", TransactionCashierData.PayerCity + " " + TransactionCashierData.PayerState + ", " + TransactionCashierData.PayerZip);
       dp.Add("@IPAddress", TransactionCashierData.ipAddress);
+      dp.Add("@PayerEmailAddress", TransactionCashierData.PayerEmailAddress);
 
       string sql = @"
         USE WATSC;
@@ -384,7 +385,7 @@ namespace ClayPay.Models.Claypay
           @YR;
 
         INSERT INTO ccCashier
-          (CoName,CashierId,LstUpdt,[Name],TransDt,Phone,Addr1,Addr2,NTUser, PayerIPAddress)
+          (CoName,CashierId,LstUpdt,[Name],TransDt,Phone,Addr1,Addr2,NTUser, PayerIPAddress, EmailAddress)
         VALUES
           (
             @PayerCompanyName,
@@ -396,7 +397,8 @@ namespace ClayPay.Models.Claypay
             @PayerStreetAddress,
             @PayerStreet2,
             @UserName, 
-            @IPAddress
+            @IPAddress,
+            @PayerEmailAddress
           );
 
         SET @otId = @@IDENTITY;";
@@ -421,112 +423,7 @@ namespace ClayPay.Models.Claypay
         //TODO: add rollback in SaveTransaction function
       }
     }
-
-    public bool GetNextCashierId()
-    {
-      // I don't know if the year is supposed to be the fiscal year.
-      // the code in  prc_upd_ccNextCashierId sets FY = the @Yr var
-      // code for @Yr checks the current year against the FY field and if it is not equal,
-      // it updates the FY and next avail fieldfield
-      var dp = new DynamicParameters();
-      dp.Add("@CashierId", value: "", dbType: DbType.String, direction: ParameterDirection.Output);
-      var query = @"
-          USE WATSC;
-          DECLARE @YR CHAR(2) = RIGHT(CAST(YEAR(GETDATE()) AS CHAR(4)), 2);
-
-          EXEC dbo.prc_upd_ClayPay_ccNextAvail_GetNextCashierId 
-            @CashierId OUTPUT,
-            @YR;
-      ";
-
-      try
-      {
-        var i = Constants.Exec_Query(query,dp);
-        if(i > 0)
-        {
-          TransactionCashierData.CashierId = dp.Get<string>("@CashierId");
-          return true;
-        }
-        else
-        {
-          TransactionCashierData.CashierId = "-1";
-          return false;
-        }
-
-      }
-      catch (Exception ex)
-      {
-        Constants.Log(ex, query);
-        TransactionCashierData.CashierId = "-1";
-        return false;
-        //TODO: add rollback in SaveTransaction function
-      }
-    }
-
-    public bool SaveCashierRow()
-    {
-      var dp = new DynamicParameters();
-      dp.Add("@otId", dbType: DbType.Int32, direction: ParameterDirection.Output);
-
-      //if(CurrentUser.authenticated) // Wha'ts the point of hardcoding a station number?
-      //{
-      //  dp.Add("@StationId", 1);
-      //}
-      dp.Add("@PayerCompanyName", TransactionCashierData.PayerCompanyName);
-      dp.Add("@CashierId", TransactionCashierData.CashierId);
-      dp.Add("@PayerName", TransactionCashierData.PayerFirstName + " " + 
-                           TransactionCashierData.PayerLastName);
-      dp.Add("@UserName", TransactionCashierData.CurrentUser.user_name);
-      dp.Add("@TransactionDate", TransactionDate);
-      dp.Add("@PayerPhoneNumber", TransactionCashierData.PayerPhoneNumber);
-      dp.Add("@PayerStreetAddress", TransactionCashierData.PayerStreetAddress);
-      dp.Add("@PayerStreet2", TransactionCashierData.PayerCity + " " + 
-                              TransactionCashierData.PayerState + ", " + 
-                              TransactionCashierData.PayerZip);
-      dp.Add("@IPAddress", TransactionCashierData.ipAddress);
-      dp.Add("@PayerEmailAddress", TransactionCashierData.PayerEmailAddress);
-
-
-      string query = @"
-          USE WATSC;
-
-          EXEC dbo.prc_ins_ClayPay_ccCashier_NewOTid 
-            @otId int output, 
-            @CoName = @PayerCompanyName,
-            @CashierId = @CashierId,
-            @Name = @PayerName,            
-            @TransDt = @TransactionDate,
-            @Phone = @PayerPhoneNumber,
-            @Addr1 = @PayerStreetAddress,
-            @Addr2 = @PayerCity + ' ' + @PayerState + ', ' + @PayerZip,
-            @NTUser = @UserName, 
-            @IPAddress = @IPAddress,
-            @EmailAddress = @PayerEmailAddress";
-      try
-      {
-        var i = Constants.Exec_Query(query, dp);
-        if (i > 0)
-        {
-           TransactionCashierData.OTId = dp.Get<int>("@otId");
-           return true;
-        }
-        else
-        {
-          TransactionCashierData.OTId = -1;
-          return false;
-        }
-
-      }
-      catch (Exception ex)
-      {
-        Constants.Log(ex, query);
-        TransactionCashierData.OTId = -1;
-        return false;
-        //TODO: add rollback in SaveTransaction function
-      }
-
-    }
-
+    
     private static DataTable CreateCashierPaymentDataTable()
     {
       var dt = new DataTable("CashierPayment");

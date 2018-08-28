@@ -16,6 +16,7 @@ var clayPay;
             this.PayerZip = "";
             this.UserName = "";
             this.TransactionDate = new Date();
+            this.IsVoided = false;
         }
         CashierData.prototype.ValidatePayer = function () {
             this.ResetPayerData();

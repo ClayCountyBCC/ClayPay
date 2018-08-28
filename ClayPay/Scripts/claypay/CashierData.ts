@@ -16,6 +16,7 @@
     PayerZip: string;
     UserName: string;
     TransactionDate: Date;
+    IsVoided: boolean;
   }
 
   export class CashierData implements ICashierData
@@ -34,7 +35,7 @@
     public PayerZip: string = "";
     public UserName: string = "";
     public TransactionDate: Date = new Date();
-
+    public IsVoided: boolean = false;
     // Payer Inputs
     public static payerFirstName = "payerFirstName";
     public static payerLastName = "payerLastName";
@@ -54,7 +55,6 @@
 
     constructor()
     {
-
     }
 
     public ValidatePayer(): boolean

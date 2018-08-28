@@ -33,10 +33,10 @@ namespace ClayPay.Models.Claypay
     public string PayerState { get; set; } = "";// Required
     public string PayerZip { get; set; } = "";// Required
     public string UserName { get; set; } = "";
+    public bool IsVoided { get; set; } = false;
 
     public CashierData()
     {
-      
     }
     
     public static CashierData Get(string cashierid)
@@ -58,7 +58,8 @@ namespace ClayPay.Models.Claypay
           ISNULL(Addr1, '') PayerStreet1,
           ISNULL(Addr2, '') PayerStreet2,
           ISNULL(EmailAddress, '') PayerEmailAddress,
-          NTUser UserName
+          NTUser UserName,
+          IsVoided
         FROM ccCashier
         WHERE CashierId = @CashierId";
 
