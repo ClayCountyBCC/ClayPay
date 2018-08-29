@@ -2039,9 +2039,6 @@ var clayPay;
                 var levelitem = document.createElement("p");
                 levelitem.classList.add("level-item");
                 levelitem.classList.add("title");
-                //levelitem.style.alignContent = "center";
-                //levelitem.style.alignItems = "center";
-                //levelitem.style.justifyContent = "center";
                 levelitem.appendChild(document.createTextNode("This transaction has been voided."));
                 level.appendChild(levelitem);
                 df.appendChild(level);
@@ -2158,7 +2155,7 @@ var clayPay;
     }());
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ClientResponse.js.map
+//# sourceMappingURL=clientresponse.js.map
 /// <reference path="payment.ts" />
 /// <reference path="clientresponse.ts" />
 var clayPay;
@@ -2326,7 +2323,7 @@ var clayPay;
     }());
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=NewTransaction.js.map
+//# sourceMappingURL=newtransaction.js.map
 var clayPay;
 (function (clayPay) {
     var AppType = /** @class */ (function () {
@@ -2874,4 +2871,4 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=UI.js.map
+//# sourceMappingURL=ui.js.map

@@ -43,6 +43,13 @@ namespace ClayPay.Models.Balancing
       //
       Log = DJournalLog.Get(dateToProcess);
       var NextDateToFinalize = LastDateFinalized().AddDays(1);
+      var rolloutDate = DateTime.Parse("8/23/2018");
+      if (dateToProcess < rolloutDate && !Log.IsCreated && !finalize)
+      {
+        Log.DJournalDate = dateToProcess;
+        Log.FinalizedOn = rolloutDate;
+        Log.CreatedBy = "Prior to Claypay";
+      }
       if (finalize)
       {
         if (Log.IsCreated) Error.Add($"{dateToProcess.ToShortDateString()} has already been finalized.");
@@ -134,7 +141,7 @@ namespace ClayPay.Models.Balancing
 
     public static bool IsDateFinalized(DateTime DateToCheck)
     {
-      return DateToCheck.Date < LastDateFinalized().Date;
+      return DateToCheck.Date <= LastDateFinalized().Date;
     }
 
     public static DateTime LastDateFinalized()

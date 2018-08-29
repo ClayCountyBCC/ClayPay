@@ -15,16 +15,16 @@
   }
   export class CashierDetailData implements ICashierDetailData
   {
-    public CashierId: string;
+    public CashierId: string = "";
     public TransactionDate: Date;
     public Name: string;
-    public AmountApplied: number;
-    public PaymentType: string;
+    public AmountApplied: number = 0;
+    public PaymentType: string = "";
     public CheckNumber: string;
     public TransactionNumber: string;
     public Info: string;
     public AssocKey: string;
-    public ChargeTotal: number;
+    public ChargeTotal: number = 0;
 
     constructor()
     {
@@ -43,11 +43,62 @@
       table.style.marginBottom = "1em";
       table.appendChild(CashierDetailData.BuildTableHeader());
       let tbody = document.createElement("tbody");
+      let previous = new CashierDetailData();
+      let totalAmounts = 0;
+      let totalCharges = 0;
       for (let cd of cdd)
       {
-        tbody.appendChild(CashierDetailData.BuildTableRow(cd));
+        let AmountApplied = "";
+        let ChargeAmount = "";
+        if (cd.CashierId === previous.CashierId)
+        {
+          if (cd.AssocKey === previous.AssocKey &&
+            cd.ChargeTotal === previous.ChargeTotal)
+          {
+            AmountApplied = Utilities.Format_Amount(cd.AmountApplied);
+            totalAmounts += cd.AmountApplied;
+          }
+          else
+          {
+            if (cd.AmountApplied === previous.AmountApplied) 
+            {
+              ChargeAmount = Utilities.Format_Amount(cd.ChargeTotal);
+              totalCharges += cd.ChargeTotal;
+            }
+            else
+            {
+              AmountApplied = Utilities.Format_Amount(cd.AmountApplied);
+              ChargeAmount = Utilities.Format_Amount(cd.ChargeTotal);
+              totalAmounts += cd.AmountApplied;
+              totalCharges += cd.ChargeTotal;
+            }
+          }
+        }
+        else
+        {
+          AmountApplied = Utilities.Format_Amount(cd.AmountApplied);
+          ChargeAmount = Utilities.Format_Amount(cd.ChargeTotal);
+          totalAmounts += cd.AmountApplied;
+          totalCharges += cd.ChargeTotal;
+        }
+        let tr = document.createElement("tr");
+        tr.appendChild(CashierDetailData.CreateTableCell("td", cd.CashierId));
+        tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Date(cd.TransactionDate), "10%", "has-text-centered"));
+        tr.appendChild(CashierDetailData.CreateTableCell("td", cd.Name, "", "has-text-left"));
+
+        tr.appendChild(CashierDetailData.CreateTableCell("td", AmountApplied, "", "has-text-right"));
+        tr.appendChild(CashierDetailData.CreateTableCell("td", cd.PaymentType));
+        let trans = cd.CheckNumber.length > 0 ? cd.CheckNumber : cd.TransactionNumber;
+        tr.appendChild(CashierDetailData.CreateTableCell("td", trans));
+        tr.appendChild(CashierDetailData.CreateTableCell("td", cd.Info));
+        tr.appendChild(CashierDetailData.CreateTableCell("td", cd.AssocKey));
+        tr.appendChild(CashierDetailData.CreateTableCell("td", ChargeAmount, "", "has-text-right"));
+        tbody.appendChild(tr);
+        //tbody.appendChild(CashierDetailData.BuildTableRow(cd, previous, totalAmounts, totalCharges));
+        previous = cd;
       }
       table.appendChild(tbody);
+      table.appendChild(CashierDetailData.BuildTableFooter(totalAmounts, totalCharges));
       df.appendChild(table);
       return df;
     }
@@ -69,20 +120,21 @@
       return thead;
     }
 
-    private static BuildTableRow(data: CashierDetailData): HTMLTableRowElement
+    private static BuildTableFooter(TotalAmount: number, TotalCharges: number): HTMLTableSectionElement
     {
+      let tfoot = document.createElement("tfoot");
       let tr = document.createElement("tr");
-      tr.appendChild(CashierDetailData.CreateTableCell("td", data.CashierId));
-      tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Date(data.TransactionDate), "10%", "has-text-centered"));
-      tr.appendChild(CashierDetailData.CreateTableCell("td", data.Name, "", "has-text-left"));
-      tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Amount(data.AmountApplied), "", "has-text-right"));
-      tr.appendChild(CashierDetailData.CreateTableCell("td", data.PaymentType));
-      let trans = data.CheckNumber.length > 0 ? data.CheckNumber : data.TransactionNumber;
-      tr.appendChild(CashierDetailData.CreateTableCell("td", trans));
-      tr.appendChild(CashierDetailData.CreateTableCell("td", data.Info));
-      tr.appendChild(CashierDetailData.CreateTableCell("td", data.AssocKey));
-      tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Amount(data.ChargeTotal), "", "has-text-right"));
-      return tr;
+      tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
+      tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
+      tr.appendChild(CashierDetailData.CreateTableCell("td", "Amount Totals"));
+      tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Amount(TotalAmount)));
+      tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
+      tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
+      tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
+      tr.appendChild(CashierDetailData.CreateTableCell("td", "Total Charges"));
+      tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Amount(TotalCharges)));
+      tfoot.appendChild(tr);
+      return tfoot;
     }
 
     private static CreateTableCell(type: string, value: string, width: string = "", className: string = "has-text-centered"): HTMLTableCellElement

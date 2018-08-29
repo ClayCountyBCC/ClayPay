@@ -53,7 +53,7 @@ namespace ClayPay.Models.Balancing
         ISNULL(CP.CkNo, '') CheckNumber, 
         ISNULL(CP.TransactionId, '') TransactionNumber,
         CP.Info,
-        ISNULL(CI.AssocKey, '') AssocKey,
+        ISNULL(LTRIM(RTRIM(CI.AssocKey)), '') AssocKey,
         SUM(CI.Total) ChargeTotal
       FROM ccCashier CC
       INNER JOIN CashierIds C ON CC.CashierId = C.CashierId

@@ -54,9 +54,6 @@ var clayPay;
                 var levelitem = document.createElement("p");
                 levelitem.classList.add("level-item");
                 levelitem.classList.add("title");
-                //levelitem.style.alignContent = "center";
-                //levelitem.style.alignItems = "center";
-                //levelitem.style.justifyContent = "center";
                 levelitem.appendChild(document.createTextNode("This transaction has been voided."));
                 level.appendChild(levelitem);
                 df.appendChild(level);
@@ -173,4 +170,4 @@ var clayPay;
     }());
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ClientResponse.js.map
+//# sourceMappingURL=clientresponse.js.map
