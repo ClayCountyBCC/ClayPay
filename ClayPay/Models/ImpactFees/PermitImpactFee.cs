@@ -138,11 +138,11 @@ namespace ClayPay.Models.ImpactFees
           Error_Text = "This fee has already been paid, so it is not eligible for the impact fee credit process.";
         }
       }
-      if (!Issue_Date.HasValue)
-      {
-        Error_Text = "This permit has not yet been issued.";
-        return;
-      }
+      //if (!Issue_Date.HasValue)
+      //{
+      //  Error_Text = "This permit has not yet been issued.";
+      //  return;
+      //}
       if (Void_Date.HasValue)
       {
         Error_Text = "This permit has been voided.";

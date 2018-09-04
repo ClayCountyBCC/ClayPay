@@ -2355,9 +2355,6 @@ var clayPay;
         clayPay.UI.buildMenuElements(clayPay.CurrentTransaction.IsCashier);
         loadDefaultValues();
         window.onhashchange = HandleHash;
-        if (location.hash.substring(1).length > 0) {
-            HandleHash();
-        }
     }
     clayPay.start = start;
     function HandleHash() {
@@ -2386,8 +2383,9 @@ var clayPay;
     }
     clayPay.HandleHash = HandleHash;
     function HandleSearch(buttonId, inputId, value) {
+        console.log('buttonid', buttonId, 'inputId', inputId, 'value', value);
         var button = document.getElementById(buttonId);
-        Utilities.Set_Text(inputId, value);
+        Utilities.Set_Value(inputId, value);
         button.click();
     }
     function HandleUIEvents() {
@@ -2456,6 +2454,9 @@ var clayPay;
             .then(function (fee) {
             clayPay.ConvenienceFee = fee;
             console.log('conv fee is', fee);
+            if (location.hash.substring(1).length > 0) {
+                HandleHash();
+            }
         }, function (e) {
             console.log('error getting convenience fee', e);
             // do something with the error here

@@ -24,10 +24,6 @@ namespace clayPay
     UI.buildMenuElements(CurrentTransaction.IsCashier);
     loadDefaultValues();
     window.onhashchange = HandleHash;
-    if (location.hash.substring(1).length > 0)
-    {
-      HandleHash();
-    }
   }
 
   export function HandleHash()
@@ -62,8 +58,9 @@ namespace clayPay
 
   function HandleSearch(buttonId: string, inputId: string, value: string)
   {
+    console.log('buttonid', buttonId, 'inputId', inputId, 'value', value);
     let button = <HTMLButtonElement>document.getElementById(buttonId);
-    Utilities.Set_Text(inputId, value);
+    Utilities.Set_Value(inputId, value);
     button.click();
   }
 
@@ -163,7 +160,10 @@ namespace clayPay
       {
         ConvenienceFee = fee;
         console.log('conv fee is', fee);
-
+        if (location.hash.substring(1).length > 0)
+        {
+          HandleHash();
+        }
       }, function (e)
         {
           console.log('error getting convenience fee', e);
