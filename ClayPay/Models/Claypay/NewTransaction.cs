@@ -175,6 +175,7 @@ namespace ClayPay.Models.Claypay
 
       // If not cashier and cash || check, return error
       if (!TransactionCashierData.CurrentUser.djournal_access &&
+          !TransactionCashierData.CurrentUser.cashier_access &&
          (CashPayment.Validated ||
           CheckPayment.Validated))
       {

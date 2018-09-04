@@ -304,7 +304,6 @@
     <Compile Include="Models\Balancing\DJournal.cs" />
     <Compile Include="Models\Balancing\DJournalLog.cs" />
     <Compile Include="Models\Balancing\Payment.cs" />
-    <Compile Include="Models\Claypay\ActiveTransactions.cs" />
     <Compile Include="Models\Claypay\AppType.cs" />
     <Compile Include="Models\Balancing\AssignedOnlinePayment.cs" />
     <Compile Include="Models\Claypay\CashierData.cs" />

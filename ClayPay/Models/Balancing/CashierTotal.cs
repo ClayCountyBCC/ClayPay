@@ -60,8 +60,6 @@ namespace ClayPay.Models.Balancing
         SELECT CashierId
         FROM dbo.ccCashier C
         WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE))
-        
-        
 
         SELECT 
         ISNULL(Code, '') Code, 
@@ -79,6 +77,9 @@ namespace ClayPay.Models.Balancing
               'AA' CdType
             FROM cccashieritem C
             INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
+            INNER JOIN ccCashierPayment CP ON CP.OTid = C.OTId
+            INNER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(CP.PmtType,5))
+            WHERE L.CdType = 'PMTTYPE' OR LOWER(L.Code) IN ('cc_online', 'cc_cashier')
 
           UNION
 
@@ -91,7 +92,7 @@ namespace ClayPay.Models.Balancing
              INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
            ) AS TempAllPayments
            RIGHT OUTER JOIN ccLookUp L ON LEFT(TempAllPayments.PmtType,5) = LEFT(L.CODE,5)
-           WHERE L.CdType IN ('SPECIALPT','PMTTYPE')
+           WHERE L.CdType IN ('PMTTYPE') OR LOWER(L.Code) IN ('cc_online', 'cc_cashier')
            GROUP BY L.SORTKEY, L.Code, L.Narrative, CdType, PmtType
 
            UNION  
@@ -131,11 +132,14 @@ namespace ClayPay.Models.Balancing
             FROM ccCashierPayment CP
             INNER JOIN ccCashier C ON CP.OTid = C.OTid
             INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
+            INNER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(CP.PmtType,5))
+            WHERE L.CdType = 'PMTTYPE' OR LOWER(L.Code) IN ('cc_online', 'cc_cashier')
 
         ) AS TMP
         WHERE AmtApplied > 0 AND AmtApplied IS NOT NULL
         ORDER BY CdType, SortKey; --THIS ALLOWS FOR THE DATA TO BE IN THE SAME ORDER AS IT IS CURRENTLY
                                   -- SOLELY FOR CONTINUITY. THE ACTUAL LAYOUT MAY CHANGE BASED ON MOCKUP
+
 
        ";
       try
