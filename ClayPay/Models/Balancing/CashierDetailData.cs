@@ -32,14 +32,13 @@ namespace ClayPay.Models.Balancing
       // and the total charges for that AssocKey and Cashier Id.
       var param = new DynamicParameters();
       param.Add("@TransactionDate", TransactionDate);
+      // INNER JOIN ccLookUp L ON UPPER(LEFT(L.CODE,5)) = UPPER(LEFT(CP.PMTTYPE,5)) AND (L.CdType='SPECIALPT' AND L.Code IN ('cc_cashier', 'cc_online'))
       string sql = @"
       WITH CashierIds AS (
         SELECT DISTINCT
           C.CashierId
         FROM ccCashier C
         INNER JOIN ccCashierPayment CP ON CP.OTid = C.OTId
-        INNER JOIN ccLookUp L ON UPPER(LEFT(L.CODE,5)) = UPPER(LEFT(CP.PMTTYPE,5)) 
-          AND (L.CdType='PMTTYPE' OR (L.CdType='SPECIALPT' AND L.Code IN ('cc_cashier', 'cc_online')))
         WHERE 
           CAST(C.TransDt AS DATE) = CAST(@TransactionDate AS DATE)
       )

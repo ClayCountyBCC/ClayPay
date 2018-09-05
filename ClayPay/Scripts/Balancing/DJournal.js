@@ -11,6 +11,7 @@ var Balancing;
             this.DJournalDateFormatted = "";
             this.CanDJournalBeFinalized = false;
             this.CashierData = [];
+            this.ImpactFeeData = [];
         }
         DJournal.ToggleButtons = function (toggle) {
             Utilities.Toggle_Loading_Button(DJournal.DJournalSearchDateButton, toggle);
@@ -337,7 +338,8 @@ var Balancing;
             var df = document.createDocumentFragment();
             df.appendChild(DJournal.CreateDJournalTable(dj, true));
             df.appendChild(Balancing.Account.BuildGLAccountTotals(dj.GLAccountTotals));
-            df.appendChild(Balancing.CashierDetailData.BuildCashierDataTable(dj.CashierData));
+            df.appendChild(Balancing.CashierDetailData.BuildCashierDataTable(dj.CashierData, "GL Data"));
+            df.appendChild(Balancing.CashierDetailData.BuildCashierDataTable(dj.ImpactFeeData, "Impact Fee Data"));
             container.appendChild(df);
         };
         DJournal.DJournalTotalsContainer = "djournalTotals";

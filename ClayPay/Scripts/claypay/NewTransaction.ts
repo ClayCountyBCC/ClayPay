@@ -139,7 +139,11 @@ namespace clayPay
           Utilities.Error_Show(NewTransaction.paymentError, "The Total Amount Paid cannot be greater than the Total Amount Due if no cash has been received.")
           return false;
         }
-        if (this.TotalAmountRemaining > 0) return false;
+        if (this.TotalAmountRemaining > 0)
+        {
+          return false;
+        }
+          
       }
       return true;
     }
@@ -187,7 +191,6 @@ namespace clayPay
       Utilities.Post<ClientResponse>(path + "API/Payments/Pay/", this)
         .then(function (cr)
         {
-          console.log('client response', cr);
           if (cr.Errors.length > 0) // Errors occurred, payment was unsuccessful.
           {
             Utilities.Error_Show(errorTarget, cr.Errors);

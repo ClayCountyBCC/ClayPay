@@ -30,18 +30,17 @@
     {
     }
 
-    public static BuildCashierDataTable(cdd: Array<CashierDetailData>): DocumentFragment
+    public static BuildCashierDataTable(cdd: Array<CashierDetailData>, title: string): DocumentFragment
     {
       let df = document.createDocumentFragment();
-      let table = document.createElement("table");//<HTMLTableElement>
+      let table = document.createElement("table");
       table.classList.add("pagebreak");
-
       table.classList.add("table");
       table.classList.add("is-bordered");
       table.classList.add("is-fullwidth");
       table.style.marginTop = "1em";
       table.style.marginBottom = "1em";
-      table.appendChild(CashierDetailData.BuildTableHeader());
+      table.appendChild(CashierDetailData.BuildTableHeader(title));
       let tbody = document.createElement("tbody");
       let previous = new CashierDetailData();
       let totalAmounts = 0;
@@ -97,15 +96,20 @@
         //tbody.appendChild(CashierDetailData.BuildTableRow(cd, previous, totalAmounts, totalCharges));
         previous = cd;
       }
+      tbody.appendChild(CashierDetailData.BuildTotalRow(totalAmounts, totalCharges));
       table.appendChild(tbody);
-      table.appendChild(CashierDetailData.BuildTableFooter(totalAmounts, totalCharges));
       df.appendChild(table);
       return df;
     }
 
-    private static BuildTableHeader(): HTMLTableSectionElement
+    private static BuildTableHeader(title: string): HTMLTableSectionElement
     {
       let thead = document.createElement("thead");
+      let titleTr = document.createElement("tr");
+      let titleTh = CashierDetailData.CreateTableCell("th", title, "", "has-text-centered");      
+      titleTh.colSpan = 9;
+      titleTr.appendChild(titleTh);
+      thead.appendChild(titleTr);
       let tr = document.createElement("tr");
       tr.appendChild(CashierDetailData.CreateTableCell("th", "CashierId", "10%", "has-text-centered"));
       tr.appendChild(CashierDetailData.CreateTableCell("th", "Date", "15%", "has-text-centered"));
@@ -120,9 +124,8 @@
       return thead;
     }
 
-    private static BuildTableFooter(TotalAmount: number, TotalCharges: number): HTMLTableSectionElement
+    private static BuildTotalRow(TotalAmount: number, TotalCharges: number): HTMLTableRowElement
     {
-      let tfoot = document.createElement("tfoot");
       let tr = document.createElement("tr");
       tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
       tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
@@ -133,8 +136,7 @@
       tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
       tr.appendChild(CashierDetailData.CreateTableCell("td", "Total Charges"));
       tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Amount(TotalCharges)));
-      tfoot.appendChild(tr);
-      return tfoot;
+      return tr;
     }
 
     private static CreateTableCell(type: string, value: string, width: string = "", className: string = "has-text-centered"): HTMLTableCellElement

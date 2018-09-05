@@ -7,16 +7,16 @@ var Balancing;
             this.PaymentType = "";
             this.ChargeTotal = 0;
         }
-        CashierDetailData.BuildCashierDataTable = function (cdd) {
+        CashierDetailData.BuildCashierDataTable = function (cdd, title) {
             var df = document.createDocumentFragment();
-            var table = document.createElement("table"); //<HTMLTableElement>
+            var table = document.createElement("table");
             table.classList.add("pagebreak");
             table.classList.add("table");
             table.classList.add("is-bordered");
             table.classList.add("is-fullwidth");
             table.style.marginTop = "1em";
             table.style.marginBottom = "1em";
-            table.appendChild(CashierDetailData.BuildTableHeader());
+            table.appendChild(CashierDetailData.BuildTableHeader(title));
             var tbody = document.createElement("tbody");
             var previous = new CashierDetailData();
             var totalAmounts = 0;
@@ -65,13 +65,18 @@ var Balancing;
                 //tbody.appendChild(CashierDetailData.BuildTableRow(cd, previous, totalAmounts, totalCharges));
                 previous = cd;
             }
+            tbody.appendChild(CashierDetailData.BuildTotalRow(totalAmounts, totalCharges));
             table.appendChild(tbody);
-            table.appendChild(CashierDetailData.BuildTableFooter(totalAmounts, totalCharges));
             df.appendChild(table);
             return df;
         };
-        CashierDetailData.BuildTableHeader = function () {
+        CashierDetailData.BuildTableHeader = function (title) {
             var thead = document.createElement("thead");
+            var titleTr = document.createElement("tr");
+            var titleTh = CashierDetailData.CreateTableCell("th", title, "", "has-text-centered");
+            titleTh.colSpan = 9;
+            titleTr.appendChild(titleTh);
+            thead.appendChild(titleTr);
             var tr = document.createElement("tr");
             tr.appendChild(CashierDetailData.CreateTableCell("th", "CashierId", "10%", "has-text-centered"));
             tr.appendChild(CashierDetailData.CreateTableCell("th", "Date", "15%", "has-text-centered"));
@@ -85,8 +90,7 @@ var Balancing;
             thead.appendChild(tr);
             return thead;
         };
-        CashierDetailData.BuildTableFooter = function (TotalAmount, TotalCharges) {
-            var tfoot = document.createElement("tfoot");
+        CashierDetailData.BuildTotalRow = function (TotalAmount, TotalCharges) {
             var tr = document.createElement("tr");
             tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
             tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
@@ -97,8 +101,7 @@ var Balancing;
             tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
             tr.appendChild(CashierDetailData.CreateTableCell("td", "Total Charges"));
             tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Amount(TotalCharges)));
-            tfoot.appendChild(tr);
-            return tfoot;
+            return tr;
         };
         CashierDetailData.CreateTableCell = function (type, value, width, className) {
             if (width === void 0) { width = ""; }

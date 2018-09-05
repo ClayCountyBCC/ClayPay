@@ -18,6 +18,7 @@ namespace ClayPay.Models.Balancing
     public List<CashierTotal> GUTotals { get; set; } = new List<CashierTotal>();
     public List<Account> GLAccountTotals { get; set; } = new List<Account>();
     public List<CashierDetailData> CashierData { get; set; } = new List<CashierDetailData>();
+    public List<CashierDetailData> ImpactFeeData { get; set; } = new List<CashierDetailData>();
     public DJournalLog Log { get; set; } = new DJournalLog();
     public List<string> Error { get; set; } = new List<string>();
     public DateTime DJournalDate { get; set; } = DateTime.MinValue;
@@ -36,7 +37,20 @@ namespace ClayPay.Models.Balancing
       this.ProcessedPaymentTotals = CashierTotal.ProcessPaymentTypeTotals(dateToProcess);
       this.GUTotals = CashierTotal.GetGUTotals(dateToProcess);
       this.GLAccountTotals = Account.GetGLAccountTotals(dateToProcess);
-      this.CashierData = CashierDetailData.Get(dateToProcess);
+      var tempCd = CashierDetailData.Get(dateToProcess);
+      string[] ImpactFeePaymentTypes = {
+      "IFCR",
+      "IFEX",
+      "IFWS",
+      "IFWR"
+      };
+      this.CashierData = (from c in tempCd
+                          where !ImpactFeePaymentTypes.Contains(c.PaymentType)
+                          select c).ToList();
+      this.ImpactFeeData = (from c in tempCd
+                            where ImpactFeePaymentTypes.Contains(c.PaymentType)
+                            select c).ToList();
+
       CheckCatCodesAgainstGL();
       CheckIfDJournalIsBalanced(ProcessedPaymentTotals);
       

@@ -1282,7 +1282,7 @@ var clayPay;
                     break;
                 case ChargeView.cart:
                     // Show Convenience Fee
-                    clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
+                    clayPay.CurrentTransaction.TotalAmountDue = parseFloat(TotalAmount.toFixed(2));
                     clayPay.CurrentTransaction.UpdateTotals();
                     df.appendChild(Charge.buildConvFeeFooterRow());
                     break;
@@ -2155,7 +2155,7 @@ var clayPay;
     }());
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=clientresponse.js.map
+//# sourceMappingURL=ClientResponse.js.map
 /// <reference path="payment.ts" />
 /// <reference path="clientresponse.ts" />
 var clayPay;
@@ -2251,8 +2251,9 @@ var clayPay;
                     Utilities.Error_Show(NewTransaction.paymentError, "The Total Amount Paid cannot be greater than the Total Amount Due if no cash has been received.");
                     return false;
                 }
-                if (this.TotalAmountRemaining > 0)
+                if (this.TotalAmountRemaining > 0) {
                     return false;
+                }
             }
             return true;
         };
@@ -2288,7 +2289,6 @@ var clayPay;
             }
             Utilities.Post(path + "API/Payments/Pay/", this)
                 .then(function (cr) {
-                console.log('client response', cr);
                 if (cr.Errors.length > 0) // Errors occurred, payment was unsuccessful.
                  {
                     Utilities.Error_Show(errorTarget, cr.Errors);
@@ -2323,7 +2323,7 @@ var clayPay;
     }());
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=newtransaction.js.map
+//# sourceMappingURL=NewTransaction.js.map
 var clayPay;
 (function (clayPay) {
     var AppType = /** @class */ (function () {
@@ -2872,4 +2872,4 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map

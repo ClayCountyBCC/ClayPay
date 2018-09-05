@@ -1128,7 +1128,7 @@ var clayPay;
                     break;
                 case ChargeView.cart:
                     // Show Convenience Fee
-                    clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
+                    clayPay.CurrentTransaction.TotalAmountDue = parseFloat(TotalAmount.toFixed(2));
                     clayPay.CurrentTransaction.UpdateTotals();
                     df.appendChild(Charge.buildConvFeeFooterRow());
                     break;
@@ -1636,7 +1636,7 @@ var clayPay;
     }());
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=clientresponse.js.map
+//# sourceMappingURL=ClientResponse.js.map
 /// <reference path="apptypes.ts" />
 /// <reference path="charge.ts" />
 /// <reference path="claypay.ts" />
@@ -2027,7 +2027,7 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map
 var Balancing;
 (function (Balancing) {
     var CashierDetailData = /** @class */ (function () {
@@ -2037,16 +2037,16 @@ var Balancing;
             this.PaymentType = "";
             this.ChargeTotal = 0;
         }
-        CashierDetailData.BuildCashierDataTable = function (cdd) {
+        CashierDetailData.BuildCashierDataTable = function (cdd, title) {
             var df = document.createDocumentFragment();
-            var table = document.createElement("table"); //<HTMLTableElement>
+            var table = document.createElement("table");
             table.classList.add("pagebreak");
             table.classList.add("table");
             table.classList.add("is-bordered");
             table.classList.add("is-fullwidth");
             table.style.marginTop = "1em";
             table.style.marginBottom = "1em";
-            table.appendChild(CashierDetailData.BuildTableHeader());
+            table.appendChild(CashierDetailData.BuildTableHeader(title));
             var tbody = document.createElement("tbody");
             var previous = new CashierDetailData();
             var totalAmounts = 0;
@@ -2095,13 +2095,18 @@ var Balancing;
                 //tbody.appendChild(CashierDetailData.BuildTableRow(cd, previous, totalAmounts, totalCharges));
                 previous = cd;
             }
+            tbody.appendChild(CashierDetailData.BuildTotalRow(totalAmounts, totalCharges));
             table.appendChild(tbody);
-            table.appendChild(CashierDetailData.BuildTableFooter(totalAmounts, totalCharges));
             df.appendChild(table);
             return df;
         };
-        CashierDetailData.BuildTableHeader = function () {
+        CashierDetailData.BuildTableHeader = function (title) {
             var thead = document.createElement("thead");
+            var titleTr = document.createElement("tr");
+            var titleTh = CashierDetailData.CreateTableCell("th", title, "", "has-text-centered");
+            titleTh.colSpan = 9;
+            titleTr.appendChild(titleTh);
+            thead.appendChild(titleTr);
             var tr = document.createElement("tr");
             tr.appendChild(CashierDetailData.CreateTableCell("th", "CashierId", "10%", "has-text-centered"));
             tr.appendChild(CashierDetailData.CreateTableCell("th", "Date", "15%", "has-text-centered"));
@@ -2115,8 +2120,7 @@ var Balancing;
             thead.appendChild(tr);
             return thead;
         };
-        CashierDetailData.BuildTableFooter = function (TotalAmount, TotalCharges) {
-            var tfoot = document.createElement("tfoot");
+        CashierDetailData.BuildTotalRow = function (TotalAmount, TotalCharges) {
             var tr = document.createElement("tr");
             tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
             tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
@@ -2127,8 +2131,7 @@ var Balancing;
             tr.appendChild(CashierDetailData.CreateTableCell("td", ""));
             tr.appendChild(CashierDetailData.CreateTableCell("td", "Total Charges"));
             tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Amount(TotalCharges)));
-            tfoot.appendChild(tr);
-            return tfoot;
+            return tr;
         };
         CashierDetailData.CreateTableCell = function (type, value, width, className) {
             if (width === void 0) { width = ""; }
@@ -2475,6 +2478,7 @@ var Balancing;
             this.DJournalDateFormatted = "";
             this.CanDJournalBeFinalized = false;
             this.CashierData = [];
+            this.ImpactFeeData = [];
         }
         DJournal.ToggleButtons = function (toggle) {
             Utilities.Toggle_Loading_Button(DJournal.DJournalSearchDateButton, toggle);
@@ -2801,7 +2805,8 @@ var Balancing;
             var df = document.createDocumentFragment();
             df.appendChild(DJournal.CreateDJournalTable(dj, true));
             df.appendChild(Balancing.Account.BuildGLAccountTotals(dj.GLAccountTotals));
-            df.appendChild(Balancing.CashierDetailData.BuildCashierDataTable(dj.CashierData));
+            df.appendChild(Balancing.CashierDetailData.BuildCashierDataTable(dj.CashierData, "GL Data"));
+            df.appendChild(Balancing.CashierDetailData.BuildCashierDataTable(dj.ImpactFeeData, "Impact Fee Data"));
             container.appendChild(df);
         };
         DJournal.DJournalTotalsContainer = "djournalTotals";

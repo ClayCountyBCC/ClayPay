@@ -11,6 +11,7 @@
     DJournalDateFormatted: string;
     CanDJournalBeFinalized: boolean;
     CashierData: Array<CashierDetailData>;
+    ImpactFeeData: Array<CashierDetailData>;
   }
 
   export class DJournal implements IDJournal
@@ -24,6 +25,7 @@
     public DJournalDateFormatted: string = "";
     public CanDJournalBeFinalized: boolean = false;
     public CashierData: Array<CashierDetailData> = [];
+    public ImpactFeeData: Array<CashierDetailData> = [];
 
     public static DJournalTotalsContainer: string = "djournalTotals";
     public static DJournalDateInput: string = "djournalDate";
@@ -442,9 +444,11 @@
       let df = document.createDocumentFragment();
       df.appendChild(DJournal.CreateDJournalTable(dj, true));
       df.appendChild(Account.BuildGLAccountTotals(dj.GLAccountTotals));
-      df.appendChild(CashierDetailData.BuildCashierDataTable(dj.CashierData));
+      df.appendChild(CashierDetailData.BuildCashierDataTable(dj.CashierData, "GL Data"));
+      df.appendChild(CashierDetailData.BuildCashierDataTable(dj.ImpactFeeData, "Impact Fee Data"));
       container.appendChild(df);
     }
+
 
 
 
