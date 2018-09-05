@@ -119,7 +119,7 @@
           break;
         case ChargeView.cart:
           // Show Convenience Fee
-          clayPay.CurrentTransaction.TotalAmountDue = TotalAmount;
+          clayPay.CurrentTransaction.TotalAmountDue = Math.round(TotalAmount * 1000) / 1000;
           clayPay.CurrentTransaction.UpdateTotals();
           df.appendChild(Charge.buildConvFeeFooterRow());
           break;
