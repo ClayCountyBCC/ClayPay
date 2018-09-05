@@ -1674,7 +1674,7 @@ var ImpactFees;
     }
     ImpactFees.buildMenuElements = buildMenuElements;
 })(ImpactFees || (ImpactFees = {}));
-//# sourceMappingURL=ImpactFees.js.map
+//# sourceMappingURL=impactfees.js.map
 var ImpactFees;
 (function (ImpactFees) {
     var DeveloperAgreement = /** @class */ (function () {
