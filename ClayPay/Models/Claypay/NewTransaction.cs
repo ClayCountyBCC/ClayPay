@@ -367,15 +367,15 @@ namespace ClayPay.Models.Claypay
       var dp = new DynamicParameters();
       dp.Add("@CashierId", size: 12, dbType: DbType.String, direction: ParameterDirection.Output);
       dp.Add("@otId", dbType: DbType.Int32, direction: ParameterDirection.Output);
-      dp.Add("@PayerCompanyName", TransactionCashierData.PayerCompanyName.Trim());
-      dp.Add("@PayerName", (TransactionCashierData.PayerFirstName.Trim() + " " + TransactionCashierData.PayerLastName.Trim()));
-      dp.Add("@UserName", TransactionCashierData.CurrentUser.user_name.Trim());
+      dp.Add("@PayerCompanyName", TransactionCashierData.PayerCompanyName.Trim(), size: 50);
+      dp.Add("@PayerName", (TransactionCashierData.PayerFirstName.Trim() + " " + TransactionCashierData.PayerLastName.Trim()), size: 50);
+      dp.Add("@UserName", TransactionCashierData.CurrentUser.user_name.Trim(), size: 50);
       dp.Add("@TransactionDate", TransactionDate);
-      dp.Add("@PayerPhoneNumber", TransactionCashierData.PayerPhoneNumber.Trim());
-      dp.Add("@PayerStreetAddress", TransactionCashierData.PayerStreetAddress.Trim());
-      dp.Add("@PayerStreet2", TransactionCashierData.PayerCity.Trim() + " " + TransactionCashierData.PayerState.Trim() + ", " + TransactionCashierData.PayerZip.Trim());
-      dp.Add("@IPAddress", TransactionCashierData.ipAddress.Trim());
-      dp.Add("@PayerEmailAddress", TransactionCashierData.PayerEmailAddress.Trim());
+      dp.Add("@PayerPhoneNumber", TransactionCashierData.PayerPhoneNumber.Trim(), size: 12);
+      dp.Add("@PayerStreetAddress", TransactionCashierData.PayerStreetAddress.Trim(), size: 50);
+      dp.Add("@PayerStreet2", TransactionCashierData.PayerCity.Trim() + " " + TransactionCashierData.PayerState.Trim() + ", " + TransactionCashierData.PayerZip.Trim(), size: 50);
+      dp.Add("@IPAddress", TransactionCashierData.ipAddress.Trim(), size: 15);
+      dp.Add("@PayerEmailAddress", TransactionCashierData.PayerEmailAddress.Trim(), size: 50);
 
       string sql = @"
         USE WATSC;
@@ -429,13 +429,26 @@ namespace ClayPay.Models.Claypay
     {
       var dt = new DataTable("CashierPayment");
 
+      var pt = new DataColumn("PaymentType", typeof(string));
+      pt.MaxLength = 10;
+
+      var info = new DataColumn("Info", typeof(string));
+      info.MaxLength = 50;
+
+      var checkNum = new DataColumn("CheckNumber", typeof(string));
+      checkNum.MaxLength = 12;
+
+      var TransId = new DataColumn("TransactionId", typeof(string));
+      TransId.MaxLength = 50;
+
+      // TODO : Breakout each string and set the maxLength
       dt.Columns.Add("OTid", typeof(int));
-      dt.Columns.Add("PaymentType", typeof(string));
+      dt.Columns.Add(pt);
       dt.Columns.Add("AmountApplied", typeof(decimal));
       dt.Columns.Add("AmountTendered", typeof(decimal));
-      dt.Columns.Add("Info", typeof(string));
-      dt.Columns.Add("CheckNumber", typeof(string));
-      dt.Columns.Add("TransactionId", typeof(string));
+      dt.Columns.Add(info);
+      dt.Columns.Add(checkNum);
+      dt.Columns.Add(TransId);
 
       return dt;
     }
