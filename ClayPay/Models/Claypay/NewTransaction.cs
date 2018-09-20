@@ -84,8 +84,8 @@ namespace ClayPay.Models.Claypay
       {
         //var amountPaid = (from payment in Payments select payment.AmountApplied).Sum();
 
-        var cr = new ClientResponse(TransactionCashierData.CashierId, Charges);
-        cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddress);
+        var cr = new ClientResponse(TransactionCashierData.CashierId.Trim(), Charges);
+        cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddress.Trim());
         return cr;
       }
       else
@@ -367,15 +367,15 @@ namespace ClayPay.Models.Claypay
       var dp = new DynamicParameters();
       dp.Add("@CashierId", size: 12, dbType: DbType.String, direction: ParameterDirection.Output);
       dp.Add("@otId", dbType: DbType.Int32, direction: ParameterDirection.Output);
-      dp.Add("@PayerCompanyName", TransactionCashierData.PayerCompanyName);
-      dp.Add("@PayerName", TransactionCashierData.PayerFirstName + " " + TransactionCashierData.PayerLastName);
-      dp.Add("@UserName", TransactionCashierData.CurrentUser.user_name);
+      dp.Add("@PayerCompanyName", TransactionCashierData.PayerCompanyName.Trim());
+      dp.Add("@PayerName", (TransactionCashierData.PayerFirstName.Trim() + " " + TransactionCashierData.PayerLastName.Trim()));
+      dp.Add("@UserName", TransactionCashierData.CurrentUser.user_name.Trim());
       dp.Add("@TransactionDate", TransactionDate);
-      dp.Add("@PayerPhoneNumber", TransactionCashierData.PayerPhoneNumber);
-      dp.Add("@PayerStreetAddress", TransactionCashierData.PayerStreetAddress);
-      dp.Add("@PayerStreet2", TransactionCashierData.PayerCity + " " + TransactionCashierData.PayerState + ", " + TransactionCashierData.PayerZip);
-      dp.Add("@IPAddress", TransactionCashierData.ipAddress);
-      dp.Add("@PayerEmailAddress", TransactionCashierData.PayerEmailAddress);
+      dp.Add("@PayerPhoneNumber", TransactionCashierData.PayerPhoneNumber.Trim());
+      dp.Add("@PayerStreetAddress", TransactionCashierData.PayerStreetAddress.Trim());
+      dp.Add("@PayerStreet2", TransactionCashierData.PayerCity.Trim() + " " + TransactionCashierData.PayerState.Trim() + ", " + TransactionCashierData.PayerZip.Trim());
+      dp.Add("@IPAddress", TransactionCashierData.ipAddress.Trim());
+      dp.Add("@PayerEmailAddress", TransactionCashierData.PayerEmailAddress.Trim());
 
       string sql = @"
         USE WATSC;
@@ -421,20 +421,22 @@ namespace ClayPay.Models.Claypay
       {
         Constants.Log(ex, sql);
         return false;
-        //TODO: add rollback in SaveTransaction function
+        //TODO: add rollback in StartTransaction function
       }
     }
     
     private static DataTable CreateCashierPaymentDataTable()
     {
       var dt = new DataTable("CashierPayment");
-      dt.Columns.Add("PaymentType", typeof(string));
+
       dt.Columns.Add("OTid", typeof(int));
+      dt.Columns.Add("PaymentType", typeof(string));
       dt.Columns.Add("AmountApplied", typeof(decimal));
       dt.Columns.Add("AmountTendered", typeof(decimal));
+      dt.Columns.Add("Info", typeof(string));
       dt.Columns.Add("CheckNumber", typeof(string));
       dt.Columns.Add("TransactionId", typeof(string));
-      dt.Columns.Add("Info", typeof(string));
+
       return dt;
     }
 
@@ -444,13 +446,13 @@ namespace ClayPay.Models.Claypay
       foreach(Payment p in Payments)
       {
         dt.Rows.Add(
-          p.PaymentTypeValue,
           TransactionCashierData.OTId,
+          p.PaymentTypeValue.Trim(),
           p.AmountApplied,
           p.AmountTendered,
-          p.CheckNumber,
-          p.TransactionId,
-          TransactionCashierData.PayerFirstName + " " + TransactionCashierData.PayerLastName);
+          TransactionCashierData.PayerFirstName.Trim() + " " + TransactionCashierData.PayerLastName.Trim(),
+          p.CheckNumber.Trim(),
+          p.TransactionId.Trim());
       }
 
       string query = $@"
@@ -491,7 +493,7 @@ namespace ClayPay.Models.Claypay
         USE WATSC;
 
         UPDATE ccCashierItem 
-        SET OTId = @OTID, CashierId = @CASHIERID
+        SET OTId = @OTID, CashierId = LTRIM(RTRIM(@CASHIERID))
         WHERE itemId IN @ITEMIDS";
       try
       {
@@ -507,7 +509,7 @@ namespace ClayPay.Models.Claypay
       {
         Constants.Log(ex, query);
         TransactionCashierData.OTId = -1;
-        //TODO: add rollback in SaveTransaction function
+        //TODO: add wait and retry, if subsequent attempt does not work, set up rollback
         return false;
       }
 

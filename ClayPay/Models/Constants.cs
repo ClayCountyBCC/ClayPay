@@ -193,11 +193,12 @@ namespace ClayPay.Models
 
     private static void SaveLog(ErrorLog el, string cs = "ProdLog")
     {
+      el.AppId = appId;
       string sql = @"
           INSERT INTO ErrorData 
-          (applicationName, errorText, errorMessage, 
+          (applicationName, AppId, errorText, errorMessage, 
           errorStacktrace, errorSource, query)  
-          VALUES (@applicationName, @errorText, @errorMessage,
+          VALUES (@applicationName, @AppId, @errorText, @errorMessage,
             @errorStacktrace, @errorSource, @query);";
       try
       {
