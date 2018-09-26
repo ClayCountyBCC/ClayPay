@@ -429,45 +429,34 @@ namespace ClayPay.Models.Claypay
     {
       var dt = new DataTable("CashierPayment");
 
-      var pt = new DataColumn("PaymentType", typeof(string));
-      pt.MaxLength = 10;
+      var pt = new DataColumn("PaymentType", typeof(string));      
+      //pt.MaxLength = 10;
 
       var info = new DataColumn("Info", typeof(string));
-      info.MaxLength = 50;
+      //info.MaxLength = 50;
 
       var checkNum = new DataColumn("CheckNumber", typeof(string));
-      checkNum.MaxLength = 12;
+      //checkNum.MaxLength = 12;
 
       var TransId = new DataColumn("TransactionId", typeof(string));
-      TransId.MaxLength = 50;
+      //TransId.MaxLength = 50;
 
       // TODO : Breakout each string and set the maxLength
-      dt.Columns.Add("OTid", typeof(int));
       dt.Columns.Add(pt);
+      dt.Columns.Add("OTid", typeof(int));
+      
       dt.Columns.Add("AmountApplied", typeof(decimal));
       dt.Columns.Add("AmountTendered", typeof(decimal));
-      dt.Columns.Add(info);
       dt.Columns.Add(checkNum);
       dt.Columns.Add(TransId);
-
+      dt.Columns.Add(info);
       return dt;
     }
 
     public bool SaveCashierPaymentRows()
     {
+      
       var dt = CreateCashierPaymentDataTable();
-      foreach(Payment p in Payments)
-      {
-        dt.Rows.Add(
-          TransactionCashierData.OTId,
-          p.PaymentTypeValue.Trim(),
-          p.AmountApplied,
-          p.AmountTendered,
-          TransactionCashierData.PayerFirstName.Trim() + " " + TransactionCashierData.PayerLastName.Trim(),
-          p.CheckNumber.Trim(),
-          p.TransactionId.Trim());
-      }
-
       string query = $@"
           USE WATSC;
           INSERT INTO ccCashierPayment 
@@ -484,6 +473,22 @@ namespace ClayPay.Models.Claypay
           ";
       try
       {
+        foreach (Payment p in Payments)
+        {
+          var Info = TransactionCashierData.PayerFirstName.Trim() + " " + TransactionCashierData.PayerLastName.Trim();
+          dt.Rows.Add(
+            p.PaymentTypeValue,
+            TransactionCashierData.OTId,
+            p.AmountApplied,
+            p.AmountTendered,
+            p.CheckNumber.Trim().Substring(0, Math.Min(p.CheckNumber.Trim().Length, 12)),
+            p.TransactionId.Trim().Substring(0, Math.Min(p.TransactionId.Trim().Length, 50)),
+            Info.Substring(0, Math.Min(Info.Length, 50)));
+        }
+
+
+
+
         using (IDbConnection db = new SqlConnection(
           Constants.Get_ConnStr("WATSC" + (Constants.UseProduction() ? "Prod" : "QA"))))
         {

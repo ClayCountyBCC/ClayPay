@@ -1636,7 +1636,7 @@ var clayPay;
     }());
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ClientResponse.js.map
+//# sourceMappingURL=clientresponse.js.map
 /// <reference path="apptypes.ts" />
 /// <reference path="charge.ts" />
 /// <reference path="claypay.ts" />
@@ -2027,7 +2027,7 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=UI.js.map
+//# sourceMappingURL=ui.js.map
 var Balancing;
 (function (Balancing) {
     var CashierDetailData = /** @class */ (function () {

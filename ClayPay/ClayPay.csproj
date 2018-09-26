@@ -249,7 +249,6 @@
     <None Include="compilerconfig.json.defaults">
       <DependentUpon>compilerconfig.json</DependentUpon>
     </None>
-    <Content Include="ImpactFees.html" />
     <Content Include="ConnectionStrings.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
@@ -263,7 +262,6 @@
     <Content Include="Content\Fontawesome\webfonts\fa-solid-900.ttf" />
     <Content Include="Content\Fontawesome\webfonts\fa-solid-900.woff" />
     <Content Include="Content\Fontawesome\webfonts\fa-solid-900.woff2" />
-    <Content Include="index.html" />
     <Content Include="Scripts\Balancing\bundle.js" />
     <Content Include="Scripts\Balancing\bundle.min.js">
       <DependentUpon>bundle.js</DependentUpon>
