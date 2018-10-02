@@ -44,7 +44,7 @@ namespace ClayPay.Models.Balancing
       )
 
       SELECT 
-        CI.CashierId, 
+        CC.CashierId, 
         CC.TransDt TransactionDate, 
 			  CC.Name, 
         CP.AmtApplied AmountApplied,
@@ -53,16 +53,15 @@ namespace ClayPay.Models.Balancing
         ISNULL(CP.TransactionId, '') TransactionNumber,
         CP.Info,
         ISNULL(LTRIM(RTRIM(CI.AssocKey)), '') AssocKey,
-        SUM(CI.Total) ChargeTotal
+        SUM(ISNULL(CI.Total, 0)) ChargeTotal
       FROM ccCashier CC
       INNER JOIN CashierIds C ON CC.CashierId = C.CashierId
-      INNER JOIN ccCashierItem CI ON CC.cashierId = CI.cashierId 
-			LEFT outer JOIN ccCashierPayment CP ON CI.OTId = CP.OTId 
-      WHERE 
-        CI.Cashierid IS NOT NULL 
-        AND CAST(CC.TransDt AS DATE) = CAST(@TransactionDate AS DATE)
+      LEFT OUTER JOIN ccCashierItem CI ON CC.cashierId = CI.cashierId 
+			LEFT OUTER JOIN ccCashierPayment CP ON CC.OTId = CP.OTId 
+      WHERE         
+        CAST(CC.TransDt AS DATE) = CAST(@TransactionDate AS DATE)
 			GROUP BY 
-        CI.CashierId, 
+        CC.CashierId, 
         CC.TransDt, 
 			  CC.Name, 
         CP.AmtApplied,
