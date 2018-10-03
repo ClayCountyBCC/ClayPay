@@ -678,17 +678,52 @@ namespace ClayPay.Models.Claypay
        * 
        * We do not care if FinalizeTransaction fails. Those rows can be updated manually
        * */
+      try
+      {
+        var sb = new StringBuilder();
+        sb.AppendLine(TransactionCashierData.CashierId)
+          .AppendLine(TransactionCashierData.OTId.ToString())
+          .AppendLine(TotalAmountDue.ToString())
+          .AppendLine(CCData.TransactionId);
+        sb.AppendLine("ItemIds:");
+        sb.AppendLine(String.Join(",", (from c in Charges select c.ItemId.ToString()).ToArray()));
+        Constants.SaveEmail("daniel.mccartney@claycountygov.com", "Claypay transaction rolled back", sb.ToString());
+      }
+      catch
+      {
+        Constants.SaveEmail("daniel.mccartney@claycountygov.com", "Claypay transaction rolled back", "error getting transaction information.");
+      }
+
+
       var param = new DynamicParameters();
       param.Add("@otid", TransactionCashierData.OTId);
       var query = $@"
         USE WATSC;
         BEGIN TRAN
             BEGIN TRY
-            DELETE ccGUItem WHERE guid IN (SELECT guid FROM ccGU WHERE otid = @otid)
-            DELETE ccGU where OTID = @otid
-            DELETE ccCashierPayment where OTID = @otid
-            DELETE ccCashier where OTID = @otid
-            UPDATE ccCashierItem set OTID = 0,CashierId = null where OTId = @otid
+            DELETE ccGUItem WHERE guid IN (SELECT guid FROM ccGU WHERE otid = @otid);
+            DELETE ccGU where OTID = @otid;
+
+            UPDATE ccCashierItem 
+              SET 
+                OTID = 0,
+                CashierId = null
+            WHERE 
+              OTId = @otid;
+
+            UPDATE ccCashierPayment
+              SET 
+                AmtApplied = 0, 
+                AmtTendered = 0      
+            WHERE 
+              OTID = @otid;
+
+            UPDATE ccCashier
+              SET
+                Name = 'Payment reversed - not applied'
+            WHERE
+              OTID = @otid;          
+
             COMMIT;
           END TRY
         BEGIN CATCH
