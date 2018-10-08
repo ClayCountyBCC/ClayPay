@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Data.SqlClient;
+using System.Data;
+using Dapper;
 
 namespace ClayPay.Models.ImpactFees
 {
@@ -18,6 +21,27 @@ namespace ClayPay.Models.ImpactFees
 
     public bool ApplyWaiver(PermitImpactFee permit, string IpAddress, UserAccess ua)
     {
+      if(permit.ImpactFee_Amount != Amount)
+      {
+        // Partial Waiver Process:
+        // This process needs to do the following:
+        // 1. Reduce the amount of the current impact fee (captured in permit) by the amount in permit.
+        // 2. Insert a new charge that has the following properties:
+        //    a. Same Catcode as the original impact fee
+        //    b. Same amount in permit object
+        //    c. Can probably do this easily with a Select Insert.
+        // 3. Capture the freshly inserted row's ItemId.
+        // 4. Use the waiver/exemption process on the new ItemId
+        // So largely, this process will just pre-empt the ApplyWaiver process.
+        // We should just be able to update the permit object with the new item id and 
+        // proceed as normal.
+        var NewItemId = PartialImpactFeeHandling(permit);
+        if (NewItemId == -1)
+        {
+          Constants.Log("Error Applying Partial Waiver", permit.ItemId.Value.ToString(), permit.Permit_Number, permit.ImpactFee_Amount_Formatted, "");
+        }
+        permit.ItemId = NewItemId; // Set it to the newly created row
+      }
       var nt = new Claypay.NewTransaction();
       nt.ItemIds.Add(permit.ItemId.Value);
 
@@ -35,6 +59,80 @@ namespace ClayPay.Models.ImpactFees
       return nt.SaveTransaction();
     }
 
+    private int PartialImpactFeeHandling(PermitImpactFee permit)
+    {
+      var dp = new DynamicParameters();
+      dp.Add("@NewItemId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+      dp.Add("@ItemId", permit.ItemId.Value);
+      dp.Add("@WaivedAmount", Amount);
+      string sql = @"
+        SET @WaivedAmount = CAST(@WaivedAmount AS DECIMAL(10, 2));
+        UPDATE ccCashierItem
+        SET 
+          BaseFee = BaseFee - @WaivedAmount,
+          Total = Total - @WaivedAmount
+        WHERE 
+          ItemId=@ItemId;
+
+        INSERT INTO [dbo].[ccCashierItem]
+          ([OTId]
+          ,[OperId]
+          ,[CatCdID]
+          ,[CatCode]
+          ,[Narrative]
+          ,[Assoc]
+          ,[AssocKey]
+          ,[Variable]
+          ,[BaseFee]
+          ,[Total]
+          ,[TimeStamp]
+          ,[Audit]
+          ,[Flag]
+          ,[Recon]
+          ,[ReconInit]
+          ,[NTUser]
+          ,[UnCollectable])
+
+        SELECT
+          0,
+          OperId,
+          CatCdID,
+          CatCode,
+          Narrative,
+          Assoc,
+          AssocKey,
+          Variable,
+          @WaivedAmount,
+          @WaivedAmount,
+          GETDATE(),
+          Audit,
+          Flag,
+          Recon,
+          ReconInit,
+          'claypay',
+          UnCollectable
+        FROM ccCashierItem
+        WHERE ItemId=@ItemId;
+
+        SET @NewItemId = @@IDENTITY;";
+      try
+      {       
+        int i = Constants.Exec_Query(sql, dp);
+        if (i != -1)
+        {
+          int newItemId = dp.Get<int>("@NewItemId");
+          return newItemId;
+        }
+        return -1;
+      }
+      catch (Exception ex)
+      {
+        Constants.Log(ex, sql);
+        return -1;
+        //TODO: add rollback in StartTransaction function
+      }
+    }
+
     public string Validate(PermitImpactFee permit)
     {
       Payment_Type = Get_Payment_Type();
@@ -42,11 +140,14 @@ namespace ClayPay.Models.ImpactFees
       {
         return "Cannot apply Impact Fee Credits using this process.";
       }
-      
-      if(permit.ImpactFee_Amount != Amount)
+      if(Amount > permit.ImpactFee_Amount)
       {
-        return "The Impact Fee amount provided does not match. Please check your permit number and try again.  If this issue persists, please contact the helpdesk.";
+        return $"You cannot waive an amount greater than the amount of the impact fee.  Amount waived: {Amount.ToString("C2")}, Impact fee Amount: {permit.ImpactFee_Amount_Formatted}";
       }
+      //if(permit.ImpactFee_Amount != Amount)
+      //{
+      //  return "The Impact Fee amount provided does not match. Please check your permit number and try again.  If this issue persists, please contact the helpdesk.";
+      //}
       if(permit.ImpactFee_Amount <= 0)
       {
         return "The Impact Fee Amount cannot be less than or equal to zero.";

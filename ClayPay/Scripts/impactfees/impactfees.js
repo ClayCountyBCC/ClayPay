@@ -39,6 +39,7 @@ var ImpactFees;
     function Start() {
         buildMenuElements();
         LoadAgreements();
+        HandleUIEvents();
     }
     ImpactFees.Start = Start;
     function PermitActionChange() {
@@ -294,5 +295,21 @@ var ImpactFees;
         }
     }
     ImpactFees.buildMenuElements = buildMenuElements;
+    function HandleUIEvents() {
+        document.getElementById('permitNumberOther')
+            .onkeydown = function (event) {
+            var e = event || window.event;
+            if (event.keyCode == 13) {
+                ImpactFees.PermitAllocation.SearchPermitOther();
+            }
+        };
+        document.getElementById('permitNumber')
+            .onkeydown = function (event) {
+            var e = event || window.event;
+            if (event.keyCode == 13) {
+                ImpactFees.PermitAllocation.SearchPermit();
+            }
+        };
+    }
 })(ImpactFees || (ImpactFees = {}));
 //# sourceMappingURL=ImpactFees.js.map

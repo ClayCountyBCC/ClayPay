@@ -267,23 +267,6 @@ var Utilities;
         Show_Menu(menuItem.id);
     }
     Utilities.Update_Menu = Update_Menu;
-    //private static BuildFancyLevelItem(label: string, value: string): HTMLElement
-    //{
-    //  let Container = document.createElement("div");
-    //  let innerContainer = document.createElement("div");
-    //  Container.classList.add("level-item");
-    //  Container.classList.add("has-text-centered");
-    //  let Label = document.createElement("p");
-    //  Label.classList.add("heading");
-    //  Label.appendChild(document.createTextNode(label));
-    //  let Value = document.createElement("p");
-    //  Value.classList.add("title");
-    //  Value.appendChild(document.createTextNode(value));
-    //  innerContainer.appendChild(Label);
-    //  innerContainer.appendChild(Value);
-    //  Container.appendChild(innerContainer);
-    //  return Container;
-    //}
     function CheckBrowser() {
         var browser = "";
         if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) {

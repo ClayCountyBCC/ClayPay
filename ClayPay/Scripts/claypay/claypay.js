@@ -45,7 +45,6 @@ var clayPay;
     }
     clayPay.HandleHash = HandleHash;
     function HandleSearch(buttonId, inputId, value) {
-        console.log('buttonid', buttonId, 'inputId', inputId, 'value', value);
         var button = document.getElementById(buttonId);
         Utilities.Set_Value(inputId, value);
         button.click();

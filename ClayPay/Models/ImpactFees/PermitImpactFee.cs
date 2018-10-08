@@ -44,7 +44,10 @@ namespace ClayPay.Models.ImpactFees
       if (Agreement_Number.Length == 0) return true;
       // 2881 is the SRID for our local state plane projection
       var dp = new DynamicParameters();
+      if (!X.HasValue || !Y.HasValue) return false;
       dp.Add("@Agreement_Number", "TIMPACT-" + Agreement_Number);
+      dp.Add("@X", X.Value);
+      dp.Add("@Y", Y.Value);
       string query = @"
         DECLARE @Point geometry = geometry::STPointFromText('POINT (' + 
           CONVERT(VARCHAR(20), @X) + ' ' + 

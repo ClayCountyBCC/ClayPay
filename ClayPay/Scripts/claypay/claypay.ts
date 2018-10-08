@@ -58,7 +58,6 @@ namespace clayPay
 
   function HandleSearch(buttonId: string, inputId: string, value: string)
   {
-    console.log('buttonid', buttonId, 'inputId', inputId, 'value', value);
     let button = <HTMLButtonElement>document.getElementById(buttonId);
     Utilities.Set_Value(inputId, value);
     button.click();

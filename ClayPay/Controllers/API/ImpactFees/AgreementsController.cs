@@ -117,12 +117,12 @@ namespace ClayPay.Controllers.ImpactFees
       var permit = PermitImpactFee.Get(pw.Permit_Number, pw.Waiver_Type, "");
       var error = pw.Validate(permit);
       if (error.Length > 0) return Ok(error);
-
       string IpAddress = ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress;
       if (!pw.ApplyWaiver(permit, IpAddress, ua))
       {
         return Ok("An error occurred while saving this permit's allocation, please try again.  If the error persists, please contact MIS.");
       }
+
       return Ok("success");
     }
 

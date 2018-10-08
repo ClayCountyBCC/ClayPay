@@ -44,6 +44,7 @@ namespace ImpactFees
   {
     buildMenuElements();
     LoadAgreements();
+    HandleUIEvents();
   }
 
   export function PermitActionChange():void
@@ -353,6 +354,30 @@ namespace ImpactFees
     {
       menu.appendChild(Utilities.Create_Menu_Element(menuItem));
     }
+  }
+
+  function HandleUIEvents(): void
+  {
+    (<HTMLInputElement>document.getElementById('permitNumberOther'))
+      .onkeydown = function (this: HTMLElement, event: KeyboardEvent)
+      {
+        var e = event || window.event;
+        if (event.keyCode == 13)
+        {
+          ImpactFees.PermitAllocation.SearchPermitOther();
+        }
+      };
+
+    (<HTMLInputElement>document.getElementById('permitNumber'))
+      .onkeydown = function (this: HTMLElement, event: KeyboardEvent)
+      {
+        var e = event || window.event;
+        if (event.keyCode == 13)
+        {
+          ImpactFees.PermitAllocation.SearchPermit()
+        }
+      };
+
   }
 
 }

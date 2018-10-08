@@ -267,6 +267,8 @@
         {
           let ImpactFee = <HTMLInputElement>document.getElementById("permitOtherImpactFee");
           ImpactFee.value = pif.ImpactFee_Amount_Formatted;
+          let AmountToWaive = <HTMLInputElement>document.getElementById("AmountToWaive");
+          AmountToWaive.value = pif.ImpactFee_Amount.toFixed(2);
           if (pif.Error_Text.length > 0)
           {
             permitErrorText.value = pif.Error_Text;
@@ -279,9 +281,7 @@
           permitErrorText.value = e;
           Utilities.Show(permitErrorContainer);
         });
-
     }
-
 
     public static SavePermitAllocation()
     {
@@ -311,6 +311,7 @@
 
     public static SavePermitWaiver()
     {
+      Utilities.Toggle_Loading_Button("SavePermitWaiver", true);
       let permitNumber = <HTMLInputElement>document.getElementById("permitNumberOther");
       let permitErrorContainer = document.getElementById("permitOtherErrorContainer");
       let permitErrorText = <HTMLInputElement>document.getElementById("permitOtherErrorText");
@@ -323,9 +324,15 @@
       }
       let pw = new ImpactFees.PermitWaiver();
 
-      let amount = (<HTMLInputElement>document.getElementById("permitOtherImpactFee")).value.replace("$", "").replace(",", "");
+      let amount = (<HTMLInputElement>document.getElementById("AmountToWaive")).value.trim();
       console.log('amount', amount);
       pw.Amount = parseFloat(amount);
+      if (isNaN(pw.Amount))
+      {
+        alert("There is a problem with the amount entered.  Please check the amount and try again.");
+        return;
+      }
+     
       pw.Permit_Number = permitNumber.value.trim();
       pw.Waiver_Type = searchType;
 
@@ -349,12 +356,14 @@
               Utilities.Hide("permitOther");
               alert("Successfully applied Waiver/Exemption to Permit: " + pw.Permit_Number);
             }
+            Utilities.Toggle_Loading_Button("SavePermitWaiver", false);
 
           }).catch(function (e)
           {
             // figure out what we want to do with the errors.
             Utilities.Show(permitErrorContainer);
             permitErrorText.value = e;
+            Utilities.Toggle_Loading_Button("SavePermitWaiver", false);
           });
     }
 

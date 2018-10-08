@@ -603,15 +603,35 @@
                      readonly
                      id="permitOtherImpactFee" />
             </div>
-          </div>
-          <div class="column"></div>
+          </div>          
         </div>
-        <button onclick="ImpactFees.PermitAllocation.SavePermitWaiver();"
-                type="button"
-                class="button is-success"
-                id="permitOtherApplyWaiver">
-          Apply Waiver / Exemption
-        </button>
+        <div id="permitOtherApplyWaiver">
+          <div class="columns">
+            <div class="column field">
+              <div class="field">
+                <label class="label">Impact Fee Amount to Waive / Exempt</label>
+              </div>
+              <div class="field is-grouped">
+                <div class="control">
+                  <input id="AmountToWaive"
+                         class="input"
+                         type="number" />
+                </div>
+                <div class="control">
+                  <button onclick="ImpactFees.PermitAllocation.SavePermitWaiver();"
+                          type="button"
+                          id="SavePermitWaiver"
+                          class="button is-success">
+                    Apply Waiver / Exemption
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+            </div>
+          </div>
+        </div>
+
         <div id="permitOtherErrorContainer"
              class="hide">
           <div class="field">
