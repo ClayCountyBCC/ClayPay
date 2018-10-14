@@ -21,35 +21,55 @@ var Balancing;
             var previous = new CashierDetailData();
             var totalAmounts = 0;
             var totalCharges = 0;
+            var paymentTypes = [];
+            var permits = [];
             for (var _i = 0, cdd_1 = cdd; _i < cdd_1.length; _i++) {
                 var cd = cdd_1[_i];
                 var AmountApplied = "";
                 var ChargeAmount = "";
-                if (cd.CashierId === previous.CashierId) {
-                    if (cd.AssocKey === previous.AssocKey &&
-                        cd.ChargeTotal === previous.ChargeTotal) {
-                        AmountApplied = Utilities.Format_Amount(cd.AmountApplied);
-                        totalAmounts += cd.AmountApplied;
-                    }
-                    else {
-                        if (cd.AmountApplied === previous.AmountApplied) {
-                            ChargeAmount = Utilities.Format_Amount(cd.ChargeTotal);
-                            totalCharges += cd.ChargeTotal;
-                        }
-                        else {
-                            AmountApplied = Utilities.Format_Amount(cd.AmountApplied);
-                            ChargeAmount = Utilities.Format_Amount(cd.ChargeTotal);
-                            totalAmounts += cd.AmountApplied;
-                            totalCharges += cd.ChargeTotal;
-                        }
-                    }
-                }
-                else {
-                    AmountApplied = Utilities.Format_Amount(cd.AmountApplied);
+                var permitKey = cd.CashierId + "-" + cd.AssocKey;
+                var paymentTypeKey = cd.CashierId + "-" + cd.PaymentType;
+                if (permits.indexOf(permitKey) === -1) {
+                    permits.push(permitKey);
                     ChargeAmount = Utilities.Format_Amount(cd.ChargeTotal);
-                    totalAmounts += cd.AmountApplied;
                     totalCharges += cd.ChargeTotal;
                 }
+                if (paymentTypes.indexOf(paymentTypeKey) === -1) {
+                    paymentTypes.push(paymentTypeKey);
+                    AmountApplied = Utilities.Format_Amount(cd.AmountApplied);
+                    totalAmounts += cd.AmountApplied;
+                }
+                //if (cd.CashierId === previous.CashierId)
+                //{
+                //  if (cd.AssocKey === previous.AssocKey &&
+                //    cd.ChargeTotal === previous.ChargeTotal)
+                //  {
+                //    AmountApplied = Utilities.Format_Amount(cd.AmountApplied);
+                //    totalAmounts += cd.AmountApplied;
+                //  }
+                //  else
+                //  {
+                //    if (cd.AmountApplied === previous.AmountApplied) 
+                //    {
+                //      ChargeAmount = Utilities.Format_Amount(cd.ChargeTotal);
+                //      totalCharges += cd.ChargeTotal;
+                //    }
+                //    else
+                //    {
+                //      AmountApplied = Utilities.Format_Amount(cd.AmountApplied);
+                //      ChargeAmount = Utilities.Format_Amount(cd.ChargeTotal);
+                //      totalAmounts += cd.AmountApplied;
+                //      totalCharges += cd.ChargeTotal;
+                //    }
+                //  }
+                //}
+                //else
+                //{
+                //  AmountApplied = Utilities.Format_Amount(cd.AmountApplied);
+                //  ChargeAmount = Utilities.Format_Amount(cd.ChargeTotal);
+                //  totalAmounts += cd.AmountApplied;
+                //  totalCharges += cd.ChargeTotal;
+                //}
                 var tr = document.createElement("tr");
                 tr.appendChild(CashierDetailData.CreateTableCell("td", cd.CashierId));
                 tr.appendChild(CashierDetailData.CreateTableCell("td", Utilities.Format_Date(cd.TransactionDate), "10%", "has-text-centered"));

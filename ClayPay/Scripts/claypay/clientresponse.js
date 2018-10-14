@@ -170,4 +170,4 @@ var clayPay;
     }());
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=clientresponse.js.map
+//# sourceMappingURL=ClientResponse.js.map
