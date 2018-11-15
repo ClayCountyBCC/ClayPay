@@ -33,7 +33,7 @@ namespace ClayPay.Models.Claypay
     public NewTransaction()
     {
     }
-  
+
     public ClientResponse ProcessPaymentTransaction()
     {
       // Process credit card payment if there is one. this will be moved to a separate function
@@ -69,9 +69,9 @@ namespace ClayPay.Models.Claypay
       if (CCData.Validated)
       {
         Payments.Add(
-          new Payment(CCData, 
-                      Environment.MachineName.ToUpper() == "CLAYBCCIIS01" ? 
-                        Payment.payment_type.credit_card_cashier : 
+          new Payment(CCData,
+                      Environment.MachineName.ToUpper() == "CLAYBCCIIS01" ?
+                        Payment.payment_type.credit_card_cashier :
                         Payment.payment_type.credit_card_public));
       }
       if (CheckPayment.Validated) Payments.Add(CheckPayment);
@@ -83,6 +83,36 @@ namespace ClayPay.Models.Claypay
       if (SaveTransaction()) // Unlock IDs at the end of this function
       {
         //var amountPaid = (from payment in Payments select payment.AmountApplied).Sum();
+
+
+
+        // TODO: include this to settle the ccpayment transaction
+
+        //if (CCData.Validated && CCData.TransactionId.Length > 0)
+        //{
+        //  var pr = PaymentResponse.PostPayment(this.CCData, "");
+        //  if (pr == null)
+        //  {
+        //    Errors.Add("There was an issue settling the credit card transaction.");
+        //    UnlockChargeItems();
+        //  }
+        //  else
+        //  {
+        //    if (pr.ErrorText.Length > 0)
+        //    {
+        //      Errors.Add(pr.ErrorText);
+        //      UnlockChargeItems();
+        //    }
+        //    else
+        //    {
+        //      var cr = new ClientResponse(TransactionCashierData.CashierId.Trim(), Charges);
+        //      cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddress.Trim());
+        //      return cr;
+        //    }
+        //  }
+        //}
+
+        //return new ClientResponse(Errors);
 
         var cr = new ClientResponse(TransactionCashierData.CashierId.Trim(), Charges);
         cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddress.Trim());
@@ -130,7 +160,7 @@ namespace ClayPay.Models.Claypay
       if (this.CashPayment.PaymentType != Payment.payment_type.cash ||
         this.CheckPayment.PaymentType != Payment.payment_type.check ||
         this.OtherPayment.PaymentType == Payment.payment_type.cash ||
-        this.OtherPayment.PaymentType == Payment.payment_type.check || 
+        this.OtherPayment.PaymentType == Payment.payment_type.check ||
         this.OtherPayment.PaymentType == Payment.payment_type.credit_card_cashier ||
         this.OtherPayment.PaymentType == Payment.payment_type.credit_card_public)
       {
@@ -355,7 +385,7 @@ namespace ClayPay.Models.Claypay
           return false;
         }
       }
-
+      
       FinalizeTransaction();
       UnlockChargeItems();
       return true;
@@ -406,13 +436,13 @@ namespace ClayPay.Models.Claypay
       try
       {
         TransactionCashierData.CashierId = "-1";
-        TransactionCashierData.OTId      = -1;
+        TransactionCashierData.OTId = -1;
 
         int i = Constants.Exec_Query(sql, dp);
-        if(i != -1)
+        if (i != -1)
         {
           TransactionCashierData.OTId = dp.Get<int>("@otId");
-          TransactionCashierData.CashierId= dp.Get<string>("@CashierId");
+          TransactionCashierData.CashierId = dp.Get<string>("@CashierId");
           return true;
         }
         return false;
@@ -424,12 +454,12 @@ namespace ClayPay.Models.Claypay
         //TODO: add rollback in StartTransaction function
       }
     }
-    
+
     private static DataTable CreateCashierPaymentDataTable()
     {
       var dt = new DataTable("CashierPayment");
 
-      var pt = new DataColumn("PaymentType", typeof(string));      
+      var pt = new DataColumn("PaymentType", typeof(string));
       //pt.MaxLength = 10;
 
       var info = new DataColumn("Info", typeof(string));
@@ -444,7 +474,7 @@ namespace ClayPay.Models.Claypay
       // TODO : Breakout each string and set the maxLength
       dt.Columns.Add(pt);
       dt.Columns.Add("OTid", typeof(int));
-      
+
       dt.Columns.Add("AmountApplied", typeof(decimal));
       dt.Columns.Add("AmountTendered", typeof(decimal));
       dt.Columns.Add(checkNum);
@@ -455,7 +485,7 @@ namespace ClayPay.Models.Claypay
 
     public bool SaveCashierPaymentRows()
     {
-      
+
       var dt = CreateCashierPaymentDataTable();
       string query = $@"
           USE WATSC;
@@ -506,8 +536,8 @@ namespace ClayPay.Models.Claypay
     public bool UpdateCashierItemRows_OTid_CashierId()
     {
 
-      
-      var query =$@"
+
+      var query = $@"
         USE WATSC;
 
         UPDATE ccCashierItem 
@@ -740,7 +770,7 @@ namespace ClayPay.Models.Claypay
         return false;
       }
     }
-
+    // TODO: check to see if thi
     //public static List<string> BuildEmailBody(string cashierId, CashierData payerData)
     //{
     //  var charges = Charge.GetChargesByCashierId(cashierId);
@@ -760,11 +790,11 @@ namespace ClayPay.Models.Claypay
     //             .Append(payerData.PayerStreet2).AppendLine()
     //             .AppendLine()
     //             .AppendLine();
-                 
+
     //  csHeader.AppendLine()
     //          .Append("Key\t\tDescription\tAmount");
 
-      
+
     //  foreach (var c in charges)
     //  {
     //    cs.Append(c.AssocKey).
@@ -798,7 +828,7 @@ namespace ClayPay.Models.Claypay
     //    psHeader.ToString(),
     //    ps.ToString()
     //   };
-       
+
     //  return emailBody;
     //}
 

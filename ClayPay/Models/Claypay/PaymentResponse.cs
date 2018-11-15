@@ -53,14 +53,15 @@ namespace ClayPay.Models
         string result = PostToMFC(BuildFeeURL(Amount));
         ProcessResults(result);
         return ConvFee;
-      }catch(Exception ex)
+      }
+      catch (Exception ex)
       {
         Constants.Log(ex);
         return "";
       }
     }
 
-    public static PaymentResponse PostPayment(CCPayment ccd, string ipAddress)
+    public static PaymentResponse PostPayment(CCPayment ccd, string ipAddress/* = ""*/)
     {
       try
       {
@@ -75,7 +76,7 @@ namespace ClayPay.Models
           return null;
         }
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         Constants.Log(ex);
         return null;
@@ -83,11 +84,31 @@ namespace ClayPay.Models
 
     }
 
+
+    // TODO: Update Post()
+    /*
+     * 
+     * Post() needs to be aware of authorize/settle function
+     * 
+     * 
+     * 
+     * 
+     * */
+
+
     private bool Post(CCPayment ccd, string ipAddress)
     {
       try
       {
+        // TODO: uncomment these to use new authorize/settle functions if they are uncommented below
+
+        // if(ccd.UniqueID != null && ccd.UniqueID.length > 0) {string result = PostToMFC(BuildSettleURL(ccd, ipAddress));}
+        // else { string result = PostToMFC(BuildAuthorizeURL(ccd,ipAddress)
+
+        // TODO: comment/delete the next line when using new authorize/settle functions
         string result = PostToMFC(BuildURL(ccd, ipAddress));
+
+
         ProcessResults(result);
         return true;
       }
@@ -131,7 +152,7 @@ namespace ClayPay.Models
           }
         }
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         Constants.Log(ex);
       }
@@ -216,8 +237,63 @@ namespace ClayPay.Models
       return sb.ToString();
     }
 
+
+    /**
+     * 
+     *     TODO: Update BuildURL.
+     * 
+     *     private string BuildAuthorizePaymentURL(CCPayment CC, string ipAddress)
+     *     { 
+     *
+     *       var sb = new StringBuilder();
+     *       try
+     *       {
+     *         sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
+     *           .Append("&BILL_TO_FNAME=").Append(CC.FirstName)
+     *           .Append("&BILL_TO_LNAME=").Append(CC.LastName)
+     *           .Append("&CARD_NUMBER=").Append(CC.CardNumber)
+     *           .Append("&CARD_TYPE=").Append(CC.CardType)
+     *           .Append("&CARD_EXP_MONTH=").Append(CC.ExpMonth)
+     *           .Append("&CARD_EXP_YEAR=").Append(CC.ExpYear)
+     *           .Append("&CVV=").Append(CC.CVVNumber)
+     *           .Append("&ZIPCODE=").Append(CC.ZipCode)
+     *           .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
+     *           .Append("&mode=A")
+     *           .Append("&*EmailAddress=").Append(CC.EmailAddress)
+     *           .Append("&*IPAddress=").Append(ipAddress);
+     *         return sb.ToString();
+     *       }
+     *       catch(Exception ex)
+     *       {
+     *         Constants.Log(ex, sb.ToString());
+     *         return "";
+     *       }
+     *     }
+     *  
+     *     BuildSettlePaymentURL(CCPayment CC)
+     *     { 
+     *
+     *       var sb = new StringBuilder();
+     *       try
+     *       {
+     *         sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
+     *           .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
+     *           .Append("&mode=S")
+     *           .Append("&uniqueid=").Append(UniqueID)
+     *         return sb.ToString();
+     *       }
+     *       catch(Exception ex)
+     *       {
+     *         Constants.Log(ex, sb.ToString());
+     *         return "";
+     *       }     
+     *     }
+     * */
+
+
     private string BuildURL(CCPayment CC, string ipAddress)
-    {      
+    {
+
       var sb = new StringBuilder();
       try
       {
@@ -236,7 +312,7 @@ namespace ClayPay.Models
           .Append("&*IPAddress=").Append(ipAddress);
         return sb.ToString();
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         Constants.Log(ex, sb.ToString());
         return "";
@@ -282,7 +358,7 @@ namespace ClayPay.Models
     }
 
     // TODO: need to use this for saving all types of payments, not just cc payments
-    
+
 
   }
 }
