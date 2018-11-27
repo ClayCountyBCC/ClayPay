@@ -354,7 +354,7 @@ namespace ClayPay.Models.Claypay
 
     public bool SaveTransaction()
     {
-
+      // TODO: Update all sub functions to email when expected number of rows are not updated properly
       if (!StartTransaction())
       {
         rollbackTransaction();
@@ -536,13 +536,14 @@ namespace ClayPay.Models.Claypay
     public bool UpdateCashierItemRows_OTid_CashierId()
     {
 
-
       var query = $@"
         USE WATSC;
 
         UPDATE ccCashierItem 
         SET OTId = @OTID, CashierId = LTRIM(RTRIM(@CASHIERID))
-        WHERE itemId IN @ITEMIDS";
+        WHERE itemId IN @ITEMIDS
+          AND CashierId IS NULL";
+
       try
       {
         var i = Constants.Exec_Query(query, new
@@ -551,7 +552,17 @@ namespace ClayPay.Models.Claypay
           OTID = TransactionCashierData.OTId,
           CASHIERID = TransactionCashierData.CashierId
         });
+
+
+        // TODO: create email if not all rows are updated
+        if (i != ItemIds.Count())
+        {
+          // create email
+        }
+
         return i > 0;
+
+
       }
       catch (Exception ex)
       {
@@ -565,6 +576,8 @@ namespace ClayPay.Models.Claypay
 
     public bool InsertGURows()
     {
+
+      Console.WriteLine("All of the Transaction", this);
       var dp = new DynamicParameters();
       dp.Add("@otid", TransactionCashierData.OTId);
       dp.Add("@TransactionDate", this.TransactionDate);
@@ -650,8 +663,7 @@ namespace ClayPay.Models.Claypay
           FROM bpHold H
           INNER JOIN ccCashierItem CI ON CI.HoldID = H.HoldID
           WHERE OTId = @otid
-
-
+          
 
       UPDATE bpASSOC_PERMIT
       SET IssueDate = GETDATE()
@@ -770,7 +782,7 @@ namespace ClayPay.Models.Claypay
         return false;
       }
     }
-    // TODO: check to see if thi
+    // TODO: check to see if this can be deleted
     //public static List<string> BuildEmailBody(string cashierId, CashierData payerData)
     //{
     //  var charges = Charge.GetChargesByCashierId(cashierId);

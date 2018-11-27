@@ -34,7 +34,7 @@ namespace ClayPay.Models
     {
       switch (Environment.MachineName.ToUpper())
       {
-        case "MISHL05":
+        // case "MISHL05":
         //case "MISSL01":
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":

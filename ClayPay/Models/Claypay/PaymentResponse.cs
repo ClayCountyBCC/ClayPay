@@ -84,18 +84,6 @@ namespace ClayPay.Models
 
     }
 
-
-    // TODO: Update Post()
-    /*
-     * 
-     * Post() needs to be aware of authorize/settle function
-     * 
-     * 
-     * 
-     * 
-     * */
-
-
     private bool Post(CCPayment ccd, string ipAddress)
     {
       try
@@ -240,7 +228,7 @@ namespace ClayPay.Models
 
     /**
      * 
-     *     TODO: Update BuildURL.
+     *     TODO: Uncomment this block-comment and comment the following BuildURL function.
      * 
      *     private string BuildAuthorizePaymentURL(CCPayment CC, string ipAddress)
      *     { 
