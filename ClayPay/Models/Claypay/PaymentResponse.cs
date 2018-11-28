@@ -88,14 +88,24 @@ namespace ClayPay.Models
     {
       try
       {
+        string result = "";
+        NewTransaction.TransactionTiming.Add(new NewTransaction.TransactionTimingObject("Send_CCData_Transmit", DateTime.Now)); // capture start of CCData transmit
+
         // TODO: uncomment these to use new authorize/settle functions if they are uncommented below
 
-        // if(ccd.UniqueID != null && ccd.UniqueID.length > 0) {string result = PostToMFC(BuildSettleURL(ccd, ipAddress));}
-        // else { string result = PostToMFC(BuildAuthorizeURL(ccd,ipAddress)
+        if (ccd.TransactionId != null && ccd.TransactionId.Length > 0) 
+        { 
+          result = PostToMFC(BuildSettlePaymentURL(ccd)); 
+        }
+        else
+        {
+          result = PostToMFC(BuildAuthorizePaymentURL(ccd, ipAddress));
 
-        // TODO: comment/delete the next line when using new authorize/settle functions
-        string result = PostToMFC(BuildURL(ccd, ipAddress));
+          // TODO: comment/delete the next line when using new authorize/settle functions
 
+          //string result = PostToMFC(BuildURL(ccd, ipAddress));
+        }
+        NewTransaction.TransactionTiming.Add(new NewTransaction.TransactionTimingObject("Return_CCData_Transmit", DateTime.Now)); // capture return of CCData transmit
 
         ProcessResults(result);
         return true;
@@ -226,86 +236,86 @@ namespace ClayPay.Models
     }
 
 
-    /**
-     * 
-     *     TODO: Uncomment this block-comment and comment the following BuildURL function.
-     * 
-     *     private string BuildAuthorizePaymentURL(CCPayment CC, string ipAddress)
-     *     { 
-     *
-     *       var sb = new StringBuilder();
-     *       try
-     *       {
-     *         sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
-     *           .Append("&BILL_TO_FNAME=").Append(CC.FirstName)
-     *           .Append("&BILL_TO_LNAME=").Append(CC.LastName)
-     *           .Append("&CARD_NUMBER=").Append(CC.CardNumber)
-     *           .Append("&CARD_TYPE=").Append(CC.CardType)
-     *           .Append("&CARD_EXP_MONTH=").Append(CC.ExpMonth)
-     *           .Append("&CARD_EXP_YEAR=").Append(CC.ExpYear)
-     *           .Append("&CVV=").Append(CC.CVVNumber)
-     *           .Append("&ZIPCODE=").Append(CC.ZipCode)
-     *           .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
-     *           .Append("&mode=A")
-     *           .Append("&*EmailAddress=").Append(CC.EmailAddress)
-     *           .Append("&*IPAddress=").Append(ipAddress);
-     *         return sb.ToString();
-     *       }
-     *       catch(Exception ex)
-     *       {
-     *         Constants.Log(ex, sb.ToString());
-     *         return "";
-     *       }
-     *     }
-     *  
-     *     BuildSettlePaymentURL(CCPayment CC)
-     *     { 
-     *
-     *       var sb = new StringBuilder();
-     *       try
-     *       {
-     *         sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
-     *           .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
-     *           .Append("&mode=S")
-     *           .Append("&uniqueid=").Append(UniqueID)
-     *         return sb.ToString();
-     *       }
-     *       catch(Exception ex)
-     *       {
-     *         Constants.Log(ex, sb.ToString());
-     *         return "";
-     *       }     
-     *     }
-     * */
-
-
-    private string BuildURL(CCPayment CC, string ipAddress)
-    {
-
-      var sb = new StringBuilder();
-      try
-      {
+    
+    
+    //  TODO: Uncomment this block-comment and comment the following BuildURL function.
+    
+      private string BuildAuthorizePaymentURL(CCPayment CC, string ipAddress)
+      { 
+    
+        var sb = new StringBuilder();
+        try
+        {
+          sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
+            .Append("&BILL_TO_FNAME=").Append(CC.FirstName)
+            .Append("&BILL_TO_LNAME=").Append(CC.LastName)
+            .Append("&CARD_NUMBER=").Append(CC.CardNumber)
+            .Append("&CARD_TYPE=").Append(CC.CardType)
+            .Append("&CARD_EXP_MONTH=").Append(CC.ExpMonth)
+            .Append("&CARD_EXP_YEAR=").Append(CC.ExpYear)
+            .Append("&CVV=").Append(CC.CVVNumber)
+            .Append("&ZIPCODE=").Append(CC.ZipCode)
+            .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
+            .Append("&mode=A")
+            .Append("&*EmailAddress=").Append(CC.EmailAddress)
+            .Append("&*IPAddress=").Append(ipAddress);
+          return sb.ToString();
+        }
+        catch(Exception ex)
+        {
+          Constants.Log(ex, sb.ToString());
+          return "";
+        }
+      }
+    
+      private string BuildSettlePaymentURL(CCPayment CC)
+      { 
+    
+        var sb = new StringBuilder();
+        try
+        {
         sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
-          .Append("&BILL_TO_FNAME=").Append(CC.FirstName)
-          .Append("&BILL_TO_LNAME=").Append(CC.LastName)
-          .Append("&CARD_NUMBER=").Append(CC.CardNumber)
-          .Append("&CARD_TYPE=").Append(CC.CardType)
-          .Append("&CARD_EXP_MONTH=").Append(CC.ExpMonth)
-          .Append("&CARD_EXP_YEAR=").Append(CC.ExpYear)
-          .Append("&CVV=").Append(CC.CVVNumber)
-          .Append("&ZIPCODE=").Append(CC.ZipCode)
           .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
-          .Append("&mode=AS")
-          .Append("&*EmailAddress=").Append(CC.EmailAddress)
-          .Append("&*IPAddress=").Append(ipAddress);
-        return sb.ToString();
+          .Append("&mode=S")
+          .Append("&uniqueid=").Append(CC.TransactionId);
+          return sb.ToString();
+        }
+        catch(Exception ex)
+        {
+          Constants.Log(ex, sb.ToString());
+          return "";
+        }     
       }
-      catch (Exception ex)
-      {
-        Constants.Log(ex, sb.ToString());
-        return "";
-      }
-    }
+    
+
+
+    //private string BuildURL(CCPayment CC, string ipAddress)
+    //{
+
+    //  var sb = new StringBuilder();
+    //  try
+    //  {
+    //    sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
+    //      .Append("&BILL_TO_FNAME=").Append(CC.FirstName)
+    //      .Append("&BILL_TO_LNAME=").Append(CC.LastName)
+    //      .Append("&CARD_NUMBER=").Append(CC.CardNumber)
+    //      .Append("&CARD_TYPE=").Append(CC.CardType)
+    //      .Append("&CARD_EXP_MONTH=").Append(CC.ExpMonth)
+    //      .Append("&CARD_EXP_YEAR=").Append(CC.ExpYear)
+    //      .Append("&CVV=").Append(CC.CVVNumber)
+    //      .Append("&ZIPCODE=").Append(CC.ZipCode)
+    //      .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
+    //      .Append("&mode=AS")
+    //      .Append("&*EmailAddress=").Append(CC.EmailAddress)
+    //      .Append("&*IPAddress=").Append(ipAddress);
+    //    return sb.ToString();
+    //  }
+    //  catch (Exception ex)
+    //  {
+    //    Constants.Log(ex, sb.ToString());
+    //    return "";
+    //  }
+    //}
 
     private string BuildProdURL()
     {
