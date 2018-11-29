@@ -41,11 +41,12 @@ namespace ClayPay.Models.Claypay
       }
     }
 
-    public static List<TransactionTimingObject> TransactionTiming { get; set; } = new List<TransactionTimingObject>();
+    public static List<TransactionTimingObject> TransactionTiming { get; set; }
     
 
     public NewTransaction()
     {
+      TransactionTiming = new List<TransactionTimingObject>();
     }
     public static List<DateTime> ActionDates { get; set; } = new List<DateTime>();
 
@@ -110,6 +111,7 @@ namespace ClayPay.Models.Claypay
           {
             Errors.Add("There was an issue settling the credit card transaction.");
             UnlockChargeItems();
+            return new ClientResponse(Errors);
           }
           else
           {
@@ -117,21 +119,15 @@ namespace ClayPay.Models.Claypay
             {
               Errors.Add(pr.ErrorText);
               UnlockChargeItems();
-            }
-            else
-            {
-              var cr = new ClientResponse(TransactionCashierData.CashierId.Trim(), Charges);
-              cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddress.Trim());
-              return cr;
+              return new ClientResponse(Errors);
             }
           }
         }
 
-        return new ClientResponse(Errors);
-
-        //var cr = new ClientResponse(TransactionCashierData.CashierId.Trim(), Charges);
-        //cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddress.Trim());
-        //return cr;
+        var cr = new ClientResponse(TransactionCashierData.CashierId.Trim(), Charges);
+        cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddress.Trim());
+        return cr;
+     
       }
       else
       {
@@ -408,6 +404,8 @@ namespace ClayPay.Models.Claypay
       // TODO: call function to update Transaction timing table
       FinalizeTransaction();
       UnlockChargeItems();
+
+      InsertTransactionTiming();
       return true;
 
     }
@@ -742,7 +740,7 @@ namespace ClayPay.Models.Claypay
         cashierId = TransactionCashierData.CashierId,
         UserName = TransactionCashierData.CurrentUser.user_name
       }) != -1;
-      TransactionTiming.Add(new TransactionTimingObject("Save_Cashier_Payment_start", DateTime.Now)); // Finalize_Transaction_End
+      TransactionTiming.Add(new TransactionTimingObject("Finalize_Transaction_End", DateTime.Now)); // Finalize_Transaction_End
 
       return i;
     }
@@ -852,8 +850,12 @@ namespace ClayPay.Models.Claypay
       str.Append(")");
       var query = str.ToString();
 
-      Console.WriteLine(query);
+      var i = Constants.Exec_Query(query, param);
 
+      if(i == -1)
+      {
+        new ErrorLog("Issue saving transaction timing for CashierId: " + TransactionCashierData.CashierId , query, "","","");
+      }
     }
     // TODO: check to see if this can be deleted
     //public static List<string> BuildEmailBody(string cashierId, CashierData payerData)
