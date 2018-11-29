@@ -285,6 +285,9 @@ namespace ClayPay.Models.Claypay
       if (Charges.Count == 0) return false;
       var sql = @"
         USE WATSC;
+        
+        SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
         BEGIN TRAN
           BEGIN TRY
 
@@ -347,16 +350,18 @@ namespace ClayPay.Models.Claypay
       var sql = @"
         USE WATSC;
 
+        SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
         BEGIN TRAN
-        BEGIN TRY
-          DELETE FROM ccChargeItemsLocked
-          WHERE TransactionDate < DATEADD(MI, -3, GETDATE())
-            OR ItemId IN (@ItemId)
-          COMMIT
-        END TRY
-        BEGIN CATCH
-          ROLLBACK TRAN
-        END CATCH";
+          BEGIN TRY
+            DELETE FROM ccChargeItemsLocked
+            WHERE TransactionDate < DATEADD(MI, -3, GETDATE())
+              OR ItemId IN (@ItemId)
+            COMMIT
+          END TRY
+          BEGIN CATCH
+            ROLLBACK TRAN
+          END CATCH";
       try
       {
         Constants.Exec_Query(sql, Charges);
