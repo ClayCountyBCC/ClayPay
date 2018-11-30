@@ -30,23 +30,32 @@ namespace ClayPay.Models.Claypay
     public decimal TotalAmountDue { get; set; } = 0; // provided by the client, this is the amount they used to calculate how much money to accept.
     public decimal ChangeDue { get; set; } = 0;
     public DateTime TransactionDate { get; set; } = DateTime.Now;
-    public class TransactionTimingObject
+    public class TransactionTiming
     {
-      public string FieldName = "";
-      public DateTime Date;
-      public TransactionTimingObject(string fn, DateTime date) 
+      public string CashierId { get; set; } = "";
+      public DateTime Transaction_Start { get; set; } = DateTime.MaxValue;
+      public DateTime Send_CCData_Authorize_Transmit { get; set; } = DateTime.MaxValue;
+      public DateTime Return_CCData_Authorize_Transmit { get; set; } = DateTime.MaxValue;
+      public DateTime Send_CCData_Settle_Transmit { get; set; } = DateTime.MaxValue;
+      public DateTime Return_CCData_Settle_Transmit { get; set; } = DateTime.MaxValue;
+      public DateTime Save_Cashier_Payment_Start { get; set; } = DateTime.MaxValue;
+      public DateTime Update_CashierItem_Start { get; set; } = DateTime.MaxValue;
+      public DateTime Insert_Update_GURows_Start { get; set; } = DateTime.MaxValue;
+      public DateTime Insert_Update_GURows_End { get; set; } = DateTime.MaxValue;
+      public DateTime Finalize_Transaction_Start { get; set; } = DateTime.MaxValue;
+      public DateTime Finalize_Transaction_End { get; set; } = DateTime.MaxValue;
+
+      public TransactionTiming()
       {
-        FieldName = fn.Trim();
-        Date = date;
+
       }
     }
 
-    public static List<TransactionTimingObject> TransactionTiming { get; set; }
-    
+    public static TransactionTiming TimingDates { get; set; } 
 
     public NewTransaction()
     {
-      TransactionTiming = new List<TransactionTimingObject>();
+      TimingDates = new TransactionTiming();
     }
     public static List<DateTime> ActionDates { get; set; } = new List<DateTime>();
 
@@ -55,8 +64,11 @@ namespace ClayPay.Models.Claypay
       // Process credit card payment if there is one. this will be moved to a separate function
       if (CCData.Validated)
       {
-
+        TimingDates.Send_CCData_Authorize_Transmit = DateTime.Now;
+        
         var pr = PaymentResponse.PostPayment(this.CCData, TransactionCashierData.ipAddress);
+
+        TimingDates.Return_CCData_Authorize_Transmit = DateTime.Now;
 
         if (pr == null)
         {
@@ -456,7 +468,7 @@ namespace ClayPay.Models.Claypay
         TransactionCashierData.CashierId = "-1";
         TransactionCashierData.OTId = -1;
 
-        TransactionTiming.Add(new TransactionTimingObject("Transaction_Start", DateTime.Now)); // Transaction_start
+        TimingDates.Transaction_Start = DateTime.Now;
 
         int i = Constants.Exec_Query(sql, dp);
         if (i != -1)
@@ -539,7 +551,7 @@ namespace ClayPay.Models.Claypay
 
 
 
-        TransactionTiming.Add(new TransactionTimingObject("Save_Cashier_Payment_start", DateTime.Now)); // Save_Cashier_Payment_start
+        TimingDates.Save_Cashier_Payment_Start = DateTime.Now; // Save_Cashier_Payment_start
 
         using (IDbConnection db = new SqlConnection(
           Constants.Get_ConnStr("WATSC" + (Constants.UseProduction() ? "Prod" : "QA"))))
@@ -571,7 +583,7 @@ namespace ClayPay.Models.Claypay
 
       try
       {
-        TransactionTiming.Add(new TransactionTimingObject("update_CashierItem_start", DateTime.Now)); // update_CashierItem_start
+        TimingDates.Update_CashierItem_Start = DateTime.Now; // update_CashierItem_start
 
         var i = Constants.Exec_Query(query, new
         {
@@ -666,11 +678,11 @@ namespace ClayPay.Models.Claypay
 
       try
       {
-        TransactionTiming.Add(new TransactionTimingObject("Insert_Update_GURows_Start", DateTime.Now)); // Insert_Update_GURows_Start
+        TimingDates.Insert_Update_GURows_Start = DateTime.Now; // Insert_Update_GURows_Start
 
         var i = Constants.Exec_Query(query, dp);
 
-        TransactionTiming.Add(new TransactionTimingObject("Insert_Update_GURows_End", DateTime.Now)); // Insert_Update_GURows_End
+        TimingDates.Insert_Update_GURows_End = DateTime.Now; // Insert_Update_GURows_End
 
         return i > 0;
       }
@@ -732,7 +744,7 @@ namespace ClayPay.Models.Claypay
                                   WHERE OTId=@otid) AND
                 CashierId IS NULL AND Total > 0) = 0);";
 
-      TransactionTiming.Add(new TransactionTimingObject("Finalize_Transaction_Start", DateTime.Now)); // Finalize_Transaction_Start
+      TimingDates.Finalize_Transaction_Start = DateTime.Now; // Finalize_Transaction_Start
 
       var i = Constants.Exec_Query(query, new
       {
@@ -740,7 +752,7 @@ namespace ClayPay.Models.Claypay
         cashierId = TransactionCashierData.CashierId,
         UserName = TransactionCashierData.CurrentUser.user_name
       }) != -1;
-      TransactionTiming.Add(new TransactionTimingObject("Finalize_Transaction_End", DateTime.Now)); // Finalize_Transaction_End
+      TimingDates.Finalize_Transaction_End = DateTime.Now; // Finalize_Transaction_End
 
       return i;
     }
@@ -821,40 +833,33 @@ namespace ClayPay.Models.Claypay
 
     public void InsertTransactionTiming()
     {
-      var param = new DynamicParameters();
-      param.Add("@CashierId", TransactionCashierData.CashierId);
-      var str = new StringBuilder();
+      TimingDates.CashierId = TransactionCashierData.CashierId;
 
-      str.Append(@"
+      var query = @"
       
           USE WATSC;
       
           INSERT INTO ClayPay_Transaction_Timing
-          (CashierId");
+          (CashierId, Transaction_Start, Send_CCData_Authorize_Transmit, 
+          Return_CCData_Authorize_Transmit, Send_CCData_Settle_Transmit, 
+          Return_CCData_Settle_Transmit, Save_Cashier_Payment_Start, 
+          Update_CashierItem_Start, Insert_Update_GURows_Start, 
+          Insert_Update_GURows_End, Finalize_Transaction_Start, 
+          Finalize_Transaction_End)
+          
+          VALUES 
+          (@CashierId, @Transaction_Start, @Send_CCData_Authorize_Transmit, 
+          @Return_CCData_Authorize_Transmit, @Send_CCData_Settle_Transmit, 
+          @Return_CCData_Settle_Transmit, @Save_Cashier_Payment_Start, 
+          @Update_CashierItem_Start, @Insert_Update_GURows_Start, 
+          @Insert_Update_GURows_End, @Finalize_Transaction_Start, 
+          @Finalize_Transaction_End)";
 
-      foreach (var t in NewTransaction.TransactionTiming)
-      {
-        str.Append(", " + t.FieldName);
-      }
-
-      str.Append(") VALUES (@CashierId");
-
-
-      foreach(var t in NewTransaction.TransactionTiming)
-      {
-        string fieldNameVariable = "@" + t.FieldName;
-        param.Add(fieldNameVariable, t.Date);
-        str.Append(", ").Append(fieldNameVariable);
-
-      }
-      str.Append(")");
-      var query = str.ToString();
-
-      var i = Constants.Exec_Query(query, param);
+      var i = Constants.Exec_Query(query, TimingDates);
 
       if(i == -1)
       {
-        new ErrorLog("Issue saving transaction timing for CashierId: " + TransactionCashierData.CashierId , query, "","","");
+        new ErrorLog("Issue saving transaction timing for CashierId: " + TransactionCashierData.CashierId , "Did not save transaction times properly", "","","");
       }
     }
     // TODO: check to see if this can be deleted

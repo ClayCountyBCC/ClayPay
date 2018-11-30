@@ -89,23 +89,29 @@ namespace ClayPay.Models
       try
       {
         string result = "";
-        NewTransaction.TransactionTiming.Add(new NewTransaction.TransactionTimingObject("Send_CCData_Transmit", DateTime.Now)); // capture start of CCData transmit
 
         // TODO: uncomment these to use new authorize/settle functions if they are uncommented below
 
-        if (ccd.TransactionId != null && ccd.TransactionId.Length > 0) 
-        { 
-          result = PostToMFC(BuildSettlePaymentURL(ccd)); 
+        if (ccd.TransactionId != null && ccd.TransactionId.Length > 0)
+        {
+          NewTransaction.TimingDates.Send_CCData_Settle_Transmit = DateTime.Now;
+
+          result = PostToMFC(BuildSettlePaymentURL(ccd));
+
+          NewTransaction.TimingDates.Return_CCData_Settle_Transmit = DateTime.Now;
         }
         else
         {
+          NewTransaction.TimingDates.Send_CCData_Authorize_Transmit = DateTime.Now;
+
           result = PostToMFC(BuildAuthorizePaymentURL(ccd, ipAddress));
+
+          NewTransaction.TimingDates.Return_CCData_Authorize_Transmit = DateTime.Now;
 
           // TODO: comment/delete the next line when using new authorize/settle functions
 
           //string result = PostToMFC(BuildURL(ccd, ipAddress));
         }
-        NewTransaction.TransactionTiming.Add(new NewTransaction.TransactionTimingObject("Return_CCData_Transmit", DateTime.Now)); // capture return of CCData transmit
 
         ProcessResults(result);
         return true;
