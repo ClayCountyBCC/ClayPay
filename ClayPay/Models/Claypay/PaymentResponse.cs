@@ -40,18 +40,13 @@ namespace ClayPay.Models
       this.UseProduction = UseProduction;
     }
 
-    public static string GetFee(decimal Amount)
-    {
-      var pr = new PaymentResponse(Amount, Constants.PaymentTypes.Building, true);
-      return pr.CalcFee(Amount);
-    }
-
-    private string CalcFee(decimal Amount)
+    public string CalcFee(decimal Amount)
     {
       try
       {
         string result = PostToMFC(BuildFeeURL(Amount));
         ProcessResults(result);
+
         return ConvFee;
       }
       catch (Exception ex)
@@ -281,9 +276,9 @@ namespace ClayPay.Models
         try
         {
         sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
-          .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
-          .Append("&mode=S")
-          .Append("&uniqueid=").Append(CC.TransactionId);
+          .Append("&PAYMENT_AMOUNT=").Append(CC.Amount + Convert.ToDecimal(CC.ConvenienceFee))
+          .Append("&PaymentUniqueId=").Append(CC.TransactionId)
+          .Append("&mode=S");
           return sb.ToString();
         }
         catch(Exception ex)

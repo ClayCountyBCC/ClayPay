@@ -28,6 +28,7 @@ namespace ClayPay.Models.Claypay
     public List<string> Errors { get; set; } = new List<string>();
     public List<string> ProcessingErrors { get; set; } = new List<string>();
     public decimal TotalAmountDue { get; set; } = 0; // provided by the client, this is the amount they used to calculate how much money to accept.
+    public string ConvenienceFeeAmount { get; set; } = "";
     public decimal ChangeDue { get; set; } = 0;
     public DateTime TransactionDate { get; set; } = DateTime.Now;
     public class TransactionTiming
@@ -87,6 +88,12 @@ namespace ClayPay.Models.Claypay
           else
           {
             CCData.TransactionId = pr.UniqueId;
+            ConvenienceFeeAmount = GetFee(CCData.Amount);
+
+            CCData.ConvenienceFee = ConvenienceFeeAmount;
+           
+            
+          
           }
         }
       }
@@ -122,6 +129,7 @@ namespace ClayPay.Models.Claypay
           if (pr == null)
           {
             Errors.Add("There was an issue settling the credit card transaction.");
+            rollbackTransaction();
             UnlockChargeItems();
             return new ClientResponse(Errors);
           }
@@ -130,6 +138,7 @@ namespace ClayPay.Models.Claypay
             if (pr.ErrorText.Length > 0)
             {
               Errors.Add(pr.ErrorText);
+              rollbackTransaction();
               UnlockChargeItems();
               return new ClientResponse(Errors);
             }
@@ -138,6 +147,8 @@ namespace ClayPay.Models.Claypay
 
         var cr = new ClientResponse(TransactionCashierData.CashierId.Trim(), Charges);
         cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddress.Trim());
+
+        InsertTransactionTiming();
         return cr;
      
       }
@@ -158,6 +169,12 @@ namespace ClayPay.Models.Claypay
       }
     }
 
+    public static string GetFee(decimal Amount)
+    {
+      var pr = new PaymentResponse(Amount, Constants.PaymentTypes.Building, true);
+      return pr.CalcFee(Amount);
+    }
+    
     public bool ValidatePaymentTransaction()
     {
       Errors = TransactionCashierData.ValidatePayerData();
@@ -416,8 +433,6 @@ namespace ClayPay.Models.Claypay
       // TODO: call function to update Transaction timing table
       FinalizeTransaction();
       UnlockChargeItems();
-
-      InsertTransactionTiming();
       return true;
 
     }
@@ -559,8 +574,6 @@ namespace ClayPay.Models.Claypay
           int i = db.Execute(query, new { CashierPayment = dt.AsTableValuedParameter("CashierPayment") }, commandTimeout: 60);
           return i > 0;
         }
-
-        
 
       }
       catch (Exception ex)
@@ -789,8 +802,10 @@ namespace ClayPay.Models.Claypay
       param.Add("@otid", TransactionCashierData.OTId);
       var query = $@"
         USE WATSC;
+        DECLARE @cashierid VARCHAR(9) = (SELECT CashierId FROM ccCashier WHERE OTid = @otid)
         BEGIN TRAN
             BEGIN TRY
+
             DELETE ccGUItem WHERE guid IN (SELECT guid FROM ccGU WHERE otid = @otid);
             DELETE ccGU where OTID = @otid;
 
@@ -813,6 +828,10 @@ namespace ClayPay.Models.Claypay
                 Name = 'Payment reversed - not applied'
             WHERE
               OTID = @otid;          
+            
+            UPDATE ClayPay_Transaction_Timing
+            SET Rollback_Transaction = GETDATE()
+            WHERE CashierId = @cashierid
 
             COMMIT;
           END TRY
