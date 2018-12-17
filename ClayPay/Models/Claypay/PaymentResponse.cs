@@ -30,7 +30,8 @@ namespace ClayPay.Models
       {
         return TimeStamp.ToShortDateString();
       }
-    } //
+    } 
+
     public PaymentResponse(decimal Amount,
      Constants.PaymentTypes PaymentType,
      bool UseProduction)
@@ -85,7 +86,6 @@ namespace ClayPay.Models
       {
         string result = "";
 
-        // TODO: uncomment these to use new authorize/settle functions if they are uncommented below
 
         if (ccd.TransactionId != null && ccd.TransactionId.Length > 0)
         {
@@ -103,9 +103,6 @@ namespace ClayPay.Models
 
           NewTransaction.TimingDates.Return_CCData_Authorize_Transmit = DateTime.Now;
 
-          // TODO: comment/delete the next line when using new authorize/settle functions
-
-          //string result = PostToMFC(BuildURL(ccd, ipAddress));
         }
 
         ProcessResults(result);
@@ -181,51 +178,6 @@ namespace ClayPay.Models
 
     }
 
-    //private static string BuildURL(Constants.PaymentTypes PTypes = Constants.PaymentTypes.Building)
-    //{
-    //  bool Prod = Constants.UseProduction();
-    //  var sb = new StringBuilder();
-    //  sb.Append("https://www.myfloridacounty.com/myflc-pay/OpenPay.do?UserID=");
-    //  if (Prod)
-    //  {
-    //    sb.Append((int)Constants.Users.Prod_User);
-    //  }
-    //  else
-    //  {
-    //    sb.Append((int)Constants.Users.Test_User);
-    //  }
-
-    //  sb.Append("&serviceID=");
-    //  switch (PTypes)
-    //  {
-    //    case Constants.PaymentTypes.Building:
-    //      if (Prod)
-    //      {
-    //        sb.Append((int)Constants.Services.Prod_Building_Service);
-    //      }
-    //      else
-    //      {
-    //        sb.Append((int)Constants.Services.Test_Building_Service);
-    //      }
-
-    //      break;
-
-    //    case Constants.PaymentTypes.Rescue:
-    //      if (Prod)
-    //      {
-    //        sb.Append((int)Constants.Services.Prod_Rescue_Service);
-    //      }
-    //      else
-    //      {
-    //        sb.Append((int)Constants.Services.Test_Rescue_Service);
-    //      }
-
-    //      break;
-    //  }
-
-    //  return sb.ToString();
-    //}
-
     private string BuildFeeURL(decimal Amount)
     {
       var sb = new StringBuilder();
@@ -236,87 +188,53 @@ namespace ClayPay.Models
       return sb.ToString();
     }
 
+    private string BuildAuthorizePaymentURL(CCPayment CC, string ipAddress)
+    {
 
-    
-    
-    //  TODO: Uncomment this block-comment and comment the following BuildURL function.
-    
-      private string BuildAuthorizePaymentURL(CCPayment CC, string ipAddress)
-      { 
-    
-        var sb = new StringBuilder();
-        try
-        {
-          sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
-            .Append("&BILL_TO_FNAME=").Append(CC.FirstName)
-            .Append("&BILL_TO_LNAME=").Append(CC.LastName)
-            .Append("&CARD_NUMBER=").Append(CC.CardNumber)
-            .Append("&CARD_TYPE=").Append(CC.CardType)
-            .Append("&CARD_EXP_MONTH=").Append(CC.ExpMonth)
-            .Append("&CARD_EXP_YEAR=").Append(CC.ExpYear)
-            .Append("&CVV=").Append(CC.CVVNumber)
-            .Append("&ZIPCODE=").Append(CC.ZipCode)
-            .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
-            .Append("&mode=A")
-            .Append("&*EmailAddress=").Append(CC.EmailAddress)
-            .Append("&*IPAddress=").Append(ipAddress);
-          return sb.ToString();
-        }
-        catch(Exception ex)
-        {
-          Constants.Log(ex, sb.ToString());
-          return "";
-        }
+      var sb = new StringBuilder();
+      try
+      {
+        sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
+          .Append("&BILL_TO_FNAME=").Append(CC.FirstName)
+          .Append("&BILL_TO_LNAME=").Append(CC.LastName)
+          .Append("&CARD_NUMBER=").Append(CC.CardNumber)
+          .Append("&CARD_TYPE=").Append(CC.CardType)
+          .Append("&CARD_EXP_MONTH=").Append(CC.ExpMonth)
+          .Append("&CARD_EXP_YEAR=").Append(CC.ExpYear)
+          .Append("&CVV=").Append(CC.CVVNumber)
+          .Append("&ZIPCODE=").Append(CC.ZipCode)
+          .Append("&PAYMENT_AMOUNT=").Append(CC.Amount + (CC.Amount * Convert.ToDecimal(ConvFee)))
+          .Append("&mode=A")
+          .Append("&*EmailAddress=").Append(CC.EmailAddress)
+          .Append("&*IPAddress=").Append(ipAddress);
+        return sb.ToString();
       }
-    
-      private string BuildSettlePaymentURL(CCPayment CC)
-      { 
-    
-        var sb = new StringBuilder();
-        try
-        {
+      catch (Exception ex)
+      {
+        Constants.Log(ex, sb.ToString());
+        return "";
+      }
+    }
+
+    private string BuildSettlePaymentURL(CCPayment CC)
+    {
+
+      var sb = new StringBuilder();
+      try
+      {
         sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
           .Append("&PAYMENT_AMOUNT=").Append(CC.Amount + Convert.ToDecimal(CC.ConvenienceFee))
-          .Append("&PaymentUniqueId=").Append(CC.TransactionId)
+          .Append("&CONV_FEE=")
+          .Append("&PaymentUniqueID=").Append(CC.TransactionId)
           .Append("&mode=S");
-          return sb.ToString();
-        }
-        catch(Exception ex)
-        {
-          Constants.Log(ex, sb.ToString());
-          return "";
-        }     
+        return sb.ToString();
       }
-    
-
-
-    //private string BuildURL(CCPayment CC, string ipAddress)
-    //{
-
-    //  var sb = new StringBuilder();
-    //  try
-    //  {
-    //    sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
-    //      .Append("&BILL_TO_FNAME=").Append(CC.FirstName)
-    //      .Append("&BILL_TO_LNAME=").Append(CC.LastName)
-    //      .Append("&CARD_NUMBER=").Append(CC.CardNumber)
-    //      .Append("&CARD_TYPE=").Append(CC.CardType)
-    //      .Append("&CARD_EXP_MONTH=").Append(CC.ExpMonth)
-    //      .Append("&CARD_EXP_YEAR=").Append(CC.ExpYear)
-    //      .Append("&CVV=").Append(CC.CVVNumber)
-    //      .Append("&ZIPCODE=").Append(CC.ZipCode)
-    //      .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
-    //      .Append("&mode=AS")
-    //      .Append("&*EmailAddress=").Append(CC.EmailAddress)
-    //      .Append("&*IPAddress=").Append(ipAddress);
-    //    return sb.ToString();
-    //  }
-    //  catch (Exception ex)
-    //  {
-    //    Constants.Log(ex, sb.ToString());
-    //    return "";
-    //  }
-    //}
+      catch (Exception ex)
+      {
+        Constants.Log(ex, sb.ToString());
+        return "";
+      }
+    }
 
     private string BuildProdURL()
     {

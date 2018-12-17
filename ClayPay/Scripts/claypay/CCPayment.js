@@ -176,6 +176,7 @@ var clayPay;
             return clayPay.CurrentTransaction.Validate();
         };
         CCPayment.prototype.ValidateAndSave = function () {
+            // TODO: This is the call from the button
             if (!this.Validate())
                 return;
             clayPay.CurrentTransaction.Save();
