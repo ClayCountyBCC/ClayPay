@@ -35,6 +35,7 @@ namespace ClayPay.Models.Claypay
     {
       public string CashierId { get; set; } = "";
       public DateTime Transaction_Start { get; set; } = DateTime.MaxValue;
+      public DateTime Get_CashierId_Otid { get; set; } = DateTime.MaxValue;
       public DateTime Send_CCData_Authorize_Transmit { get; set; } = DateTime.MaxValue;
       public DateTime Return_CCData_Authorize_Transmit { get; set; } = DateTime.MaxValue;
       public DateTime Send_CCData_Settle_Transmit { get; set; } = DateTime.MaxValue;
@@ -57,6 +58,7 @@ namespace ClayPay.Models.Claypay
     public NewTransaction()
     {
       TimingDates = new TransactionTiming();
+      TimingDates.Transaction_Start = DateTime.Now;
     }
     public static List<DateTime> ActionDates { get; set; } = new List<DateTime>();
 
@@ -126,6 +128,7 @@ namespace ClayPay.Models.Claypay
             Errors.Add("There was an issue settling the credit card transaction.");
             rollbackTransaction();
             UnlockChargeItems();
+            InsertTransactionTiming();
             return new ClientResponse(Errors);
           }
           else
@@ -135,6 +138,7 @@ namespace ClayPay.Models.Claypay
               Errors.Add(pr.ErrorText);
               rollbackTransaction();
               UnlockChargeItems();
+              InsertTransactionTiming();
               return new ClientResponse(Errors);
             }
           }
@@ -480,7 +484,7 @@ namespace ClayPay.Models.Claypay
         TransactionCashierData.CashierId = "-1";
         TransactionCashierData.OTId = -1;
 
-        TimingDates.Transaction_Start = DateTime.Now;
+        TimingDates.Get_CashierId_Otid = DateTime.Now;
 
         int i = Constants.Exec_Query(sql, dp);
         if (i != -1)
