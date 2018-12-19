@@ -57,7 +57,7 @@ namespace ClayPay.Models.Claypay
           case "cc_cashier":
           case "cc on":
           case "cc online":
-            return Convert.ToDecimal(PaymentResponse.GetFee(AmountTendered));
+            return Convert.ToDecimal(NewTransaction.GetFee(AmountTendered));
           default:
             return 0;
         }

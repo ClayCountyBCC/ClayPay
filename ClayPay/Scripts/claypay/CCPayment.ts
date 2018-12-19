@@ -260,6 +260,7 @@ namespace clayPay
 
     public ValidateAndSave(): void
     {
+      // TODO: This is the call from the button
       if (!this.Validate()) return;
       clayPay.CurrentTransaction.Save();
     }

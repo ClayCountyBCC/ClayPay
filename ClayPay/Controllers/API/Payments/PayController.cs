@@ -23,16 +23,14 @@ namespace ClayPay.Controllers
       thisTransaction.TransactionCashierData.CurrentUser = UserAccess.GetUserAccess(User.Identity.Name);
       if (thisTransaction.ValidatePaymentTransaction())
       {
-        var response = thisTransaction.ProcessPaymentTransaction(); 
+        var response = thisTransaction.ProcessPaymentTransaction();
         return Ok(response);
       }
       else
       {
-    
         return Ok(new ClientResponse(thisTransaction.Errors));
       }
     }
-
 
 
     private IHttpActionResult CreateError(string message, HttpStatusCode codeToUse)

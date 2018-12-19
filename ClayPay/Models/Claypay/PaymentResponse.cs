@@ -30,7 +30,8 @@ namespace ClayPay.Models
       {
         return TimeStamp.ToShortDateString();
       }
-    } //
+    } 
+
     public PaymentResponse(decimal Amount,
      Constants.PaymentTypes PaymentType,
      bool UseProduction)
@@ -40,27 +41,23 @@ namespace ClayPay.Models
       this.UseProduction = UseProduction;
     }
 
-    public static string GetFee(decimal Amount)
-    {
-      var pr = new PaymentResponse(Amount, Constants.PaymentTypes.Building, true);
-      return pr.CalcFee(Amount);
-    }
-
-    private string CalcFee(decimal Amount)
+    public string CalcFee(decimal Amount)
     {
       try
       {
         string result = PostToMFC(BuildFeeURL(Amount));
         ProcessResults(result);
+
         return ConvFee;
-      }catch(Exception ex)
+      }
+      catch (Exception ex)
       {
         Constants.Log(ex);
         return "";
       }
     }
 
-    public static PaymentResponse PostPayment(CCPayment ccd, string ipAddress)
+    public static PaymentResponse PostPayment(CCPayment ccd, string ipAddress/* = ""*/)
     {
       try
       {
@@ -75,7 +72,7 @@ namespace ClayPay.Models
           return null;
         }
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         Constants.Log(ex);
         return null;
@@ -87,7 +84,27 @@ namespace ClayPay.Models
     {
       try
       {
-        string result = PostToMFC(BuildURL(ccd, ipAddress));
+        string result = "";
+
+
+        if (ccd.TransactionId != null && ccd.TransactionId.Length > 0)
+        {
+          NewTransaction.TimingDates.Send_CCData_Settle_Transmit = DateTime.Now;
+
+          result = PostToMFC(BuildSettlePaymentURL(ccd));
+
+          NewTransaction.TimingDates.Return_CCData_Settle_Transmit = DateTime.Now;
+        }
+        else
+        {
+          NewTransaction.TimingDates.Send_CCData_Authorize_Transmit = DateTime.Now;
+
+          result = PostToMFC(BuildAuthorizePaymentURL(ccd, ipAddress));
+
+          NewTransaction.TimingDates.Return_CCData_Authorize_Transmit = DateTime.Now;
+
+        }
+
         ProcessResults(result);
         return true;
       }
@@ -131,7 +148,7 @@ namespace ClayPay.Models
           }
         }
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
         Constants.Log(ex);
       }
@@ -161,51 +178,6 @@ namespace ClayPay.Models
 
     }
 
-    //private static string BuildURL(Constants.PaymentTypes PTypes = Constants.PaymentTypes.Building)
-    //{
-    //  bool Prod = Constants.UseProduction();
-    //  var sb = new StringBuilder();
-    //  sb.Append("https://www.myfloridacounty.com/myflc-pay/OpenPay.do?UserID=");
-    //  if (Prod)
-    //  {
-    //    sb.Append((int)Constants.Users.Prod_User);
-    //  }
-    //  else
-    //  {
-    //    sb.Append((int)Constants.Users.Test_User);
-    //  }
-
-    //  sb.Append("&serviceID=");
-    //  switch (PTypes)
-    //  {
-    //    case Constants.PaymentTypes.Building:
-    //      if (Prod)
-    //      {
-    //        sb.Append((int)Constants.Services.Prod_Building_Service);
-    //      }
-    //      else
-    //      {
-    //        sb.Append((int)Constants.Services.Test_Building_Service);
-    //      }
-
-    //      break;
-
-    //    case Constants.PaymentTypes.Rescue:
-    //      if (Prod)
-    //      {
-    //        sb.Append((int)Constants.Services.Prod_Rescue_Service);
-    //      }
-    //      else
-    //      {
-    //        sb.Append((int)Constants.Services.Test_Rescue_Service);
-    //      }
-
-    //      break;
-    //  }
-
-    //  return sb.ToString();
-    //}
-
     private string BuildFeeURL(decimal Amount)
     {
       var sb = new StringBuilder();
@@ -216,8 +188,9 @@ namespace ClayPay.Models
       return sb.ToString();
     }
 
-    private string BuildURL(CCPayment CC, string ipAddress)
-    {      
+    private string BuildAuthorizePaymentURL(CCPayment CC, string ipAddress)
+    {
+
       var sb = new StringBuilder();
       try
       {
@@ -230,13 +203,33 @@ namespace ClayPay.Models
           .Append("&CARD_EXP_YEAR=").Append(CC.ExpYear)
           .Append("&CVV=").Append(CC.CVVNumber)
           .Append("&ZIPCODE=").Append(CC.ZipCode)
-          .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
-          .Append("&mode=AS")
+          .Append("&PAYMENT_AMOUNT=").Append(CC.Amount + (CC.Amount * Convert.ToDecimal(ConvFee)))
+          .Append("&mode=A")
           .Append("&*EmailAddress=").Append(CC.EmailAddress)
           .Append("&*IPAddress=").Append(ipAddress);
         return sb.ToString();
       }
-      catch(Exception ex)
+      catch (Exception ex)
+      {
+        Constants.Log(ex, sb.ToString());
+        return "";
+      }
+    }
+
+    private string BuildSettlePaymentURL(CCPayment CC)
+    {
+
+      var sb = new StringBuilder();
+      try
+      {
+        sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
+          .Append("&PAYMENT_AMOUNT=").Append(CC.Amount + Convert.ToDecimal(CC.ConvenienceFee))
+          .Append("&CONV_FEE=")
+          .Append("&PaymentUniqueID=").Append(CC.TransactionId)
+          .Append("&mode=S");
+        return sb.ToString();
+      }
+      catch (Exception ex)
       {
         Constants.Log(ex, sb.ToString());
         return "";
@@ -282,7 +275,7 @@ namespace ClayPay.Models
     }
 
     // TODO: need to use this for saving all types of payments, not just cc payments
-    
+
 
   }
 }

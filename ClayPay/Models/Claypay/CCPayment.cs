@@ -16,6 +16,7 @@ namespace ClayPay.Models
     public string CVVNumber { get; set; } = "";
     public string ZipCode { get; set; } = "";
     public decimal Amount { get; set; } = 0;
+    public string ConvenienceFee { get; set; } = "";
     public string EmailAddress { get; set; } = "";
     //public string IPAddress { get; set; } = "";
     public string TransactionId { get; set; } = "";

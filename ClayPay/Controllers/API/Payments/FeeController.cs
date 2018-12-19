@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using ClayPay.Models;
+using ClayPay.Models.Claypay;
 
 namespace ClayPay.Controllers
 {
@@ -30,7 +31,7 @@ namespace ClayPay.Controllers
       }
       else
       {
-        return Ok(PaymentResponse.GetFee(Amount));
+        return Ok(NewTransaction.GetFee(Amount));
       }
 
     }

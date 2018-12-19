@@ -28,19 +28,50 @@ namespace ClayPay.Models.Claypay
     public List<string> Errors { get; set; } = new List<string>();
     public List<string> ProcessingErrors { get; set; } = new List<string>();
     public decimal TotalAmountDue { get; set; } = 0; // provided by the client, this is the amount they used to calculate how much money to accept.
+    public string ConvenienceFeeAmount { get; set; } = "";
     public decimal ChangeDue { get; set; } = 0;
-    private DateTime TransactionDate { get; set; } = DateTime.Now;
+    public DateTime TransactionDate { get; set; } = DateTime.Now;
+    public class TransactionTiming
+    {
+      public string CashierId { get; set; } = "";
+      public DateTime Transaction_Start { get; set; } = DateTime.MaxValue;
+      public DateTime Get_CashierId_Otid { get; set; } = DateTime.MaxValue;
+      public DateTime Send_CCData_Authorize_Transmit { get; set; } = DateTime.MaxValue;
+      public DateTime Return_CCData_Authorize_Transmit { get; set; } = DateTime.MaxValue;
+      public DateTime Send_CCData_Settle_Transmit { get; set; } = DateTime.MaxValue;
+      public DateTime Return_CCData_Settle_Transmit { get; set; } = DateTime.MaxValue;
+      public DateTime Save_Cashier_Payment_Start { get; set; } = DateTime.MaxValue;
+      public DateTime Update_CashierItem_Start { get; set; } = DateTime.MaxValue;
+      public DateTime Insert_Update_GURows_Start { get; set; } = DateTime.MaxValue;
+      public DateTime Insert_Update_GURows_End { get; set; } = DateTime.MaxValue;
+      public DateTime Finalize_Transaction_Start { get; set; } = DateTime.MaxValue;
+      public DateTime Finalize_Transaction_End { get; set; } = DateTime.MaxValue;
+
+      public TransactionTiming()
+      {
+
+      }
+    }
+
+    public static TransactionTiming TimingDates { get; set; } 
+
     public NewTransaction()
     {
+      TimingDates = new TransactionTiming();
+      TimingDates.Transaction_Start = DateTime.Now;
     }
-  
+    public static List<DateTime> ActionDates { get; set; } = new List<DateTime>();
+
     public ClientResponse ProcessPaymentTransaction()
     {
       // Process credit card payment if there is one. this will be moved to a separate function
       if (CCData.Validated)
       {
-
+        TimingDates.Send_CCData_Authorize_Transmit = DateTime.Now;
+        
         var pr = PaymentResponse.PostPayment(this.CCData, TransactionCashierData.ipAddress);
+
+        TimingDates.Return_CCData_Authorize_Transmit = DateTime.Now;
 
         if (pr == null)
         {
@@ -59,6 +90,10 @@ namespace ClayPay.Models.Claypay
           else
           {
             CCData.TransactionId = pr.UniqueId;
+            ConvenienceFeeAmount = GetFee(CCData.Amount);
+
+            CCData.ConvenienceFee = ConvenienceFeeAmount;
+          
           }
         }
       }
@@ -69,9 +104,9 @@ namespace ClayPay.Models.Claypay
       if (CCData.Validated)
       {
         Payments.Add(
-          new Payment(CCData, 
-                      Environment.MachineName.ToUpper() == "CLAYBCCIIS01" ? 
-                        Payment.payment_type.credit_card_cashier : 
+          new Payment(CCData,
+                      Environment.MachineName.ToUpper() == "CLAYBCCIIS01" ?
+                        Payment.payment_type.credit_card_cashier :
                         Payment.payment_type.credit_card_public));
       }
       if (CheckPayment.Validated) Payments.Add(CheckPayment);
@@ -84,9 +119,37 @@ namespace ClayPay.Models.Claypay
       {
         //var amountPaid = (from payment in Payments select payment.AmountApplied).Sum();
 
+
+        if (CCData.Validated && CCData.TransactionId.Length > 0)
+        {
+          var pr = PaymentResponse.PostPayment(this.CCData, "");
+          if (pr == null)
+          {
+            Errors.Add("There was an issue settling the credit card transaction.");
+            rollbackTransaction();
+            UnlockChargeItems();
+            InsertTransactionTiming();
+            return new ClientResponse(Errors);
+          }
+          else
+          {
+            if (pr.ErrorText.Length > 0)
+            {
+              Errors.Add(pr.ErrorText);
+              rollbackTransaction();
+              UnlockChargeItems();
+              InsertTransactionTiming();
+              return new ClientResponse(Errors);
+            }
+          }
+        }
+
         var cr = new ClientResponse(TransactionCashierData.CashierId.Trim(), Charges);
         cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddress.Trim());
+
+        InsertTransactionTiming();
         return cr;
+ 
       }
       else
       {
@@ -105,6 +168,12 @@ namespace ClayPay.Models.Claypay
       }
     }
 
+    public static string GetFee(decimal Amount)
+    {
+      var pr = new PaymentResponse(Amount, Constants.PaymentTypes.Building, true);
+      return pr.CalcFee(Amount);
+    }
+    
     public bool ValidatePaymentTransaction()
     {
       Errors = TransactionCashierData.ValidatePayerData();
@@ -130,7 +199,7 @@ namespace ClayPay.Models.Claypay
       if (this.CashPayment.PaymentType != Payment.payment_type.cash ||
         this.CheckPayment.PaymentType != Payment.payment_type.check ||
         this.OtherPayment.PaymentType == Payment.payment_type.cash ||
-        this.OtherPayment.PaymentType == Payment.payment_type.check || 
+        this.OtherPayment.PaymentType == Payment.payment_type.check ||
         this.OtherPayment.PaymentType == Payment.payment_type.credit_card_cashier ||
         this.OtherPayment.PaymentType == Payment.payment_type.credit_card_public)
       {
@@ -240,11 +309,14 @@ namespace ClayPay.Models.Claypay
       if (Charges.Count == 0) return false;
       var sql = @"
         USE WATSC;
+        
+        SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
         BEGIN TRAN
           BEGIN TRY
 
             DELETE ccChargeItemsLocked
-            WHERE TransactionDate < DATEADD(MI, -3, GETDATE());
+            WHERE TransactionDate < DATEADD(MI, -10, GETDATE());
 
             INSERT INTO ccChargeItemsLocked
             (ItemId)  
@@ -302,16 +374,18 @@ namespace ClayPay.Models.Claypay
       var sql = @"
         USE WATSC;
 
+        SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+
         BEGIN TRAN
-        BEGIN TRY
-          DELETE FROM ccChargeItemsLocked
-          WHERE TransactionDate < DATEADD(MI, -3, GETDATE())
-            OR ItemId IN (@ItemId)
-          COMMIT
-        END TRY
-        BEGIN CATCH
-          ROLLBACK TRAN
-        END CATCH";
+          BEGIN TRY
+            DELETE FROM ccChargeItemsLocked
+            WHERE TransactionDate < DATEADD(MI, -10, GETDATE())
+              OR ItemId IN (@ItemId)
+            COMMIT
+          END TRY
+          BEGIN CATCH
+            ROLLBACK TRAN
+          END CATCH";
       try
       {
         Constants.Exec_Query(sql, Charges);
@@ -324,7 +398,7 @@ namespace ClayPay.Models.Claypay
 
     public bool SaveTransaction()
     {
-
+      // TODO: Update all sub functions to email when expected number of rows are not updated properly
       if (!StartTransaction())
       {
         rollbackTransaction();
@@ -405,31 +479,62 @@ namespace ClayPay.Models.Claypay
         SET @otId = @@IDENTITY;";
       try
       {
+
+        
         TransactionCashierData.CashierId = "-1";
-        TransactionCashierData.OTId      = -1;
+        TransactionCashierData.OTId = -1;
+
+        TimingDates.Get_CashierId_Otid = DateTime.Now;
 
         int i = Constants.Exec_Query(sql, dp);
-        if(i != -1)
+        if (i != -1)
         {
+          
           TransactionCashierData.OTId = dp.Get<int>("@otId");
-          TransactionCashierData.CashierId= dp.Get<string>("@CashierId");
+          TransactionCashierData.CashierId = dp.Get<string>("@CashierId");
           return true;
         }
-        return false;
+        else
+        {
+          try
+          {
+            var sb = new StringBuilder();
+            sb.Append("In StartTransaction() ").Append("in " + (Constants.UseProduction() ? "PROD" : "DEVELOPMENT")).AppendLine(" Server")
+              .AppendLine(TransactionDate.ToLongDateString())
+              .AppendLine("There was an issue saving getting NextAvailable CashierId or inserting new row Into WATSC.dbo.ccCashier")
+              .AppendLine(TotalAmountDue.ToString())
+              .Append("Payer: ").AppendLine(TransactionCashierData.PayerName)
+              .Append("Payer email: ").AppendLine(TransactionCashierData.PayerEmailAddress)
+              .Append("Number of payment types: ").AppendLine(Payments.Count().ToString())
+              .AppendLine("ItemIds:");
+            sb.AppendLine(String.Join(",", (from c in Charges select c.ItemId.ToString()).ToArray()));
+            Constants.SaveEmail("daniel.mccartney@claycountygov.com", "Claypay transaction rolled back", sb.ToString());
+          }
+          catch
+          {
+            Constants.SaveEmail("daniel.mccartney@claycountygov.com", 
+                                "Claypay Issue in StartTransaction()", 
+                                "error getting new CashierId or new OTid.");
+          }
+          
+          return false;
+
+        }
+
       }
       catch (Exception ex)
       {
+     
         Constants.Log(ex, sql);
         return false;
-        //TODO: add rollback in StartTransaction function
       }
     }
-    
+
     private static DataTable CreateCashierPaymentDataTable()
     {
       var dt = new DataTable("CashierPayment");
 
-      var pt = new DataColumn("PaymentType", typeof(string));      
+      var pt = new DataColumn("PaymentType", typeof(string));
       //pt.MaxLength = 10;
 
       var info = new DataColumn("Info", typeof(string));
@@ -444,7 +549,7 @@ namespace ClayPay.Models.Claypay
       // TODO : Breakout each string and set the maxLength
       dt.Columns.Add(pt);
       dt.Columns.Add("OTid", typeof(int));
-      
+
       dt.Columns.Add("AmountApplied", typeof(decimal));
       dt.Columns.Add("AmountTendered", typeof(decimal));
       dt.Columns.Add(checkNum);
@@ -455,7 +560,7 @@ namespace ClayPay.Models.Claypay
 
     public bool SaveCashierPaymentRows()
     {
-      
+
       var dt = CreateCashierPaymentDataTable();
       string query = $@"
           USE WATSC;
@@ -488,13 +593,43 @@ namespace ClayPay.Models.Claypay
 
 
 
+        TimingDates.Save_Cashier_Payment_Start = DateTime.Now; // Save_Cashier_Payment_start
 
         using (IDbConnection db = new SqlConnection(
           Constants.Get_ConnStr("WATSC" + (Constants.UseProduction() ? "Prod" : "QA"))))
         {
           int i = db.Execute(query, new { CashierPayment = dt.AsTableValuedParameter("CashierPayment") }, commandTimeout: 60);
+          
+          if(i != Payments.Count())
+          {
+            try
+            {
+              var sb = new StringBuilder();
+              sb.Append("In SaveCashierPaymentRows() ")
+                .Append("in " + (Constants.UseProduction() ? "PROD" : "DEVELOPMENT")).AppendLine(" Server")
+                .AppendLine(TransactionDate.ToLongDateString())
+                .AppendLine("There was an issue inserting data for ").Append((Payments.Count() - i).ToString())
+                  .AppendLine(" payment types into ccCashierPayment")
+                .Append("OTId: ").AppendLine(TransactionCashierData.OTId.ToString())
+                .Append("Amount Due: ").AppendLine(TotalAmountDue.ToString())
+                .Append("Payer: ").AppendLine(TransactionCashierData.PayerName)
+                .Append("Payer email: ").AppendLine(TransactionCashierData.PayerEmailAddress)
+                .Append("Number of payment types: ").AppendLine(Payments.Count().ToString())
+                .AppendLine("ItemIds:");
+              sb.AppendLine(String.Join(",", (from c in Charges select c.ItemId.ToString()).ToArray()));
+              Constants.SaveEmail("daniel.mccartney@claycountygov.com", "Claypay transaction has not been rolled back", sb.ToString());
+            }
+            catch
+            {
+              Constants.SaveEmail("daniel.mccartney@claycountygov.com", 
+                                  "Claypay Issue in SaveCashierPaymentRows()", 
+                                  "error inserting payments");
+            }
+          }
+          
           return i > 0;
         }
+
       }
       catch (Exception ex)
       {
@@ -506,22 +641,63 @@ namespace ClayPay.Models.Claypay
     public bool UpdateCashierItemRows_OTid_CashierId()
     {
 
-      
-      var query =$@"
+      var query = $@"
         USE WATSC;
 
         UPDATE ccCashierItem 
-        SET OTId = @OTID, CashierId = LTRIM(RTRIM(@CASHIERID))
-        WHERE itemId IN @ITEMIDS";
+        SET OTId = @OTID, CashierId = LTRIM(RTRIM(@CASHIERID)), [TimeStamp] = GETDATE()
+        WHERE itemId IN @ITEMIDS
+          AND CashierId IS NULL";
+
       try
       {
+        TimingDates.Update_CashierItem_Start = DateTime.Now; // update_CashierItem_start
+
         var i = Constants.Exec_Query(query, new
         {
           ITEMIDS = ItemIds,
           OTID = TransactionCashierData.OTId,
           CASHIERID = TransactionCashierData.CashierId
         });
+
+
+        // TODO: create email if not all rows are updated
+        if (i != ItemIds.Count())
+        {
+          if(i != ItemIds.Count())
+          {
+            try
+            {
+              var sb = new StringBuilder();
+              sb.Append("In UpdateCashierItemRows_OTid_CashierId() ")
+                .Append("in " + (Constants.UseProduction() ? "PROD" : "DEVELOPMENT")).AppendLine(" Server")
+                .AppendLine(TransactionDate.ToLongDateString())
+                .Append("There was an issue updating ").Append((ItemIds.Count() - i).ToString())
+                  .AppendLine(" charge items ccCashierPayment")
+                .Append("OTId: ").AppendLine(TransactionCashierData.OTId.ToString())
+                .Append("Amount Due: ").AppendLine(TotalAmountDue.ToString())
+                .Append("Payer: ").AppendLine(TransactionCashierData.PayerName)
+                .Append("Payer email: ").AppendLine(TransactionCashierData.PayerEmailAddress)
+                .Append("Number of payment types: ").AppendLine(Payments.Count().ToString())
+                .AppendLine("ItemIds:");
+              sb.AppendLine(String.Join(",", (from c in Charges select c.ItemId.ToString()).ToArray()));
+              Constants.SaveEmail("daniel.mccartney@claycountygov.com", 
+                                  "Claypay Issue in UpdateCashierItemRows_OTid_CashierId()", 
+                                  sb.ToString());
+            }
+            catch
+            {
+              Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+                                  "Claypay Issue in UpdateCashierItemRows_OTid_CashierId()", 
+                                  "error updating cashierItem rows");
+            }
+          }
+
+        }
+
         return i > 0;
+
+
       }
       catch (Exception ex)
       {
@@ -535,6 +711,8 @@ namespace ClayPay.Models.Claypay
 
     public bool InsertGURows()
     {
+
+      Console.WriteLine("All of the Transaction", this);
       var dp = new DynamicParameters();
       dp.Add("@otid", TransactionCashierData.OTId);
       dp.Add("@TransactionDate", this.TransactionDate);
@@ -596,7 +774,40 @@ namespace ClayPay.Models.Claypay
 
       try
       {
+        TimingDates.Insert_Update_GURows_Start = DateTime.Now; // Insert_Update_GURows_Start
+
         var i = Constants.Exec_Query(query, dp);
+
+        TimingDates.Insert_Update_GURows_End = DateTime.Now; // Insert_Update_GURows_End
+
+        if(i != ItemIds.Count() * 2)
+        {
+          try
+          {
+            var sb = new StringBuilder();
+            sb.Append("In SaveCashierPaymentRows() ")
+              .Append("in " + (Constants.UseProduction() ? "PROD" : "DEVELOPMENT")).AppendLine(" Server")
+              .AppendLine(TransactionDate.ToLongDateString())
+              .AppendLine("There was an issue inserting GU data for ").Append(((Payments.Count()/2) - i).ToString())
+                .AppendLine(" payments into ccGU or ccGUItem")
+              .Append("OTId: ").AppendLine(TransactionCashierData.OTId.ToString())
+              .Append("Amount Due: ").AppendLine(TotalAmountDue.ToString())
+              .Append("Payer: ").AppendLine(TransactionCashierData.PayerName)
+              .Append("Payer email: ").AppendLine(TransactionCashierData.PayerEmailAddress)
+              .Append("Number of payment types: ").AppendLine(Payments.Count().ToString())
+              .AppendLine("ItemIds:");
+            sb.AppendLine(String.Join(",", (from c in Charges select c.ItemId.ToString()).ToArray()));
+            Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+                                "Claypay Issue in InsertGURows()", 
+                                sb.ToString());
+          }
+          catch
+          {
+            Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+                                "Claypay Issue in InsertGURows()", 
+                                "error inserting rows into ccGU or ccGUItem");
+          }
+        }
         return i > 0;
       }
       catch (Exception ex)
@@ -610,7 +821,6 @@ namespace ClayPay.Models.Claypay
     {
       var query = @"
       USE WATSC;
-        USE WATSC;
 
       --Handle HoldIds
       UPDATE H
@@ -620,8 +830,7 @@ namespace ClayPay.Models.Claypay
           FROM bpHold H
           INNER JOIN ccCashierItem CI ON CI.HoldID = H.HoldID
           WHERE OTId = @otid
-
-
+          
 
       UPDATE bpASSOC_PERMIT
       SET IssueDate = GETDATE()
@@ -658,13 +867,18 @@ namespace ClayPay.Models.Claypay
                                   FROM ccCashierItem 
                                   WHERE OTId=@otid) AND
                 CashierId IS NULL AND Total > 0) = 0);";
-      return Constants.Exec_Query(query, new
+
+      TimingDates.Finalize_Transaction_Start = DateTime.Now; // Finalize_Transaction_Start
+
+      var i = Constants.Exec_Query(query, new
       {
         otid = TransactionCashierData.OTId,
         cashierId = TransactionCashierData.CashierId,
         UserName = TransactionCashierData.CurrentUser.user_name
       }) != -1;
+      TimingDates.Finalize_Transaction_End = DateTime.Now; // Finalize_Transaction_End
 
+      return i;
     }
 
     public bool rollbackTransaction()
@@ -699,8 +913,10 @@ namespace ClayPay.Models.Claypay
       param.Add("@otid", TransactionCashierData.OTId);
       var query = $@"
         USE WATSC;
+        DECLARE @cashierid VARCHAR(9) = (SELECT CashierId FROM ccCashier WHERE OTid = @otid)
         BEGIN TRAN
             BEGIN TRY
+
             DELETE ccGUItem WHERE guid IN (SELECT guid FROM ccGU WHERE otid = @otid);
             DELETE ccGU where OTID = @otid;
 
@@ -723,6 +939,10 @@ namespace ClayPay.Models.Claypay
                 Name = 'Payment reversed - not applied'
             WHERE
               OTID = @otid;          
+            
+            UPDATE ClayPay_Transaction_Timing
+            SET Rollback_Transaction = GETDATE()
+            WHERE CashierId = @cashierid
 
             COMMIT;
           END TRY
@@ -741,96 +961,39 @@ namespace ClayPay.Models.Claypay
       }
     }
 
-    //public static List<string> BuildEmailBody(string cashierId, CashierData payerData)
-    //{
-    //  var charges = Charge.GetChargesByCashierId(cashierId);
-    //  var payments = ReceiptPayment.Get(cashierId);
+    public void InsertTransactionTiming()
+    {
+      TimingDates.CashierId = TransactionCashierData.CashierId;
 
-    //  var emailReceipt = new List<string>();
-    //  var emailHeader = new StringBuilder();
-    //  var csHeader = new StringBuilder();
-    //  var cs = new StringBuilder();
-    //  var psHeader = new StringBuilder();
-    //  var ps = new StringBuilder();
-
-    //  emailHeader.Append(payerData.PayerName).Append("\t\t\t").Append(payerData.TransactionDate.ToString()).AppendLine()
-    //             .Append(payerData.PayerEmailAddress).AppendLine()
-    //             .Append(payerData.PayerCompanyName).AppendLine()
-    //             .Append(payerData.PayerStreetAddress).AppendLine()
-    //             .Append(payerData.PayerStreet2).AppendLine()
-    //             .AppendLine()
-    //             .AppendLine();
-                 
-    //  csHeader.AppendLine()
-    //          .Append("Key\t\tDescription\tAmount");
-
+      var query = @"
       
-    //  foreach (var c in charges)
-    //  {
-    //    cs.Append(c.AssocKey).
-    //    Append("\t")
-    //    .Append(c.Description)
-    //    .Append("\t")
-    //    .Append(c.TotalDisplay)
-    //    .AppendLine();
-    //  }
-    //  psHeader.AppendLine()
-    //          .Append("\t\tCheck Number\n")
-    //          .Append("Payment Type\tTransaction ID\tAmount\tConvenience Fee(cc only)");
+          USE WATSC;
+      
+          INSERT INTO ClayPay_Transaction_Timing
+          (CashierId, Transaction_Start, Send_CCData_Authorize_Transmit, 
+          Return_CCData_Authorize_Transmit, Send_CCData_Settle_Transmit, 
+          Return_CCData_Settle_Transmit, Save_Cashier_Payment_Start, 
+          Update_CashierItem_Start, Insert_Update_GURows_Start, 
+          Insert_Update_GURows_End, Finalize_Transaction_Start, 
+          Finalize_Transaction_End)
+          
+          VALUES 
+          (@CashierId, @Transaction_Start, @Send_CCData_Authorize_Transmit, 
+          @Return_CCData_Authorize_Transmit, @Send_CCData_Settle_Transmit, 
+          @Return_CCData_Settle_Transmit, @Save_Cashier_Payment_Start, 
+          @Update_CashierItem_Start, @Insert_Update_GURows_Start, 
+          @Insert_Update_GURows_End, @Finalize_Transaction_Start, 
+          @Finalize_Transaction_End)";
 
-    //  foreach (var p in payments)
-    //  {
-    //    ps.Append(p.PaymentTypeDescription)
-    //    .Append("\t")
-    //    .Append(p.CheckNumber + p.TransactionId)
-    //    .Append("\t\t")
-    //    .Append(p.AmountApplied)
-    //    .Append("\t")
-    //    .Append(p.ConvenienceFeeAmount)
-    //    .AppendLine();
-    //  }
+      var i = Constants.Exec_Query(query, TimingDates);
 
-    //  var emailBody = new List<string>
-    //  {
-    //    emailHeader.ToString(),
-    //    csHeader.ToString(),
-    //    cs.ToString(),
-    //    psHeader.ToString(),
-    //    ps.ToString()
-    //   };
-       
-    //  return emailBody;
-    //}
+      if(i == -1)
+      {
+        new ErrorLog("Issue saving transaction timing for CashierId: " + TransactionCashierData.CashierId , "Did not save transaction times properly", "","","");
+      }
+    }
+    
 
-    //public string CreateEmailBody()
-    //{
-    //  var AssocKeys = GetAssocKeys(ItemIds);
-    //  var chargeItems = new List<Charge>();
-
-    //  foreach (var k in AssocKeys)
-    //  {
-    //    chargeItems.AddRange(Charge.Get(k));
-    //  }
-
-    //  var keys = String.Join(", \n", AssocKeys);
-    //  string body = $"An online credit card payment of {this.CCData.Amount.ToString("C")}.\n";
-    //  body += $"The Charges paid include:\n";
-    //  foreach (var c in chargeItems)
-    //  {
-    //    body += $"{c.Description}\t\t{c.TotalDisplay}\n{keys}";
-    //  }
-    //  body += "\nThis payment is associated with the following items: \n" + keys;
-
-    //  return body;
-    //}
-
-    //public List<string> GetAssocKeys(List<int> ItemIds)
-    //{
-    //  string query = @"
-    //    SELECT DISTINCT LTRIM(RTRIM(AssocKey)) AS AssocKey FROM ccCashierItem
-    //    WHERE ItemId IN @ids;";
-    //  return Constants.Get_Data<string>(query, ItemIds);
-    //}
 
   }
 }

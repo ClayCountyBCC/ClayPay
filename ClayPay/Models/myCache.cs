@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Runtime.Caching;
+using ClayPay.Models.Claypay;
 
 namespace ClayPay.Models
 {
@@ -69,7 +70,7 @@ namespace ClayPay.Models
         case "useraccess":
           return UserAccess.GetAllUserAccess();
         case "fee":
-          return PaymentResponse.GetFee(100) + "%";
+          return NewTransaction.GetFee(100) + "%";
         case "apptypes":
           return AppType.Get();
 
