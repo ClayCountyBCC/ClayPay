@@ -316,7 +316,7 @@ namespace ClayPay.Models.Claypay
           BEGIN TRY
 
             DELETE ccChargeItemsLocked
-            WHERE TransactionDate < DATEADD(MI, -3, GETDATE());
+            WHERE TransactionDate < DATEADD(MI, -10, GETDATE());
 
             INSERT INTO ccChargeItemsLocked
             (ItemId)  
@@ -379,7 +379,7 @@ namespace ClayPay.Models.Claypay
         BEGIN TRAN
           BEGIN TRY
             DELETE FROM ccChargeItemsLocked
-            WHERE TransactionDate < DATEADD(MI, -3, GETDATE())
+            WHERE TransactionDate < DATEADD(MI, -10, GETDATE())
               OR ItemId IN (@ItemId)
             COMMIT
           END TRY
