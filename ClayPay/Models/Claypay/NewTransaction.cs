@@ -53,7 +53,7 @@ namespace ClayPay.Models.Claypay
       }
     }
 
-    public static TransactionTiming TimingDates { get; set; } 
+    public static TransactionTiming TimingDates { get; set; }
 
     public NewTransaction()
     {
@@ -68,7 +68,7 @@ namespace ClayPay.Models.Claypay
       if (CCData.Validated)
       {
         TimingDates.Send_CCData_Authorize_Transmit = DateTime.Now;
-        
+
         var pr = PaymentResponse.PostPayment(this.CCData, TransactionCashierData.ipAddress);
 
         TimingDates.Return_CCData_Authorize_Transmit = DateTime.Now;
@@ -93,7 +93,7 @@ namespace ClayPay.Models.Claypay
             ConvenienceFeeAmount = GetFee(CCData.Amount);
 
             CCData.ConvenienceFee = ConvenienceFeeAmount;
-          
+
           }
         }
       }
@@ -149,7 +149,7 @@ namespace ClayPay.Models.Claypay
 
         InsertTransactionTiming();
         return cr;
- 
+
       }
       else
       {
@@ -173,7 +173,7 @@ namespace ClayPay.Models.Claypay
       var pr = new PaymentResponse(Amount, Constants.PaymentTypes.Building, true);
       return pr.CalcFee(Amount);
     }
-    
+
     public bool ValidatePaymentTransaction()
     {
       Errors = TransactionCashierData.ValidatePayerData();
@@ -480,7 +480,7 @@ namespace ClayPay.Models.Claypay
       try
       {
 
-        
+
         TransactionCashierData.CashierId = "-1";
         TransactionCashierData.OTId = -1;
 
@@ -489,7 +489,7 @@ namespace ClayPay.Models.Claypay
         int i = Constants.Exec_Query(sql, dp);
         if (i != -1)
         {
-          
+
           TransactionCashierData.OTId = dp.Get<int>("@otId");
           TransactionCashierData.CashierId = dp.Get<string>("@CashierId");
           return true;
@@ -512,11 +512,11 @@ namespace ClayPay.Models.Claypay
           }
           catch
           {
-            Constants.SaveEmail("daniel.mccartney@claycountygov.com", 
-                                "Claypay Issue in StartTransaction()", 
+            Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+                                "Claypay Issue in StartTransaction()",
                                 "error getting new CashierId or new OTid.");
           }
-          
+
           return false;
 
         }
@@ -524,7 +524,7 @@ namespace ClayPay.Models.Claypay
       }
       catch (Exception ex)
       {
-     
+
         Constants.Log(ex, sql);
         return false;
       }
@@ -599,8 +599,8 @@ namespace ClayPay.Models.Claypay
           Constants.Get_ConnStr("WATSC" + (Constants.UseProduction() ? "Prod" : "QA"))))
         {
           int i = db.Execute(query, new { CashierPayment = dt.AsTableValuedParameter("CashierPayment") }, commandTimeout: 60);
-          
-          if(i != Payments.Count())
+
+          if (i != Payments.Count())
           {
             try
             {
@@ -621,12 +621,12 @@ namespace ClayPay.Models.Claypay
             }
             catch
             {
-              Constants.SaveEmail("daniel.mccartney@claycountygov.com", 
-                                  "Claypay Issue in SaveCashierPaymentRows()", 
+              Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+                                  "Claypay Issue in SaveCashierPaymentRows()",
                                   "error inserting payments");
             }
           }
-          
+
           return i > 0;
         }
 
@@ -664,7 +664,7 @@ namespace ClayPay.Models.Claypay
         // TODO: create email if not all rows are updated
         if (i != ItemIds.Count())
         {
-          if(i != ItemIds.Count())
+          if (i != ItemIds.Count())
           {
             try
             {
@@ -681,14 +681,14 @@ namespace ClayPay.Models.Claypay
                 .Append("Number of payment types: ").AppendLine(Payments.Count().ToString())
                 .AppendLine("ItemIds:");
               sb.AppendLine(String.Join(",", (from c in Charges select c.ItemId.ToString()).ToArray()));
-              Constants.SaveEmail("daniel.mccartney@claycountygov.com", 
-                                  "Claypay Issue in UpdateCashierItemRows_OTid_CashierId()", 
+              Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+                                  "Claypay Issue in UpdateCashierItemRows_OTid_CashierId()",
                                   sb.ToString());
             }
             catch
             {
               Constants.SaveEmail("daniel.mccartney@claycountygov.com",
-                                  "Claypay Issue in UpdateCashierItemRows_OTid_CashierId()", 
+                                  "Claypay Issue in UpdateCashierItemRows_OTid_CashierId()",
                                   "error updating cashierItem rows");
             }
           }
@@ -780,7 +780,7 @@ namespace ClayPay.Models.Claypay
 
         TimingDates.Insert_Update_GURows_End = DateTime.Now; // Insert_Update_GURows_End
 
-        if(i != ItemIds.Count() * 2)
+        if (i != ItemIds.Count() * 2)
         {
           try
           {
@@ -788,7 +788,7 @@ namespace ClayPay.Models.Claypay
             sb.Append("In SaveCashierPaymentRows() ")
               .Append("in " + (Constants.UseProduction() ? "PROD" : "DEVELOPMENT")).AppendLine(" Server")
               .AppendLine(TransactionDate.ToLongDateString())
-              .AppendLine("There was an issue inserting GU data for ").Append(((Payments.Count()/2) - i).ToString())
+              .AppendLine("There was an issue inserting GU data for ").Append(((Payments.Count() / 2) - i).ToString())
                 .AppendLine(" payments into ccGU or ccGUItem")
               .Append("OTId: ").AppendLine(TransactionCashierData.OTId.ToString())
               .Append("Amount Due: ").AppendLine(TotalAmountDue.ToString())
@@ -798,13 +798,13 @@ namespace ClayPay.Models.Claypay
               .AppendLine("ItemIds:");
             sb.AppendLine(String.Join(",", (from c in Charges select c.ItemId.ToString()).ToArray()));
             Constants.SaveEmail("daniel.mccartney@claycountygov.com",
-                                "Claypay Issue in InsertGURows()", 
+                                "Claypay Issue in InsertGURows()",
                                 sb.ToString());
           }
           catch
           {
             Constants.SaveEmail("daniel.mccartney@claycountygov.com",
-                                "Claypay Issue in InsertGURows()", 
+                                "Claypay Issue in InsertGURows()",
                                 "error inserting rows into ccGU or ccGUItem");
           }
         }
@@ -987,12 +987,12 @@ namespace ClayPay.Models.Claypay
 
       var i = Constants.Exec_Query(query, TimingDates);
 
-      if(i == -1)
+      if (i == -1)
       {
-        new ErrorLog("Issue saving transaction timing for CashierId: " + TransactionCashierData.CashierId , "Did not save transaction times properly", "","","");
+        new ErrorLog("Issue saving transaction timing for CashierId: " + TransactionCashierData.CashierId, "Did not save transaction times properly", "", "", "");
       }
     }
-    
+
 
 
   }
