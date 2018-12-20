@@ -22,8 +22,8 @@ namespace ClayPay.Controllers.API.Payments
     [Route("Receipt")]
     public IHttpActionResult Get(string CashierId)
     {
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
-      if (!ua.authenticated) return Unauthorized();
+      //var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      //if (!ua.authenticated) return Unauthorized();
       var cr = new ClientResponse(CashierId);
       if (cr == null)
       {

@@ -3,6 +3,9 @@ var clayPay;
     var CCPayment = /** @class */ (function () {
         function CCPayment() {
             this.Validated = false;
+            this.ValidateAndSave = Utilities.Debounce(function () {
+                clayPay.CurrentTransaction.CCData.DebouncedValidateAndSave();
+            }, 1500, true);
         }
         CCPayment.prototype.UpdatePayerData = function () {
             Utilities.Set_Value(CCPayment.FirstNameInput, this.FirstName);
@@ -175,11 +178,11 @@ var clayPay;
             }
             return clayPay.CurrentTransaction.Validate();
         };
-        CCPayment.prototype.ValidateAndSave = function () {
+        CCPayment.prototype.DebouncedValidateAndSave = function () {
             // TODO: This is the call from the button
             if (!this.Validate())
                 return;
-            clayPay.CurrentTransaction.Save();
+            clayPay.CurrentTransaction.DebouncedSave();
         };
         // credit card form container
         CCPayment.CreditCardForm = "creditCardPaymentType";

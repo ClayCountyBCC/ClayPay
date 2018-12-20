@@ -160,7 +160,12 @@ namespace clayPay
       this.CCData.UpdatePayerData();
     }
 
-    Save(): void
+    public Save = Utilities.Debounce(function ()
+    {
+      clayPay.CurrentTransaction.DebouncedSave();
+    }, 1000, true);
+
+    DebouncedSave():void
     {
       // Disable the button that was just used so that it can't be clicked multiple times.
       let loadingButton = this.IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
@@ -197,7 +202,7 @@ namespace clayPay
           }
           else
           {
-            if(clayPay.CurrentTransaction.IsCashier) Payment.ResetAll();
+            if (clayPay.CurrentTransaction.IsCashier) Payment.ResetAll();
             clayPay.CurrentTransaction.TransactionCashierData.ResetPayerForm();
             clayPay.CurrentTransaction.CCData.ResetForm();
             clayPay.CurrentTransaction = new NewTransaction(); // this will reset the entire object back to default.
