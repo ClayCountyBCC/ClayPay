@@ -203,7 +203,7 @@ namespace ClayPay.Models
           .Append("&CARD_EXP_YEAR=").Append(CC.ExpYear)
           .Append("&CVV=").Append(CC.CVVNumber)
           .Append("&ZIPCODE=").Append(CC.ZipCode)
-          .Append("&PAYMENT_AMOUNT=").Append(CC.Amount + (CC.Amount * Convert.ToDecimal(ConvFee)))
+          .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
           .Append("&mode=A")
           .Append("&*EmailAddress=").Append(CC.EmailAddress)
           .Append("&*IPAddress=").Append(ipAddress);
@@ -223,7 +223,7 @@ namespace ClayPay.Models
       try
       {
         sb.Append((this.UseProduction) ? BuildProdURL() : BuildTestURL())
-          .Append("&PAYMENT_AMOUNT=").Append(CC.Amount + Convert.ToDecimal(CC.ConvenienceFee))
+          .Append("&PAYMENT_AMOUNT=").Append(CC.Amount)
           .Append("&CONV_FEE=")
           .Append("&PaymentUniqueID=").Append(CC.TransactionId)
           .Append("&mode=S");
