@@ -428,10 +428,10 @@ namespace clayPay.UI
       }
       else
       {
-        if (menuItem.id !== "nav-existingReceipts")
-        {
-          menu.appendChild(Utilities.Create_Menu_Element(menuItem));
-        }
+        //if (menuItem.id !== "nav-existingReceipts")
+        //{
+        menu.appendChild(Utilities.Create_Menu_Element(menuItem));
+        //}
       }
     }
     createNavCart();

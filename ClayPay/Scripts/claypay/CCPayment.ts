@@ -258,12 +258,16 @@ namespace clayPay
       return clayPay.CurrentTransaction.Validate();
     }
 
-    public ValidateAndSave(): void
+    public ValidateAndSave = Utilities.Debounce(function()
+    {
+      clayPay.CurrentTransaction.CCData.DebouncedValidateAndSave();
+    }, 1500, true);
+
+    public DebouncedValidateAndSave(): void
     {
       // TODO: This is the call from the button
       if (!this.Validate()) return;
-      clayPay.CurrentTransaction.Save();
+      clayPay.CurrentTransaction.DebouncedSave();
     }
-
   }
 }

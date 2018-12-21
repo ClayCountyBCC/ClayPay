@@ -23,6 +23,9 @@ var clayPay;
             this.TotalAmountPaid = 0;
             this.TotalAmountRemaining = 0;
             this.TotalChangeDue = 0;
+            this.Save = Utilities.Debounce(function () {
+                clayPay.CurrentTransaction.DebouncedSave();
+            }, 1000, true);
         }
         NewTransaction.prototype.UpdateIsCashier = function () {
             var e = document.getElementById(clayPay.Payment.checkPaymentContainer);
@@ -109,7 +112,7 @@ var clayPay;
             // this.CCData.EmailAddress = this.TransactionCashierData.PayerEmailAddress;
             this.CCData.UpdatePayerData();
         };
-        NewTransaction.prototype.Save = function () {
+        NewTransaction.prototype.DebouncedSave = function () {
             // Disable the button that was just used so that it can't be clicked multiple times.
             var loadingButton = this.IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
             Utilities.Toggle_Loading_Button(loadingButton, true);
@@ -165,4 +168,4 @@ var clayPay;
     }());
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=NewTransaction.js.map
+//# sourceMappingURL=newtransaction.js.map

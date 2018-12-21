@@ -403,4 +403,47 @@ namespace Utilities
     }
     return browser;
   }
+
+  //export function Debounce<F extends Function>(func: F, wait: number = 1000): F
+  //{
+  //  let timeoutID: number;
+
+  //  // conversion through any necessary as it wont satisfy criteria otherwise
+  //  return <F><any>function (this: any, ...args: any[])
+  //  {
+  //    clearTimeout(timeoutID);
+  //    const context = this;
+
+  //    timeoutID = window.setTimeout(function ()
+  //    {
+  //      func.apply(context, args);
+  //    }, wait);
+  //  };
+  //};
+
+  export function Debounce(func, wait, immediate)
+  {
+    var timeout;
+
+    return function executedFunction()
+    {
+      var context = this;
+      var args = arguments;
+
+      var later = function ()
+      {
+        timeout = null;
+        if (!immediate) func.apply(context, args);
+      };
+
+      var callNow = immediate && !timeout;
+
+      clearTimeout(timeout);
+
+      timeout = setTimeout(later, wait);
+
+      if (callNow) func.apply(context, args);
+    };
+  };
+
 }

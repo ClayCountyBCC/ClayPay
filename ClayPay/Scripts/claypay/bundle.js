@@ -1025,6 +1025,39 @@ var Utilities;
         return browser;
     }
     Utilities.CheckBrowser = CheckBrowser;
+    //export function Debounce<F extends Function>(func: F, wait: number = 1000): F
+    //{
+    //  let timeoutID: number;
+    //  // conversion through any necessary as it wont satisfy criteria otherwise
+    //  return <F><any>function (this: any, ...args: any[])
+    //  {
+    //    clearTimeout(timeoutID);
+    //    const context = this;
+    //    timeoutID = window.setTimeout(function ()
+    //    {
+    //      func.apply(context, args);
+    //    }, wait);
+    //  };
+    //};
+    function Debounce(func, wait, immediate) {
+        var timeout;
+        return function executedFunction() {
+            var context = this;
+            var args = arguments;
+            var later = function () {
+                timeout = null;
+                if (!immediate)
+                    func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow)
+                func.apply(context, args);
+        };
+    }
+    Utilities.Debounce = Debounce;
+    ;
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map
 var clayPay;
@@ -1550,6 +1583,9 @@ var clayPay;
     var CCPayment = /** @class */ (function () {
         function CCPayment() {
             this.Validated = false;
+            this.ValidateAndSave = Utilities.Debounce(function () {
+                clayPay.CurrentTransaction.CCData.DebouncedValidateAndSave();
+            }, 1500, true);
         }
         CCPayment.prototype.UpdatePayerData = function () {
             Utilities.Set_Value(CCPayment.FirstNameInput, this.FirstName);
@@ -1722,10 +1758,11 @@ var clayPay;
             }
             return clayPay.CurrentTransaction.Validate();
         };
-        CCPayment.prototype.ValidateAndSave = function () {
+        CCPayment.prototype.DebouncedValidateAndSave = function () {
+            // TODO: This is the call from the button
             if (!this.Validate())
                 return;
-            clayPay.CurrentTransaction.Save();
+            clayPay.CurrentTransaction.DebouncedSave();
         };
         // credit card form container
         CCPayment.CreditCardForm = "creditCardPaymentType";
@@ -2138,7 +2175,7 @@ var clayPay;
     }());
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ClientResponse.js.map
+//# sourceMappingURL=clientresponse.js.map
 /// <reference path="payment.ts" />
 /// <reference path="clientresponse.ts" />
 var clayPay;
@@ -2164,6 +2201,9 @@ var clayPay;
             this.TotalAmountPaid = 0;
             this.TotalAmountRemaining = 0;
             this.TotalChangeDue = 0;
+            this.Save = Utilities.Debounce(function () {
+                clayPay.CurrentTransaction.DebouncedSave();
+            }, 1000, true);
         }
         NewTransaction.prototype.UpdateIsCashier = function () {
             var e = document.getElementById(clayPay.Payment.checkPaymentContainer);
@@ -2250,7 +2290,7 @@ var clayPay;
             // this.CCData.EmailAddress = this.TransactionCashierData.PayerEmailAddress;
             this.CCData.UpdatePayerData();
         };
-        NewTransaction.prototype.Save = function () {
+        NewTransaction.prototype.DebouncedSave = function () {
             // Disable the button that was just used so that it can't be clicked multiple times.
             var loadingButton = this.IsCashier ? NewTransaction.PayNowCashierButton : NewTransaction.PayNowPublicButton;
             Utilities.Toggle_Loading_Button(loadingButton, true);
@@ -2306,7 +2346,7 @@ var clayPay;
     }());
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=NewTransaction.js.map
+//# sourceMappingURL=newtransaction.js.map
 var clayPay;
 (function (clayPay) {
     var AppType = /** @class */ (function () {
@@ -2834,9 +2874,10 @@ var clayPay;
                     menu.appendChild(Utilities.Create_Menu_Element(menuItem));
                 }
                 else {
-                    if (menuItem.id !== "nav-existingReceipts") {
-                        menu.appendChild(Utilities.Create_Menu_Element(menuItem));
-                    }
+                    //if (menuItem.id !== "nav-existingReceipts")
+                    //{
+                    menu.appendChild(Utilities.Create_Menu_Element(menuItem));
+                    //}
                 }
             }
             createNavCart();
@@ -2854,4 +2895,4 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=UI.js.map
+//# sourceMappingURL=ui.js.map

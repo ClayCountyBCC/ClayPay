@@ -368,9 +368,10 @@ var clayPay;
                     menu.appendChild(Utilities.Create_Menu_Element(menuItem));
                 }
                 else {
-                    if (menuItem.id !== "nav-existingReceipts") {
-                        menu.appendChild(Utilities.Create_Menu_Element(menuItem));
-                    }
+                    //if (menuItem.id !== "nav-existingReceipts")
+                    //{
+                    menu.appendChild(Utilities.Create_Menu_Element(menuItem));
+                    //}
                 }
             }
             createNavCart();
@@ -388,4 +389,4 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=UI.js.map
+//# sourceMappingURL=ui.js.map

@@ -1025,6 +1025,39 @@ var Utilities;
         return browser;
     }
     Utilities.CheckBrowser = CheckBrowser;
+    //export function Debounce<F extends Function>(func: F, wait: number = 1000): F
+    //{
+    //  let timeoutID: number;
+    //  // conversion through any necessary as it wont satisfy criteria otherwise
+    //  return <F><any>function (this: any, ...args: any[])
+    //  {
+    //    clearTimeout(timeoutID);
+    //    const context = this;
+    //    timeoutID = window.setTimeout(function ()
+    //    {
+    //      func.apply(context, args);
+    //    }, wait);
+    //  };
+    //};
+    function Debounce(func, wait, immediate) {
+        var timeout;
+        return function executedFunction() {
+            var context = this;
+            var args = arguments;
+            var later = function () {
+                timeout = null;
+                if (!immediate)
+                    func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow)
+                func.apply(context, args);
+        };
+    }
+    Utilities.Debounce = Debounce;
+    ;
 })(Utilities || (Utilities = {}));
 //# sourceMappingURL=Utilities.js.map
 var clayPay;
@@ -1619,7 +1652,7 @@ var clayPay;
     }());
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ClientResponse.js.map
+//# sourceMappingURL=clientresponse.js.map
 /// <reference path="apptypes.ts" />
 /// <reference path="charge.ts" />
 /// <reference path="claypay.ts" />
@@ -1990,9 +2023,10 @@ var clayPay;
                     menu.appendChild(Utilities.Create_Menu_Element(menuItem));
                 }
                 else {
-                    if (menuItem.id !== "nav-existingReceipts") {
-                        menu.appendChild(Utilities.Create_Menu_Element(menuItem));
-                    }
+                    //if (menuItem.id !== "nav-existingReceipts")
+                    //{
+                    menu.appendChild(Utilities.Create_Menu_Element(menuItem));
+                    //}
                 }
             }
             createNavCart();
@@ -2010,7 +2044,7 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=UI.js.map
+//# sourceMappingURL=ui.js.map
 var Balancing;
 (function (Balancing) {
     var CashierDetailData = /** @class */ (function () {
