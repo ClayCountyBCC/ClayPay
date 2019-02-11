@@ -60,7 +60,7 @@ namespace clayPay
 
     constructor()
     {
-
+      this.UpdateIsCashier();
     }
 
     public UpdateIsCashier(): void
@@ -71,7 +71,13 @@ namespace clayPay
 
     public Validate():boolean
     {
-      let payer = this.TransactionCashierData.ValidatePayer();
+      let payments = false;
+      if (clayPay.CurrentTransaction.IsCashier)
+      {
+        clayPay.CurrentTransaction.UpdateTotals();
+        payments = clayPay.CurrentTransaction.ValidatePayments();
+      }
+      let payer = clayPay.CurrentTransaction.TransactionCashierData.ValidatePayer();
       if (!payer)
       {
         Utilities.Show("validatePayer");
@@ -85,10 +91,7 @@ namespace clayPay
       //console.log('values', this.TotalAmountDue, this.TotalAmountPaid, this.TotalAmountRemaining);
       if (this.IsCashier)
       {
-        this.UpdateTotals();
-        let payments = this.ValidatePayments();
         let button = <HTMLButtonElement>document.getElementById(NewTransaction.PayNowCashierButton);
-        console.log('values', this);
         button.disabled = !(payer && payments);
         return (payer && payments);
       }
@@ -110,18 +113,18 @@ namespace clayPay
       let TotalPaidInt = 0;
       if (this.CheckPayment.Validated)
       {
-        TotalPaid += this.CheckPayment.Amount;
-        TotalPaidInt += this.CheckPayment.AmountInt;
+        TotalPaid += clayPay.CurrentTransaction.CheckPayment.Amount;
+        TotalPaidInt += clayPay.CurrentTransaction.CheckPayment.AmountInt;
       }
       if (this.CashPayment.Validated)
       {
-        TotalPaid += this.CashPayment.Amount;
-        TotalPaidInt += this.CashPayment.AmountInt;
+        TotalPaid += clayPay.CurrentTransaction.CashPayment.Amount;
+        TotalPaidInt += clayPay.CurrentTransaction.CashPayment.AmountInt;
       }
       if (this.CCData.Validated)
       {
-        TotalPaid += this.CCData.Amount;
-        TotalPaidInt += this.CCData.AmountInt;
+        TotalPaid += clayPay.CurrentTransaction.CCData.Amount;
+        TotalPaidInt += clayPay.CurrentTransaction.CCData.AmountInt;
       }
       
       this.TotalAmountPaid = TotalPaid;
@@ -133,22 +136,22 @@ namespace clayPay
 
       if (this.TotalAmountDueInt - this.TotalAmountPaidInt < 0)
       {
-        this.TotalChangeDue = this.TotalAmountPaid - this.TotalAmountDue;
-        this.TotalChangeDueInt = parseInt((this.TotalChangeDue * 100).toString());
+        clayPay.CurrentTransaction.TotalChangeDue = clayPay.CurrentTransaction.TotalAmountPaid - clayPay.CurrentTransaction.TotalAmountDue;
+        clayPay.CurrentTransaction.TotalChangeDueInt = parseInt((clayPay.CurrentTransaction.TotalChangeDue * 100).toString());
       }
-      this.UpdateForm();
+      clayPay.CurrentTransaction.UpdateForm();
     }
 
     UpdateForm()
     {
-      Utilities.Set_Text(NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(this.TotalAmountDue));
-      Utilities.Set_Text(NewTransaction.TotalAmountPaidMenu, Utilities.Format_Amount(this.TotalAmountPaid));
-      Utilities.Set_Text(NewTransaction.TotalChangeDueMenu, Utilities.Format_Amount(this.TotalChangeDue));
-      Utilities.Set_Text(NewTransaction.TotalAmountRemainingMenu, Utilities.Format_Amount(this.TotalAmountRemaining));
-      let amount = this.TotalAmountRemaining.toFixed(2);
-      if (!this.CCData.Validated) Utilities.Set_Value(CCPayment.AmountPaidInput, amount);
-      if (!this.CheckPayment.Validated) Utilities.Set_Value(Payment.checkAmountInput, amount);
-      if (!this.CashPayment.Validated) Utilities.Set_Value(Payment.cashAmountInput, amount);
+      Utilities.Set_Text(NewTransaction.TotalAmountDueMenu, Utilities.Format_Amount(clayPay.CurrentTransaction.TotalAmountDue));
+      Utilities.Set_Text(NewTransaction.TotalAmountPaidMenu, Utilities.Format_Amount(clayPay.CurrentTransaction.TotalAmountPaid));
+      Utilities.Set_Text(NewTransaction.TotalChangeDueMenu, Utilities.Format_Amount(clayPay.CurrentTransaction.TotalChangeDue));
+      Utilities.Set_Text(NewTransaction.TotalAmountRemainingMenu, Utilities.Format_Amount(clayPay.CurrentTransaction.TotalAmountRemaining));
+      let amount = clayPay.CurrentTransaction.TotalAmountRemaining.toFixed(2);
+      if (!clayPay.CurrentTransaction.CCData.Validated) Utilities.Set_Value(CCPayment.AmountPaidInput, amount);
+      if (!clayPay.CurrentTransaction.CheckPayment.Validated) Utilities.Set_Value(Payment.checkAmountInput, amount);
+      if (!clayPay.CurrentTransaction.CashPayment.Validated) Utilities.Set_Value(Payment.cashAmountInput, amount);
     }
 
     public ValidatePayments(): boolean
@@ -232,11 +235,18 @@ namespace clayPay
           }
           else
           {
-            if (clayPay.CurrentTransaction.IsCashier) Payment.ResetAll();
+            if (clayPay.CurrentTransaction.IsCashier)
+            {
+              Payment.ResetAll();
+            }
             clayPay.CurrentTransaction.TransactionCashierData.ResetPayerForm();
             clayPay.CurrentTransaction = new NewTransaction(); // this will reset the entire object back to default.
+            clayPay.CurrentTransaction.UpdateTotals();
             clayPay.CurrentTransaction.CCData.ResetForm();
+            Utilities.Show("validatePayer");
+            Utilities.Hide("paymentData");
             clayPay.UI.updateCart();
+            
             ClientResponse.ShowPaymentReceipt(cr, ClientResponse.PaymentReceiptContainer);
           }
           Utilities.Toggle_Loading_Button(toggleButton, false);

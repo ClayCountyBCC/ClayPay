@@ -19,17 +19,17 @@ namespace clayPay
 
   export class CCPayment implements ICCPayment
   {
-    public FirstName: string;
-    public LastName: string;
-    public CardNumber: string;
-    public CardType: string;
-    public ExpMonth: string;
-    public ExpYear: string;
-    public CVVNumber: string;
-    public ZipCode: string;
-    public EmailAddress: string;
-    public Amount: number;
-    public AmountInt: number;
+    public FirstName: string = "";
+    public LastName: string = "";
+    public CardNumber: string = "";
+    public CardType: string = "";
+    public ExpMonth: string = "";
+    public ExpYear: string = "";
+    public CVVNumber: string = "";
+    public ZipCode: string = "";
+    public EmailAddress: string = "";
+    public Amount: number = 0;
+    public AmountInt: number = 0;
     public Validated: boolean = false;
     // credit card form container
     static CreditCardForm: string = "creditCardPaymentType";    
@@ -78,6 +78,8 @@ namespace clayPay
       this.ResetData();
       this.ResetFormErrors();
       // now clear the form
+      Utilities.Set_Text(CCPayment.creditCardTotalMenu, Utilities.Format_Amount(this.Amount));
+      Utilities.Hide(CCPayment.CreditCardForm);
       Utilities.Set_Value(CCPayment.FirstNameInput, "");
       Utilities.Set_Value(CCPayment.LastNameInput, "");
       Utilities.Set_Value(CCPayment.ZipCodeInput, "");
@@ -91,7 +93,11 @@ namespace clayPay
       {
         Utilities.Set_Value(CCPayment.AmountPaidInput, "");
         Utilities.Hide(CCPayment.CreditCardForm);
+        let menu = document.getElementById(CCPayment.creditCardTotalMenu);
+        Utilities.Set_Text(menu, "Add");
       }
+      //this.Validate();
+      //clayPay.CurrentTransaction.Validate();
     }
 
     public ResetData(): void

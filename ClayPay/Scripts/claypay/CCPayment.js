@@ -2,6 +2,17 @@ var clayPay;
 (function (clayPay) {
     var CCPayment = /** @class */ (function () {
         function CCPayment() {
+            this.FirstName = "";
+            this.LastName = "";
+            this.CardNumber = "";
+            this.CardType = "";
+            this.ExpMonth = "";
+            this.ExpYear = "";
+            this.CVVNumber = "";
+            this.ZipCode = "";
+            this.EmailAddress = "";
+            this.Amount = 0;
+            this.AmountInt = 0;
             this.Validated = false;
             this.ValidateAndSave = Utilities.Debounce(function () {
                 clayPay.CurrentTransaction.CCData.DebouncedValidateAndSave();
@@ -20,6 +31,8 @@ var clayPay;
             this.ResetData();
             this.ResetFormErrors();
             // now clear the form
+            Utilities.Set_Text(CCPayment.creditCardTotalMenu, Utilities.Format_Amount(this.Amount));
+            Utilities.Hide(CCPayment.CreditCardForm);
             Utilities.Set_Value(CCPayment.FirstNameInput, "");
             Utilities.Set_Value(CCPayment.LastNameInput, "");
             Utilities.Set_Value(CCPayment.ZipCodeInput, "");
@@ -32,7 +45,11 @@ var clayPay;
             if (clayPay.CurrentTransaction.IsCashier) {
                 Utilities.Set_Value(CCPayment.AmountPaidInput, "");
                 Utilities.Hide(CCPayment.CreditCardForm);
+                var menu = document.getElementById(CCPayment.creditCardTotalMenu);
+                Utilities.Set_Text(menu, "Add");
             }
+            //this.Validate();
+            //clayPay.CurrentTransaction.Validate();
         };
         CCPayment.prototype.ResetData = function () {
             this.Amount = 0;

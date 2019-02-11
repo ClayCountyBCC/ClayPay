@@ -2,9 +2,9 @@
 {
   export enum ChargeView
   {
-    search_results,
-    cart,
-    receipt
+    search_results = 0,
+    cart = 1,
+    receipt = 2
   }
   interface ICharge
   {
@@ -89,7 +89,6 @@
       //  2. Convenience Fee
       // Receipt Footer should show:
       //  1. Total Charges
-
       let df = document.createDocumentFragment();
       let trTotal = document.createElement("tr");
       trTotal.appendChild(UI.createTableElement("", "", view === ChargeView.receipt ? 1 : 2)); 
