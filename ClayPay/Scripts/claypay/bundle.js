@@ -1438,6 +1438,7 @@ var clayPay;
         function Payment(paymentType) {
             this.Editable = false;
             this.Amount = 0;
+            this.AmountInt = 0;
             this.CheckNumber = "";
             this.TransactionId = "";
             this.Validated = false;
@@ -1451,6 +1452,7 @@ var clayPay;
         Payment.prototype.Validate = function () {
             this.Validated == false;
             this.Amount = 0;
+            this.AmountInt = 0;
             this.CheckNumber = "";
             this.TransactionId = "";
             // We don't need to validate Credit card payments here
@@ -1482,6 +1484,7 @@ var clayPay;
                 Utilities.Error_Show(Payment.cashErrorElement, "An invalid amount was entered.");
                 return false;
             }
+            this.AmountInt = parseInt((this.Amount * 100).toString());
             if (this.Amount === 0) {
                 Payment.ResetCash();
                 return false;
@@ -1516,6 +1519,7 @@ var clayPay;
                 Utilities.Error_Show(Payment.checkErrorElement, "An invalid amount was entered.");
                 return false;
             }
+            this.AmountInt = parseInt((this.Amount * 100).toString());
             if (this.Amount > clayPay.CurrentTransaction.TotalAmountDue) {
                 checkAmount.classList.add("is-danger");
                 checkAmount.focus();
@@ -1616,6 +1620,7 @@ var clayPay;
         };
         CCPayment.prototype.ResetData = function () {
             this.Amount = 0;
+            this.AmountInt = 0;
             this.Validated = false;
             this.FirstName = "";
             this.LastName = "";
@@ -1734,6 +1739,7 @@ var clayPay;
                 if (testAmount.length === 0)
                     return;
                 this.Amount = parseFloat(testAmount);
+                this.AmountInt = parseInt((this.Amount * 100).toString());
                 if (clayPay.isNaN(this.Amount) || this.Amount < 0) {
                     this.Amount = 0;
                     Utilities.Error_Show(CCPayment.AmountError, "An invalid amount was entered.");
@@ -2175,7 +2181,7 @@ var clayPay;
     }());
     clayPay.ClientResponse = ClientResponse;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=clientresponse.js.map
+//# sourceMappingURL=ClientResponse.js.map
 /// <reference path="payment.ts" />
 /// <reference path="clientresponse.ts" />
 var clayPay;
@@ -2198,9 +2204,13 @@ var clayPay;
             this.CheckPayment = new clayPay.Payment(clayPay.payment_type.check);
             this.CashPayment = new clayPay.Payment(clayPay.payment_type.cash);
             this.TotalAmountDue = 0;
+            this.TotalAmountDueInt = 0;
             this.TotalAmountPaid = 0;
+            this.TotalAmountPaidInt = 0;
             this.TotalAmountRemaining = 0;
+            this.TotalAmountRemainingInt = 0;
             this.TotalChangeDue = 0;
+            this.TotalChangeDueInt = 0;
             this.Save = Utilities.Debounce(function () {
                 clayPay.CurrentTransaction.DebouncedSave();
             }, 1000, true);
@@ -2220,10 +2230,12 @@ var clayPay;
                 Utilities.Hide("validatePayer");
                 Utilities.Show("paymentData");
             }
+            //console.log('values', this.TotalAmountDue, this.TotalAmountPaid, this.TotalAmountRemaining);
             if (this.IsCashier) {
                 this.UpdateTotals();
                 var payments = this.ValidatePayments();
                 var button = document.getElementById(NewTransaction.PayNowCashierButton);
+                console.log('values', this);
                 button.disabled = !(payer && payments);
                 return (payer && payments);
             }
@@ -2233,19 +2245,33 @@ var clayPay;
             if (!this.IsCashier)
                 return;
             this.TotalAmountPaid = 0;
+            this.TotalAmountPaidInt = 0;
             this.TotalAmountRemaining = 0;
+            this.TotalAmountRemainingInt = 0;
             this.TotalChangeDue = 0;
+            this.TotalChangeDueInt = 0;
             var TotalPaid = 0;
-            if (this.CheckPayment.Validated)
+            var TotalPaidInt = 0;
+            if (this.CheckPayment.Validated) {
                 TotalPaid += this.CheckPayment.Amount;
-            if (this.CashPayment.Validated)
+                TotalPaidInt += this.CheckPayment.AmountInt;
+            }
+            if (this.CashPayment.Validated) {
                 TotalPaid += this.CashPayment.Amount;
-            if (this.CCData.Validated)
+                TotalPaidInt += this.CashPayment.AmountInt;
+            }
+            if (this.CCData.Validated) {
                 TotalPaid += this.CCData.Amount;
+                TotalPaidInt += this.CCData.AmountInt;
+            }
             this.TotalAmountPaid = TotalPaid;
+            this.TotalAmountPaidInt = TotalPaidInt;
+            this.TotalAmountDueInt = parseInt((this.TotalAmountDue * 100).toString());
             this.TotalAmountRemaining = Math.max(this.TotalAmountDue - this.TotalAmountPaid, 0);
-            if (this.TotalAmountDue - this.TotalAmountPaid < 0) {
+            this.TotalAmountRemainingInt = Math.max(this.TotalAmountDueInt - this.TotalAmountPaidInt, 0);
+            if (this.TotalAmountDueInt - this.TotalAmountPaidInt < 0) {
                 this.TotalChangeDue = this.TotalAmountPaid - this.TotalAmountDue;
+                this.TotalChangeDueInt = parseInt((this.TotalChangeDue * 100).toString());
             }
             this.UpdateForm();
         };
@@ -2265,16 +2291,16 @@ var clayPay;
         NewTransaction.prototype.ValidatePayments = function () {
             if (this.IsCashier) {
                 if (this.CashPayment.Validated && this.CashPayment.Amount > 0) {
-                    if (this.TotalChangeDue >= this.CashPayment.Amount) {
+                    if (this.TotalChangeDueInt >= this.CashPayment.AmountInt) {
                         Utilities.Error_Show(NewTransaction.paymentError, "The Total Change due the customer cannot be more than or equal to the amount of Cash paid.");
                         return false;
                     }
                 }
-                if (this.TotalChangeDue > 0 && (!this.CashPayment.Validated || this.CashPayment.Amount === 0)) {
+                if (this.TotalChangeDueInt > 0 && (!this.CashPayment.Validated || this.CashPayment.AmountInt === 0)) {
                     Utilities.Error_Show(NewTransaction.paymentError, "The Total Amount Paid cannot be greater than the Total Amount Due if no cash has been received.");
                     return false;
                 }
-                if (this.TotalAmountRemaining > 0) {
+                if (this.TotalAmountRemainingInt > 0) {
                     return false;
                 }
             }
@@ -2346,7 +2372,7 @@ var clayPay;
     }());
     clayPay.NewTransaction = NewTransaction;
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=newtransaction.js.map
+//# sourceMappingURL=NewTransaction.js.map
 var clayPay;
 (function (clayPay) {
     var AppType = /** @class */ (function () {
@@ -2895,4 +2921,4 @@ var clayPay;
         }
     })(UI = clayPay.UI || (clayPay.UI = {}));
 })(clayPay || (clayPay = {}));
-//# sourceMappingURL=ui.js.map
+//# sourceMappingURL=UI.js.map

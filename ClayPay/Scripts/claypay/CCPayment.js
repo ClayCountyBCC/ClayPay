@@ -36,6 +36,7 @@ var clayPay;
         };
         CCPayment.prototype.ResetData = function () {
             this.Amount = 0;
+            this.AmountInt = 0;
             this.Validated = false;
             this.FirstName = "";
             this.LastName = "";
@@ -154,6 +155,7 @@ var clayPay;
                 if (testAmount.length === 0)
                     return;
                 this.Amount = parseFloat(testAmount);
+                this.AmountInt = parseInt((this.Amount * 100).toString());
                 if (clayPay.isNaN(this.Amount) || this.Amount < 0) {
                     this.Amount = 0;
                     Utilities.Error_Show(CCPayment.AmountError, "An invalid amount was entered.");

@@ -29,6 +29,7 @@ namespace clayPay
     public ZipCode: string;
     public EmailAddress: string;
     public Amount: number;
+    public AmountInt: number;
     public Validated: boolean = false;
     // credit card form container
     static CreditCardForm: string = "creditCardPaymentType";    
@@ -96,6 +97,7 @@ namespace clayPay
     public ResetData(): void
     {
       this.Amount = 0;
+      this.AmountInt = 0;
       this.Validated = false;
       this.FirstName = "";
       this.LastName = "";
@@ -228,6 +230,7 @@ namespace clayPay
         let testAmount = Utilities.Validate_Text(CCPayment.AmountPaidInput, CCPayment.AmountError, "The Amount field is required.");
         if (testAmount.length === 0) return;
         this.Amount = parseFloat(testAmount);
+        this.AmountInt = parseInt((this.Amount * 100).toString());
         if (clayPay.isNaN(this.Amount) || this.Amount < 0)
         {
           this.Amount = 0;
@@ -246,7 +249,7 @@ namespace clayPay
       }
       else
       {
-        clayPay.CurrentTransaction.CCData.Amount = clayPay.CurrentTransaction.TotalAmountDue;
+        clayPay.CurrentTransaction.CCData.Amount = clayPay.CurrentTransaction.TotalAmountDue;        
       }
 
       this.Validated = true;

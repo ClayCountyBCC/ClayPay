@@ -13,6 +13,7 @@ namespace clayPay
     TransactionCashierData: CashierData;
     IsCashier: boolean;
     TotalAmountDue: number;
+    TotalAmountDueInt: number;
     CheckPayment: Payment;
     CashPayment: Payment;
     Validate(): boolean;
@@ -37,9 +38,13 @@ namespace clayPay
     public CheckPayment: Payment = new Payment(payment_type.check);
     public CashPayment: Payment = new Payment(payment_type.cash);
     public TotalAmountDue: number = 0;
+    public TotalAmountDueInt: number = 0;
     public TotalAmountPaid: number = 0;
+    public TotalAmountPaidInt: number = 0;
     public TotalAmountRemaining: number = 0;
+    public TotalAmountRemainingInt: number = 0;
     public TotalChangeDue: number = 0;
+    public TotalChangeDueInt: number = 0;
     // Menu Ids
     public static TotalAmountPaidMenu = "cartTotalAmountPaid";
     public static TotalAmountDueMenu = "cartTotalAmountDue";
@@ -77,11 +82,13 @@ namespace clayPay
         Utilities.Hide("validatePayer");
         Utilities.Show("paymentData");        
       }
+      //console.log('values', this.TotalAmountDue, this.TotalAmountPaid, this.TotalAmountRemaining);
       if (this.IsCashier)
       {
         this.UpdateTotals();
         let payments = this.ValidatePayments();
         let button = <HTMLButtonElement>document.getElementById(NewTransaction.PayNowCashierButton);
+        console.log('values', this);
         button.disabled = !(payer && payments);
         return (payer && payments);
       }
@@ -93,19 +100,41 @@ namespace clayPay
       if (!this.IsCashier) return;
 
       this.TotalAmountPaid = 0;
+      this.TotalAmountPaidInt = 0;
       this.TotalAmountRemaining = 0;
+      this.TotalAmountRemainingInt = 0;
       this.TotalChangeDue = 0;
+      this.TotalChangeDueInt = 0;
 
       let TotalPaid = 0;
-      if (this.CheckPayment.Validated) TotalPaid += this.CheckPayment.Amount;
-      if (this.CashPayment.Validated) TotalPaid += this.CashPayment.Amount;
-      if (this.CCData.Validated) TotalPaid += this.CCData.Amount;
+      let TotalPaidInt = 0;
+      if (this.CheckPayment.Validated)
+      {
+        TotalPaid += this.CheckPayment.Amount;
+        TotalPaidInt += this.CheckPayment.AmountInt;
+      }
+      if (this.CashPayment.Validated)
+      {
+        TotalPaid += this.CashPayment.Amount;
+        TotalPaidInt += this.CashPayment.AmountInt;
+      }
+      if (this.CCData.Validated)
+      {
+        TotalPaid += this.CCData.Amount;
+        TotalPaidInt += this.CCData.AmountInt;
+      }
       
       this.TotalAmountPaid = TotalPaid;
+      this.TotalAmountPaidInt = TotalPaidInt;
+      this.TotalAmountDueInt = parseInt((this.TotalAmountDue * 100).toString());
+
       this.TotalAmountRemaining = Math.max(this.TotalAmountDue - this.TotalAmountPaid, 0);
-      if (this.TotalAmountDue - this.TotalAmountPaid < 0)
+      this.TotalAmountRemainingInt = Math.max(this.TotalAmountDueInt - this.TotalAmountPaidInt, 0);
+
+      if (this.TotalAmountDueInt - this.TotalAmountPaidInt < 0)
       {
         this.TotalChangeDue = this.TotalAmountPaid - this.TotalAmountDue;
+        this.TotalChangeDueInt = parseInt((this.TotalChangeDue * 100).toString());
       }
       this.UpdateForm();
     }
@@ -126,20 +155,21 @@ namespace clayPay
     {
       if (this.IsCashier)
       {
+
         if (this.CashPayment.Validated && this.CashPayment.Amount > 0)
         {
-          if (this.TotalChangeDue >= this.CashPayment.Amount)
+          if (this.TotalChangeDueInt >= this.CashPayment.AmountInt)
           {
             Utilities.Error_Show(NewTransaction.paymentError, "The Total Change due the customer cannot be more than or equal to the amount of Cash paid.");
             return false;
           }
         }
-        if (this.TotalChangeDue > 0 && (!this.CashPayment.Validated || this.CashPayment.Amount === 0))
+        if (this.TotalChangeDueInt > 0 && (!this.CashPayment.Validated || this.CashPayment.AmountInt === 0))
         {
           Utilities.Error_Show(NewTransaction.paymentError, "The Total Amount Paid cannot be greater than the Total Amount Due if no cash has been received.")
           return false;
         }
-        if (this.TotalAmountRemaining > 0)
+        if (this.TotalAmountRemainingInt > 0)
         {
           return false;
         }

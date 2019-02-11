@@ -15,6 +15,7 @@ var clayPay;
         function Payment(paymentType) {
             this.Editable = false;
             this.Amount = 0;
+            this.AmountInt = 0;
             this.CheckNumber = "";
             this.TransactionId = "";
             this.Validated = false;
@@ -28,6 +29,7 @@ var clayPay;
         Payment.prototype.Validate = function () {
             this.Validated == false;
             this.Amount = 0;
+            this.AmountInt = 0;
             this.CheckNumber = "";
             this.TransactionId = "";
             // We don't need to validate Credit card payments here
@@ -59,6 +61,7 @@ var clayPay;
                 Utilities.Error_Show(Payment.cashErrorElement, "An invalid amount was entered.");
                 return false;
             }
+            this.AmountInt = parseInt((this.Amount * 100).toString());
             if (this.Amount === 0) {
                 Payment.ResetCash();
                 return false;
@@ -93,6 +96,7 @@ var clayPay;
                 Utilities.Error_Show(Payment.checkErrorElement, "An invalid amount was entered.");
                 return false;
             }
+            this.AmountInt = parseInt((this.Amount * 100).toString());
             if (this.Amount > clayPay.CurrentTransaction.TotalAmountDue) {
                 checkAmount.classList.add("is-danger");
                 checkAmount.focus();

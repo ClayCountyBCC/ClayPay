@@ -21,6 +21,7 @@ namespace clayPay
     TransactionDate: Date;
     PaymentType: payment_type;
     Amount: number;
+    AmountInt: number;
     CheckNumber: string;
     TransactionId: string;
     Validated: boolean;
@@ -33,6 +34,7 @@ namespace clayPay
     public TransactionDate: Date;
     public PaymentType: payment_type;
     public Amount: number = 0;
+    public AmountInt: number = 0;
     public CheckNumber: string = "";
     public TransactionId: string = "";
     public Validated: boolean = false;
@@ -64,6 +66,7 @@ namespace clayPay
     {
       this.Validated == false;
       this.Amount = 0;
+      this.AmountInt = 0;
       this.CheckNumber = "";
       this.TransactionId = "";
       // We don't need to validate Credit card payments here
@@ -102,7 +105,7 @@ namespace clayPay
         Utilities.Error_Show(Payment.cashErrorElement, "An invalid amount was entered.");
         return false;
       }
-
+      this.AmountInt = parseInt((this.Amount * 100).toString());
       if (this.Amount === 0)
       {
         Payment.ResetCash();
@@ -144,6 +147,7 @@ namespace clayPay
         Utilities.Error_Show(Payment.checkErrorElement, "An invalid amount was entered.");
         return false;
       }
+      this.AmountInt = parseInt((this.Amount * 100).toString());
       if (this.Amount > clayPay.CurrentTransaction.TotalAmountDue)
       {
         checkAmount.classList.add("is-danger");
