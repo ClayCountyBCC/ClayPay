@@ -59,7 +59,7 @@ namespace ClayPay.Models
     {
       return new CacheItemPolicy()
       {
-        AbsoluteExpiration = DateTime.Now.AddHours(12)
+        AbsoluteExpiration = DateTime.Now.AddHours(1)
       };
     }
 

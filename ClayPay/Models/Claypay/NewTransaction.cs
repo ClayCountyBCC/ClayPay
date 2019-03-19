@@ -780,34 +780,35 @@ namespace ClayPay.Models.Claypay
 
         TimingDates.Insert_Update_GURows_End = DateTime.Now; // Insert_Update_GURows_End
 
-        if (i != ItemIds.Count() * 2)
-        {
-          try
-          {
-            var sb = new StringBuilder();
-            sb.Append("In SaveCashierPaymentRows() ")
-              .Append("in " + (Constants.UseProduction() ? "PROD" : "DEVELOPMENT")).AppendLine(" Server")
-              .AppendLine(TransactionDate.ToLongDateString())
-              .AppendLine("There was an issue inserting GU data for ").Append(((Payments.Count() / 2) - i).ToString())
-                .AppendLine(" payments into ccGU or ccGUItem")
-              .Append("OTId: ").AppendLine(TransactionCashierData.OTId.ToString())
-              .Append("Amount Due: ").AppendLine(TotalAmountDue.ToString())
-              .Append("Payer: ").AppendLine(TransactionCashierData.PayerName)
-              .Append("Payer email: ").AppendLine(TransactionCashierData.PayerEmailAddress)
-              .Append("Number of payment types: ").AppendLine(Payments.Count().ToString())
-              .AppendLine("ItemIds:");
-            sb.AppendLine(String.Join(",", (from c in Charges select c.ItemId.ToString()).ToArray()));
-            Constants.SaveEmail("daniel.mccartney@claycountygov.com",
-                                "Claypay Issue in InsertGURows()",
-                                sb.ToString());
-          }
-          catch
-          {
-            Constants.SaveEmail("daniel.mccartney@claycountygov.com",
-                                "Claypay Issue in InsertGURows()",
-                                "error inserting rows into ccGU or ccGUItem");
-          }
-        }
+        // Leaving this in to publicly shame Jeremy and his decision making process.
+        //if (i != ItemIds.Count() * 2)
+        //{
+        //  try
+        //  {
+        //    var sb = new StringBuilder();
+        //    sb.Append("In SaveCashierPaymentRows() ")
+        //      .Append("in " + (Constants.UseProduction() ? "PROD" : "DEVELOPMENT")).AppendLine(" Server")
+        //      .AppendLine(TransactionDate.ToLongDateString())
+        //      .AppendLine("There was an issue inserting GU data for ").Append(((Payments.Count() / 2) - i).ToString())
+        //        .AppendLine(" payments into ccGU or ccGUItem")
+        //      .Append("OTId: ").AppendLine(TransactionCashierData.OTId.ToString())
+        //      .Append("Amount Due: ").AppendLine(TotalAmountDue.ToString())
+        //      .Append("Payer: ").AppendLine(TransactionCashierData.PayerName)
+        //      .Append("Payer email: ").AppendLine(TransactionCashierData.PayerEmailAddress)
+        //      .Append("Number of payment types: ").AppendLine(Payments.Count().ToString())
+        //      .AppendLine("ItemIds:");
+        //    sb.AppendLine(String.Join(",", (from c in Charges select c.ItemId.ToString()).ToArray()));
+        //    Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+        //                        "Claypay Issue in InsertGURows()",
+        //                        sb.ToString());
+        //  }
+        //  catch
+        //  {
+        //    Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+        //                        "Claypay Issue in InsertGURows()",
+        //                        "error inserting rows into ccGU or ccGUItem");
+        //  }
+        //}
         return i > 0;
       }
       catch (Exception ex)
