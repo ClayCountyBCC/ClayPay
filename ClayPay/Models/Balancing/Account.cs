@@ -62,6 +62,7 @@ namespace ClayPay.Models.Balancing
   
         SELECT
           GUID
+          ,Account
           ,Amount
           ,CAST(LEFT(Account, FundLength - 1) AS INT) Fund
           ,SUBSTRING(Account, FundLength + 1,CHARINDEX('*', Account, FundLength + 1) - 1) AccountNumber
@@ -86,7 +87,7 @@ namespace ClayPay.Models.Balancing
       LEFT OUTER JOIN ccGL GL ON GL.Account = GUI.Account
       WHERE 
         CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)        
-      GROUP BY FUND, GUI.Account, GL.Project, GL.ProjectAccount
+      GROUP BY GUI.Fund, GUI.Account, GUI.AccountNumber, GL.Project, GL.ProjectAccount, GUI.CashAccount
       ORDER BY GUI.Account
        ";
       try
