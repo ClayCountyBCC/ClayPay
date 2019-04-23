@@ -93,7 +93,8 @@ namespace ClayPay.Models
 	        Total,	
 	        Detail
         FROM vwClaypayCharges
-        WHERE ItemId IN @ids
+        WHERE 
+          ItemId IN @ids
           AND CashierId IS NULL
         ORDER BY TimeStamp ASC";
       var lc = Constants.Get_Data<Charge>(sql, itemIds);
