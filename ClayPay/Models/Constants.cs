@@ -35,8 +35,8 @@ namespace ClayPay.Models
       switch (Environment.MachineName.ToUpper())
       {
 
-        case "MISHL05":
-        case "MISSL01":
+        // case "MISHL05":
+        // case "MISSL01":
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":
           return true;
@@ -82,7 +82,23 @@ namespace ClayPay.Models
         return null;
       }
     }
-
+    public static List<T> Get_Data<T>(string query, List<string> assocKeys)
+    {
+      try
+      {
+        using (IDbConnection db =
+          new SqlConnection(
+            Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
+        {
+          return (List<T>)db.Query<T>(query, new { assocKeys });
+        }
+      }
+      catch (Exception ex)
+      {
+        Log(ex, query);
+        return null;
+      }
+    }
     public static List<T> Get_Data<T>(string query, DynamicParameters dbA)
     {
       try

@@ -13,16 +13,16 @@ namespace ClayPay.Models
     private const string clayPay_cashier_group = "gClayPayCashiergroup"; // We may make this an argument if we end up using this code elsewhere.
     private const string clayPay_impactfee_group = "gClayPayImpactFeegroup"; // We may make this an argument if we end up using this code elsewhere.
     private const string mis_access_group = "gMISDeveloper_Group";
+    private const string clayPay_void_manager_access = "gClayPayVoidManagerAccessGroup";
 
     public bool authenticated { get; set; } = false;
     public string user_name { get; set; }
     public int employee_id { get; set; } = 0;
     public string display_name { get; set; } = "";
-
     public bool djournal_access = false;
     public bool impactfee_access = false;
     public bool cashier_access = false;
-
+    public bool void_manager_access = false;
 
     public UserAccess(string name)
     {
@@ -79,12 +79,15 @@ namespace ClayPay.Models
             djournal_access = true;
             impactfee_access = true;
             cashier_access = true;
+            void_manager_access = true;
           }
           else
           {
             cashier_access = groups.Contains(clayPay_cashier_group);
             djournal_access = groups.Contains(clayPay_djournal_group);
             impactfee_access = groups.Contains(clayPay_impactfee_group);
+            void_manager_access = groups.Contains(clayPay_void_manager_access);
+
           }
 
         }
@@ -94,6 +97,7 @@ namespace ClayPay.Models
         new ErrorLog(ex);
       }
     }
+
     private static void ParseGroup(string group, ref Dictionary<string, UserAccess> d)
     {
       using (PrincipalContext pc = new PrincipalContext(ContextType.Domain))
@@ -134,7 +138,7 @@ namespace ClayPay.Models
             ParseGroup(clayPay_cashier_group, ref d);
             ParseGroup(clayPay_djournal_group, ref d);
             ParseGroup(clayPay_impactfee_group, ref d);
-
+            ParseGroup(clayPay_void_manager_access, ref d);
             d[""] = new UserAccess("");
             break;
 

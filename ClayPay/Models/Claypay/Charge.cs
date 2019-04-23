@@ -94,6 +94,7 @@ namespace ClayPay.Models
 	        Detail
         FROM vwClaypayCharges
         WHERE ItemId IN @ids
+          AND CashierId IS NULL
         ORDER BY TimeStamp ASC";
       var lc = Constants.Get_Data<Charge>(sql, itemIds);
       return lc;

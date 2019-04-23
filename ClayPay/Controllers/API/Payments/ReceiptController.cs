@@ -22,9 +22,11 @@ namespace ClayPay.Controllers.API.Payments
     [Route("Receipt")]
     public IHttpActionResult Get(string CashierId)
     {
-      //var ua = UserAccess.GetUserAccess(User.Identity.Name);
-      //if (!ua.authenticated) return Unauthorized();
-      var cr = new ClientResponse(CashierId);
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      if (!ua.authenticated) return Unauthorized();
+
+      var cr = new ClientResponse(CashierId, ua);
+      
       if (cr == null)
       {
         return InternalServerError();
@@ -35,7 +37,25 @@ namespace ClayPay.Controllers.API.Payments
       }
     }
 
+    [HttpGet]
+    [Route("VoidPayment")]
+    public IHttpActionResult Void(string cashierId)
+    {
+      var ua = UserAccess.GetUserAccess(User.Identity.Name);
+      if (!ua.authenticated) return Unauthorized();
 
+      // TODO: ADD THIS TO VALIDATE_VOID FUNCTION
+      var cr = ClientResponse.Void(cashierId, ua, ((HttpContextWrapper)Request.Properties["MS_HttpContext"]).Request.UserHostAddress, true);
+
+      if (cr == null)
+      {
+        return InternalServerError();
+      }
+      else
+      {
+        return Ok(cr);
+      }
+
+    }
   }
 }
- 

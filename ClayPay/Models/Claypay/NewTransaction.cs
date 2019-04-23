@@ -46,6 +46,7 @@ namespace ClayPay.Models.Claypay
       public DateTime Insert_Update_GURows_End { get; set; } = DateTime.MaxValue;
       public DateTime Finalize_Transaction_Start { get; set; } = DateTime.MaxValue;
       public DateTime Finalize_Transaction_End { get; set; } = DateTime.MaxValue;
+      public DateTime Rollback_Transaction { get; set; } = DateTime.MaxValue;
 
       public TransactionTiming()
       {
@@ -703,7 +704,6 @@ namespace ClayPay.Models.Claypay
       {
         Constants.Log(ex, query);
         TransactionCashierData.OTId = -1;
-        //TODO: add wait and retry, if subsequent attempt does not work, set up rollback
         return false;
       }
 
@@ -716,11 +716,14 @@ namespace ClayPay.Models.Claypay
       var dp = new DynamicParameters();
       dp.Add("@otid", TransactionCashierData.OTId);
       dp.Add("@TransactionDate", this.TransactionDate);
-
+      
       // I don't know if the year is supposed to be the fiscal year.
       // the code in  prc_upd_ccNextCashierId sets FY = the @Yr var
       // code for @Yr checks the current year against the FY field and if it is not equal,
       // it updates the FY and next avail fieldfield
+      
+      // TODO: Add these queries to stored procedures
+      
       var query = @"
         USE WATSC;
         INSERT INTO ccGU 
@@ -944,7 +947,7 @@ namespace ClayPay.Models.Claypay
             UPDATE ClayPay_Transaction_Timing
             SET Rollback_Transaction = GETDATE()
             WHERE CashierId = @cashierid
-
+            
             COMMIT;
           END TRY
         BEGIN CATCH
@@ -952,6 +955,7 @@ namespace ClayPay.Models.Claypay
         END CATCH";
       try
       {
+        TimingDates.Rollback_Transaction = DateTime.Now; // Rollback_Transaction
         var i = Constants.Exec_Query(query, param);
         return (i != -1);
       }
@@ -971,20 +975,20 @@ namespace ClayPay.Models.Claypay
           USE WATSC;
       
           INSERT INTO ClayPay_Transaction_Timing
-          (CashierId, Transaction_Start, Send_CCData_Authorize_Transmit, 
+          (CashierId, Transaction_Start, Get_CashierId_Otid, Send_CCData_Authorize_Transmit, 
           Return_CCData_Authorize_Transmit, Send_CCData_Settle_Transmit, 
           Return_CCData_Settle_Transmit, Save_Cashier_Payment_Start, 
           Update_CashierItem_Start, Insert_Update_GURows_Start, 
           Insert_Update_GURows_End, Finalize_Transaction_Start, 
-          Finalize_Transaction_End)
+          Finalize_Transaction_End, Rollback_Transaction)
           
           VALUES 
-          (@CashierId, @Transaction_Start, @Send_CCData_Authorize_Transmit, 
+          (@CashierId, @Transaction_Start, @Get_CashierId_Otid, @Send_CCData_Authorize_Transmit, 
           @Return_CCData_Authorize_Transmit, @Send_CCData_Settle_Transmit, 
           @Return_CCData_Settle_Transmit, @Save_Cashier_Payment_Start, 
           @Update_CashierItem_Start, @Insert_Update_GURows_Start, 
           @Insert_Update_GURows_End, @Finalize_Transaction_Start, 
-          @Finalize_Transaction_End)";
+          @Finalize_Transaction_End, @Rollback_transaction)";
 
       var i = Constants.Exec_Query(query, TimingDates);
 
@@ -994,7 +998,6 @@ namespace ClayPay.Models.Claypay
       }
     }
 
-
-
   }
 }
+  

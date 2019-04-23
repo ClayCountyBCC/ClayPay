@@ -68,10 +68,9 @@ namespace ClayPay.Models.Claypay
 
     public bool IsFinalized { get; set; } = false;
 
-
     public ReceiptPayment()
     {
-
+      
     }
 
     public static List<ReceiptPayment> Get(string CashierId)
@@ -88,13 +87,18 @@ namespace ClayPay.Models.Claypay
           INFO,
           L.CODE [PaymentType],
           CASE WHEN UPPER(LEFT(L.Narrative,2)) = 'CC' 
-               THEN LTRIM(RTRIM(SUBSTRING(L.Narrative,4,LEN(L.Narrative)))) 
-               ELSE L.Narrative END PaymentTypeDescription,
+                THEN LTRIM(RTRIM(SUBSTRING(L.Narrative,4,LEN(L.Narrative)))) 
+                ELSE L.Narrative END PaymentTypeDescription,
           AmtTendered [AmountTendered], 
           AmtApplied [AmountApplied], 
           (AmtTendered - AmtApplied) ChangeDue, 
           CkNo [CheckNumber],
-          ISNULL(TransactionId, '') TransactionId
+          ISNULL(TransactionId, '') TransactionId,
+          CASE WHEN (SELECT djournal_date
+                     FROM ccDJournalTransactionLog 
+                     WHERE djournal_date = CAST(TransDt AS DATE)) IS NOT NULL 
+                     THEN 1 ELSE 0 
+               END IsFinalized 
         FROM ccCashierPayment CP
         INNER JOIN ccCashier C ON C.OTId = CP.OTid
         INNER JOIN ccLookUp L ON LEFT(L.CODE,5) = LEFT(CP.PmtType,5)
@@ -102,8 +106,8 @@ namespace ClayPay.Models.Claypay
           AND C.CashierId = @cashierId
         ORDER BY CashierId DESC";
 
-      var i = Constants.Get_Data<ReceiptPayment>(query, param);
-      return i;
+      var receipts = Constants.Get_Data<ReceiptPayment>(query, param);
+      return receipts;
 
     }
 
@@ -138,6 +142,12 @@ namespace ClayPay.Models.Claypay
 
       var i = Constants.Get_Data<ReceiptPayment>(query, param);
       return i;
+    }
+
+    public bool CheckIfCanVoid()
+    {
+
+      return true;
     }
 
     public static List<string> UpdatePayments(
@@ -220,7 +230,6 @@ namespace ClayPay.Models.Claypay
       return errors;
     }
 
-
     public static bool NotEditablePaymentTypes(ReceiptPayment paymentTypeToEdit, ReceiptPayment originalPaymentType)
     {
       string[] validPaymentTypes = { "CA", "CK" };
@@ -254,5 +263,7 @@ namespace ClayPay.Models.Claypay
       }
       return false;
     }
+
+
   }
 }
