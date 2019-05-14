@@ -112,7 +112,7 @@ namespace ClayPay.Models.ImpactFees
 
         SELECT 
           UPPER(LTRIM(RTRIM(A.ProjName))) Developer_Name,
-          A.ApplNum Agreement_Number,
+          LTRIM(RTRIM(A.ApplType)) + '-' + LTRIM(RTRIM(A.ApplNum)) Agreement_Number,
           ISNULL(D.Agreement_Amount, 0) Agreement_Amount,
           ISNULL(CDA.Amount_Currently_Allocated, 0) Developer_Amount_Currently_Allocated,
           ISNULL(D.Audit_Log, '') Developer_Audit_Log,
@@ -133,11 +133,11 @@ namespace ClayPay.Models.ImpactFees
         LEFT OUTER JOIN CurrentDeveloperAllocation CDA ON D.Agreement_Number = CDA.Agreement_Number
         LEFT OUTER JOIN ImpactFees_Permit_Allocations P ON P.Builder_Id = B.Id
         LEFT OUTER JOIN CurrentBuilderAllocation CBA ON B.Id = CBA.Builder_Id
-        WHERE A.ApplType='TIMPACT'
+        WHERE A.ApplType IN ('TIMPACT', 'PFS_AGREE')
 ";
       if(agreementNumber.Length > 0)
       {
-        query += "AND A.ApplNum=@Agreement_Number" + Environment.NewLine;
+        query += "AND LTRIM(RTRIM(A.ApplType)) + '-' + LTRIM(RTRIM(A.ApplNum))=@Agreement_Number" + Environment.NewLine;
         dp.Add("@Agreement_Number", agreementNumber);
       }
       if(builderId != -1)

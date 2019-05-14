@@ -12,6 +12,7 @@
 
   export class DeveloperAgreement implements IDeveloperAgreement
   {
+    public Application_Name: string = "";
     public Agreement_Number: string;
     public Developer_Name: string = "";
     public Agreement_Amount: number;
@@ -35,7 +36,7 @@
         return; // no agreement selected.
       }
 
-      let agreementNumber = e.options[e.selectedIndex].value;
+      let agreementNumber = e.options[e.selectedIndex].value;      
 
       CombinedAllocation.GetAll(agreementNumber, -1, "").then(function (agreements)
       {

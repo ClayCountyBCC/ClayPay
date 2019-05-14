@@ -2,6 +2,7 @@ var ImpactFees;
 (function (ImpactFees) {
     var DeveloperAgreement = /** @class */ (function () {
         function DeveloperAgreement() {
+            this.Application_Name = "";
             this.Developer_Name = "";
             this.Amount_Currently_Allocated = 0;
             this.Audit_Log = "";

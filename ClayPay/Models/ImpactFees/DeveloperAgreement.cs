@@ -8,6 +8,7 @@ namespace ClayPay.Models.ImpactFees
 {
   public class DeveloperAgreement
   {
+    public string Application_Name { get; set; } = "";
     public string Agreement_Number { get; set; }
     public string Developer_Name { get; set; } // Display only, not to be saved.
     public decimal Agreement_Amount { get; set; } = -1;
@@ -143,6 +144,7 @@ namespace ClayPay.Models.ImpactFees
         )
 
         SELECT
+          LTRIM(RTRIM(A.ApplType)) Application_Name,
           LTRIM(RTRIM(UPPER(A.ProjName))) Developer_Name,
           LTRIM(RTRIM(A.ApplNum)) Agreement_Number,
           ISNULL(Agreement_Amount, 0) Agreement_Amount,
@@ -152,7 +154,7 @@ namespace ClayPay.Models.ImpactFees
         LEFT OUTER JOIN ImpactFees_Developer_Agreements D ON LTRIM(RTRIM(A.ApplNum)) = D.Agreement_Number
         LEFT OUTER JOIN CurrentAllotment C ON D.Agreement_Number = C.Agreement_Number
         WHERE 
-          A.ApplType = 'TIMPACT'
+          A.ApplType IN ('TIMPACT', 'PFS_AGREE')
 ";
       if (Agreement_Number.Length > 0)
       {
