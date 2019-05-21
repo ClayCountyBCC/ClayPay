@@ -22,10 +22,26 @@ namespace ClayPay.Controllers.API.Payments
     [Route("Receipt")]
     public IHttpActionResult Get(string CashierId)
     {
-      var ua = UserAccess.GetUserAccess(User.Identity.Name);
-      if (!ua.authenticated) return Unauthorized();
-
-      var cr = new ClientResponse(CashierId, ua);
+      ClientResponse cr;
+      // In order to allow for voids, we need to know which user is looking at this receipt.
+      // If they are on the public server (and thus unauthenticated)
+      // or are just unauthenticated, we won't bother to check the user access.
+      if (!Constants.IsPublic())
+      {
+        var ua = UserAccess.GetUserAccess(User.Identity.Name);
+        if (!ua.authenticated)
+        {
+          cr = new ClientResponse(CashierId, ua);
+        }
+        else
+        {
+          cr = new ClientResponse(CashierId);
+        }
+      }
+      else
+      {
+        cr = new ClientResponse(CashierId);
+      }
       
       if (cr == null)
       {

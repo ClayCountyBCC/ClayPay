@@ -179,12 +179,13 @@ namespace ClayPay.Models.Claypay
         er.Add("Cannot void transactions older than six months");
       }
 
-      // TODO: Add CO and passed final check for all permits associated with payments
+      
       if(CheckForClosedPermits())
       {
         er.Add("Cannot void any transaction which includes permits that have been CO'd or have a passed final inspection");
       }
-
+      // It doesn't look like we ever check to see if the person has void access besides here.
+      // And this check actually looks to make sure that they don't have void access.
       if (!er.Any() && !ua.void_manager_access)
       {
         if (ReceiptPayments.Any(p => p.IsFinalized == true))

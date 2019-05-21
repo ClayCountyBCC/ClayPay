@@ -30,6 +30,18 @@ namespace ClayPay.Models
       return $"{DateTime.Now.ToString("MM/dd/yyyy hh:mm tt")} by {Username}: {FieldName} changed from {OldValue} to {NewValue}.";
     }
     
+    public static bool IsPublic()
+    {
+      switch (Environment.MachineName.ToUpper())
+      {
+        case "CLAYBCCDMZIIS01":
+          return true;
+
+        default:
+          return false;
+      }
+    }
+
     public static bool UseProduction()
     {
       switch (Environment.MachineName.ToUpper())
