@@ -128,7 +128,8 @@ namespace ClayPay.Models.ImpactFees
           ISNULL(P.Audit_Log, '') Permit_Audit_Log
         
         FROM apApplication A 
-        LEFT OUTER JOIN ImpactFees_Developer_Agreements D ON D.Agreement_Number = A.ApplNum 
+        --LEFT OUTER JOIN ImpactFees_Developer_Agreements D ON D.Agreement_Number =  A.ApplNum 
+        LEFT OUTER JOIN ImpactFees_Developer_Agreements D ON D.Agreement_Number =  A.apAssocKey
         LEFT OUTER JOIN ImpactFees_Builder_Allocations B ON D.Agreement_Number = B.Agreement_Number
         LEFT OUTER JOIN CurrentDeveloperAllocation CDA ON D.Agreement_Number = CDA.Agreement_Number
         LEFT OUTER JOIN ImpactFees_Permit_Allocations P ON P.Builder_Id = B.Id

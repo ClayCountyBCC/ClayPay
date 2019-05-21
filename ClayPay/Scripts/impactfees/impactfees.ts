@@ -79,6 +79,7 @@ namespace ImpactFees
 
   function PopulateAgreementDropdowns(agreements: Array<CombinedAllocation>): void
   {
+    console.log('agreements to Populate', agreements);
     let added = [];
     let developer = <HTMLSelectElement>document.getElementById("developerAgreementAdd");
     let builder = <HTMLSelectElement>document.getElementById("builderAllocationAgreementAdd");

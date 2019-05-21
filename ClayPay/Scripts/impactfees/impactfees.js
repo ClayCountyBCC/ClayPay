@@ -66,6 +66,7 @@ var ImpactFees;
         });
     }
     function PopulateAgreementDropdowns(agreements) {
+        console.log('agreements to Populate', agreements);
         var added = [];
         var developer = document.getElementById("developerAgreementAdd");
         var builder = document.getElementById("builderAllocationAgreementAdd");
