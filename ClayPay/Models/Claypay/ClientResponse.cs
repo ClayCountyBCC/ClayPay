@@ -321,14 +321,14 @@ namespace ClayPay.Models.Claypay
           PF.permit_number
         FROM passed_final PF
         LEFT OUTER JOIN co_permits CO ON CO.BaseID = PF.BaseId
-        WHERE PF.permit_number IN @assocKeys
+        WHERE PF.permit_number IN @ids
           AND CO.permit_number IS NULL
         UNION
         SELECT 
           CO.permit_number
         FROM co_permits CO
         INNER JOIN passed_final PF ON CO.permit_number = PF.permit_number
-        WHERE CO.permit_number IN @assocKeys
+        WHERE CO.permit_number IN @ids
       ";
 
       var permits = Constants.Get_Data<string>(query, assocKeys);
