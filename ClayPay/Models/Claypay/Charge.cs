@@ -99,9 +99,14 @@ namespace ClayPay.Models
           ItemId IN @ids
           AND CashierId IS NULL
         ORDER BY TimeStamp ASC";
-      var lc = Constants.Get_Data<Charge>(sql, itemIds);
+      var lc = Constants.Get_Data<Charge,int>(sql, itemIds);
       return lc;
     }
 
+    public static Type GetThis(DynamicParameters dbArg)
+    {
+      
+      return dbArg.GetType();
+    }
   }
 }

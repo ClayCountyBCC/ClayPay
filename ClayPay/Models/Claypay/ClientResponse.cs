@@ -331,7 +331,7 @@ namespace ClayPay.Models.Claypay
         WHERE CO.permit_number IN @ids
       ";
 
-      var permits = Constants.Get_Data<string>(query, assocKeys);
+      var permits = Constants.Get_Data<string,string>(query, assocKeys);
 
       return permits.Any();
     }

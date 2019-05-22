@@ -47,7 +47,7 @@ namespace ClayPay.Models
       switch (Environment.MachineName.ToUpper())
       {
 
-        // case "MISHL05":
+        //case "MISHL05":
         case "MISSL01":
         case "CLAYBCCIIS01":
         case "CLAYBCCDMZIIS01":
@@ -77,7 +77,7 @@ namespace ClayPay.Models
       }
     }
 
-    public static List<T> Get_Data<T>(string query, List<T> ids)
+    public static List<T1> Get_Data<T1,T2>(string query, List<T2> ids)
     {
       try
       {
@@ -85,7 +85,7 @@ namespace ClayPay.Models
           new SqlConnection(
             Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
         {
-          return (List<T>)db.Query<T>(query, new { ids });
+          return (List<T1>)db.Query<T1>(query, new { ids });
         }
       }
       catch (Exception ex)
@@ -94,7 +94,23 @@ namespace ClayPay.Models
         return null;
       }
     }
-
+    public static List<T1> Get_Data<T1, T2>(string query, T2 id)
+    {
+      try
+      {
+        using (IDbConnection db =
+          new SqlConnection(
+            Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
+        {
+          return (List<T1>)db.Query<T1>(query, new { id });
+        }
+      }
+      catch (Exception ex)
+      {
+        Log(ex, query);
+        return null;
+      }
+    }
     //public static List<T> Get_Data<T>(string query, List<string> assocKeys)
     //{
     //  try
@@ -117,7 +133,9 @@ namespace ClayPay.Models
     public static List<T> Get_Data<T>(string query, DynamicParameters dbA)
     {
       try
+
       {
+        dbA.GetType();
         using (IDbConnection db =
           new SqlConnection(
             Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
