@@ -167,50 +167,52 @@ namespace ClayPay.Models.Claypay
         *   
         *      
       **/
+      
       var er = new List<string>();
+
 
       if (!ua.void_manager_access && !ua.cashier_access)
       {
-        er.Add("Not Authorized to void payments");
+        if (isVoid) Errors.Add("Not Authorized to void payments");
+        return;
       }
-      else
+
+
+      if (ResponseCashierData.IsVoided)
       {
-        if (ResponseCashierData.IsVoided)
-        {
-          er.Add("Payment is already void.");
-        }
+        er.Add("Payment is already void.");
+      }
 
-        if (ResponseCashierData.TransactionDate.Date < DateTime.Today.Date.AddMonths(-6))
-        {
-          er.Add("Cannot void transactions older than six months");
-        }
+      if (ResponseCashierData.TransactionDate.Date < DateTime.Today.Date.AddMonths(-6))
+      {
+        er.Add("Cannot void transactions older than six months");
+      }
 
 
-        if (CheckForClosedPermits())
+      if (CheckForClosedPermits())
+      {
+        er.Add("Cannot void any transaction which includes permits that have been CO'd or have a passed final inspection");
+      }
+
+
+      if (!er.Any() && !ua.void_manager_access)
+      {
+        if (ReceiptPayments.Any(p => p.IsFinalized == true))
         {
-          er.Add("Cannot void any transaction which includes permits that have been CO'd or have a passed final inspection");
+          er.Add("Cannot void a finalized receipt.");
         }
-        // It doesn't look like we ever check to see if the person has void access besides here.
-        // And this check actually looks to make sure that they don't have void access.
-        if (!er.Any() && !ua.void_manager_access)
+        else
         {
-          if (ReceiptPayments.Any(p => p.IsFinalized == true))
+          if (ReceiptPayments.Any(p => p.TransactionId != ""))
           {
-            er.Add("Cannot void a finalized receipt.");
-          }
-          else
-          {
-            if (ReceiptPayments.Any(p => p.TransactionId != ""))
-            {
-              er.Add("Cannot void a same day transaction with a Credit card payment");
-            }
+            er.Add("Cannot void a same day transaction with a Credit card payment");
           }
         }
       }
 
       CanVoid = !er.Any();
 
-      if(isVoid)
+      if (isVoid)
       {
         Errors.AddRange(er);
       }
@@ -288,7 +290,7 @@ namespace ClayPay.Models.Claypay
     {
 
       List<string> assocKeys = (from c in Charges
-                     select c.AssocKey.ToString()).ToList();
+                                select c.AssocKey).Distinct().ToList();
 
       var query = @"
         USE WATSC;
@@ -311,8 +313,7 @@ namespace ClayPay.Models.Claypay
           FROM bpMASTER_PERMIT M 
           WHERE 1=1
             AND BaseID IS NOT NULL
-            AND (CoDate IS NOT NULL AND CoClosed = 1)
-              OR (CoClosedType IN ('A','C','O'))
+            AND CoDate IS NOT NULL
 
         )
 
@@ -328,14 +329,9 @@ namespace ClayPay.Models.Claypay
         FROM co_permits CO
         INNER JOIN passed_final PF ON CO.permit_number = PF.permit_number
         WHERE CO.permit_number IN @assocKeys
-
-       
       ";
 
-      var permits = new List<string>();
-
-      permits.AddRange(Constants.Get_Data<string>(query, assocKeys));
-
+      var permits = Constants.Get_Data<string>(query, assocKeys);
 
       return permits.Any();
     }

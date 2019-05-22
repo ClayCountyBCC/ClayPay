@@ -77,7 +77,7 @@ namespace ClayPay.Models
       }
     }
 
-    public static List<T> Get_Data<T>(string query, List<int> ids)
+    public static List<T> Get_Data<T>(string query, List<T> ids)
     {
       try
       {
@@ -94,23 +94,26 @@ namespace ClayPay.Models
         return null;
       }
     }
-    public static List<T> Get_Data<T>(string query, List<string> assocKeys)
-    {
-      try
-      {
-        using (IDbConnection db =
-          new SqlConnection(
-            Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
-        {
-          return (List<T>)db.Query<T>(query, new { assocKeys });
-        }
-      }
-      catch (Exception ex)
-      {
-        Log(ex, query);
-        return null;
-      }
-    }
+
+    //public static List<T> Get_Data<T>(string query, List<string> assocKeys)
+    //{
+    //  try
+    //  {
+    //    using (IDbConnection db =
+    //      new SqlConnection(
+    //        Get_ConnStr("WATSC" + (UseProduction() ? "Prod" : "QA"))))
+    //    {
+    //      return (List<T>)db.Query<T>(query, new { assocKeys });
+    //    }
+    //  }
+    //  catch (Exception ex)
+    //  {
+    //    Log(ex, query);
+    //    return null;
+    //  }
+    //}
+
+
     public static List<T> Get_Data<T>(string query, DynamicParameters dbA)
     {
       try
