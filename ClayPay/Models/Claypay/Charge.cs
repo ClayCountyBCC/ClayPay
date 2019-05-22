@@ -82,6 +82,8 @@ namespace ClayPay.Models
 
     public static List<Charge> GetChargesByItemIds(List<int> itemIds)
     {
+      var param = new DynamicParameters();
+      param.Add("@itemIds", itemIds);
       string sql = @"
         USE WATSC;
         SELECT 
