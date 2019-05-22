@@ -169,34 +169,41 @@ namespace ClayPay.Models.Claypay
       **/
       var er = new List<string>();
 
-      if (ResponseCashierData.IsVoided)
+      if (!ua.void_manager_access && !ua.cashier_access)
       {
-        er.Add("Payment is already void.");
+        er.Add("Not Authorized to void payments");
       }
-
-      if (ResponseCashierData.TransactionDate.Date < DateTime.Today.Date.AddMonths(-6))
+      else
       {
-        er.Add("Cannot void transactions older than six months");
-      }
-
-      
-      if(CheckForClosedPermits())
-      {
-        er.Add("Cannot void any transaction which includes permits that have been CO'd or have a passed final inspection");
-      }
-      // It doesn't look like we ever check to see if the person has void access besides here.
-      // And this check actually looks to make sure that they don't have void access.
-      if (!er.Any() && !ua.void_manager_access)
-      {
-        if (ReceiptPayments.Any(p => p.IsFinalized == true))
+        if (ResponseCashierData.IsVoided)
         {
-          er.Add("Cannot void a finalized receipt.");
+          er.Add("Payment is already void.");
         }
-        else
+
+        if (ResponseCashierData.TransactionDate.Date < DateTime.Today.Date.AddMonths(-6))
         {
-          if (ReceiptPayments.Any(p => p.TransactionId != ""))
+          er.Add("Cannot void transactions older than six months");
+        }
+
+
+        if (CheckForClosedPermits())
+        {
+          er.Add("Cannot void any transaction which includes permits that have been CO'd or have a passed final inspection");
+        }
+        // It doesn't look like we ever check to see if the person has void access besides here.
+        // And this check actually looks to make sure that they don't have void access.
+        if (!er.Any() && !ua.void_manager_access)
+        {
+          if (ReceiptPayments.Any(p => p.IsFinalized == true))
           {
-            er.Add("Cannot void a same day transaction with a Credit card payment");
+            er.Add("Cannot void a finalized receipt.");
+          }
+          else
+          {
+            if (ReceiptPayments.Any(p => p.TransactionId != ""))
+            {
+              er.Add("Cannot void a same day transaction with a Credit card payment");
+            }
           }
         }
       }
@@ -332,9 +339,12 @@ namespace ClayPay.Models.Claypay
 
       return permits.Any();
     }
-    
+
+
+    //unused    
     public void SetUserNameAndIpAddress(string ipAddress = "", string username = "")
     {
+
       UserName = username;
       IpAddress = ipAddress;
     }
