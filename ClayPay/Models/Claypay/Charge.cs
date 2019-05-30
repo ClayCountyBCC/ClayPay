@@ -48,7 +48,8 @@ namespace ClayPay.Models
 	          AssocKey,
 	          Total,	
 	          Detail
-          FROM vwClaypayCharges 
+          FROM vwClaypayCharges C
+          INNER JOIN ccCatCd CC ON CC.CatCode = C.CatCode
 	        WHERE Total > 0 
             AND CashierId IS NULL 
             AND UPPER(AssocKey)=@AK
@@ -95,6 +96,7 @@ namespace ClayPay.Models
 	        Total,	
 	        Detail
         FROM vwClaypayCharges
+        INNER JOIN ccCatCd CC ON CC.CatCode = C.CatCode
         WHERE 
           ItemId IN @ids
           AND CashierId IS NULL
@@ -108,5 +110,32 @@ namespace ClayPay.Models
       
       return dbArg.GetType();
     }
+
+    public static List<string> ValidateCharges(List<Charge> charges)
+    {
+      var errors = new List<string>();
+      var itemids = (from c in charges
+                     select c.ItemId).ToList();
+
+      if(itemids != null)
+      {
+        var goodCharges = GetChargesByItemIds(itemids);
+
+        
+        charges.RemoveAll(c => goodCharges.Contains(c));
+
+        if(charges.Count()> 0)
+        {
+          errors.Add("One or more of the charges in your cart are not able to be paid. Please contact the building department for assistance.");
+        }
+        
+
+
+      }
+
+     
+      return errors;
+    }
+
   }
 }

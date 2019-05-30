@@ -183,6 +183,9 @@ namespace ClayPay.Models.Claypay
         return false;
       }
 
+      // TODO: VALIDATE ALL CHARGES IN TRANSACTION ARE VALID AND HAVE ASSOCIATED GL
+      
+
       // These rules do not include fields / forms, just how we validate the amount.
       // Payment Items to validate:      
       // 1. The Total charges must match the amount sent from the client.
@@ -254,6 +257,8 @@ namespace ClayPay.Models.Claypay
       }
 
       this.Charges = Charge.GetChargesByItemIds(ItemIds);
+
+      Errors = Charge.ValidateCharges(Charges);
       var totalCharges = (from c in this.Charges
                           select c.Total).Sum();
 

@@ -52,7 +52,7 @@ namespace ClayPay.Models.Balancing
                             select c).ToList();
 
       CheckCatCodesAgainstGL();
-      CheckIfDJournalIsBalanced(ProcessedPaymentTotals);
+      CheckIfDJournalIsBalanced();
       
       //
       Log = DJournalLog.Get(dateToProcess);
@@ -111,9 +111,9 @@ namespace ClayPay.Models.Balancing
     //  }
     //}
 
-    private void CheckIfDJournalIsBalanced(List<CashierTotal> ppt)
+    private void CheckIfDJournalIsBalanced()
     {
-      var balanced = CashierTotal.IsDjournalBalanced(ppt);
+      var balanced = CashierTotal.IsDjournalBalanced(ProcessedPaymentTotals, GUTotals, GLAccountTotals);
       if (!balanced)
       {
         var keys = String.Join(", \n", CashierTotal.GetOutOfBalanceCashierIds(DJournalDate));
@@ -127,8 +127,12 @@ namespace ClayPay.Models.Balancing
           .AppendLine()
           .Append(keys)
           .AppendLine();
-        
+
+
+        Error.Add(errorString.ToString());
       }
+
+
     }
 
 
@@ -174,6 +178,8 @@ namespace ClayPay.Models.Balancing
     public static List<string> GetCAtCodesWithInvalidGLInformation()
     {
       var sql = @"
+        USE WATSC;
+
         SELECT DISTINCT
           'Error in CatCode: ' +   
           ISNULL(CONCAT(LTRIM(RTRIM(CC.CatCode)), ' - ' + CC.Description), '') + 

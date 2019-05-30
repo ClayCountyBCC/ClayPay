@@ -21,7 +21,7 @@ namespace ClayPay.Models.Balancing
     //public string ProjectAccount { get; set; } = "";
     public string Total { get; set; }
     public string CashAccount { get; set; }
-
+    public decimal TotalAmount { get; set; }
     /*
      * This model only serves as a way to get the lower half of the DJournal output
      * The data is pre-formatted and is ready for display on the client
@@ -81,13 +81,14 @@ namespace ClayPay.Models.Balancing
         GUI.Fund
         ,GUI.AccountNumber
         ,FORMAT(SUM(GUI.Amount),'$000000000.00') Total
+        ,GUI.Amount TotalAmount
         ,GUI.CashAccount
       FROM ccGU GU
       INNER JOIN FormattedGUItemData GUI ON GU.GUId = GUI.GUID
       LEFT OUTER JOIN ccGL GL ON GL.Account = GUI.AccountNumber
       WHERE 
         CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)        
-      GROUP BY GUI.Fund, GUI.Account, GUI.AccountNumber, GL.Project, GL.ProjectAccount, GUI.CashAccount
+      GROUP BY GUI.Fund, GUI.Account, GUI.AccountNumber,GUI.Amount ,GL.Project, GL.ProjectAccount, GUI.CashAccount
       ORDER BY GUI.Account
        ";
       try

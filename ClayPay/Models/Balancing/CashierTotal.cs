@@ -255,8 +255,10 @@ namespace ClayPay.Models.Balancing
       return i;
     }
 
-    public static bool IsDjournalBalanced(List<CashierTotal> cs)
+    public static bool IsDjournalBalanced(List<CashierTotal> cs, List<CashierTotal> guTotals, List<Account> glTotals)
     {
+
+
       var totalCharges = (from t in cs
                           where t.Type.ToLower() == "total charges"
                           select t.TotalAmount).DefaultIfEmpty(0).First();
@@ -265,10 +267,21 @@ namespace ClayPay.Models.Balancing
                            where t.Type.ToLower() == "total payments"
                            select t.TotalAmount).DefaultIfEmpty(0).First();
 
+      var totalGU = (from t in guTotals
+                     select t.TotalAmount).DefaultIfEmpty(0).First();
 
-      if (totalCharges == totalPayments) return true;
+      var totalGL = (from t in glTotals
+                     select t.TotalAmount).DefaultIfEmpty(0).First();
 
-      return false;
+      if (totalCharges != totalPayments ||
+          totalGU != totalCharges ||
+          totalGU != totalGL)
+      {
+        return false;
+      }
+
+
+      return true;
 
       //var param = new DynamicParameters();
 
