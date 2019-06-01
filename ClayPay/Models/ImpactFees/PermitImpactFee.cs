@@ -151,16 +151,6 @@ namespace ClayPay.Models.ImpactFees
         Error_Text = "This permit has been voided.";
         return;
       }
-      if(!X.HasValue || !Y.HasValue)
-      {
-        Error_Text = "This permit has an invalid X/Y so we cannot procede.";
-        return;
-      }
-      if(X.Value == 0 || Y.Value == 0)
-      {
-        Error_Text = "This permit has an invalid X/Y so we cannot procede.";
-        return;
-      }
       if (!ImpactFee_Amount.HasValue)
       {
         Error_Text = "This permit does not have a recognized Impact Fee that can be credited via this process.  Only charges with Cat Code IFRD2 or IFRD3 can be credited.";
@@ -171,13 +161,24 @@ namespace ClayPay.Models.ImpactFees
         Error_Text = "This permit's Impact Fee is 0 or less.";
         return;
       }
-      if (!Validate_Permit_Agreement_Boundary(Agreement_Number))
+      if (Agreement_Number.Length > 0)
       {
-        Error_Text = "This permit is not inside this agreement's assigned land area.";
-        return;
+        if (!X.HasValue || !Y.HasValue)
+        {
+          Error_Text = "This permit has an invalid X/Y so we cannot procede.";
+          return;
+        }
+        if (X.Value == 0 || Y.Value == 0)
+        {
+          Error_Text = "This permit has an invalid X/Y so we cannot procede.";
+          return;
+        }
+        if (!Validate_Permit_Agreement_Boundary(Agreement_Number))
+        {
+          Error_Text = "This permit is not inside this agreement's assigned land area.";
+          return;
+        }
       }
-
-
     }
   }
 }

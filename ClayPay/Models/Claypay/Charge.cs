@@ -37,7 +37,7 @@ namespace ClayPay.Models
     public static List<Charge> GetChargesByAssocKey(string AssocKey)
     {
       var dbArgs = new DynamicParameters( );
-      dbArgs.Add("@AK", AssocKey);
+      dbArgs.Add("@AK", AssocKey.ToUpper());
       string sql = @"
         USE WATSC;
           SELECT 
@@ -103,12 +103,6 @@ namespace ClayPay.Models
         ORDER BY TimeStamp ASC";
       var lc = Constants.Get_Data<Charge,int>(sql, itemIds);
       return lc;
-    }
-
-    public static Type GetThis(DynamicParameters dbArg)
-    {
-      
-      return dbArg.GetType();
     }
 
     public static List<string> ValidateCharges(List<Charge> charges)
