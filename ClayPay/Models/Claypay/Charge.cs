@@ -42,8 +42,8 @@ namespace ClayPay.Models
         USE WATSC;
           SELECT 
 	          ItemId,
-	          Description,
-	          TimeStamp,
+	          C.Description,
+	          C.TimeStamp,
 	          Assoc,
 	          AssocKey,
 	          Total,	
@@ -63,18 +63,17 @@ namespace ClayPay.Models
       var dbArgs = new DynamicParameters();
       dbArgs.Add("@CashierId", CashierId);
       string sql = @"
- 
-           USE WATSC;
-           SELECT 
-	          ItemId,
-	          ISNULL(Description, '') Description,
-	          TimeStamp,
-	          Assoc,
-	          AssocKey,
-	          ISNULL(Total, 0) Total,	
-	          Detail
-          FROM vwClaypayCharges vC
-          WHERE CashierId = @CashierId
+        USE WATSC;
+        SELECT 
+	        ItemId,
+	        ISNULL(Description, '') Description,
+	        TimeStamp,
+	        Assoc,
+	        AssocKey,
+	        ISNULL(Total, 0) Total,	
+	        Detail
+        FROM vwClaypayCharges vC
+        WHERE CashierId = @CashierId
         ORDER BY TimeStamp ASC";
 
       var lc = Constants.Get_Data<Charge>(sql, dbArgs);
@@ -89,13 +88,13 @@ namespace ClayPay.Models
         USE WATSC;
         SELECT 
 	        ItemId,
-	        Description,
-	        TimeStamp,
+	        C.Description,
+	        C.TimeStamp,
 	        Assoc,
 	        AssocKey,
 	        Total,	
 	        Detail
-        FROM vwClaypayCharges
+        FROM vwClaypayCharges C
         INNER JOIN ccCatCd CC ON CC.CatCode = C.CatCode
         WHERE 
           ItemId IN @ids
