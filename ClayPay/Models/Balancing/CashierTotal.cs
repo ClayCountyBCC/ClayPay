@@ -271,7 +271,7 @@ namespace ClayPay.Models.Balancing
                      select t.TotalAmount).DefaultIfEmpty(0).First();
 
       var totalGL = (from t in glTotals
-                     select t.TotalAmount).DefaultIfEmpty(0).First();
+                     select t.TotalAmount).Sum();
 
       if (totalCharges != totalPayments ||
           totalGU != totalCharges ||
@@ -285,28 +285,9 @@ namespace ClayPay.Models.Balancing
 
       //var param = new DynamicParameters();
 
-  
+
       //var query = @"
-      //  USE WATSC;
-      //  WITH GuTotal(TotalPayments) AS (
-      //  SELECT SUM(Amount) TotalAmount FROM (
-      //        SELECT otid, cashierid, cast(transdt AS DATE) transdt, account, amount, type
-      //  FROM dbo.ccGU INNER JOIN dbo.ccGUItem ON dbo.ccGU.GUId = dbo.ccGUItem.GUID
-      //  WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)
-      //    AND TYPE = 'd') AS tmp
-      //  GROUP BY type)
 
-      //  ,ChargeTotals ([TotalCharges]) AS 
-      //  ( SELECT SUM(CP.AmtApplied) 
-      //  FROM ccCashierPayment CP 
-      //  INNER JOIN ccCashier C ON CP.OTid = C.OTId
-      //  INNER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(CP.PmtType,5)) AND L.CdType='PMTTYPE'
-      //  WHERE CAST(C.TransDt AS DATE) = CAST(@DateToBalance AS DATE))
-
-      //  SELECT
-      //  CASE WHEN G.TotalPayments = C.TotalCharges THEN '' ELSE 'out of balance' END
-      //  FROM GuTotal G
-      //  INNER JOIN ChargeTotals C ON C.TotalCharges != 0 OR G.TotalPayments != 0
       //";
 
       //var i = Constants.Get_Data<string>(query, param).DefaultIfEmpty("").First();

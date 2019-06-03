@@ -81,14 +81,14 @@ namespace ClayPay.Models.Balancing
         GUI.Fund
         ,GUI.AccountNumber
         ,FORMAT(SUM(GUI.Amount),'$000000000.00') Total
-        ,GUI.Amount TotalAmount
+        ,SUM(GUI.Amount) TotalAmount
         ,GUI.CashAccount
       FROM ccGU GU
       INNER JOIN FormattedGUItemData GUI ON GU.GUId = GUI.GUID
       LEFT OUTER JOIN ccGL GL ON GL.Account = GUI.AccountNumber
       WHERE 
         CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)        
-      GROUP BY GUI.Fund, GUI.Account, GUI.AccountNumber,GUI.Amount ,GL.Project, GL.ProjectAccount, GUI.CashAccount
+      GROUP BY GUI.Fund, GUI.Account, GUI.AccountNumber,GL.Project, GL.ProjectAccount, GUI.CashAccount
       ORDER BY GUI.Account
        ";
       try
