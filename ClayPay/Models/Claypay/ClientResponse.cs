@@ -61,7 +61,14 @@ namespace ClayPay.Models.Claypay
       }
       Charges = Charge.GetChargesByCashierId(cashierid);
       ReceiptPayments = ReceiptPayment.Get(cashierid);
-      ValidateVoid(ua, isVoid);
+      if(!isVoid && (ua.void_manager_access || (ua.cashier_access && !ReceiptPayments.Any(p => p.IsFinalized == true))))
+      {
+        CanVoid = true;
+      }
+      else
+      {
+        ValidateVoid(ua, isVoid);
+      }
     }
 
     public ClientResponse(List<string> errors)
@@ -180,7 +187,7 @@ namespace ClayPay.Models.Claypay
 
       if (ResponseCashierData.IsVoided)
       {
-        er.Add("Payment is already void.");
+        er.Add("Payment has already been voided.");
       }
 
       if (ResponseCashierData.TransactionDate.Date < DateTime.Today.Date.AddMonths(-6))
@@ -188,11 +195,11 @@ namespace ClayPay.Models.Claypay
         er.Add("Cannot void transactions older than six months");
       }
 
-
-      if (CheckForClosedPermits())
-      {
-        er.Add("Cannot void any transaction which includes permits that have been CO'd or have a passed final inspection");
-      }
+      CheckForClosedPermits(isVoid);
+      //if ()
+      //{
+      //  er.Add("Cannot void any transaction which includes permits that have been CO'd or have a passed final inspection");
+      //}
 
 
       if (!er.Any() && !ua.void_manager_access)
@@ -210,13 +217,13 @@ namespace ClayPay.Models.Claypay
         }
       }
 
-      CanVoid = !er.Any();
+      
 
       if (isVoid)
       {
         Errors.AddRange(er);
       }
-
+      CanVoid = !Errors.Any();
     }
 
     private ClientResponse VoidPayments()
@@ -286,54 +293,129 @@ namespace ClayPay.Models.Claypay
 
     }
 
-    private bool CheckForClosedPermits()
+    private void CheckForClosedPermits(bool isVoid)
     {
 
       List<string> assocKeys = (from c in Charges
                                 select c.AssocKey).Distinct().ToList();
 
       var query = @"
-        USE WATSC;
+        WITH PassedFinal AS (
 
-        WITH passed_final AS (
+          SELECT DISTINCT
+            PermitNo
+          FROM WATSC.dbo.bpINS_REQUEST I 
+          INNER JOIN WATSC.dbo.bpINS_REF IR ON I.InspectionCode = IR.InspCd AND Final = 1
+          WHERE 
+            ResultADC IN ('A', 'P')
+
+        ), Permits AS (
+          SELECT
+            'Included' PermitType
+            ,BaseID
+            ,M.PermitNo
+            ,VoidDate
+            ,CoDate
+            ,CASE WHEN PF.PermitNo IS NULL 
+              THEN 0
+              ELSE 1
+              END PassedFinal
+          FROM WATSC.dbo.bpMASTER_PERMIT M
+          LEFT OUTER JOIN PassedFinal PF ON PF.PermitNo = M.PermitNo
+          WHERE 
+            M.PermitNo IN @ids
+            
+          UNION ALL
+
+          SELECT
+          'Included' PermitType
+            ,BaseID
+            ,A.PermitNo
+            ,VoidDate
+            ,NULL
+            ,CASE WHEN PF.PermitNo IS NULL 
+              THEN 0
+              ELSE 1
+              END PassedFinal
+          FROM WATSC.dbo.bpASSOC_PERMIT A
+          LEFT OUTER JOIN PassedFinal PF ON PF.PermitNo = A.PermitNo
+          WHERE 
+            A.PermitNo IN @ids
+
+        ), CoPermits AS (
+
+          SELECT
+            'Related' PermitType
+            ,M.BaseID
+            ,M.PermitNo
+            ,M.VoidDate
+            ,M.CoDate
+            ,NULL PassedFinal
+          FROM bpMASTER_PERMIT M
+          INNER JOIN Permits P ON P.BaseID = M.BaseID AND M.PermitNo != P.PermitNo
+          WHERE 
+            M.CoDate IS NOT NULL
+
+        ), AllData AS (
+
+          SELECT
+            PermitType
+            ,BaseID
+            ,PermitNo
+            ,VoidDate
+            ,CoDate
+            ,PassedFinal
+          FROM Permits
+        
+          UNION
+
+          SELECT
+            PermitType
+            ,BaseID
+            ,PermitNo
+            ,VoidDate
+            ,CoDate
+            ,PassedFinal
+          FROM CoPermits
           
-          SELECT DISTINCT
-            BaseId,
-            PermitNo permit_number
-          FROM bpINS_REQUEST I 
-          INNER JOIN bpINS_REF IR ON I.InspectionCode = IR.InspCd AND Final = 1
-          WHERE 1=1
-            AND ResultADC IN ('A', 'P')
-
-        ), co_permits AS (
-
-          SELECT DISTINCT
-            BaseID,
-            PermitNo permit_number
-          FROM bpMASTER_PERMIT M 
-          WHERE 1=1
-            AND BaseID IS NOT NULL
-            AND CoDate IS NOT NULL
-
         )
 
         SELECT
-          PF.permit_number
-        FROM passed_final PF
-        LEFT OUTER JOIN co_permits CO ON CO.BaseID = PF.BaseId
-        WHERE PF.permit_number IN @ids
-          AND CO.permit_number IS NULL
-        UNION
-        SELECT 
-          CO.permit_number
-        FROM co_permits CO
-        INNER JOIN passed_final PF ON CO.permit_number = PF.permit_number
-        WHERE CO.permit_number IN @ids
+          PermitType
+          ,BaseID
+          ,PermitNo
+          ,VoidDate
+          ,CoDate
+          ,PassedFinal
+        FROM AllData
+        WHERE
+          PassedFinal = 1
+          OR VoidDate IS NOT NULL
+          OR CoDate IS NOT NULL
       ";
 
-      var permits = Constants.Get_Data<string,string>(query, assocKeys);
+      var permits = Constants.Get_Data<dynamic,string>(query, assocKeys);
 
-      return permits.Any();
+      if (isVoid)
+      {
+        foreach (dynamic permit in permits)
+        {
+          if (permit.VoidDate != null)
+          {
+            Errors.Add(permit.PermitType + " permit: " + permit.PermitNo + " is voided.");
+          }
+          if (permit.CoDate != null)
+          {
+            Errors.Add(permit.PermitType + " permit: " + permit.PermitNo + " has a Co Date.");
+          }
+          if (permit.PassedFinal == 1)
+          {
+            Errors.Add(permit.PermitType + " permit: " + permit.PermitNo + " has passed it's final inspection.");
+          }
+        }
+      }
+
+      //return permits.Any();
     }
 
 

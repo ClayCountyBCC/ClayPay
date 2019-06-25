@@ -258,7 +258,6 @@ namespace ClayPay.Models.Claypay
 
       this.Charges = Charge.GetChargesByItemIds(ItemIds);
 
-      Errors = Charge.ValidateCharges(Charges);
       var totalCharges = (from c in this.Charges
                           select c.Total).Sum();
 

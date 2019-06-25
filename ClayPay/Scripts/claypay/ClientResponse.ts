@@ -10,6 +10,7 @@ namespace clayPay
     TransactionId: string;
     IsEditable: boolean;
     PartialErrors: Array<string>;
+    CanVoid: boolean;
   }
 
   export class ClientResponse implements IClientResponse
@@ -21,6 +22,7 @@ namespace clayPay
     public IsEditable: boolean = false;
     public Errors: Array<string> = []; // Errors are full stop, meaning the payment did not process.
     public PartialErrors: Array<string> = []; // Partial errors mean part of the transaction was completed, but something wasn't.
+    public CanVoid: boolean = false;
 
     static CashierErrorTarget: string = "paymentError";
     static PublicErrorTarget: string = "publicPaymentError";
@@ -36,20 +38,20 @@ namespace clayPay
     {
     }
 
-    public static ShowPaymentReceipt(cr: ClientResponse, target: string):void
+    public static ShowPaymentReceipt(cr: ClientResponse, target: string, showVoid: boolean = false):void
     {
       console.log('client response ShowPaymentReceipt', cr);
       let container = document.getElementById(target);
       Utilities.Clear_Element(container);
-      container.appendChild(ClientResponse.CreateReceiptView(cr));
+      container.appendChild(ClientResponse.CreateReceiptView(cr, showVoid));
       Utilities.Show_Hide_Selector("#views > section", target);
     }
 
-    private static CreateReceiptView(cr: ClientResponse): DocumentFragment
+    private static CreateReceiptView(cr: ClientResponse, showVoid: boolean): DocumentFragment
     {      
       let df = document.createDocumentFragment();
       if (cr.ReceiptPayments.length === 0) return df;
-      df.appendChild(ClientResponse.CreateReceiptHeader(cr));
+      df.appendChild(ClientResponse.CreateReceiptHeader(cr, showVoid));
       df.appendChild(ClientResponse.CreateReceiptPayerView(cr.ResponseCashierData));
       df.appendChild(Charge.CreateChargesTable(cr.Charges, ChargeView.receipt));
       df.appendChild(ReceiptPayment.CreateReceiptPaymentView(cr.ReceiptPayments, cr.IsEditable));
@@ -57,21 +59,39 @@ namespace clayPay
       return df;
     }
 
-    private static CreateReceiptHeader(cr: ClientResponse): HTMLDivElement
+    private static CreateReceiptHeader(cr: ClientResponse, showVoid: boolean): HTMLDivElement
     {
       let div = document.createElement("div");
       div.classList.add("level")
       let title = document.createElement("span");
+      div.appendChild(title);
       title.classList.add("level-item");
       title.classList.add("title");
       title.appendChild(document.createTextNode("Payment Receipt for: " + cr.ReceiptPayments[0].CashierId));
+      if (showVoid && cr.CanVoid)
+      {
+        let voidbutton = document.createElement("button");
+        voidbutton.classList.add("button");
+        voidbutton.classList.add("is-warning");
+        voidbutton.classList.add("is-normal");
+        voidbutton.classList.add("hide-for-print");
+        voidbutton.classList.add("level-item");
+        voidbutton.appendChild(document.createTextNode("Void Payment"));
+        voidbutton.onclick = function ()
+        {
+          Utilities.Update_Menu(UI.Menus[5]);
+          Utilities.Toggle_Loading_Button("receiptSearchButton", true);
+          //Utilities.Toggle_Loading_Button(voidbutton, true);
+          ClientResponse.Search(cr.ResponseCashierData.CashierId);
+        }
+        div.appendChild(voidbutton);
+      }
       
       let receiptDate = document.createElement("span");
       receiptDate.classList.add("level-item");
       receiptDate.classList.add("subtitle");
       receiptDate.appendChild(document.createTextNode("Transaction Date: " + Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
-
-      div.appendChild(title);
+      
       div.appendChild(receiptDate);
       let timestamp = cr.ResponseCashierData.TransactionDate
       return div;
@@ -134,7 +154,7 @@ namespace clayPay
       return field;
     }
 
-    public static Search(): void
+    public static Search(CashierIdToVoid: string = ""): void
     {
       Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, true);
       let input = <HTMLInputElement>document.getElementById(ClientResponse.receiptSearchInput);
@@ -152,17 +172,28 @@ namespace clayPay
         {
           path = "/claypay/";
         }
-        Utilities.Get(path + "API/Payments/Receipt/?CashierId=" + k).then(
+        let fullpath = "";
+        if (CashierIdToVoid.length > 0)
+        {
+          fullpath = path + "API/Payments/VoidPayment/?CashierId=" + CashierIdToVoid;
+        }
+        else
+        {
+          fullpath = path + "API/Payments/Receipt/?CashierId=" + k
+        }
+        Utilities.Get(fullpath).then(
           function (cr: ClientResponse)
           {
             console.log('Client Response', cr);
             if (cr.Errors.length > 0)
             {
+              let container = document.getElementById(ClientResponse.PaymentReceiptContainer);
+              Utilities.Clear_Element(container);
               Utilities.Error_Show(ClientResponse.receiptSearchError, cr.Errors);
             }
             else
             {
-              ClientResponse.ShowPaymentReceipt(cr, ClientResponse.PaymentReceiptContainer);
+              ClientResponse.ShowPaymentReceipt(cr, ClientResponse.PaymentReceiptContainer, true);
             }
             Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
           },
@@ -203,7 +234,7 @@ namespace clayPay
         {
           console.log('client response', cr);
           if (link !== null) Utilities.Set_Text(link, cashierId);          
-          clayPay.ClientResponse.ShowPaymentReceipt(cr, Balancing.Payment.DJournalReceiptContainer);
+          clayPay.ClientResponse.ShowPaymentReceipt(cr, Balancing.Payment.DJournalReceiptContainer, false);
           // need to select the right box at the top
           let menulist = Balancing.Menus.filter(function (j) { return j.id === "nav-receipts" });
           let receiptMenu = menulist[0];

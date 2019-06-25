@@ -1064,6 +1064,7 @@ var clayPay;
 (function (clayPay) {
     var CashierData = /** @class */ (function () {
         function CashierData() {
+            this.CashierId = "";
             this.PayerFirstName = "";
             this.PayerLastName = "";
             this.PayerName = "";
@@ -2037,37 +2038,55 @@ var clayPay;
             this.IsEditable = false;
             this.Errors = []; // Errors are full stop, meaning the payment did not process.
             this.PartialErrors = []; // Partial errors mean part of the transaction was completed, but something wasn't.
+            this.CanVoid = false;
         }
-        ClientResponse.ShowPaymentReceipt = function (cr, target) {
+        ClientResponse.ShowPaymentReceipt = function (cr, target, showVoid) {
+            if (showVoid === void 0) { showVoid = false; }
             console.log('client response ShowPaymentReceipt', cr);
             var container = document.getElementById(target);
             Utilities.Clear_Element(container);
-            container.appendChild(ClientResponse.CreateReceiptView(cr));
+            container.appendChild(ClientResponse.CreateReceiptView(cr, showVoid));
             Utilities.Show_Hide_Selector("#views > section", target);
         };
-        ClientResponse.CreateReceiptView = function (cr) {
+        ClientResponse.CreateReceiptView = function (cr, showVoid) {
             var df = document.createDocumentFragment();
             if (cr.ReceiptPayments.length === 0)
                 return df;
-            df.appendChild(ClientResponse.CreateReceiptHeader(cr));
+            df.appendChild(ClientResponse.CreateReceiptHeader(cr, showVoid));
             df.appendChild(ClientResponse.CreateReceiptPayerView(cr.ResponseCashierData));
             df.appendChild(clayPay.Charge.CreateChargesTable(cr.Charges, clayPay.ChargeView.receipt));
             df.appendChild(clayPay.ReceiptPayment.CreateReceiptPaymentView(cr.ReceiptPayments, cr.IsEditable));
             // show payment info
             return df;
         };
-        ClientResponse.CreateReceiptHeader = function (cr) {
+        ClientResponse.CreateReceiptHeader = function (cr, showVoid) {
             var div = document.createElement("div");
             div.classList.add("level");
             var title = document.createElement("span");
+            div.appendChild(title);
             title.classList.add("level-item");
             title.classList.add("title");
             title.appendChild(document.createTextNode("Payment Receipt for: " + cr.ReceiptPayments[0].CashierId));
+            if (showVoid && cr.CanVoid) {
+                var voidbutton = document.createElement("button");
+                voidbutton.classList.add("button");
+                voidbutton.classList.add("is-warning");
+                voidbutton.classList.add("is-normal");
+                voidbutton.classList.add("hide-for-print");
+                voidbutton.classList.add("level-item");
+                voidbutton.appendChild(document.createTextNode("Void Payment"));
+                voidbutton.onclick = function () {
+                    Utilities.Update_Menu(clayPay.UI.Menus[5]);
+                    Utilities.Toggle_Loading_Button("receiptSearchButton", true);
+                    //Utilities.Toggle_Loading_Button(voidbutton, true);
+                    ClientResponse.Search(cr.ResponseCashierData.CashierId);
+                };
+                div.appendChild(voidbutton);
+            }
             var receiptDate = document.createElement("span");
             receiptDate.classList.add("level-item");
             receiptDate.classList.add("subtitle");
             receiptDate.appendChild(document.createTextNode("Transaction Date: " + Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
-            div.appendChild(title);
             div.appendChild(receiptDate);
             var timestamp = cr.ResponseCashierData.TransactionDate;
             return div;
@@ -2120,7 +2139,8 @@ var clayPay;
             field.appendChild(control);
             return field;
         };
-        ClientResponse.Search = function () {
+        ClientResponse.Search = function (CashierIdToVoid) {
+            if (CashierIdToVoid === void 0) { CashierIdToVoid = ""; }
             Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, true);
             var input = document.getElementById(ClientResponse.receiptSearchInput);
             var k = input.value.trim().toUpperCase();
@@ -2134,13 +2154,22 @@ var clayPay;
                 if (i == 0) {
                     path = "/claypay/";
                 }
-                Utilities.Get(path + "API/Payments/Receipt/?CashierId=" + k).then(function (cr) {
+                var fullpath = "";
+                if (CashierIdToVoid.length > 0) {
+                    fullpath = path + "API/Payments/VoidPayment/?CashierId=" + CashierIdToVoid;
+                }
+                else {
+                    fullpath = path + "API/Payments/Receipt/?CashierId=" + k;
+                }
+                Utilities.Get(fullpath).then(function (cr) {
                     console.log('Client Response', cr);
                     if (cr.Errors.length > 0) {
+                        var container = document.getElementById(ClientResponse.PaymentReceiptContainer);
+                        Utilities.Clear_Element(container);
                         Utilities.Error_Show(ClientResponse.receiptSearchError, cr.Errors);
                     }
                     else {
-                        ClientResponse.ShowPaymentReceipt(cr, ClientResponse.PaymentReceiptContainer);
+                        ClientResponse.ShowPaymentReceipt(cr, ClientResponse.PaymentReceiptContainer, true);
                     }
                     Utilities.Toggle_Loading_Button(ClientResponse.receiptSearchButton, false);
                 }, function (errorText) {
@@ -2174,7 +2203,7 @@ var clayPay;
                 console.log('client response', cr);
                 if (link !== null)
                     Utilities.Set_Text(link, cashierId);
-                clayPay.ClientResponse.ShowPaymentReceipt(cr, Balancing.Payment.DJournalReceiptContainer);
+                clayPay.ClientResponse.ShowPaymentReceipt(cr, Balancing.Payment.DJournalReceiptContainer, false);
                 // need to select the right box at the top
                 var menulist = Balancing.Menus.filter(function (j) { return j.id === "nav-receipts"; });
                 var receiptMenu = menulist[0];

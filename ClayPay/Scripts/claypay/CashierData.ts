@@ -21,6 +21,7 @@
 
   export class CashierData implements ICashierData
   {
+    public CashierId: string = "";
     public PayerFirstName: string = "";
     public PayerLastName: string = "";
     public PayerName: string = "";

@@ -2,6 +2,7 @@ var clayPay;
 (function (clayPay) {
     var CashierData = /** @class */ (function () {
         function CashierData() {
+            this.CashierId = "";
             this.PayerFirstName = "";
             this.PayerLastName = "";
             this.PayerName = "";
