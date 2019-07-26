@@ -151,14 +151,14 @@ namespace ClayPay.Models.ImpactFees
           ISNULL(C.Amount_Currently_Allocated, 0) Amount_Currently_Allocated,
           ISNULL(Audit_Log, '') Audit_Log
         FROM apApplication A
-        LEFT OUTER JOIN ImpactFees_Developer_Agreements D ON LTRIM(RTRIM(A.ApplNum)) = D.Agreement_Number
+        LEFT OUTER JOIN ImpactFees_Developer_Agreements D ON LTRIM(RTRIM(A.ApplType)) + '-' + LTRIM(RTRIM(A.ApplNum)) = D.Agreement_Number
         LEFT OUTER JOIN CurrentAllotment C ON D.Agreement_Number = C.Agreement_Number
         WHERE 
           A.ApplType IN ('TIMPACT', 'PFS_AGREE')
 ";
       if (Agreement_Number.Length > 0)
       {
-        query += "AND A.ApplNum = @Agreement_Number";
+        query += "AND LTRIM(RTRIM(A.ApplType)) + '-' + LTRIM(RTRIM(A.ApplNum)) = @Agreement_Number";
         dp.Add("@Agreement_Number", Agreement_Number);
       }
       return Constants.Get_Data<DeveloperAgreement>(query, dp);
