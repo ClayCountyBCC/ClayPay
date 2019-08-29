@@ -93,6 +93,14 @@ namespace ClayPay.Models.ImpactFees
       }
       dp.Add("@CatCodes", catCodes);
       string query = @"
+        WITH void_charges AS (
+
+          SELECT
+            CashierId
+          FROM ccCashier
+          WHERE IsVoided = 1
+           )
+
         SELECT
           M.PermitNo Permit_Number,
           M.IssueDate Issue_Date,
@@ -109,9 +117,12 @@ namespace ClayPay.Models.ImpactFees
         INNER JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
         LEFT OUTER JOIN clContractor C ON B.ContractorId = C.ContractorCd
         LEFT OUTER JOIN ccCashierItem CI ON M.PermitNo = CI.AssocKey AND CI.CatCode IN @CatCodes
-        LEFT OUTER JOIN ccCashier CC ON CI.CashierId = CC.CashierId AND CC.IsVoided = 0
+        LEFT OUTER JOIN ccCashier CC ON CI.CashierId = CC.CashierId
+        LEFT OUTER JOIN void_charges VC ON VC.CashierId = CI.CashierId
         LEFT OUTER JOIN ImpactFees_Permit_Allocations PA ON M.PermitNo = PA.Permit_Number
-        WHERE M.PermitNo=@Permit_Number;";
+        WHERE M.PermitNo=@Permit_Number
+          AND VC.CashierId IS NULL;";
+
       var permits = Constants.Get_Data<PermitImpactFee>(query, dp);
       // if we get multiple permits back for one permit number, we've most likely got multiple impact fees on the permit.
       if(permits.Count() >= 1)

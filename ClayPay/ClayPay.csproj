@@ -262,6 +262,11 @@
     <Content Include="Content\Fontawesome\webfonts\fa-solid-900.ttf" />
     <Content Include="Content\Fontawesome\webfonts\fa-solid-900.woff" />
     <Content Include="Content\Fontawesome\webfonts\fa-solid-900.woff2" />
+    <Content Include="Properties\PublishProfiles\ClaypayPublic-Anon.pubxml.user" />
+    <Content Include="Properties\PublishProfiles\Deploy Folder.pubxml.user" />
+    <Content Include="Properties\PublishProfiles\DV10 Internal.pubxml.user" />
+    <Content Include="Properties\PublishProfiles\Internal Production.pubxml.user" />
+    <Content Include="Properties\PublishProfiles\Public Production.pubxml.user" />
     <Content Include="Scripts\Balancing\bundle.js" />
     <Content Include="Scripts\Balancing\bundle.min.js">
       <DependentUpon>bundle.js</DependentUpon>
@@ -343,11 +348,9 @@
     <Content Include="Views\ImpactFees\Index.cshtml" />
     <Content Include="Views\Balancing\Index.cshtml" />
     <Content Include="Views\Payments\CreditCardPayment.cshtml" />
+    <None Include="Properties\PublishProfiles\ClaypayPublic-Anon.pubxml" />
     <None Include="Properties\PublishProfiles\Deploy Folder.pubxml" />
     <None Include="Properties\PublishProfiles\DV10 Internal.pubxml" />
-    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
-    <None Include="Properties\PublishProfiles\FolderProfile1.pubxml" />
-    <None Include="Properties\PublishProfiles\FolderProfile2.pubxml" />
     <None Include="Properties\PublishProfiles\Internal Production.pubxml" />
     <None Include="Properties\PublishProfiles\Public Production.pubxml" />
     <None Include="Web.Debug.config">
