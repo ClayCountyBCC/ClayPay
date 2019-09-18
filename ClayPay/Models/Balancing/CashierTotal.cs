@@ -55,17 +55,19 @@ namespace ClayPay.Models.Balancing
 
       var sql = @"
         USE WATSC;
+
         /*
           ValidPaymentTypes is a list of the payment types that don't include
           the impact fee waivers / exemptions / credits.
           We are using ValidPaymentTypes to impact the CashierIdsToBalance
           CTE so that we won't have to filter for them everywhere.
         */
-        WITH ValidPaymentTypes AS (
+        
+                WITH ValidPaymentTypes AS (
           SELECT Code FROM ccLookUp
           WHERE Cdtype IN ('PMTTYPE')
           OR (CdType = 'SPECIALPT'
-          AND Code IN ('cc_cashier', 'cc_online'))
+          AND Code IN ('cc_cashier', 'cc_online','cc_on'))
         ), CashierIdsToBalance (CashierId) AS (
           SELECT CashierId
           FROM dbo.ccCashier C          
@@ -76,6 +78,15 @@ namespace ClayPay.Models.Balancing
             FROM ccCashierPayment CP
             INNER JOIN ValidPaymentTypes V ON CP.PmtType = V.Code            
           )
+        ), processedTotals AS (
+
+          SELECT L.sortKey, PmtType code, L.Narrative [type], SUM(AmtApplied) AmtApplied, L.CdType
+          FROM  ccCashierPayment CP
+          LEFT OUTER join ccCashier C ON C.OTId = CP.OTid
+          INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
+          INNER JOIN ccLookUp L ON L.Code = PmtType
+          GROUP BY L.sortkey, PmtType, Narrative, L.CdType
+
         )
 
         SELECT 
@@ -100,67 +111,48 @@ namespace ClayPay.Models.Balancing
 
           UNION
 
-          SELECT 
-            L.SortKey,
-            L.Code, 
-            L.Narrative,
-            SUM(AmtApplied) AmtApplied, 
-            CdType 
-           FROM 
-           (
-             SELECT PmtType, AmtApplied
-             FROM  ccCashierPayment CP
-             LEFT OUTER join ccCashier C ON C.OTId = CP.OTid
-             INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
-           ) AS TempAllPayments
-           RIGHT OUTER JOIN ccLookUp L ON LEFT(TempAllPayments.PmtType,5) = LEFT(L.CODE,5)
-           WHERE L.CdType IN ('PMTTYPE') OR LOWER(L.Code) IN ('cc_online', 'cc_cashier')
-           GROUP BY L.SORTKEY, L.Code, L.Narrative, CdType, PmtType
+          
+          SELECT
+            SortKey,
+            code,
+            [type],
+            AmtApplied,
+            cdType
+          FROM processedTotals
 
-           UNION  
+
+          UNION   
          
-           SELECT 
-              98 SortKey, 
-              NULL Code, 
-              'Change' Narrative, 
-              (SUM(AMTAPPLIED) - SUM(AMTTENDERED)) * (-1),
-              'ZB'CdType
-            FROM ccCashierPayment CP
-            INNER JOIN ccCashier C ON C.OTId = CP.OTid
-            INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
-              AND PmtType IN ('CK', 'CA')
+          SELECT 
+            99 SortKey, 
+            NULL Code, 
+            'Total Deposit' Narrative, 
+            SUM(AmtApplied),
+            'ZC' CdType
+          FROM ccCashierPayment CP
+          INNER JOIN ccCashier C ON C.OTId = CP.OTid
+          INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
+            AND PmtType IN ('CK', 'CA')
          
-            UNION   
+          UNION   
          
-            SELECT 
-              99 SortKey, 
-              NULL Code, 
-              'Total Deposit' Narrative, 
-              SUM(AmtApplied),
-              'ZC' CdType
-            FROM ccCashierPayment CP
-            INNER JOIN ccCashier C ON C.OTId = CP.OTid
-            INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
-              AND PmtType IN ('CK', 'CA')
-         
-            UNION   
-         
-            SELECT 
-              100 SortKey,
-              NULL Code, 
-              'Total Payments' Narrative, 
-              SUM(AmtApplied),
-              'ZD' CdType
-            FROM ccCashierPayment CP
-            INNER JOIN ccCashier C ON CP.OTid = C.OTid
-            INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
-            --INNER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(CP.PmtType,5))
-            --WHERE L.CdType = 'PMTTYPE' OR LOWER(L.Code) IN ('cc_online', 'cc_cashier')
+          SELECT 
+            100 SortKey,
+            NULL Code, 
+            'Total Payments' Narrative, 
+            SUM(AmtApplied),
+            'ZD' CdType
+          FROM ccCashierPayment CP
+          INNER JOIN ccCashier C ON CP.OTid = C.OTid
+          INNER JOIN CashierIdsToBalance CIB ON C.CashierId = CIB.CashierId
+          --INNER JOIN ccLookUp L ON UPPER(LEFT(L.Code,5)) = UPPER(LEFT(CP.PmtType,5))
+          --WHERE L.CdType = 'PMTTYPE' OR LOWER(L.Code) IN ('cc_online', 'cc_cashier')
 
         ) AS TMP
-        WHERE AmtApplied > 0 AND AmtApplied IS NOT NULL
+        WHERE AmtApplied IS NOT NULL
         ORDER BY CdType, SortKey; --THIS ALLOWS FOR THE DATA TO BE IN THE SAME ORDER AS IT IS CURRENTLY
                                   -- SOLELY FOR CONTINUITY. THE ACTUAL LAYOUT MAY CHANGE BASED ON MOCKUP
+
        ";
       try
       {
