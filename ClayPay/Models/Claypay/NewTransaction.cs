@@ -856,25 +856,46 @@ namespace ClayPay.Models.Claypay
                               WHERE OTId = @otid) AND
             CashierId IS NULL AND Total > 0) = 0);
 
+      /*
+      *  THE FOLLOWING WILL UPDATE THE CONTRACTOR EXPIRATION DATE IF THEY 
+      *  PAID A LICENSE FEE ('CLLTF', 'CLFE', 'CLREC', 'CLTAR'). 
+      */
 
       DECLARE @ExpDt VARCHAR(20) = (SELECT TOP 1 Description
           FROM clCategory_Codes WHERE Code = 'dt' AND Type_Code = '9');
 
+      WITH [key] AS (
+
+        SELECT DISTINCT 
+          AssocKey 
+        FROM ccCashierItem CI 
+        INNER JOIN clContractor C ON CI.AssocKey = C.ContractorCd AND C.ContractorCd NOT LIKE 'AP%' 
+        WHERE OTId=@otid 
+          AND Assoc='CL' 
+          AND CatCode IN ('CLLTF', 'CLFE', 'CLREC', 'CLTAR')
+
+      ), total AS (
+
+        SELECT 
+          ISNULL(SUM(C.TOTAL),0)Total
+        FROM ccCashierItem C
+        INNER JOIN [key] k ON k.AssocKey = c.AssocKey
+        WHERE Total > 0 
+          AND CashierId IS NULL
+
+      )
+
       UPDATE clContractor
-        SET IssueDt=GETDATE(), ExpDt=@ExpDt, BlkCrdExpDt=@ExpDt
-      WHERE ContractorCd NOT LIKE 'AP%' AND 
-            ContractorCd IN 
-            (SELECT DISTINCT AssocKey 
-              FROM ccCashierItem 
-              WHERE OTId=@otid AND
-                Assoc='CL' AND
-                CatCode IN ('CLLTF', 'CLFE', 'CLREC', 'CLTAR') AND
-              (SELECT ISNULL(SUM(Total), 0) AS Total 
-                FROM ccCashierItem
-                WHERE AssocKey IN (SELECT DISTINCT AssocKey 
-                                  FROM ccCashierItem 
-                                  WHERE OTId=@otid) AND
-                CashierId IS NULL AND Total > 0) = 0);";
+      SET
+        ExpDt = @ExpDt,
+        BlkCrdExpDt = @ExpDt,
+        IssueDt = GETDATE()
+      FROM clContractor c
+      INNER JOIN [key] K ON K.AssocKey = C.ContractorCd
+      INNER JOIN total T ON T.Total = 0;
+
+
+";
 
       TimingDates.Finalize_Transaction_Start = DateTime.Now; // Finalize_Transaction_Start
 

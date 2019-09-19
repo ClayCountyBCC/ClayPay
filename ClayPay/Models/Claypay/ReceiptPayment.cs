@@ -101,7 +101,7 @@ namespace ClayPay.Models.Claypay
                END IsFinalized 
         FROM ccCashierPayment CP
         INNER JOIN ccCashier C ON C.OTId = CP.OTid
-        INNER JOIN ccLookUp L ON LEFT(L.CODE,5) = LEFT(CP.PmtType,5)
+        INNER JOIN ccLookUp L ON LOWER(L.CODE)= LOWER(CP.PmtType)
         WHERE CdType IN ('SPECIALPT', 'PMTTYPE')
           AND C.CashierId = @cashierId
         ORDER BY CashierId DESC";
@@ -135,7 +135,7 @@ namespace ClayPay.Models.Claypay
           ISNULL(TransactionId, '') TransactionId
         FROM ccCashierPayment CP
         INNER JOIN ccCashier C ON C.OTId = CP.OTid
-        INNER JOIN ccLookUp L ON LEFT(L.CODE,5) = LEFT(CP.PmtType,5)
+        INNER JOIN ccLookUp L ON LOWER(L.CODE)= LOWER(CP.PmtType)
         WHERE CdType IN ('SPECIALPT', 'PMTTYPE')
           AND CP.PayId = @PayId
         ORDER BY CashierId DESC";
