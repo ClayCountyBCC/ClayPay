@@ -827,8 +827,10 @@ namespace ClayPay.Models.Claypay
 
     public bool FinalizeTransaction()
     {
+
       var query = @"
       USE WATSC;
+
 
       --Handle HoldIds
       UPDATE H
@@ -895,8 +897,43 @@ namespace ClayPay.Models.Claypay
       INNER JOIN total T ON T.Total = 0;
 
 
-";
+      WITH permit_numbers AS (
 
+        SELECT DISTINCT
+          AssocKey
+        FROM ccCashierItem CI
+        INNER JOIN bpMASTER_PERMIT M ON CI.AssocKey = M.PermitNo AND M.Comm = 1
+        WHERE CashierId = @cashierId
+          AND OTId = @otid
+          AND CatCode IN ('IFRD2','IFRD3')
+
+      )
+
+
+      UPDATE CI SET CashierId = @cashierId, OTId = @otid
+      FROM ccCashierItem CI
+      INNER JOIN permit_numbers P ON P.AssocKey = CI.AssocKey
+      WHERE CI.CatCode IN ('ISR2', 'ISR3')
+
+
+      INSERT INTO ccCashierPayment (OTid, PmtType, AmtApplied, AmtTendered, Info, AddedBy, UpdatedBy, UpdatedOn)
+      SELECT
+        @otid
+        ,'IFS'
+        ,CI.Total
+        ,0
+        ,'ClayPay'
+        ,@username
+        ,'initial insert'
+        ,GETDATE()
+      FROM ccCashierItem CI
+      WHERE CI.OTId = @otid
+        AND CatCode IN ('ISR2', 'ISR3')
+        AND BaseFee > Total;
+
+
+    ";
+      
       TimingDates.Finalize_Transaction_Start = DateTime.Now; // Finalize_Transaction_Start
 
       var i = Constants.Exec_Query(query, new
