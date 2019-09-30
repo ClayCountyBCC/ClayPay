@@ -913,7 +913,7 @@ namespace ClayPay.Models.Claypay
       UPDATE CI SET CashierId = @cashierId, OTId = @otid
       FROM ccCashierItem CI
       INNER JOIN permit_numbers P ON P.AssocKey = CI.AssocKey
-      WHERE CI.CatCode IN ('ISR2', 'ISR3')
+      WHERE CI.CatCode IN ('IFS2', 'IFS3')
 
 
       INSERT INTO ccCashierPayment (OTid, PmtType, AmtApplied, AmtTendered, Info, AddedBy, UpdatedBy, UpdatedOn)
@@ -928,7 +928,7 @@ namespace ClayPay.Models.Claypay
         ,GETDATE()
       FROM ccCashierItem CI
       WHERE CI.OTId = @otid
-        AND CatCode IN ('ISR2', 'ISR3')
+        AND CatCode IN ('IFS2', 'IFS3')
         AND BaseFee > Total;
 
 
