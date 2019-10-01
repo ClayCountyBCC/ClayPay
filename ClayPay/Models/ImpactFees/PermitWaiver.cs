@@ -35,7 +35,7 @@ namespace ClayPay.Models.ImpactFees
         // So largely, this process will just pre-empt the ApplyWaiver process.
         // We should just be able to update the permit object with the new item id and 
         // proceed as normal.
-        var NewItemId = PartialImpactFeeHandling(permit);
+        var NewItemId = PartialImpactFeeHandling(permit, Amount);
         if (NewItemId == -1)
         {
           Constants.Log("Error Applying Partial Waiver", permit.ItemId.Value.ToString(), permit.Permit_Number, permit.ImpactFee_Amount_Formatted, "");
@@ -59,7 +59,7 @@ namespace ClayPay.Models.ImpactFees
       return nt.SaveTransaction();
     }
 
-    private int PartialImpactFeeHandling(PermitImpactFee permit)
+    public static int PartialImpactFeeHandling(PermitImpactFee permit, decimal Amount)
     {
       var dp = new DynamicParameters();
       dp.Add("@NewItemId", dbType: DbType.Int32, direction: ParameterDirection.Output);

@@ -160,13 +160,32 @@ namespace ClayPay.Models.ImpactFees
         return true;
       }
       return ApplyCreditPayment(permit, IpAddress, ua);
-
-
-      
     }
 
     public bool ApplyCreditPayment(PermitImpactFee permit, string IpAddress, Models.UserAccess ua)
     {
+      if (permit.ImpactFee_Amount != Amount_Allocated)
+      {
+        // Partial Waiver Process:
+        // This process needs to do the following:
+        // 1. Reduce the amount of the current impact fee (captured in permit) by the amount in permit.
+        // 2. Insert a new charge that has the following properties:
+        //    a. Same Catcode as the original impact fee
+        //    b. Same amount in permit object
+        //    c. Can probably do this easily with a Select Insert.
+        // 3. Capture the freshly inserted row's ItemId.
+        // 4. Use the waiver/exemption process on the new ItemId
+        // So largely, this process will just pre-empt the ApplyWaiver process.
+        // We should just be able to update the permit object with the new item id and 
+        // proceed as normal.
+        var NewItemId = PermitWaiver.PartialImpactFeeHandling(permit, Amount_Allocated);
+        if (NewItemId == -1)
+        {
+          Constants.Log("Error Applying Partial Credit", permit.ItemId.Value.ToString(), permit.Permit_Number, permit.ImpactFee_Amount_Formatted, "");
+        }
+        permit.ItemId = NewItemId; // Set it to the newly created row
+      }
+
       var nt = new Claypay.NewTransaction();
       nt.ItemIds.Add(permit.ItemId.Value);
       var ifPayment = new Claypay.Payment(Claypay.Payment.payment_type.impact_fee_credit)
