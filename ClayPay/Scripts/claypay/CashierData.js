@@ -39,6 +39,26 @@ var clayPay;
                 return false;
             }
             this.PayerEmailAddress = Utilities.Get_Value(CashierData.payerEmail).trim();
+            var email = this.PayerEmailAddress.split("@");
+            if (email.length !== 2) {
+                Utilities.Error_Show(CashierData.payerEmailError, "The email address does not appear to be in the correct format.");
+                var element = document.getElementById(CashierData.payerEmail);
+                element.classList.add("is-danger");
+                element.focus();
+                element.scrollTo();
+                return false;
+            }
+            else {
+                var domain = email[1].split(".");
+                if (domain.length === 1) {
+                    Utilities.Error_Show(CashierData.payerEmailError, "The email address does not appear to be in the correct format.");
+                    var element = document.getElementById(CashierData.payerEmail);
+                    element.classList.add("is-danger");
+                    element.focus();
+                    element.scrollTo();
+                    return false;
+                }
+            }
             this.PayerCompanyName = Utilities.Get_Value(CashierData.payerCompany).trim();
             this.PayerStreetAddress = Utilities.Validate_Text(CashierData.payerStreet, CashierData.payerStreetError, "The street address field is required.");
             if (this.PayerStreetAddress.length === 0)
@@ -94,6 +114,7 @@ var clayPay;
         CashierData.payerPhoneError = "payerPhoneError";
         CashierData.payerStreetError = "payerStreetError";
         CashierData.payerCityError = "payerCityError";
+        CashierData.payerEmailError = "payerEmailError";
         return CashierData;
     }());
     clayPay.CashierData = CashierData;

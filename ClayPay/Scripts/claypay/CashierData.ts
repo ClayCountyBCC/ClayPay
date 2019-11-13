@@ -53,6 +53,7 @@
     public static payerPhoneError = "payerPhoneError";
     public static payerStreetError = "payerStreetError";
     public static payerCityError = "payerCityError";
+    public static payerEmailError = "payerEmailError";
 
     constructor()
     {
@@ -80,7 +81,29 @@
       }
 
       this.PayerEmailAddress = Utilities.Get_Value(CashierData.payerEmail).trim();
-
+      let email = this.PayerEmailAddress.split("@");
+      if (email.length !== 2)
+      {
+        Utilities.Error_Show(CashierData.payerEmailError, "The email address does not appear to be in the correct format.");
+        let element = document.getElementById(CashierData.payerEmail);
+        element.classList.add("is-danger");
+        element.focus();
+        element.scrollTo();
+        return false;
+      }
+      else
+      {
+        let domain = email[1].split(".");
+        if (domain.length === 1)
+        {
+          Utilities.Error_Show(CashierData.payerEmailError, "The email address does not appear to be in the correct format.");
+          let element = document.getElementById(CashierData.payerEmail);
+          element.classList.add("is-danger");
+          element.focus();
+          element.scrollTo();
+          return false;
+        }
+      }
 
       this.PayerCompanyName = Utilities.Get_Value(CashierData.payerCompany).trim();
 

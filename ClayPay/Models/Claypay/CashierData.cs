@@ -102,7 +102,7 @@ namespace ClayPay.Models.Claypay
 #pragma warning restore CS0168 // Variable is declared but never used
         {
           errors.Add("The email address provided does not appear to be in a valid format.");
-        }
+        }        
       }
       if (PayerStreetAddress.Length == 0)
       {
