@@ -759,7 +759,7 @@ namespace ClayPay.Models.Claypay
             WHEN 50 THEN
               CASE WHEN (ROUND((Total * GL.[Percent]) / 100, 2)*2) <> CCI.Total THEN
                 CASE WHEN GL.Account = '322100' THEN
-                    ROUND((Total * GL.[Percent]) / 100, 2) + (CCI.Total -  (ROUND((Total * GL.[Percent]) / 100, 2)*2))
+                    ROUND(ROUND((Total * (GL.[Percent]) / 100), 2) + (CCI.Total -  (ROUND((Total * (GL.[Percent]) / 100), 2)*2)),2)
                 ELSE
                   ROUND((Total * GL.[Percent]) / 100, 2) 
                 END
