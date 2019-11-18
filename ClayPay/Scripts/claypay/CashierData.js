@@ -40,8 +40,9 @@ var clayPay;
             }
             this.PayerEmailAddress = Utilities.Get_Value(CashierData.payerEmail).trim();
             var email = this.PayerEmailAddress.split("@");
+            var emailFormatError = "The email address does not appear to be in the correct format.  The email address should be in user@example.org format.";
             if (email.length !== 2) {
-                Utilities.Error_Show(CashierData.payerEmailError, "The email address does not appear to be in the correct format.");
+                Utilities.Error_Show(CashierData.payerEmailError, emailFormatError);
                 var element = document.getElementById(CashierData.payerEmail);
                 element.classList.add("is-danger");
                 element.focus();
@@ -50,8 +51,8 @@ var clayPay;
             }
             else {
                 var domain = email[1].split(".");
-                if (domain.length === 1) {
-                    Utilities.Error_Show(CashierData.payerEmailError, "The email address does not appear to be in the correct format.");
+                if (domain.length === 1 || (domain.length > 1 && domain[1].length === 0)) {
+                    Utilities.Error_Show(CashierData.payerEmailError, emailFormatError);
                     var element = document.getElementById(CashierData.payerEmail);
                     element.classList.add("is-danger");
                     element.focus();

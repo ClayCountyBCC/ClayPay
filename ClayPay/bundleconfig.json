@@ -5,11 +5,12 @@
       "bower_components/promise-polyfill/dist/polyfill.js",
       "bower_components/fetch/fetch.js",
       "Scripts/app/Utilities.js",
+      "Scripts/claypay/CCPayment.js",
       "Scripts/claypay/CashierData.js",
       "Scripts/claypay/LocationHash.js",
       "Scripts/claypay/Charge.js",
       "Scripts/claypay/Payment.js",
-      "Scripts/claypay/CCPayment.js",
+
       "Scripts/claypay/ReceiptPayment.js",
       "Scripts/claypay/ClientResponse.js",
       "Scripts/claypay/NewTransaction.js",
