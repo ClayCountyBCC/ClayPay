@@ -78,17 +78,18 @@ namespace ClayPay.Models.Claypay
       var param = new DynamicParameters();
       param.Add("@cashierId", CashierId);
       var query = @"
-        USE WATSC;
+       USE WATSC;
         SELECT DISTINCT
           LTRIM(RTRIM(C.CashierId)) CashierId,
           CP.OTId,
+          CP.PmtType,
           PayId, 
           TRANSDT [TransactionDate], 
           INFO,
-          L.CODE [PaymentType],
-          CASE WHEN UPPER(LEFT(L.Narrative,2)) = 'CC' 
-                THEN LTRIM(RTRIM(SUBSTRING(L.Narrative,4,LEN(L.Narrative)))) 
-                ELSE L.Narrative END PaymentTypeDescription,
+          ISNULL(L.Code, CP.PmtType) PaymentType,
+          CASE WHEN UPPER(LEFT(ISNULL(L.Narrative, ''),2)) = 'CC' 
+                THEN LTRIM(RTRIM(SUBSTRING(ISNULL(L.Narrative, ''),4,LEN(ISNULL(L.Narrative, ''))))) 
+                ELSE ISNULL(L.Narrative, '') END PaymentTypeDescription,
           AmtTendered [AmountTendered], 
           AmtApplied [AmountApplied], 
           (AmtTendered - AmtApplied) ChangeDue, 
@@ -101,8 +102,9 @@ namespace ClayPay.Models.Claypay
                END IsFinalized 
         FROM ccCashierPayment CP
         INNER JOIN ccCashier C ON C.OTId = CP.OTid
-        INNER JOIN ccLookUp L ON LOWER(L.CODE)= LOWER(CP.PmtType)
-        WHERE CdType IN ('SPECIALPT', 'PMTTYPE')
+        LEFT OUTER JOIN ccLookUp L ON LOWER(L.CODE)= LOWER(CASE WHEN CP.PmtType = 'CC On' THEN 'CC Online' ELSE CP.PmtType END) AND CdType IN ('SPECIALPT', 'PMTTYPE')
+        WHERE 
+          1 = 1          
           AND C.CashierId = @cashierId
         ORDER BY CashierId DESC";
 

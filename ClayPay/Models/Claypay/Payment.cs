@@ -156,6 +156,7 @@ namespace ClayPay.Models.Claypay
         case "cc_online":
         case "cc_cashier":
         case "cc on":
+        case "cc online":
           return "Credit Card";
 
         case "ck":
