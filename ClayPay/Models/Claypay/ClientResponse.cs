@@ -61,7 +61,7 @@ namespace ClayPay.Models.Claypay
       }
       Charges = Charge.GetChargesByCashierId(cashierid);
       ReceiptPayments = ReceiptPayment.Get(cashierid);
-      if(!isVoid && (ua.void_manager_access || (ua.cashier_access && !ReceiptPayments.Any(p => p.IsFinalized == true))))
+      if(isVoid && (ua.void_manager_access || (ua.cashier_access && !ReceiptPayments.Any(p => p.IsFinalized == true))))
       {
         CanVoid = true;
       }
@@ -180,7 +180,7 @@ namespace ClayPay.Models.Claypay
 
       if (!ua.void_manager_access && !ua.cashier_access)
       {
-        if (isVoid) Errors.Add("Not Authorized to void payments");
+        if (!isVoid) Errors.Add("Not Authorized to void payments");
         return;
       }
 
@@ -188,6 +188,7 @@ namespace ClayPay.Models.Claypay
       if (ResponseCashierData.IsVoided)
       {
         er.Add("Payment has already been voided.");
+
       }
 
       if (ResponseCashierData.TransactionDate.Date < DateTime.Today.Date.AddMonths(-6))
@@ -195,7 +196,7 @@ namespace ClayPay.Models.Claypay
         er.Add("Cannot void transactions older than six months");
       }
 
-      CheckForClosedPermits(isVoid);
+      CheckForClosedPermits();
       //if ()
       //{
       //  er.Add("Cannot void any transaction which includes permits that have been CO'd or have a passed final inspection");
@@ -293,7 +294,7 @@ namespace ClayPay.Models.Claypay
 
     }
 
-    private void CheckForClosedPermits(bool isVoid)
+    private void CheckForClosedPermits()
     {
 
       List<string> assocKeys = (from c in Charges
@@ -394,24 +395,21 @@ namespace ClayPay.Models.Claypay
           OR CoDate IS NOT NULL
       ";
 
-      var permits = Constants.Get_Data<dynamic,string>(query, assocKeys);
+      var permits = Constants.Get_Data<dynamic, string>(query, assocKeys);
 
-      if (isVoid)
+      foreach (dynamic permit in permits)
       {
-        foreach (dynamic permit in permits)
+        if (permit.VoidDate != null)
         {
-          if (permit.VoidDate != null)
-          {
-            Errors.Add(permit.PermitType + " permit: " + permit.PermitNo + " is voided.");
-          }
-          if (permit.CoDate != null)
-          {
-            Errors.Add(permit.PermitType + " permit: " + permit.PermitNo + " has a Co Date.");
-          }
-          if (permit.PassedFinal == 1)
-          {
-            Errors.Add(permit.PermitType + " permit: " + permit.PermitNo + " has passed it's final inspection.");
-          }
+          Errors.Add(permit.PermitType + " permit: " + permit.PermitNo + " is voided.");
+        }
+        if (permit.CoDate != null)
+        {
+          Errors.Add(permit.PermitType + " permit: " + permit.PermitNo + " has a Co Date.");
+        }
+        if (permit.PassedFinal == 1)
+        {
+          Errors.Add(permit.PermitType + " permit: " + permit.PermitNo + " has passed it's final inspection.");
         }
       }
 

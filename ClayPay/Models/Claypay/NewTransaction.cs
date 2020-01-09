@@ -737,47 +737,10 @@ namespace ClayPay.Models.Claypay
           INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
         WHERE CCI.OTId = @otid;
 
-        INSERT INTO ccGUItem (GUID, Account, Amount, Type)
-          SELECT
-            GUId, Account, Amount, Type from (
-          SELECT DISTINCT
-          CCI.ItemId, 
-            GU.GUId,
-            GL.Fund + '*' + GL.Account + '**' AS Account,
-          FORMAT(
-          CASE GL.[Percent] 
-            WHEN 0.05 THEN
-              CASE WHEN CAST(ROUND((Total * 99.9) / 100, 2) + (ROUND((Total * 0.05) / 100, 2)*2) AS MONEY) > CCI.Total THEN
-                CASE WHEN Fund <> '001' THEN 
-                    ROUND((Total * GL.[Percent]) / 100, 2) - .01
-                  ELSE 
-                    ROUND((Total * GL.[Percent]) / 100, 2) 
-                END
-              ELSE
-                ROUND((Total * GL.[Percent]) / 100, 2) 
-              END
-            WHEN 50 THEN
-              CASE WHEN (ROUND((Total * GL.[Percent]) / 100, 2)*2) <> CCI.Total THEN
-                CASE WHEN GL.Account = '322100' THEN
-                    ROUND(ROUND((Total * (GL.[Percent]) / 100), 2) + (CCI.Total -  (ROUND((Total * (GL.[Percent]) / 100), 2)*2)),2)
-                ELSE
-                  ROUND((Total * GL.[Percent]) / 100, 2) 
-                END
-              ELSE
-                ROUND((Total * GL.[Percent]) / 100, 2) 
-              END
-            ELSE
-              ROUND(Total / (100 / GL.[Percent]), 2) 
-            END
-          , 'N2') AS Amount,
-            GL.Type
-          FROM ccCashierItem CCI
-          INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
-          INNER JOIN ccGU GU ON CCI.OTId = GU.OTId AND CCI.ItemId = GU.ItemId
-          INNER JOIN ccCashierPayment CP ON CCI.OTId = CP.OTid
-          WHERE CCI.OTId = @otid
-          ) as tmp
-          ORDER BY ItemId, Type";
+
+        EXEC prc_claypay_insert_guitem_rows @otid
+
+      ";
 
       try
       {
