@@ -61,7 +61,7 @@ namespace ClayPay.Models.Claypay
       }
       Charges = Charge.GetChargesByCashierId(cashierid);
       ReceiptPayments = ReceiptPayment.Get(cashierid);
-      if(isVoid && (ua.void_manager_access || (ua.cashier_access && !ReceiptPayments.Any(p => p.IsFinalized == true))))
+      if(!isVoid && (ua.void_manager_access || (ua.cashier_access && !ReceiptPayments.Any(p => p.IsFinalized == true))))
       {
         CanVoid = true;
       }
