@@ -225,7 +225,13 @@ namespace ClayPay.Models.Balancing
 
               (SELECT SUM(AmtApplied) AS PmtTtl
               FROM dbo.ccCashierPayment
-              WHERE (dbo.ccCashierPayment.OTId = dbo.ccCashier.OTId)) AS PmtTtl,
+              WHERE (dbo.ccCashierPayment.OTId = dbo.ccCashier.OTId)
+                AND PmtType NOT IN ('IFCR','IFEX','IFWS','IFWR','IFFS','IFS','IFSCR')) AS PmtTtl,
+              
+              (SELECT SUM(AmtApplied) AS PmtTtl
+              FROM dbo.ccCashierPayment
+              WHERE (dbo.ccCashierPayment.OTId = dbo.ccCashier.OTId)
+                AND PmtType IN ('IFCR','IFEX','IFWS','IFWR','IFFS','IFS','IFSCR')) AS CrdtTotal,
 
               (SELECT ISNULL(COUNT(*),0)
               FROM dbo.ccCashierPayment
@@ -240,9 +246,10 @@ namespace ClayPay.Models.Balancing
             FROM dbo.ccCashier
             WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE))
           AS tmp
-          WHERE PmtTtl + EscrowPmt != GUTtl OR ItemTtl != GUTtl
+          WHERE PmtTtl + EscrowPmt != GUTtl OR ItemTtl != (GUTtl + CrdtTotal)
           ORDER BY CashierId
-      
+
+
       ";
 
       var i = Constants.Get_Data<string>(query, param);

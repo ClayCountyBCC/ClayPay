@@ -48,11 +48,23 @@ namespace ClayPay.Models.Claypay
       public DateTime Finalize_Transaction_End { get; set; } = DateTime.MaxValue;
       public DateTime Rollback_Transaction { get; set; } = DateTime.MaxValue;
 
+
       public TransactionTiming()
       {
 
       }
     }
+    public class bad_guitems
+    {
+      public int guitem_id { get; set; }
+      public decimal amount { get; set; }
+      public bad_guitems()
+      {
+
+      }
+
+     }
+
 
     public static TransactionTiming TimingDates { get; set; }
 
@@ -433,6 +445,7 @@ namespace ClayPay.Models.Claypay
           rollbackTransaction();
           return false;
         }
+
       }
 
       FinalizeTransaction();
@@ -740,6 +753,8 @@ namespace ClayPay.Models.Claypay
 
         EXEC prc_claypay_insert_guitem_rows @otid
 
+
+
       ";
 
       try
@@ -749,6 +764,16 @@ namespace ClayPay.Models.Claypay
         var i = Constants.Exec_Query(query, dp);
 
         TimingDates.Insert_Update_GURows_End = DateTime.Now; // Insert_Update_GURows_End
+
+        // 1. CHECK IF GL ENTRIES BALANCE FOR THIS OTID
+        
+
+
+        // 2. FIND ALL CAT CODES THAT ARE OUT OF BALANCE
+        // 3. DECIDE WHICH ROW TO REDUCE BY .01 (NOT GREATER AMOUNT)
+
+
+
 
         // Leaving this in to publicly shame Jeremy and his decision making process.
         //if (i != ItemIds.Count() * 2)
@@ -892,7 +917,7 @@ namespace ClayPay.Models.Claypay
       FROM ccCashierItem CI
       WHERE CI.OTId = @otid
         AND CatCode IN ('IFS2', 'IFS3')
-        AND BaseFee > Total;
+        AND BaseFee = Total;
 
 
     ";
@@ -905,6 +930,9 @@ namespace ClayPay.Models.Claypay
         cashierId = TransactionCashierData.CashierId,
         UserName = TransactionCashierData.CurrentUser.user_name
       }) != -1;
+
+      BalanceRoadImpactFees(TransactionCashierData.OTId);
+
       TimingDates.Finalize_Transaction_End = DateTime.Now; // Finalize_Transaction_End
 
       return i;
@@ -1023,6 +1051,109 @@ namespace ClayPay.Models.Claypay
       }
     }
 
+    private void BalanceRoadImpactFees(int? otid)
+    {
+      if(otid == null || otid == -1)  return;
+      var param = new DynamicParameters();
+      param.Add("@otid", otid);
+
+      var query = @"
+          USE WATSC;
+
+          SELECT DISTINCT * FROM (
+            SELECT   CashierId,OTId,NTUser,
+              (SELECT     SUM(Total) AS ItemTtl
+              FROM         dbo.ccCashierItem
+              WHERE     (dbo.ccCashierItem.OTId = dbo.ccCashier.OTId)) AS ItemTtl,
+
+              (SELECT SUM(AmtApplied) AS PmtTtl
+              FROM dbo.ccCashierPayment
+              WHERE (dbo.ccCashierPayment.OTId = dbo.ccCashier.OTId)) AS PmtTtl,
+
+              (SELECT ISNULL(COUNT(*),0)
+              FROM dbo.ccCashierPayment
+              WHERE (dbo.ccCashierPayment.OTId = dbo.ccCashier.OTId) AND 
+              (dbo.ccCashierPayment.PmtType = 'ESP')) AS EscrowPmt,
+            
+              (SELECT SUM(dbo.ccGUItem.Amount) AS GUTtl
+              FROM dbo.ccGU INNER JOIN
+              dbo.ccGUItem ON dbo.ccGU.GUId = dbo.ccGUItem.GUID
+              WHERE (dbo.ccGU.OTId = dbo.ccCashier.OTId) and (dbo.ccGUItem.Type = 'c')) AS GUTtl
+
+            FROM dbo.ccCashier
+            WHERE OTId = @otid)
+          AS tmp
+          WHERE PmtTtl + EscrowPmt != GUTtl OR ItemTtl != GUTtl
+          
+          
+
+      ";
+
+      var i = Constants.Get_Data<string>(query, param);
+
+      if (i.Count() == 0)
+      {
+        return;
+      }
+      else
+      {
+
+        query = @"
+          USE WATSC;
+          WITH gl_entries AS (
+
+            SELECT
+              GU.ItemId
+              ,GU.GUId
+              ,GUI.Account
+              ,GUI.Amount
+              ,GUI.Type
+              ,CI.CatCode
+              ,CI.Total
+              ,GUI.GUItemId
+            FROM ccGU GU
+            INNER JOIN ccGUItem GUI  ON GUI.GUID = GU.GUId
+            INNER JOIN ccGL GL ON GL.CatCode = GU.CatCode
+            INNER JOIN ccCashierItem CI ON CI.OTId = GU.OTId AND CI.CATCODE IN ('IFRD2', 'IFRD3')
+            WHERE GU.OTId = @otid
+
+          )
+
+          SELECT DISTINCT
+            G1.GUItemId [guitem_id]
+          ,G1.Amount + (G3.Amount - G1.Amount - G2.Amount) [amount]
+          FROM gl_entries G1
+          INNER JOIN gl_entries G2 ON G2.ItemId = G1.ItemId AND G2.Account = '305*324310**'
+          INNER JOIN gl_entries G3 ON G3.ItemId = G1.ItemId AND G3.Type = 'd'
+          WHERE G1.Account = '138*369910**'
+
+      
+        ";
+
+        var guitems_to_fix = Constants.Get_Data<bad_guitems>(query, param);
+
+        foreach (var g in guitems_to_fix)
+        {
+          var p = new DynamicParameters();
+          p.Add("@guitem_id", g.guitem_id);
+          p.Add("@amount", g.amount);
+
+          query = @"
+            USE WATSC;
+
+            UPDATE ccGUItem
+            SET AMOUNT = @amount
+            WHERE GUItemId = @guitem_id
+
+          ";
+
+          var j = Constants.Exec_Query(query, p);
+
+        }
+
+      }
+      
+    }
   }
 }
   
