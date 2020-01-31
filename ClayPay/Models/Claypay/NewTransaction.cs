@@ -448,7 +448,16 @@ namespace ClayPay.Models.Claypay
 
       }
 
-      FinalizeTransaction();
+      if (!Payments.Any(p => p.PaymentType == Payment.payment_type.impact_fee_credit
+                         || p.PaymentType == Payment.payment_type.impact_fee_exemption
+                         || p.PaymentType == Payment.payment_type.impact_waiver_road
+                         || p.PaymentType == Payment.payment_type.impact_waiver_school
+                         ))
+
+      {
+        FinalizeTransaction();
+      }
+      
       UnlockChargeItems();
       return true;
 
@@ -884,8 +893,9 @@ namespace ClayPay.Models.Claypay
       INNER JOIN [key] K ON K.AssocKey = C.ContractorCd
       INNER JOIN total T ON T.Total = 0;
 
+      DECLARE @YR CHAR(2) = RIGHT(CAST(YEAR(GETDATE()) AS CHAR(4)), 2);
 
-      WITH permit_numbers AS (
+        WITH permit_numbers AS (
 
         SELECT DISTINCT
           AssocKey
@@ -895,9 +905,9 @@ namespace ClayPay.Models.Claypay
           AND OTId = @otid
           AND CatCode IN ('IFRD2','IFRD3')
 
-      )
-
-
+      ) 
+      
+      
       UPDATE CI SET CashierId = @cashierId, OTId = @otid
       FROM ccCashierItem CI
       INNER JOIN permit_numbers P ON P.AssocKey = CI.AssocKey
@@ -907,7 +917,7 @@ namespace ClayPay.Models.Claypay
       INSERT INTO ccCashierPayment (OTid, PmtType, AmtApplied, AmtTendered, Info, AddedBy, UpdatedBy, UpdatedOn)
       SELECT
         @otid
-        ,'IFS'
+        ,CI.CatCode
         ,CI.Total
         ,0
         ,'ClayPay'
