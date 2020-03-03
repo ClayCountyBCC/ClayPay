@@ -7,9 +7,14 @@
 <div style="margin-top: 1em;"
      id="views"
      class="container">
-  <section class="show content is-large"
+  <section class="row show content is-large"
            id="Home">
-    <ul>
+    @*<div class="row ">
+      <div class="has-background-warning">
+        <p style=" padding:5px;">Clay County Payment Center will be unavailable during server maintenance. Currently scheduled Sunday, March 1st, 2020.</p>
+      </div>
+    </div>*@
+    <ul class="column is-one-third is-12-mobile">
       <li>
         Permit
         <ul>
@@ -56,705 +61,706 @@
         </ul>
       </li>
     </ul>
+
   </section>
 
-  <section class="hide"
-           id="permitFees">
+<section class="hide"
+         id="permitFees">
 
-    <div class="field is-horizontal">
-      <div class="field-label is-normal">
-        <label class="label">Permit Number</label>
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label class="label">Permit Number</label>
+    </div>
+    <div class="field-body">
+      <div class="field is-grouped">
+        <div class="control">
+          <input id="permitSearch"
+                 class="input"
+                 type="number"
+                 maxlength="8"
+                 value="@(HttpContext.Current.IsDebuggingEnabled ? "11900689" : "")"
+                 placeholder="18000001" />
+        </div>
+        <div class="control">
+          <button id="permitSearchButton"
+                  type="button"
+                  class="button is-primary">
+            Search
+          </button>
+        </div>
       </div>
-      <div class="field-body">
-        <div class="field is-grouped">
+    </div>
+  </div>
+  <div class="columns">
+    <div class="column is-offset-1">
+      <div class="hide"
+           id="permitSearchError">
+
+      </div>
+    </div>
+    <div class="column">
+
+    </div>
+  </div>
+
+</section>
+
+<section class="hide"
+         id="existingReceipts">
+
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label class="label">Receipt Number</label>
+    </div>
+    <div class="field-body">
+      <div class="field is-grouped">
+        <div class="control">
+          <input id="receiptSearch"
+                 class="input"
+                 type="text"
+                 maxlength="9"
+                 value="@(HttpContext.Current.IsDebuggingEnabled ? "18-013663" : "")"
+                 placeholder="18-000001" />
+        </div>
+        <div class="control">
+          <button id="receiptSearchButton"
+                  type="button"
+                  class="button is-primary">
+            Search
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="columns">
+    <div class="column is-offset-1">
+      <div class="hide"
+           id="receiptSearchError">
+
+      </div>
+    </div>
+    <div class="column">
+
+    </div>
+  </div>
+
+</section>
+
+<section class="hide"
+         id="contractorFees">
+
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label class="label">Contractor Id</label>
+    </div>
+    <div class="field-body">
+      <div class="field is-grouped">
+        <div class="control is-grouped">
+          <input id="contractorSearch"
+                 class="input"
+                 type="text"
+                 placeholder="Contractor Id" />
+        </div>
+        <div class="control is-grouped">
+          <button id="contractorSearchButton"
+                  type="button"
+                  class="button is-primary">
+            Search
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="columns">
+    <div class="column is-offset-1">
+      <div class="hide"
+           id="contractorSearchError">
+      </div>
+    </div>
+    <div class="column">
+    </div>
+  </div>
+</section>
+
+<section class="hide"
+         id="applicationFees">
+
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label class="label">Application Type</label>
+    </div>
+    <div class="field-body">
+      <div class="field">
+        <div class="control is-grouped">
+          <div class="select">
+            <select id="applicationSearchType"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field is-horizontal">
+    <div class="field-label is-normal">
+      <label class="label">Application Number</label>
+    </div>
+    <div class="field-body">
+      <div class="field is-grouped">
+        <div class="control is-grouped">
+          <input id="applicationSearch"
+                 class="input"
+                 type="number"
+                 maxlength="10"
+                 placeholder="2018000000" />
+        </div>
+        <div class="control is-grouped">
+          <button id="applicationSearchButton"
+                  type="button"
+                  class="button is-primary">
+            Search
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="columns">
+    <div class="column is-offset-1">
+      <div class="hide"
+           id="applicationSearchError">
+      </div>
+    </div>
+    <div class="column">
+    </div>
+  </div>
+
+
+</section>
+
+<section style="margin-top: 1em;"
+         class="hide"
+         id="searchResults">
+  <div class="level">
+    <div class="level-item has-text-centered">
+      <div>
+        <p id="ChargesKey"
+           class="title">
+        </p>
+      </div>
+    </div>
+    <div class="level-item has-text-centered">
+      <div>
+        <p id="ChargesDetail"
+           class="title">
+        </p>
+      </div>
+    </div>
+  </div>
+  <hr />
+  <div id="Charges">
+
+  </div>
+</section>
+
+<section style="margin-bottom: 5em;"
+         class="hide"
+         id="cart">
+  <div id="emptyCart"
+       class="level show">
+    <div class="level-item">
+      No charges have been added to the cart.
+    </div>
+  </div>
+  <div id="fullCart"
+       class="hide">
+  </div>
+
+  <div class="hide"
+       id="payerData">
+    <form id="payerForm">
+      <div style="margin-bottom: 0;"
+           class="columns">
+        <div class="field column">
+          <label class="label">Your First Name</label>
           <div class="control">
-            <input id="permitSearch"
-                   class="input"
-                   type="number"
-                   maxlength="8"
-                   value="@(HttpContext.Current.IsDebuggingEnabled ? "11900689" : "")"
-                   placeholder="18000001" />
-          </div>
-          <div class="control">
-            <button id="permitSearchButton"
-                    type="button"
-                    class="button is-primary">
-              Search
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="columns">
-      <div class="column is-offset-1">
-        <div class="hide"
-             id="permitSearchError">
-
-        </div>
-      </div>
-      <div class="column">
-
-      </div>
-    </div>
-
-  </section>
-
-  <section class="hide"
-           id="existingReceipts">
-
-    <div class="field is-horizontal">
-      <div class="field-label is-normal">
-        <label class="label">Receipt Number</label>
-      </div>
-      <div class="field-body">
-        <div class="field is-grouped">
-          <div class="control">
-            <input id="receiptSearch"
-                   class="input"
-                   type="text"
-                   maxlength="9"
-                   value="@(HttpContext.Current.IsDebuggingEnabled ? "18-013663" : "")"
-                   placeholder="18-000001" />
-          </div>
-          <div class="control">
-            <button id="receiptSearchButton"
-                    type="button"
-                    class="button is-primary">
-              Search
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="columns">
-      <div class="column is-offset-1">
-        <div class="hide"
-             id="receiptSearchError">
-
-        </div>
-      </div>
-      <div class="column">
-
-      </div>
-    </div>
-
-  </section>
-
-  <section class="hide"
-           id="contractorFees">
-
-    <div class="field is-horizontal">
-      <div class="field-label is-normal">
-        <label class="label">Contractor Id</label>
-      </div>
-      <div class="field-body">
-        <div class="field is-grouped">
-          <div class="control is-grouped">
-            <input id="contractorSearch"
-                   class="input"
-                   type="text"
-                   placeholder="Contractor Id" />
-          </div>
-          <div class="control is-grouped">
-            <button id="contractorSearchButton"
-                    type="button"
-                    class="button is-primary">
-              Search
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="columns">
-      <div class="column is-offset-1">
-        <div class="hide"
-             id="contractorSearchError">
-        </div>
-      </div>
-      <div class="column">
-      </div>
-    </div>
-  </section>
-
-  <section class="hide"
-           id="applicationFees">
-
-    <div class="field is-horizontal">
-      <div class="field-label is-normal">
-        <label class="label">Application Type</label>
-      </div>
-      <div class="field-body">
-        <div class="field">
-          <div class="control is-grouped">
-            <div class="select">
-              <select id="applicationSearchType"></select>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="field is-horizontal">
-      <div class="field-label is-normal">
-        <label class="label">Application Number</label>
-      </div>
-      <div class="field-body">
-        <div class="field is-grouped">
-          <div class="control is-grouped">
-            <input id="applicationSearch"
-                   class="input"
-                   type="number"
-                   maxlength="10"
-                   placeholder="2018000000" />
-          </div>
-          <div class="control is-grouped">
-            <button id="applicationSearchButton"
-                    type="button"
-                    class="button is-primary">
-              Search
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="columns">
-      <div class="column is-offset-1">
-        <div class="hide"
-             id="applicationSearchError">
-        </div>
-      </div>
-      <div class="column">
-      </div>
-    </div>
-
-
-  </section>
-
-  <section style="margin-top: 1em;"
-           class="hide"
-           id="searchResults">
-    <div class="level">
-      <div class="level-item has-text-centered">
-        <div>
-          <p id="ChargesKey"
-             class="title">
-          </p>
-        </div>
-      </div>
-      <div class="level-item has-text-centered">
-        <div>
-          <p id="ChargesDetail"
-             class="title">
-          </p>
-        </div>
-      </div>
-    </div>
-    <hr />
-    <div id="Charges">
-
-    </div>
-  </section>
-
-  <section style="margin-bottom: 5em;"
-           class="hide"
-           id="cart">
-    <div id="emptyCart"
-         class="level show">
-      <div class="level-item">
-        No charges have been added to the cart.
-      </div>
-    </div>
-    <div id="fullCart"
-         class="hide">
-    </div>
-
-    <div class="hide"
-         id="payerData">
-      <form id="payerForm">
-        <div style="margin-bottom: 0;"
-             class="columns">
-          <div class="field column">
-            <label class="label">Your First Name</label>
-            <div class="control">
-              <input id="payerFirstName"
-                     autocomplete="given-name"
-                     class="input"
-                     type="text"
-                     maxlength="50"
-                     required
-                     value="@(HttpContext.Current.IsDebuggingEnabled ? "Firstname" : "")"
-                     placeholder="Firstname" />
-            </div>
-          </div>
-
-          <div class="field column">
-            <label class="label">Last Name</label>
-            <div class="control">
-              <input id="payerLastName"
-                     autocomplete="family-name"
-                     class="input"
-                     type="text"
-                     maxlength="50"
-                     required
-                     value="@(HttpContext.Current.IsDebuggingEnabled ? "Lastname" : "")"
-                     placeholder="Lastname" />
-            </div>
-          </div>
-
-        </div>
-
-        <div class="field">
-          <div class="field">
-            <div class="control">
-              <p id="payerNameError"
-                 class="help is-danger hide">
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-bottom: 0;"
-             class="columns">
-          <div class="field column">
-            <label class="label">Phone #</label>
-            <div class="control">
-              <input id="payerPhone"
-                     autocomplete="tel"
-                     class="input"
-                     type="tel"
-                     maxlength="12"
-                     value="@(HttpContext.Current.IsDebuggingEnabled ? "904-555-1212" : "")"
-                     placeholder="904-555-1212" />
-            </div>
-          </div>
-
-          <div class="field column">
-            <label class="label">Email Address</label>
-            <div class="control">
-              <input id="payerEmailAddress"
-                     autocomplete="email"
-                     class="input"
-                     type="email"
-                     value="@(HttpContext.Current.IsDebuggingEnabled ? "jeremy.west@claycountygov.com" : "")"
-                     maxlength="50"
-                     placeholder="email@example.com" />
-            </div>
-          </div>
-
-        </div>
-
-        <div class="field">
-          <div class="field">
-            <div class="control">
-              <p id="payerPhoneError"
-                 class="help is-danger hide">
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="field">
-          <div class="field">
-            <div class="control">
-              <p id="payerEmailError"
-                 class="help is-danger hide">
-              </p>
-            </div>
-          </div>
-        </div>
-
-
-        <div class="field">
-          <label class="label">Company Name</label>
-          <div class="control">
-            <input id="payerCompany"
-                   autocomplete="organization"
+            <input id="payerFirstName"
+                   autocomplete="given-name"
                    class="input"
                    type="text"
                    maxlength="50"
-                   value="@(HttpContext.Current.IsDebuggingEnabled ? "CBCC" : "")"
-                   placeholder="Company Name" />
+                   required
+                   value="@(HttpContext.Current.IsDebuggingEnabled ? "Firstname" : "")"
+                   placeholder="Firstname" />
           </div>
         </div>
 
-        <div class="field">
-          <label class="label">Street Address</label>
+        <div class="field column">
+          <label class="label">Last Name</label>
           <div class="control">
-            <input id="payerStreetAddress"
-                   autocomplete="street-address"
+            <input id="payerLastName"
+                   autocomplete="family-name"
+                   class="input"
+                   type="text"
+                   maxlength="50"
+                   required
+                   value="@(HttpContext.Current.IsDebuggingEnabled ? "Lastname" : "")"
+                   placeholder="Lastname" />
+          </div>
+        </div>
+
+      </div>
+
+      <div class="field">
+        <div class="field">
+          <div class="control">
+            <p id="payerNameError"
+               class="help is-danger hide">
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 0;"
+           class="columns">
+        <div class="field column">
+          <label class="label">Phone #</label>
+          <div class="control">
+            <input id="payerPhone"
+                   autocomplete="tel"
+                   class="input"
+                   type="tel"
+                   maxlength="12"
+                   value="@(HttpContext.Current.IsDebuggingEnabled ? "904-555-1212" : "")"
+                   placeholder="904-555-1212" />
+          </div>
+        </div>
+
+        <div class="field column">
+          <label class="label">Email Address</label>
+          <div class="control">
+            <input id="payerEmailAddress"
+                   autocomplete="email"
+                   class="input"
+                   type="email"
+                   value="@(HttpContext.Current.IsDebuggingEnabled ? "jeremy.west@claycountygov.com" : "")"
+                   maxlength="50"
+                   placeholder="email@example.com" />
+          </div>
+        </div>
+
+      </div>
+
+      <div class="field">
+        <div class="field">
+          <div class="control">
+            <p id="payerPhoneError"
+               class="help is-danger hide">
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field">
+          <div class="control">
+            <p id="payerEmailError"
+               class="help is-danger hide">
+            </p>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="field">
+        <label class="label">Company Name</label>
+        <div class="control">
+          <input id="payerCompany"
+                 autocomplete="organization"
+                 class="input"
+                 type="text"
+                 maxlength="50"
+                 value="@(HttpContext.Current.IsDebuggingEnabled ? "CBCC" : "")"
+                 placeholder="Company Name" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Street Address</label>
+        <div class="control">
+          <input id="payerStreetAddress"
+                 autocomplete="street-address"
+                 class="input"
+                 type="text"
+                 required
+                 maxlength="50"
+                 value="@(HttpContext.Current.IsDebuggingEnabled ? "555 Blanding" : "")"
+                 placeholder="Address" />
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field">
+          <div class="control">
+            <p id="payerStreetError"
+               class="help is-danger hide">
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="columns">
+        <div class="field column is-three-fifths">
+          <label class="label">City</label>
+          <div class="control">
+            <input id="payerCity"
+                   autocomplete="address-level2"
                    class="input"
                    type="text"
                    required
                    maxlength="50"
-                   value="@(HttpContext.Current.IsDebuggingEnabled ? "555 Blanding" : "")"
-                   placeholder="Address" />
+                   value="@(HttpContext.Current.IsDebuggingEnabled ? "Orange" : "")"
+                   placeholder="City" />
           </div>
         </div>
 
+        <div class="field column is-one-fifth">
+          <label class="label">State</label>
+          <div class="control">
+            <div class="select">
+              <select autocomplete="address-level1"
+                      value="@(HttpContext.Current.IsDebuggingEnabled ? "FL" : "")"
+                      id="payerState"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="field column is-one-fifth">
+          <label class="label">Zip</label>
+          <div class="control">
+            <input id="payerZip"
+                   autocomplete="postal-code"
+                   class="input"
+                   type="text"
+                   required
+                   maxlength="5"
+                   value="@(HttpContext.Current.IsDebuggingEnabled ? "32000" : "")"
+                   placeholder="Zip" />
+          </div>
+        </div>
+
+      </div>
+
+      <div class="field">
         <div class="field">
-          <div class="field">
-            <div class="control">
-              <p id="payerStreetError"
-                 class="help is-danger hide">
-              </p>
-            </div>
+          <div class="control">
+            <p id="payerCityError"
+               class="help is-danger hide">
+            </p>
           </div>
         </div>
+      </div>
 
+      <div id="validatePayer">
         <div class="columns">
-          <div class="field column is-three-fifths">
-            <label class="label">City</label>
-            <div class="control">
-              <input id="payerCity"
-                     autocomplete="address-level2"
-                     class="input"
-                     type="text"
-                     required
-                     maxlength="50"
-                     value="@(HttpContext.Current.IsDebuggingEnabled ? "Orange" : "")"
-                     placeholder="City" />
-            </div>
+          <div class="column">
           </div>
+          <div class="column is-centered">
+            <button onclick="clayPay.CurrentTransaction.Validate();"
+                    type="button"
+                    class="button is-success is-fullwidth is-large">
+              Continue
+            </button>
+          </div>
+          <div class="column">
 
-          <div class="field column is-one-fifth">
-            <label class="label">State</label>
-            <div class="control">
-              <div class="select">
-                <select autocomplete="address-level1"
-                        value="@(HttpContext.Current.IsDebuggingEnabled ? "FL" : "")"
-                        id="payerState"></select>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="hide"
+       id="paymentData">
+    @if (Model.djournal_access)
+    {
+      <div style="margin-top: 1em; margin-bottom: 1em;"
+           class="columns">
+        <div class="column is-one-fifth">
+          <div class="menu">
+
+            <p class="menu-label">
+              Total Charges
+            </p>
+            <ul class="menu-list">
+              <li class="level">
+                <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%; padding-right: .75em;"
+                      id="cartTotalAmountDue"
+                      class="level-item">
+                </span>
+              </li>
+            </ul>
+
+            <p class="menu-label">
+              Method of Payment
+            </p>
+
+            <ul class="menu-list">
+              <li>
+                <div class="level">
+                  <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
+                        class="level-item">
+                    <span class="icon is-medium">
+                      <i class="fas fa-credit-card"></i>
+                    </span>
+                    Credit Card
+                  </span>
+                  <a id="creditCardPaymentTotal"
+                     onclick="Utilities.Show_Hide_Selector('#paymentInformation section', 'creditCardPaymentType'); return false;"
+                     style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
+                     class="has-text-link level-item">
+                    Add
+                  </a>
+                </div>
+              </li>
+              <li>
+                <div class="level">
+                  <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
+                        class="level-item">
+                    <span class="icon is-medium">
+                      <i class="fas fa-money-check"></i>
+                    </span>
+                    Check
+                  </span>
+                  <a id="checkPaymentTotal"
+                     onclick="Utilities.Show_Hide_Selector('#paymentInformation section', 'checkPaymentType'); return false;"
+                     style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
+                     class="has-text-link level-item">
+                    Add
+                  </a>
+                </div>
+              </li>
+              <li>
+                <div class="level">
+                  <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
+                        class="level-item">
+                    <span class="icon is-medium">
+                      <i class="fas fa-money-bill-alt"></i>
+                    </span>
+                    Cash
+                  </span>
+                  <a id="cashPaymentTotal"
+                     onclick="Utilities.Show_Hide_Selector('#paymentInformation section', 'cashPaymentType'); return false;"
+                     style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
+                     class="has-text-link level-item">
+                    Add
+                  </a>
+                </div>
+              </li>
+            </ul>
+
+            <p class="menu-label">
+              Total Amount Paid
+            </p>
+            <ul class="menu-list">
+              <li class="level">
+                <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%; padding-right: .75em;"
+                      id="cartTotalAmountPaid"
+                      class="level-item">
+                  $0.00
+                </span>
+              </li>
+            </ul>
+
+
+            <p class="menu-label">
+              Total Amount Remaining
+            </p>
+            <ul class="menu-list">
+              <li class="level">
+                <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%; padding-right: .75em;"
+                      id="cartTotalAmountRemaining"
+                      class="level-item">
+                  $0.00
+                </span>
+              </li>
+            </ul>
+
+            <p class="menu-label">
+              Total Change Due
+            </p>
+            <ul class="menu-list">
+              <li class="level">
+                <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%; padding-right: .75em;"
+                      id="cartTotalChangeDue"
+                      class="level-item">
+                  $0.00
+                </span>
+              </li>
+            </ul>
+
+
+            <p style="margin-top: .75em;"
+               class="level">
+              <button id="processPayments"
+                      onclick="clayPay.CurrentTransaction.Save();"
+                      disabled
+                      class="level-item button is-success is-disabled is-large">
+                Pay Now
+              </button>
+            </p>
+
+          </div>
+        </div>
+        <div class="column is-four-fifths"
+             id="paymentInformation">
+          <section class="hide"
+                   id="creditCardPaymentType">
+            @Html.Partial("CreditCardPayment")
+          </section>
+
+          <section class="hide"
+                   id="checkPaymentType">
+
+            <div class="level">
+              <h2 class="level-item title">
+                Pay By Check
+              </h2>
+            </div>
+            <hr />
+
+            <div class="columns">
+              <div class="field column is-half">
+                <label class="label">Amount Tendered</label>
+                <div class="control has-icons-left">
+                  <input id="checkPaymentAmount"
+                         class="input"
+                         type="number"
+                         required
+                         placeholder="0.00" />
+                  <span class="icon is-medium is-left">
+                    <i class="fas fa-dollar-sign"></i>
+                  </span>
+                </div>
+              </div>
+              <div class="field column is-one-quarter">
+                <label class="label">Check Number</label>
+                <div class="control">
+                  <input id="checkNumber"
+                         class="input"
+                         type="text"
+                         required
+                         placeholder="Check #" />
+                </div>
+              </div>
+              <div class="column is-one-quarter"></div>
+            </div>
+            <div class="field">
+              <div class="field">
+                <div class="control">
+                  <p id="checkPaymentError"
+                     class="help is-danger hide">
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div class="field column is-one-fifth">
-            <label class="label">Zip</label>
-            <div class="control">
-              <input id="payerZip"
-                     autocomplete="postal-code"
-                     class="input"
-                     type="text"
-                     required
-                     maxlength="5"
-                     value="@(HttpContext.Current.IsDebuggingEnabled ? "32000" : "")"
-                     placeholder="Zip" />
-            </div>
-          </div>
-
-        </div>
-
-        <div class="field">
-          <div class="field">
-            <div class="control">
-              <p id="payerCityError"
-                 class="help is-danger hide">
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div id="validatePayer">
-          <div class="columns">
-            <div class="column">
-            </div>
-            <div class="column is-centered">
-              <button onclick="clayPay.CurrentTransaction.Validate();"
+            <div class="level">
+              <button onclick="clayPay.CurrentTransaction.CheckPayment.Validate();"
+                      style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
                       type="button"
-                      class="button is-success is-fullwidth is-large">
+                      class="button is-success level-item">
                 Continue
               </button>
+
+              <button style="width: calc(50% - .75rem); flex-grow: 0; margin-left: .75rem;"
+                      onclick="clayPay.Payment.ResetCheck();"
+                      type="button"
+                      class="button is-warning level-item">
+                Clear
+              </button>
             </div>
-            <div class="column">
 
+
+          </section>
+          <section class="hide"
+                   id="paymentError"></section>
+          <section class="hide"
+                   id="cashPaymentType">
+            <div class="level">
+              <h2 class="level-item title">
+                Pay With Cash
+              </h2>
             </div>
-          </div>
-        </div>
-      </form>
-    </div>
+            <hr />
 
-    <div class="hide"
-         id="paymentData">
-      @if (Model.djournal_access)
-      {
-        <div style="margin-top: 1em; margin-bottom: 1em;"
-             class="columns">
-          <div class="column is-one-fifth">
-            <div class="menu">
-
-              <p class="menu-label">
-                Total Charges
-              </p>
-              <ul class="menu-list">
-                <li class="level">
-                  <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%; padding-right: .75em;"
-                        id="cartTotalAmountDue"
-                        class="level-item">
+            <div class="columns">
+              <div class="field column is-half">
+                <label class="label">Amount Tendered</label>
+                <div class="control has-icons-left">
+                  <input id="cashPaymentAmount"
+                         class="input"
+                         type="number"
+                         placeholder="0.00" />
+                  <span class="icon is-medium is-left">
+                    <i class="fas fa-dollar-sign"></i>
                   </span>
-                </li>
-              </ul>
-
-              <p class="menu-label">
-                Method of Payment
-              </p>
-
-              <ul class="menu-list">
-                <li>
-                  <div class="level">
-                    <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
-                          class="level-item">
-                      <span class="icon is-medium">
-                        <i class="fas fa-credit-card"></i>
-                      </span>
-                      Credit Card
-                    </span>
-                    <a id="creditCardPaymentTotal"
-                       onclick="Utilities.Show_Hide_Selector('#paymentInformation section', 'creditCardPaymentType'); return false;"
-                       style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
-                       class="has-text-link level-item">
-                      Add
-                    </a>
-                  </div>
-                </li>
-                <li>
-                  <div class="level">
-                    <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
-                          class="level-item">
-                      <span class="icon is-medium">
-                        <i class="fas fa-money-check"></i>
-                      </span>
-                      Check
-                    </span>
-                    <a id="checkPaymentTotal"
-                       onclick="Utilities.Show_Hide_Selector('#paymentInformation section', 'checkPaymentType'); return false;"
-                       style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
-                       class="has-text-link level-item">
-                      Add
-                    </a>
-                  </div>
-                </li>
-                <li>
-                  <div class="level">
-                    <span style="justify-content: flex-start; flex-grow: 0; width: 50%;"
-                          class="level-item">
-                      <span class="icon is-medium">
-                        <i class="fas fa-money-bill-alt"></i>
-                      </span>
-                      Cash
-                    </span>
-                    <a id="cashPaymentTotal"
-                       onclick="Utilities.Show_Hide_Selector('#paymentInformation section', 'cashPaymentType'); return false;"
-                       style="display: flex; justify-content: flex-end; flex-grow: 0; width: 50%;"
-                       class="has-text-link level-item">
-                      Add
-                    </a>
-                  </div>
-                </li>
-              </ul>
-
-              <p class="menu-label">
-                Total Amount Paid
-              </p>
-              <ul class="menu-list">
-                <li class="level">
-                  <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%; padding-right: .75em;"
-                        id="cartTotalAmountPaid"
-                        class="level-item">
-                    $0.00
-                  </span>
-                </li>
-              </ul>
-
-
-              <p class="menu-label">
-                Total Amount Remaining
-              </p>
-              <ul class="menu-list">
-                <li class="level">
-                  <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%; padding-right: .75em;"
-                        id="cartTotalAmountRemaining"
-                        class="level-item">
-                    $0.00
-                  </span>
-                </li>
-              </ul>
-
-              <p class="menu-label">
-                Total Change Due
-              </p>
-              <ul class="menu-list">
-                <li class="level">
-                  <span style="display: flex; justify-content: flex-end; flex-grow: 0; width: 100%; padding-right: .75em;"
-                        id="cartTotalChangeDue"
-                        class="level-item">
-                    $0.00
-                  </span>
-                </li>
-              </ul>
-
-
-              <p style="margin-top: .75em;"
-                 class="level">
-                <button id="processPayments"
-                        onclick="clayPay.CurrentTransaction.Save();"
-                        disabled
-                        class="level-item button is-success is-disabled is-large">
-                  Pay Now
-                </button>
-              </p>
-
-            </div>
-          </div>
-          <div class="column is-four-fifths"
-               id="paymentInformation">
-            <section class="hide"
-                     id="creditCardPaymentType">
-              @Html.Partial("CreditCardPayment")
-            </section>
-
-            <section class="hide"
-                     id="checkPaymentType">
-
-              <div class="level">
-                <h2 class="level-item title">
-                  Pay By Check
-                </h2>
-              </div>
-              <hr />
-
-              <div class="columns">
-                <div class="field column is-half">
-                  <label class="label">Amount Tendered</label>
-                  <div class="control has-icons-left">
-                    <input id="checkPaymentAmount"
-                           class="input"
-                           type="number"
-                           required
-                           placeholder="0.00" />
-                    <span class="icon is-medium is-left">
-                      <i class="fas fa-dollar-sign"></i>
-                    </span>
-                  </div>
                 </div>
-                <div class="field column is-one-quarter">
-                  <label class="label">Check Number</label>
-                  <div class="control">
-                    <input id="checkNumber"
-                           class="input"
-                           type="text"
-                           required
-                           placeholder="Check #" />
-                  </div>
-                </div>
-                <div class="column is-one-quarter"></div>
               </div>
+              <div class="column is-half"></div>
+            </div>
+            <div class="field">
               <div class="field">
-                <div class="field">
-                  <div class="control">
-                    <p id="checkPaymentError"
-                       class="help is-danger hide">
-                    </p>
-                  </div>
+                <div class="control">
+                  <p id="cashPaymentError"
+                     class="help is-danger hide">
+                  </p>
                 </div>
               </div>
-              <div class="level">
-                <button onclick="clayPay.CurrentTransaction.CheckPayment.Validate();"
-                        style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
-                        type="button"
-                        class="button is-success level-item">
-                  Continue
-                </button>
+            </div>
 
-                <button style="width: calc(50% - .75rem); flex-grow: 0; margin-left: .75rem;"
-                        onclick="clayPay.Payment.ResetCheck();"
-                        type="button"
-                        class="button is-warning level-item">
-                  Clear
-                </button>
-              </div>
+            <div class="level">
+              <button onclick="clayPay.CurrentTransaction.CashPayment.Validate();"
+                      style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
+                      type="button"
+                      class="button is-success level-item">
+                Continue
+              </button>
 
-
-            </section>
-            <section class="hide"
-                     id="paymentError"></section>
-            <section class="hide"
-                     id="cashPaymentType">
-              <div class="level">
-                <h2 class="level-item title">
-                  Pay With Cash
-                </h2>
-              </div>
-              <hr />
-
-              <div class="columns">
-                <div class="field column is-half">
-                  <label class="label">Amount Tendered</label>
-                  <div class="control has-icons-left">
-                    <input id="cashPaymentAmount"
-                           class="input"
-                           type="number"
-                           placeholder="0.00" />
-                    <span class="icon is-medium is-left">
-                      <i class="fas fa-dollar-sign"></i>
-                    </span>
-                  </div>
-                </div>
-                <div class="column is-half"></div>
-              </div>
-              <div class="field">
-                <div class="field">
-                  <div class="control">
-                    <p id="cashPaymentError"
-                       class="help is-danger hide">
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="level">
-                <button onclick="clayPay.CurrentTransaction.CashPayment.Validate();"
-                        style="width: calc(50% - .75rem); flex-grow: 0; margin-right: .75rem;"
-                        type="button"
-                        class="button is-success level-item">
-                  Continue
-                </button>
-
-                <button style="width: calc(50% - .75rem); flex-grow: 0; margin-left: .75rem;"
-                        onclick="clayPay.Payment.ResetCash();"
-                        type="button"
-                        class="button is-warning level-item">
-                  Clear
-                </button>
-              </div>
-            </section>
-          </div>
+              <button style="width: calc(50% - .75rem); flex-grow: 0; margin-left: .75rem;"
+                      onclick="clayPay.Payment.ResetCash();"
+                      type="button"
+                      class="button is-warning level-item">
+                Clear
+              </button>
+            </div>
+          </section>
         </div>
-      }
-      else
-      {
-        @Html.Partial("CreditCardPayment", Model)
-      }
-    </div>
-  </section>
+      </div>
+    }
+    else
+    {
+      @Html.Partial("CreditCardPayment", Model)
+    }
+  </div>
+</section>
 
-  <section class="hide"
-           id="receipt"></section>
+<section class="hide"
+         id="receipt"></section>
 </div>
 
 <script src="~/Scripts/claypay/bundle.js"></script>
 @*<script src="~/bower_components/promise-polyfill/dist/polyfill.js" ></script>
-      <script src="~/bower_components/fetch/fetch.js"></script>
-      <script src="~/Scripts/app/Utilities.js"></script>
-      <script src="~/Scripts/claypay/CashierData.js"></script>
-      <script src="~/Scripts/claypay/LocationHash.js"></script>
-      <script src="~/Scripts/claypay/Charge.js"></script>
-      <script src="~/Scripts/claypay/Payment.js"></script>
-      <script src="~/Scripts/claypay/CCPayment.js"></script>
-      <script src="~/Scripts/claypay/ReceiptPayment.js"></script>
-      <script src="~/Scripts/claypay/ClientResponse.js"></script>
-      <script src="~/Scripts/claypay/NewTransaction.js"></script>
-      <script src="~/Scripts/claypay/AppTypes.js"></script>
-      <script src="~/Scripts/claypay/claypay.js"></script>
-      <script src="~/Scripts/claypay/UI.js"></script>*@
+  <script src="~/bower_components/fetch/fetch.js"></script>
+  <script src="~/Scripts/app/Utilities.js"></script>
+  <script src="~/Scripts/claypay/CashierData.js"></script>
+  <script src="~/Scripts/claypay/LocationHash.js"></script>
+  <script src="~/Scripts/claypay/Charge.js"></script>
+  <script src="~/Scripts/claypay/Payment.js"></script>
+  <script src="~/Scripts/claypay/CCPayment.js"></script>
+  <script src="~/Scripts/claypay/ReceiptPayment.js"></script>
+  <script src="~/Scripts/claypay/ClientResponse.js"></script>
+  <script src="~/Scripts/claypay/NewTransaction.js"></script>
+  <script src="~/Scripts/claypay/AppTypes.js"></script>
+  <script src="~/Scripts/claypay/claypay.js"></script>
+  <script src="~/Scripts/claypay/UI.js"></script>*@
 
 <script>
   document.addEventListener("DOMContentLoaded", function (event)

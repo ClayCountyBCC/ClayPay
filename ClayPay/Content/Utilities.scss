@@ -23,10 +23,16 @@
   display: flex;
 }
 
+@media(max-width: 751px) { /* <== You can change this break point as per your  needs */
+  .reverse-columns {
+    flex-direction: column-reverse;
+    display: flex;
+  }
+}
 @media print 
 {
   @page {
-    margin: .5em;
+    margin: 2em;
   }
 
 
@@ -35,9 +41,13 @@
     text-decoration: none;
     color: black;
   }
+
   .print-title-size{
-    font-size: 24px;
+    font-size: 20px;
     line-height: 2em;
+  }
+  .subtitle {
+    line-height: 1em;
   }
   table.print-with-no-border {
     align-self: center;
@@ -74,4 +84,7 @@
   {
     display: none;
   }
+
+
+
 }

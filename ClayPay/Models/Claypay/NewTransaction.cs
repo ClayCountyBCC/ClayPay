@@ -1131,9 +1131,9 @@ namespace ClayPay.Models.Claypay
 
           SELECT DISTINCT
             G1.GUItemId [guitem_id]
-          ,G1.Amount + (G3.Amount - G1.Amount - G2.Amount) [amount]
+            ,G1.Amount + (G3.Amount - G1.Amount - G2.Amount) [amount]
           FROM gl_entries G1
-          INNER JOIN gl_entries G2 ON G2.ItemId = G1.ItemId AND G2.Account = '305*324310**'
+          INNER JOIN gl_entries G2 ON G2.ItemId = G1.ItemId AND (G2.Account = '305*324310**' OR G2.Account = '305*324311**')
           INNER JOIN gl_entries G3 ON G3.ItemId = G1.ItemId AND G3.Type = 'd'
           WHERE G1.Account = '138*369910**'
 

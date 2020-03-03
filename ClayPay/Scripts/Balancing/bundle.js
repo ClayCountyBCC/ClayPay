@@ -1538,8 +1538,8 @@ var clayPay;
             }
             var receiptDate = document.createElement("span");
             receiptDate.classList.add("level-item");
-            receiptDate.classList.add("subtitle");
-            receiptDate.appendChild(document.createTextNode("Transaction Date: " + Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
+          receiptDate.classList.add("subtitle");
+            receiptDate.appendChild(document.createTextNode("Date: " + Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
             div.appendChild(receiptDate);
             var timestamp = cr.ResponseCashierData.TransactionDate;
             return div;

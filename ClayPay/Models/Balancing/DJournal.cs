@@ -116,20 +116,32 @@ namespace ClayPay.Models.Balancing
       var balanced = CashierTotal.IsDjournalBalanced(ProcessedPaymentTotals, GUTotals, GLAccountTotals);
       if (!balanced)
       {
-        var keys = String.Join(", \n", CashierTotal.GetOutOfBalanceCashierIds(DJournalDate));
-        var errorString = new StringBuilder();
+        var key_list = CashierTotal.GetOutOfBalanceCashierIds(DJournalDate);
+        
 
-        errorString.Append($"The DJournal for ")
-          .Append(this.DJournalDate.ToShortDateString())
-          .Append(" is out of balance.")
-          .AppendLine()
-          .Append("The following keys have issues:")
-          .AppendLine()
-          .Append(keys)
-          .AppendLine();
+        if (key_list.Count > 0)
+        {
+          var keys = String.Join(", \n", key_list);
+
+          var errorString = new StringBuilder();
+          errorString.Append($"The DJournal for ")
+            .Append(this.DJournalDate.ToShortDateString())
+            .Append(" is out of balance.")
+            .AppendLine()
+            .Append("The following keys have issues:")
+            .AppendLine()
+            .Append(keys)
+            .AppendLine();
 
 
-        Error.Add(errorString.ToString());
+          Error.Add(errorString.ToString());
+        }
+        else
+        {
+          Error.Add($@"The Djournal for
+          {this.DJournalDate.ToShortDateString()} is out of balance. 
+          There may be an issue with the total payments, total charges, or the GU amounts.");
+        }
       }
 
 
