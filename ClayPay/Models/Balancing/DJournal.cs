@@ -42,7 +42,9 @@ namespace ClayPay.Models.Balancing
       "IFCR",
       "IFEX",
       "IFWS",
-      "IFWR"
+      "IFWR",
+      "IFS2",
+      "IFS3"
       };
       this.CashierData = (from c in tempCd
                           where !ImpactFeePaymentTypes.Contains(c.PaymentType)

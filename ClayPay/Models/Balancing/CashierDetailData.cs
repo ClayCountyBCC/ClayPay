@@ -56,7 +56,8 @@ namespace ClayPay.Models.Balancing
       FROM ccCashier CC
       INNER JOIN CashierIds C ON CC.CashierId = C.CashierId
       LEFT OUTER JOIN ccCashierItem CI ON CC.cashierId = CI.cashierId 
-			LEFT OUTER JOIN ccCashierPayment CP ON CC.OTId = CP.OTId 
+			LEFT OUTER JOIN ccCashierPayment CP ON CC.OTId = CP.OTId
+      INNER JOIN ccLookUp L ON L.Code = CP.PmtType AND L.CdType = 'PMTTYPE'
       WHERE         
         CAST(CC.TransDt AS DATE) = CAST(@TransactionDate AS DATE)
 			GROUP BY 
