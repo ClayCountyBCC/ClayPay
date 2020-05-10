@@ -674,7 +674,27 @@ namespace ClayPay.Models.Claypay
         UPDATE ccCashierItem 
         SET OTId = @OTID, CashierId = LTRIM(RTRIM(@CASHIERID)), [TimeStamp] = GETDATE()
         WHERE itemId IN @ITEMIDS
-          AND CashierId IS NULL";
+          AND CashierId IS NULL;
+
+        -- THIS IS TO CAPTURE THE DISCOUNT IN THE PAYMENT OF THE BUILDING FEE
+        WITH building_fees AS (
+
+          SELECT *
+          FROM ccCashierItem CI
+          WHERE CI.CatCode IN ('100RE','100C')
+            AND CashierId = @CASHIERID
+            AND Narrative IS NULL
+
+        )
+
+        UPDATE CI
+        SET CashierId = @CASHIERID, OTId = @OTID
+        FROM ccCashierItem CI
+        INNER JOIN building_fees BF ON BF.AssocKey = CI.AssocKey
+        WHERE CI.CatCode IN ('100RE','100C')
+          AND CI.Narrative = 'PRIVATE PROVIDER DISC'
+
+";
 
       try
       {
@@ -826,110 +846,109 @@ namespace ClayPay.Models.Claypay
     {
 
       var query = @"
-      USE WATSC;
+        USE WATSC;
 
 
-      --Handle HoldIds
-      UPDATE H
-        SET HldDate = GETDATE(), 
-        HldIntl = @UserName, 
-        HldInput = @cashierId
-          FROM bpHold H
-          INNER JOIN ccCashierItem CI ON CI.HoldID = H.HoldID
-          WHERE OTId = @otid
+        --Handle HoldIds
+        UPDATE H
+          SET HldDate = GETDATE(), 
+          HldIntl = @UserName, 
+          HldInput = @cashierId
+            FROM bpHold H
+            INNER JOIN ccCashierItem CI ON CI.HoldID = H.HoldID
+            WHERE OTId = @otid
           
 
-      UPDATE bpASSOC_PERMIT
-      SET IssueDate = GETDATE()
-      WHERE IssueDate IS NULL AND
-        PermitNo IN
-        (SELECT DISTINCT AssocKey
-          FROM ccCashierItem
-          WHERE OTId = @otid AND
-          Assoc NOT IN('AP', 'CL') AND
-          LEFT(AssocKey, 1) NOT IN('1', '7') AND
-          (SELECT ISNULL(SUM(Total), 0) AS Total
+        UPDATE bpASSOC_PERMIT
+        SET IssueDate = GETDATE()
+        WHERE IssueDate IS NULL AND
+          PermitNo IN
+          (SELECT DISTINCT AssocKey
             FROM ccCashierItem
-            WHERE AssocKey IN(SELECT DISTINCT AssocKey
-                              FROM ccCashierItem
-                              WHERE OTId = @otid) AND
-            CashierId IS NULL AND Total > 0) = 0);
+            WHERE OTId = @otid AND
+            Assoc NOT IN('AP', 'CL') AND
+            LEFT(AssocKey, 1) NOT IN('1', '7') AND
+            (SELECT ISNULL(SUM(Total), 0) AS Total
+              FROM ccCashierItem
+              WHERE AssocKey IN(SELECT DISTINCT AssocKey
+                                FROM ccCashierItem
+                                WHERE OTId = @otid) AND
+              CashierId IS NULL AND Total > 0) = 0);
 
-      /*
-      *  THE FOLLOWING WILL UPDATE THE CONTRACTOR EXPIRATION DATE IF THEY 
-      *  PAID A LICENSE FEE ('CLLTF', 'CLFE', 'CLREC', 'CLTAR'). 
-      */
+        /*
+        *  THE FOLLOWING WILL UPDATE THE CONTRACTOR EXPIRATION DATE IF THEY 
+        *  PAID A LICENSE FEE ('CLLTF', 'CLFE', 'CLREC', 'CLTAR'). 
+        */
 
-      DECLARE @ExpDt VARCHAR(20) = (SELECT TOP 1 Description
-          FROM clCategory_Codes WHERE Code = 'dt' AND Type_Code = '9');
+        DECLARE @ExpDt VARCHAR(20) = (SELECT TOP 1 Description
+            FROM clCategory_Codes WHERE Code = 'dt' AND Type_Code = '9');
 
-      WITH [key] AS (
+        WITH [key] AS (
 
-        SELECT DISTINCT 
-          AssocKey 
-        FROM ccCashierItem CI 
-        INNER JOIN clContractor C ON CI.AssocKey = C.ContractorCd AND C.ContractorCd NOT LIKE 'AP%' 
-        WHERE OTId=@otid 
-          AND Assoc='CL' 
-          AND CatCode IN ('CLLTF', 'CLFE', 'CLREC', 'CLTAR')
+          SELECT DISTINCT 
+            AssocKey 
+          FROM ccCashierItem CI 
+          INNER JOIN clContractor C ON CI.AssocKey = C.ContractorCd AND C.ContractorCd NOT LIKE 'AP%' 
+          WHERE OTId=@otid 
+            AND Assoc='CL' 
+            AND CatCode IN ('CLLTF', 'CLFE', 'CLREC', 'CLTAR')
 
-      ), total AS (
+        ), total AS (
 
-        SELECT 
-          ISNULL(SUM(C.TOTAL),0)Total
-        FROM ccCashierItem C
-        INNER JOIN [key] k ON k.AssocKey = c.AssocKey
-        WHERE Total > 0 
-          AND CashierId IS NULL
+          SELECT 
+            ISNULL(SUM(C.TOTAL),0)Total
+          FROM ccCashierItem C
+          INNER JOIN [key] k ON k.AssocKey = c.AssocKey
+          WHERE Total > 0 
+            AND CashierId IS NULL
 
-      )
+        )
 
-      UPDATE clContractor
-      SET
-        ExpDt = @ExpDt,
-        BlkCrdExpDt = @ExpDt,
-        IssueDt = GETDATE()
-      FROM clContractor c
-      INNER JOIN [key] K ON K.AssocKey = C.ContractorCd
-      INNER JOIN total T ON T.Total = 0;
+        UPDATE clContractor
+        SET
+          ExpDt = @ExpDt,
+          BlkCrdExpDt = @ExpDt,
+          IssueDt = GETDATE()
+        FROM clContractor c
+        INNER JOIN [key] K ON K.AssocKey = C.ContractorCd
+        INNER JOIN total T ON T.Total = 0;
 
-      DECLARE @YR CHAR(2) = RIGHT(CAST(YEAR(GETDATE()) AS CHAR(4)), 2);
+        DECLARE @YR CHAR(2) = RIGHT(CAST(YEAR(GETDATE()) AS CHAR(4)), 2);
 
-        WITH permit_numbers AS (
+          WITH permit_numbers AS (
 
-        SELECT DISTINCT
-          AssocKey
+          SELECT DISTINCT
+            AssocKey
+          FROM ccCashierItem CI
+          INNER JOIN bpMASTER_PERMIT M ON CI.AssocKey = M.PermitNo AND M.Comm = 1
+          WHERE CashierId = @cashierId
+            AND OTId = @otid
+            AND CatCode IN ('IFRD2','IFRD3')
+
+        ) 
+      
+      
+        UPDATE CI SET CashierId = @cashierId, OTId = @otid
         FROM ccCashierItem CI
-        INNER JOIN bpMASTER_PERMIT M ON CI.AssocKey = M.PermitNo AND M.Comm = 1
-        WHERE CashierId = @cashierId
-          AND OTId = @otid
-          AND CatCode IN ('IFRD2','IFRD3')
-
-      ) 
-      
-      
-      UPDATE CI SET CashierId = @cashierId, OTId = @otid
-      FROM ccCashierItem CI
-      INNER JOIN permit_numbers P ON P.AssocKey = CI.AssocKey
-      WHERE CI.CatCode IN ('IFS2', 'IFS3')
+        INNER JOIN permit_numbers P ON P.AssocKey = CI.AssocKey
+        WHERE CI.CatCode IN ('IFS2', 'IFS3')
 
 
-      INSERT INTO ccCashierPayment (OTid, PmtType, AmtApplied, AmtTendered, Info, AddedBy, UpdatedBy, UpdatedOn)
-      SELECT
-        @otid
-        ,CI.CatCode
-        ,CI.Total
-        ,0
-        ,'ClayPay'
-        ,@username
-        ,'initial insert'
-        ,GETDATE()
-      FROM ccCashierItem CI
-      WHERE CI.OTId = @otid
-        AND CatCode IN ('IFS2', 'IFS3')
-        AND BaseFee = Total;
-
-
+        INSERT INTO ccCashierPayment (OTid, PmtType, AmtApplied, AmtTendered, Info, AddedBy, UpdatedBy, UpdatedOn)
+        SELECT
+          @otid
+          ,CI.CatCode
+          ,CI.Total
+          ,0
+          ,'ClayPay'
+          ,@username
+          ,'initial insert'
+          ,GETDATE()
+        FROM ccCashierItem CI
+        WHERE CI.OTId = @otid
+          AND CatCode IN ('IFS2', 'IFS3')
+          AND BaseFee = Total;
+                                                               
     ";
       
       TimingDates.Finalize_Transaction_Start = DateTime.Now; // Finalize_Transaction_Start

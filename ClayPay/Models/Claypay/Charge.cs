@@ -29,6 +29,9 @@ namespace ClayPay.Models
         return TimeStamp == DateTime.MinValue ? "" : TimeStamp.ToShortDateString();
       }
     }
+
+    private bool IsVoided { get; set; } = false;
+    private bool IsOriginal { get; set; } = true;
     public Charge()
     {
 
@@ -40,20 +43,59 @@ namespace ClayPay.Models
       dbArgs.Add("@AK", AssocKey.ToUpper());
       string sql = @"
         USE WATSC;
-          SELECT 
-	          ItemId,
-	          C.Description,
-	          C.TimeStamp,
-	          Assoc,
-	          AssocKey,
-	          Total,	
-	          Detail
-          FROM vwClaypayCharges C
-          INNER JOIN ccCatCd CC ON CC.CatCode = C.CatCode
-	        WHERE Total > 0 
-            AND CashierId IS NULL 
-            AND UPPER(AssocKey)=@AK
-        ORDER BY TimeStamp ASC";
+        WITH discounted_permits AS (
+  
+          SELECT AssocKey, CatCode, SUM(Total) Total
+          FROM ccCashierItem
+          WHERE CatCode IN ('100RE','100C')
+            AND CashierId IS NULL
+            AND AssocKey = @AK
+          GROUP BY AssocKey, CatCode
+
+
+        ), unpaid_building_fees AS (
+
+          SELECT CI.ItemId, CC.Description, CI.TimeStamp, CI.Assoc, CI.AssocKey, CI.CatCode, D.Total
+          FROM ccCashierItem CI
+          INNER JOIN ccCatCd CC ON CC.CatCode = CI.CatCode
+          INNER JOIN discounted_permits D ON D.AssocKey = CI.AssocKey
+          WHERE CI.CATCODE IN ('100RE','100C')
+            AND CashierId IS NULL
+            AND CI.Narrative IS NULL
+
+        )
+
+        SELECT 
+	        ItemId,
+	        C.Description,
+	        C.TimeStamp,
+	        Assoc,
+	        AssocKey,
+          TOTAL,	
+	        Detail  
+        FROM vwClaypayCharges C
+        INNER JOIN ccCatCd CC ON CC.CatCode = C.CatCode
+        WHERE Total > 0
+          AND CashierId IS NULL 
+          AND UPPER(AssocKey)=@AK
+          AND C.CatCode NOT IN ('100RE', '100C')
+
+        UNION
+
+        SELECT
+	        C.ItemId,
+	        C.Description,
+	        C.TimeStamp,
+	        C.Assoc,
+	        C.AssocKey,
+	        UPF.TOTAL,	
+	        C.Detail
+        FROM vwClaypayCharges C
+        INNER JOIN unpaid_building_fees UPF ON UPF.ItemId = C.ItemId
+        ORDER BY TimeStamp ASC
+
+      ";
+
       var lc = Constants.Get_Data<Charge>(sql, dbArgs);
       return lc;
     }
@@ -67,16 +109,40 @@ namespace ClayPay.Models
         SELECT 
 	        ItemId,
 	        ISNULL(Description, '') Description,
-	        TimeStamp,
+	        vc.TimeStamp,
 	        Assoc,
 	        AssocKey,
 	        ISNULL(Total, 0) Total,	
-	        Detail
+	        Detail,
+          C.IsVoided,
+          CASE WHEN RIGHT(LTRIM(RTRIM(@CashierId)), 1) = 'V'
+            THEN 0 ELSE 1 END IsOriginal
         FROM vwClaypayCharges vC
-        WHERE CashierId = @CashierId
-        ORDER BY TimeStamp ASC";
+        INNER JOIN ccCashier C ON C.CashierId = vc.CashierId
+        WHERE vc.CashierId = @CashierId
+        ORDER BY vc.TimeStamp ASC";
 
       var lc = Constants.Get_Data<Charge>(sql, dbArgs);
+
+      foreach(var l in lc)
+      {
+        if (l.Total < 0 &&
+          l.IsOriginal &&
+          (l.Description.ToUpper() == "RESIDENTIAL BUILDINGS" 
+          || l.Description.ToUpper() == "COMMERCIAL BUILDING PERMIT FEE"))
+        {
+          l.Description += " (PPI DISCOUNT)";
+        }
+
+        if (l.Total > 0 && 
+        l.IsVoided &&
+        !l.IsOriginal &&
+        (l.Description.ToUpper() == "RESIDENTIAL BUILDINGS" || l.Description.ToUpper() == "COMMERCIAL BUILDING PERMIT FEE"))
+        {
+          l.Description += " (PPI DISCOUNT)";
+        }
+
+      }
       return lc;
     }
 
@@ -85,7 +151,33 @@ namespace ClayPay.Models
       var param = new DynamicParameters();
       param.Add("@itemIds", itemIds);
       string sql = @"
-        USE WATSC;
+
+        DECLARE @AK VARCHAR(8);
+        SET @AK = (SELECT TOP 1 AssocKey FROM ccCashierItem WHERE ItemId IN @ids);
+
+        WITH discounted_permits AS (
+  
+          SELECT AssocKey, CatCode, SUM(Total) Total
+          FROM ccCashierItem
+          WHERE CatCode IN ('100RE','100C')
+            AND CashierId IS NULL
+            AND AssocKey = @AK
+          GROUP BY AssocKey, CatCode
+
+
+        ), unpaid_building_fees AS (
+
+          SELECT CI.ItemId, CC.Description, CI.TimeStamp, CI.Assoc, CI.AssocKey, CI.CatCode, D.Total
+          FROM ccCashierItem CI
+          INNER JOIN ccCatCd CC ON CC.CatCode = CI.CatCode
+          INNER JOIN discounted_permits D ON D.AssocKey = CI.AssocKey
+          WHERE CI.CATCODE IN ('100RE','100C')
+            AND CashierId IS NULL
+            AND CI.Narrative IS NULL
+
+
+        )
+
         SELECT 
 	        ItemId,
 	        C.Description,
@@ -99,7 +191,23 @@ namespace ClayPay.Models
         WHERE 
           ItemId IN @ids
           AND CashierId IS NULL
+          AND C.CatCode NOT IN ('100RE', '100C')
+
+        UNION
+
+        SELECT
+	        C.ItemId,
+	        C.Description,
+	        C.TimeStamp,
+	        C.Assoc,
+	        C.AssocKey,
+	        UPF.TOTAL,	
+	        C.Detail
+        FROM vwClaypayCharges C
+        INNER JOIN unpaid_building_fees UPF ON UPF.ItemId = C.ItemId
+
         ORDER BY TimeStamp ASC";
+
       var lc = Constants.Get_Data<Charge,int>(sql, itemIds);
       return lc;
     }
