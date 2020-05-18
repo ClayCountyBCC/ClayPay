@@ -33,50 +33,10 @@ namespace ClayPay.Models.Balancing
       var param = new DynamicParameters();
       param.Add("@TransactionDate", TransactionDate);
       string sql = @"
-      WITH CashierIds AS (
-        SELECT DISTINCT
-          C.CashierId
-        FROM ccCashier C
-        INNER JOIN ccCashierPayment CP ON CP.OTid = C.OTId
-        WHERE 
-          CAST(C.TransDt AS DATE) = CAST(@TransactionDate AS DATE)
-      )
+          
+        EXEC prc_claypay_cashier_detail_data @TransactionDate
 
-      SELECT 
-        CC.CashierId, 
-        CC.TransDt TransactionDate, 
-			  CC.Name, 
-        CP.AmtApplied AmountApplied,
-        CP.PmtType PaymentType, 
-        ISNULL(CP.CkNo, '') CheckNumber, 
-        ISNULL(CP.TransactionId, '') TransactionNumber,
-        CP.Info,
-        ISNULL(LTRIM(RTRIM(CI.AssocKey)), '') AssocKey,
-        SUM(ISNULL(CI.Total, 0)) ChargeTotal
-      FROM ccCashier CC
-      INNER JOIN CashierIds C ON CC.CashierId = C.CashierId
-      LEFT OUTER JOIN ccCashierItem CI ON CC.cashierId = CI.cashierId 
-			LEFT OUTER JOIN ccCashierPayment CP ON CC.OTId = CP.OTId
-      INNER JOIN ccLookUp L ON L.Code = CP.PmtType AND L.CdType = 'PMTTYPE' OR 
-                               (L.CdType = 'SPECIALPT' AND L.Code IN (
-                                'IFCR',
-                                'IFEX',
-                                'IFWS',
-                                'IFWR',
-                                'IFSCR'))
-      WHERE         
-        CAST(CC.TransDt AS DATE) = CAST(@TransactionDate AS DATE)
-			GROUP BY 
-        CC.CashierId, 
-        CC.TransDt, 
-			  CC.Name, 
-        CP.AmtApplied,
-        CP.PmtType, 
-        CP.CkNo, 
-        CP.TransactionId,
-        CP.Info,
-        CI.AssocKey
-			ORDER BY CC.TransDt";
+      ";
       return Constants.Get_Data<CashierDetailData>(sql, param);
     }
   }
