@@ -709,38 +709,38 @@ namespace ClayPay.Models.Claypay
 
 
         // TODO: create email if not all rows are updated
-        if (i != ItemIds.Count())
-        {
-          if (i != ItemIds.Count())
-          {
-            try
-            {
-              var sb = new StringBuilder();
-              sb.Append("In UpdateCashierItemRows_OTid_CashierId() ")
-                .Append("in " + (Constants.UseProduction() ? "PROD" : "DEVELOPMENT")).AppendLine(" Server")
-                .AppendLine(TransactionDate.ToLongDateString())
-                .Append("There was an issue updating ").Append((ItemIds.Count() - i).ToString())
-                  .AppendLine(" charge items ccCashierPayment")
-                .Append("OTId: ").AppendLine(TransactionCashierData.OTId.ToString())
-                .Append("Amount Due: ").AppendLine(TotalAmountDue.ToString())
-                .Append("Payer: ").AppendLine(TransactionCashierData.PayerName)
-                .Append("Payer email: ").AppendLine(TransactionCashierData.PayerEmailAddress)
-                .Append("Number of payment types: ").AppendLine(Payments.Count().ToString())
-                .AppendLine("ItemIds:");
-              sb.AppendLine(String.Join(",", (from c in Charges select c.ItemId.ToString()).ToArray()));
-              Constants.SaveEmail("daniel.mccartney@claycountygov.com",
-                                  "Claypay Issue in UpdateCashierItemRows_OTid_CashierId()",
-                                  sb.ToString());
-            }
-            catch
-            {
-              Constants.SaveEmail("daniel.mccartney@claycountygov.com",
-                                  "Claypay Issue in UpdateCashierItemRows_OTid_CashierId()",
-                                  "error updating cashierItem rows");
-            }
-          }
+        //if (i != ItemIds.Count())
+        //{
+        //  if (i != ItemIds.Count())
+        //  {
+        //    try
+        //    {
+        //      var sb = new StringBuilder();
+        //      sb.Append("In UpdateCashierItemRows_OTid_CashierId() ")
+        //        .Append("in " + (Constants.UseProduction() ? "PROD" : "DEVELOPMENT")).AppendLine(" Server")
+        //        .AppendLine(TransactionDate.ToLongDateString())
+        //        .Append("There was an issue updating ").Append((ItemIds.Count() - i).ToString())
+        //          .AppendLine(" charge items ccCashierPayment")
+        //        .Append("OTId: ").AppendLine(TransactionCashierData.OTId.ToString())
+        //        .Append("Amount Due: ").AppendLine(TotalAmountDue.ToString())
+        //        .Append("Payer: ").AppendLine(TransactionCashierData.PayerName)
+        //        .Append("Payer email: ").AppendLine(TransactionCashierData.PayerEmailAddress)
+        //        .Append("Number of payment types: ").AppendLine(Payments.Count().ToString())
+        //        .AppendLine("ItemIds:");
+        //      sb.AppendLine(String.Join(",", (from c in Charges select c.ItemId.ToString()).ToArray()));
+        //      Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+        //                          "Claypay Issue in UpdateCashierItemRows_OTid_CashierId()",
+        //                          sb.ToString());
+        //    }
+        //    catch
+        //    {
+        //      Constants.SaveEmail("daniel.mccartney@claycountygov.com",
+        //                          "Claypay Issue in UpdateCashierItemRows_OTid_CashierId()",
+        //                          "error updating cashierItem rows");
+        //    }
+        //  }
 
-        }
+        //}
 
         return i > 0;
 
@@ -987,11 +987,11 @@ namespace ClayPay.Models.Claypay
           .AppendLine(CCData.TransactionId);
         sb.AppendLine("ItemIds:");
         sb.AppendLine(String.Join(",", (from c in Charges select c.ItemId.ToString()).ToArray()));
-        Constants.SaveEmail("daniel.mccartney@claycountygov.com", "Claypay transaction rolled back", sb.ToString());
+        Constants.SaveEmail("jeremy.west@claycountygov.com", "Claypay transaction rolled back", sb.ToString());
       }
       catch
       {
-        Constants.SaveEmail("daniel.mccartney@claycountygov.com", "Claypay transaction rolled back", "error getting transaction information.");
+        Constants.SaveEmail("jeremy.west@claycountygov.com", "Claypay transaction rolled back", "error getting transaction information.");
       }
 
 
