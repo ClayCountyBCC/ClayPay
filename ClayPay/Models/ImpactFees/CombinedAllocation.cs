@@ -97,17 +97,31 @@ namespace ClayPay.Models.ImpactFees
 
       string query = @"
         WITH CurrentDeveloperAllocation AS (
+
           SELECT
             Agreement_Number,
             SUM(Amount_Allocated) Amount_Currently_Allocated    
           FROM ImpactFees_Builder_Allocations
           GROUP BY Agreement_Number
+
         ), CurrentBuilderAllocation AS (
+
           SELECT
             Builder_Id,
             SUM(Amount_Allocated) Amount_Currently_Allocated    
           FROM ImpactFees_Permit_Allocations
           GROUP BY Builder_Id
+
+        ), NonVoidedPermitAllocations AS (
+
+          SELECT
+            P.Permit_Number
+            ,P.Builder_Id
+            ,P.Amount_Allocated
+            ,P.Audit_Log
+          FROM ImpactFees_Permit_Allocations P
+          INNER JOIN bpMASTER_PERMIT M ON P.Permit_Number = M.PermitNo
+          WHERE M.VoidDate IS NULL
         )
 
         SELECT 
@@ -128,13 +142,14 @@ namespace ClayPay.Models.ImpactFees
           ISNULL(P.Audit_Log, '') Permit_Audit_Log
         
         FROM apApplication A 
-        --LEFT OUTER JOIN ImpactFees_Developer_Agreements D ON D.Agreement_Number =  A.ApplNum 
         LEFT OUTER JOIN ImpactFees_Developer_Agreements D ON D.Agreement_Number =  A.apAssocKey
         LEFT OUTER JOIN ImpactFees_Builder_Allocations B ON D.Agreement_Number = B.Agreement_Number
         LEFT OUTER JOIN CurrentDeveloperAllocation CDA ON D.Agreement_Number = CDA.Agreement_Number
-        LEFT OUTER JOIN ImpactFees_Permit_Allocations P ON P.Builder_Id = B.Id
+        LEFT OUTER JOIN NonVoidedPermitAllocations P ON P.Builder_Id = B.Id
         LEFT OUTER JOIN CurrentBuilderAllocation CBA ON B.Id = CBA.Builder_Id
-        WHERE A.ApplType IN ('TIMPACT', 'PFS_AGREE')
+        WHERE 
+          A.ApplType IN ('TIMPACT', 'PFS_AGREE')
+
 ";
       if(agreementNumber.Length > 0)
       {
