@@ -48,20 +48,7 @@ namespace ClayPay.Models.Claypay
       var query = @"
         USE WATSC;
         
-        SELECT
-          OTId,
-          CashierId,
-          TransDt TransactionDate,
-          ISNULL(Name, '') PayerName,
-          ISNULL(CoName, '') PayerCompanyName,
-          ISNULL(Phone, '') PayerPhoneNumber,
-          ISNULL(Addr1, '') PayerStreet1,
-          ISNULL(Addr2, '') PayerStreet2,
-          ISNULL(EmailAddress, '') PayerEmailAddress,
-          NTUser UserName,
-          IsVoided
-        FROM ccCashier
-        WHERE CashierId = @CashierId";
+        EXEC claypay_public_get_receipt @CashierId";
 
       return Constants.Get_Data<CashierData>(query, param).DefaultIfEmpty(new CashierData()).First();
     }
