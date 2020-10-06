@@ -53,9 +53,14 @@ namespace ClayPay.Models.Balancing
                             where ImpactFeePaymentTypes.Contains(c.PaymentType)
                             select c).ToList();
 
-      CheckCatCodesAgainstGL();
       CheckIfDJournalIsBalanced();
-      
+
+      if (!CanDJournalBeFinalized)
+      { 
+        CheckCatCodesAgainstGL(); 
+      }
+
+      CanDJournalBeFinalized = false;
       //
       Log = DJournalLog.Get(dateToProcess);
       var NextDateToFinalize = LastDateFinalized().AddDays(1);
@@ -123,6 +128,7 @@ namespace ClayPay.Models.Balancing
 
         if (key_list.Count > 0)
         {
+          
           var keys = String.Join(", \n", key_list);
 
           var errorString = new StringBuilder();
@@ -144,6 +150,10 @@ namespace ClayPay.Models.Balancing
           {this.DJournalDate.ToShortDateString()} is out of balance. 
           There may be an issue with the total payments, total charges, or the GU amounts.");
         }
+      }
+      else
+      {
+        CanDJournalBeFinalized = true;
       }
 
 
