@@ -25,7 +25,10 @@ namespace Utilities
     {
       e = document.getElementById(e);
     }
-    e.classList.add("show");
+    //if (!e.classList.includes("show")) {
+    //   e.classList.add("show");
+    //}
+     e.classList.add("show");
     e.classList.remove("hide");
     e.classList.remove("show-inline");
     e.classList.remove("show-flex");

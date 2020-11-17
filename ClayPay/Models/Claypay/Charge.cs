@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Dapper;
+using ClayPay.Models.ImpactFees;
+using System.Data.SqlClient;
+using System.Data;
+
 namespace ClayPay.Models
 {
   public class Charge
@@ -21,6 +25,8 @@ namespace ClayPay.Models
       }
     }
     public string Detail { get; set; } = "";
+    public bool ImpactFeeCreditAvailable { get; set; } = false;
+
 
     public string TimeStampDisplay
     {
@@ -32,6 +38,10 @@ namespace ClayPay.Models
 
     private bool IsVoided { get; set; } = false;
     private bool IsOriginal { get; set; } = true;
+    private string CatCode { get; set; } = "";
+    private int xCoord { get; set; }
+    private int yCoord { get; set; }
+
     public Charge()
     {
 
@@ -67,13 +77,18 @@ namespace ClayPay.Models
 
         SELECT 
 	        ItemId,
+          C.CatCode,
 	        C.Description,
 	        C.TimeStamp,
 	        Assoc,
 	        AssocKey,
           TOTAL,	
-	        Detail  
+	        Detail,
+          B.x xCoord,
+          B.y yCoord
         FROM vwClaypayCharges C
+        INNER JOIN bpMASTER_PERMIT M ON M.PermitNo = C.AssocKey
+        INNER JOIN bpBASE_PERMIT B ON B.BaseId = M.BaseId
         INNER JOIN ccCatCd CC ON CC.CatCode = C.CatCode
         WHERE Total > 0
           AND CashierId IS NULL 
@@ -84,19 +99,34 @@ namespace ClayPay.Models
 
         SELECT
 	        C.ItemId,
+          C.CatCode,
 	        C.Description,
 	        C.TimeStamp,
 	        C.Assoc,
 	        C.AssocKey,
 	        UPF.TOTAL,	
-	        C.Detail
+	        C.Detail,
+          B.x xCoord,
+          B.y yCoord
         FROM vwClaypayCharges C
+        INNER JOIN bpMASTER_PERMIT M ON M.PermitNo = C.AssocKey
+        INNER JOIN bpBASE_PERMIT B ON B.BaseId = M.BaseId
         INNER JOIN unpaid_building_fees UPF ON UPF.ItemId = C.ItemId
         ORDER BY TimeStamp ASC
 
       ";
 
       var lc = Constants.Get_Data<Charge>(sql, dbArgs);
+      if (lc == null) return lc;
+
+      foreach (var l in lc)
+      {
+        if (l.CatCode == "IFRD2" || l.CatCode == "IFRD3")
+        {
+          l.ImpactFeeCreditAvailable = l.CheckForCredit();
+        }
+      }
+
       return lc;
     }
 
@@ -212,6 +242,41 @@ namespace ClayPay.Models
       return lc;
     }
 
+    private bool CheckForCredit()
+    {
+      if (AssocKey.Length == 0) return false;
+      // 2881 is the SRID for our local state plane projection
+      var dp = new DynamicParameters();
+      dp.Add("@X", xCoord);
+      dp.Add("@Y", yCoord);
 
+      string query = @"
+          DECLARE @Point geometry = geometry::STPointFromText('POINT (' + 
+              CAST(@X AS VARCHAR(20)) + ' ' + 
+              CAST(@Y AS VARCHAR(20)) + ')', 2881);
+
+          SELECT TOP 1
+            SHAPE.STIntersects(@Point) Inside
+          FROM IMS_APPLICATIONS A
+          WHERE SHAPE.STIntersects(@Point) = 1
+            AND LEFT(A.Appl_Number, 7) = 'TIMPACT'
+
+";
+      try
+      {
+        using (IDbConnection db =
+          new SqlConnection(
+            Constants.Get_ConnStr("GIS")))
+        {
+          int i =  db.ExecuteScalar<int>(query, dp);
+          return (i == 1);
+        }
+      }
+      catch (Exception ex)
+      {
+        new ErrorLog(ex, query);
+        return false;
+      }
+    }
   }
 }

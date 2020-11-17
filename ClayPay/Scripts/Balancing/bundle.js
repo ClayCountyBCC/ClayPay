@@ -748,6 +748,9 @@ var Utilities;
         if (typeof e == "string") {
             e = document.getElementById(e);
         }
+        //if (!e.classList.includes("show")) {
+        //   e.classList.add("show");
+        //}
         e.classList.add("show");
         e.classList.remove("hide");
         e.classList.remove("show-inline");
@@ -1073,6 +1076,7 @@ var clayPay;
             this.ItemId = 0;
             this.Description = "";
             this.TimeStampDisplay = "";
+            this.ImpactFeeCreditAvailable = false;
         }
         Charge.CreateTable = function (view) {
             var table = document.createElement("table");
@@ -1538,8 +1542,8 @@ var clayPay;
             }
             var receiptDate = document.createElement("span");
             receiptDate.classList.add("level-item");
-          receiptDate.classList.add("subtitle");
-            receiptDate.appendChild(document.createTextNode("Date: " + Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
+            receiptDate.classList.add("subtitle");
+            receiptDate.appendChild(document.createTextNode("Transaction Date: " + Utilities.Format_Date(cr.ResponseCashierData.TransactionDate)));
             div.appendChild(receiptDate);
             var timestamp = cr.ResponseCashierData.TransactionDate;
             return div;
@@ -2009,8 +2013,10 @@ var clayPay;
             var emptyCart = document.getElementById("emptyCart");
             var fullCart = document.getElementById("fullCart");
             var payerData = document.getElementById("payerData");
+            var impactFeeWarning = document.getElementById("impactFeeWarning");
             var paymentData = document.getElementById("paymentData");
             Utilities.Hide(emptyCart);
+            Utilities.Hide(impactFeeWarning);
             Utilities.Hide(fullCart);
             Utilities.Hide(payerData);
             //Utilities.Hide(paymentData);
@@ -2024,6 +2030,15 @@ var clayPay;
                 var cartLength = clayPay.CurrentTransaction.Cart.length;
                 CartNav.appendChild(document.createTextNode(+cartLength.toString() + (cartLength === 1 ? ' item' : ' items')));
                 Utilities.Show(fullCart);
+                //TODO: NEED TO ADD A CHECK FOR THE IMPACT FEE AVAILABLE BOOLEAN HERE
+                var show = false;
+                for (var _i = 0, _a = clayPay.CurrentTransaction.Cart; _i < _a.length; _i++) {
+                    var i = _a[_i];
+                    if (i.ImpactFeeCreditAvailable) {
+                        Utilities.Show(impactFeeWarning);
+                    }
+                }
+                //SHOW INFO BOX TO USER STATING: ONE OR MORE IMPACT FEES IN THE CART MAY BE COVERED UNDER A CLAY COUNTY IMPACT FEE CREDIT AGREEMENT. PLEASE CONTACT THE BLDG DEPARTMENT FOR MORE INFORMATION.
                 Utilities.Show(payerData);
                 //Utilities.Show(paymentData);
             }

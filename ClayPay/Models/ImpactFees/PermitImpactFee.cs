@@ -33,7 +33,7 @@ namespace ClayPay.Models.ImpactFees
     public string Cashier_Id { get; set; } = "";
     public string Error_Text { get; set; } = "";
     public decimal? Amount_Allocated { get; set; }
-
+    private string Payment_Type { get; set; } = "";
     public PermitImpactFee()
     {
 
@@ -112,6 +112,7 @@ namespace ClayPay.Models.ImpactFees
           CI.ItemId ItemId,
           CI.Total ImpactFee_Amount,
           LTRIM(RTRIM(CI.CashierId)) Cashier_Id,
+          ISNULL(CP.PmtType, '') Payment_Type,
           PA.Amount_Allocated
         FROM bpMASTER_PERMIT M
         INNER JOIN bpBASE_PERMIT B ON M.BaseID = B.BaseID
@@ -120,13 +121,18 @@ namespace ClayPay.Models.ImpactFees
         LEFT OUTER JOIN ccCashier CC ON CI.CashierId = CC.CashierId
         LEFT OUTER JOIN void_charges VC ON VC.CashierId = CI.CashierId
         LEFT OUTER JOIN ImpactFees_Permit_Allocations PA ON M.PermitNo = PA.Permit_Number
+        LEFT OUTER JOIN ccCashierPayment CP ON CP.OTid = CC.OTId
         WHERE M.PermitNo=@Permit_Number
           AND VC.CashierId IS NULL;";
 
       var permits = Constants.Get_Data<PermitImpactFee>(query, dp);
       // if we get multiple permits back for one permit number, we've most likely got multiple impact fees on the permit.
-      if(permits.Count() >= 1)
+      if (permits.Count() >= 1)
       {
+        if (Search_Type == "IFEX")
+        {
+          permits.RemoveAll(prmt => prmt.Payment_Type == "IFCR");
+        }
         var permit = permits.First();
         if(permits.Count > 1)
         {

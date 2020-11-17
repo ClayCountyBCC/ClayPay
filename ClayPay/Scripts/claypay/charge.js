@@ -11,6 +11,7 @@ var clayPay;
             this.ItemId = 0;
             this.Description = "";
             this.TimeStampDisplay = "";
+            this.ImpactFeeCreditAvailable = false;
         }
         Charge.CreateTable = function (view) {
             var table = document.createElement("table");

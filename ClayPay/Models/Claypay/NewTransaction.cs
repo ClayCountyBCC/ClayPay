@@ -139,7 +139,7 @@ namespace ClayPay.Models.Claypay
           if (pr == null)
           {
             Errors.Add("There was an issue settling the credit card transaction.");
-            rollbackTransaction();
+            rollbackTransaction("ProcessPaymentTransaction: pr is NULL, var pr = PaymentResponse.PostPayment(this.CCData, \"\"");
             UnlockChargeItems();
             InsertTransactionTiming();
             return new ClientResponse(Errors);
@@ -149,7 +149,7 @@ namespace ClayPay.Models.Claypay
             if (pr.ErrorText.Length > 0)
             {
               Errors.Add(pr.ErrorText);
-              rollbackTransaction();
+              rollbackTransaction("ProcessPaymentTransaction: pr.ErrorText.Length > 0");
               UnlockChargeItems();
               InsertTransactionTiming();
               return new ClientResponse(Errors);
@@ -157,6 +157,17 @@ namespace ClayPay.Models.Claypay
           }
         }
 
+        // Change: moved FinalizeTransaction here to prevent finalizing if transaction has been rolled back.
+        if (!Payments.Any(p => p.PaymentType == Payment.payment_type.impact_fee_credit
+                   || p.PaymentType == Payment.payment_type.impact_fee_exemption
+                   || p.PaymentType == Payment.payment_type.impact_waiver_road
+                   || p.PaymentType == Payment.payment_type.impact_waiver_school
+                   ))
+
+        {
+          FinalizeTransaction();
+        }
+        
         var cr = new ClientResponse(TransactionCashierData.CashierId.Trim(), Charges);
         cr.SendPayerEmailReceipt(TransactionCashierData.PayerEmailAddress.Trim());
 
@@ -418,17 +429,17 @@ namespace ClayPay.Models.Claypay
       // TODO: Update all sub functions to email when expected number of rows are not updated properly
       if (!StartTransaction())
       {
-        rollbackTransaction();
+        rollbackTransaction("SaveTransaction: !StartTransaction()");
         return false;
       }
       if (!SaveCashierPaymentRows())
       {
-        rollbackTransaction();
+        rollbackTransaction("SaveTransaction: !SaveCashierPaymentRows()");
         return false;
       }
       if (!UpdateCashierItemRows_OTid_CashierId())
       {
-        rollbackTransaction();
+        rollbackTransaction("SaveTransaction: !UpdateCashierItemRows_OTid_CashierId()");
         return false;
       }
       bool updateGU = (from p in Payments
@@ -442,21 +453,21 @@ namespace ClayPay.Models.Claypay
 
         if (!InsertGURows())
         {
-          rollbackTransaction();
+          rollbackTransaction("SaveTransaction: !InsertGURows()");
           return false;
         }
 
       }
 
-      if (!Payments.Any(p => p.PaymentType == Payment.payment_type.impact_fee_credit
-                         || p.PaymentType == Payment.payment_type.impact_fee_exemption
-                         || p.PaymentType == Payment.payment_type.impact_waiver_road
-                         || p.PaymentType == Payment.payment_type.impact_waiver_school
-                         ))
+      //if (!Payments.Any(p => p.PaymentType == Payment.payment_type.impact_fee_credit
+      //                   || p.PaymentType == Payment.payment_type.impact_fee_exemption
+      //                   || p.PaymentType == Payment.payment_type.impact_waiver_road
+      //                   || p.PaymentType == Payment.payment_type.impact_waiver_school
+      //                   ))
 
-      {
-        FinalizeTransaction();
-      }
+      //{
+      //  FinalizeTransaction();
+      //}
       
       UnlockChargeItems();
       return true;
@@ -968,7 +979,7 @@ namespace ClayPay.Models.Claypay
       return i;
     }
 
-    public bool rollbackTransaction()
+    public bool rollbackTransaction(string calliingFunction)
     {
       /**
        * 1. delete ccGUItem where guid in (select guid from ccGU where otid = @TransactionOTId)
@@ -982,7 +993,8 @@ namespace ClayPay.Models.Claypay
       try
       {
         var sb = new StringBuilder();
-        sb.AppendLine(TransactionCashierData.CashierId)
+        sb.AppendLine(calliingFunction)
+          .AppendLine(TransactionCashierData.CashierId)
           .AppendLine(TransactionCashierData.OTId.ToString())
           .AppendLine(TotalAmountDue.ToString())
           .AppendLine(CCData.TransactionId);
@@ -1248,7 +1260,7 @@ namespace ClayPay.Models.Claypay
             INNER JOIN ccGUItem GUI  ON GUI.GUID = GU.GUId
             INNER JOIN ccGL GL ON GL.CatCode = GU.CatCode
             INNER JOIN ccCashierItem CI ON CI.OTId = GU.OTId AND CI.CATCODE IN ('IFSCH')
-            WHERE GU.OTId = 862091
+            WHERE GU.OTId = @otid
 
           )
 

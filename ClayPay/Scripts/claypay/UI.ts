@@ -379,8 +379,10 @@ namespace clayPay.UI
     let emptyCart: HTMLElement = document.getElementById("emptyCart"); 
     let fullCart: HTMLElement = document.getElementById("fullCart");
     let payerData: HTMLElement = document.getElementById("payerData");
+    let impactFeeWarning: HTMLElement = document.getElementById("impactFeeWarning");
     let paymentData: HTMLElement = document.getElementById("paymentData");
     Utilities.Hide(emptyCart);
+    Utilities.Hide(impactFeeWarning);
     Utilities.Hide(fullCart);
     Utilities.Hide(payerData);
     //Utilities.Hide(paymentData);
@@ -394,7 +396,23 @@ namespace clayPay.UI
     {
       let cartLength = clayPay.CurrentTransaction.Cart.length;
       CartNav.appendChild(document.createTextNode(+ cartLength.toString() + (cartLength === 1 ? ' item' : ' items')));
+
       Utilities.Show(fullCart);
+
+      //TODO: NEED TO ADD A CHECK FOR THE IMPACT FEE AVAILABLE BOOLEAN HERE
+      var show: boolean = false;
+
+      for (var i of clayPay.CurrentTransaction.Cart)
+      {
+        if (i.ImpactFeeCreditAvailable)
+        {
+          Utilities.Show(impactFeeWarning);
+        }
+      }
+      //SHOW INFO BOX TO USER STATING: ONE OR MORE IMPACT FEES IN THE CART MAY BE COVERED UNDER A CLAY COUNTY IMPACT FEE CREDIT AGREEMENT. PLEASE CONTACT THE BLDG DEPARTMENT FOR MORE INFORMATION.
+
+      
+
       Utilities.Show(payerData);
       //Utilities.Show(paymentData);
     }

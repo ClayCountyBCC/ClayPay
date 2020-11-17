@@ -748,6 +748,9 @@ var Utilities;
         if (typeof e == "string") {
             e = document.getElementById(e);
         }
+        //if (!e.classList.includes("show")) {
+        //   e.classList.add("show");
+        //}
         e.classList.add("show");
         e.classList.remove("hide");
         e.classList.remove("show-inline");
@@ -1717,7 +1720,7 @@ var ImpactFees;
         };
     }
 })(ImpactFees || (ImpactFees = {}));
-//# sourceMappingURL=ImpactFees.js.map
+//# sourceMappingURL=impactfees.js.map
 var ImpactFees;
 (function (ImpactFees) {
     var DeveloperAgreement = /** @class */ (function () {

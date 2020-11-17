@@ -326,8 +326,10 @@ var clayPay;
             var emptyCart = document.getElementById("emptyCart");
             var fullCart = document.getElementById("fullCart");
             var payerData = document.getElementById("payerData");
+            var impactFeeWarning = document.getElementById("impactFeeWarning");
             var paymentData = document.getElementById("paymentData");
             Utilities.Hide(emptyCart);
+            Utilities.Hide(impactFeeWarning);
             Utilities.Hide(fullCart);
             Utilities.Hide(payerData);
             //Utilities.Hide(paymentData);
@@ -341,6 +343,15 @@ var clayPay;
                 var cartLength = clayPay.CurrentTransaction.Cart.length;
                 CartNav.appendChild(document.createTextNode(+cartLength.toString() + (cartLength === 1 ? ' item' : ' items')));
                 Utilities.Show(fullCart);
+                //TODO: NEED TO ADD A CHECK FOR THE IMPACT FEE AVAILABLE BOOLEAN HERE
+                var show = false;
+                for (var _i = 0, _a = clayPay.CurrentTransaction.Cart; _i < _a.length; _i++) {
+                    var i = _a[_i];
+                    if (i.ImpactFeeCreditAvailable) {
+                        Utilities.Show(impactFeeWarning);
+                    }
+                }
+                //SHOW INFO BOX TO USER STATING: ONE OR MORE IMPACT FEES IN THE CART MAY BE COVERED UNDER A CLAY COUNTY IMPACT FEE CREDIT AGREEMENT. PLEASE CONTACT THE BLDG DEPARTMENT FOR MORE INFORMATION.
                 Utilities.Show(payerData);
                 //Utilities.Show(paymentData);
             }

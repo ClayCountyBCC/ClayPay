@@ -16,6 +16,7 @@
     AssocKey: string;
     Total: number;
     Detail: string;
+    ImpactFeeCreditAvailable: boolean;
   }
 
   export class Charge implements ICharge
@@ -28,6 +29,7 @@
     public AssocKey: string;
     public Total: number;
     public Detail: string;
+    public ImpactFeeCreditAvailable: boolean = false;
 
     constructor()
     {

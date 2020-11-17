@@ -270,8 +270,20 @@
       No charges have been added to the cart.
     </div>
   </div>
-  <div id="fullCart"
-       class="hide">
+  <div>
+
+    <article id="impactFeeWarning" class="message is-danger">
+      <div class="message-header">
+        <p>Warning...</p>
+        
+      </div>
+      <div class="message-body">
+        ONE OR MORE IMPACT FEES IN THE CART MAY BE COVERED UNDER A CLAY COUNTY IMPACT FEE CREDIT AGREEMENT. PLEASE CONTACT THE BLDG DEPARTMENT FOR MORE INFORMATION
+      </div>
+    </article>
+    <div id="fullCart"
+         class="hide">
+    </div>
   </div>
 
   <div class="hide"
@@ -747,6 +759,7 @@
 </div>
 
 <script src="~/Scripts/claypay/bundle.js"></script>
+
 @*<script src="~/bower_components/promise-polyfill/dist/polyfill.js" ></script>
   <script src="~/bower_components/fetch/fetch.js"></script>
   <script src="~/Scripts/app/Utilities.js"></script>

@@ -14,6 +14,9 @@ var Utilities;
         if (typeof e == "string") {
             e = document.getElementById(e);
         }
+        //if (!e.classList.includes("show")) {
+        //   e.classList.add("show");
+        //}
         e.classList.add("show");
         e.classList.remove("hide");
         e.classList.remove("show-inline");
