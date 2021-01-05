@@ -224,7 +224,7 @@ namespace ClayPay.Models.Claypay
       {
         Errors.AddRange(er);
       }
-      CanVoid = !Errors.Any();
+      CanVoid = false;
     }
 
     private ClientResponse VoidPayments()
@@ -253,7 +253,7 @@ namespace ClayPay.Models.Claypay
       int completed = -1;
       try
       {
-        completed = Constants.Exec_Query(query, param); 
+        completed = 0;// Constants.Exec_Query(query, param); 
       }
       catch(Exception ex)
       {

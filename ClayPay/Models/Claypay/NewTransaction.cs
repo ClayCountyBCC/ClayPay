@@ -139,6 +139,7 @@ namespace ClayPay.Models.Claypay
           if (pr == null)
           {
             Errors.Add("There was an issue settling the credit card transaction.");
+
             rollbackTransaction("ProcessPaymentTransaction: pr is NULL, var pr = PaymentResponse.PostPayment(this.CCData, \"\"");
             UnlockChargeItems();
             InsertTransactionTiming();
@@ -149,7 +150,8 @@ namespace ClayPay.Models.Claypay
             if (pr.ErrorText.Length > 0)
             {
               Errors.Add(pr.ErrorText);
-              rollbackTransaction("ProcessPaymentTransaction: pr.ErrorText.Length > 0");
+              rollbackTransaction($@"ProcessPaymentTransaction: pr.ErrorText.Length > 0
+                                    pr.ErrorText = {pr.ErrorText}");
               UnlockChargeItems();
               InsertTransactionTiming();
               return new ClientResponse(Errors);
@@ -934,7 +936,7 @@ namespace ClayPay.Models.Claypay
           INNER JOIN bpMASTER_PERMIT M ON CI.AssocKey = M.PermitNo AND M.Comm = 1
           WHERE CashierId = @cashierId
             AND OTId = @otid
-            AND CatCode IN ('IFRD2','IFRD3')
+            AND CatCode IN ('IFRD2','IFRD3', 'MFD1', 'MFD2', 'MFD4', 'MFD7', 'MFD10')
 
         ) 
       
@@ -942,7 +944,7 @@ namespace ClayPay.Models.Claypay
         UPDATE CI SET CashierId = @cashierId, OTId = @otid
         FROM ccCashierItem CI
         INNER JOIN permit_numbers P ON P.AssocKey = CI.AssocKey
-        WHERE CI.CatCode IN ('IFS2', 'IFS3')
+        WHERE CI.CatCode IN ('IFS2', 'IFS3', 'MFS1', 'MFS2', 'MFS4', 'MFS7', 'MFS10')
 
 
         INSERT INTO ccCashierPayment (OTid, PmtType, AmtApplied, AmtTendered, Info, AddedBy, UpdatedBy, UpdatedOn)
@@ -957,7 +959,7 @@ namespace ClayPay.Models.Claypay
           ,GETDATE()
         FROM ccCashierItem CI
         WHERE CI.OTId = @otid
-          AND CatCode IN ('IFS2', 'IFS3')
+          AND CatCode IN ('IFS2', 'IFS3', 'MFS1', 'MFS2', 'MFS4', 'MFS7', 'MFS10')
           AND BaseFee = Total;
                                                                
     ";

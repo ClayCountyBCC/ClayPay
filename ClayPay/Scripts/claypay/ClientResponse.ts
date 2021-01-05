@@ -84,7 +84,7 @@ namespace clayPay
           //Utilities.Toggle_Loading_Button(voidbutton, true);
           ClientResponse.Search(cr.ResponseCashierData.CashierId);
         }
-        div.appendChild(voidbutton);
+       // div.appendChild(voidbutton);
       }
       
       let receiptDate = document.createElement("span");

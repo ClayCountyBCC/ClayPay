@@ -76,23 +76,26 @@ namespace ClayPay.Models
         )
 
         SELECT 
-	        ItemId,
+	        C.ItemId,
           C.CatCode,
 	        C.Description,
 	        C.TimeStamp,
-	        Assoc,
-	        AssocKey,
-          TOTAL,	
+	        C.Assoc,
+	        C.AssocKey,
+          C.TOTAL,	
 	        Detail,
           B.x xCoord,
-          B.y yCoord
+          B.y yCoord,
+          ISNULL(CI.Narrative,'') [Narrative]
         FROM vwClaypayCharges C
-        INNER JOIN bpMASTER_PERMIT M ON M.PermitNo = C.AssocKey
-        INNER JOIN bpBASE_PERMIT B ON B.BaseId = M.BaseId
+        INNER JOIN ccCashierItem CI ON CI.ItemId = C.ItemId --AND RIGHT(CI.Narrative, 7) != 'SUBSIDY'
+        left outer JOIN bpMASTER_PERMIT M ON M.PermitNo = C.AssocKey
+        left outer JOIN bpBASE_PERMIT B ON B.BaseId = M.BaseId
         INNER JOIN ccCatCd CC ON CC.CatCode = C.CatCode
-        WHERE Total > 0
-          AND CashierId IS NULL 
-          AND UPPER(AssocKey)=@AK
+        WHERE C.Total > 0
+          AND RIGHT(ISNULL(CI.Narrative, ''), 7) != 'SUBSIDY'
+          AND C.CashierId IS NULL 
+          AND UPPER(C.AssocKey)=@AK
           AND C.CatCode NOT IN ('100RE', '100C')
 
         UNION
@@ -107,12 +110,14 @@ namespace ClayPay.Models
 	        UPF.TOTAL,	
 	        C.Detail,
           B.x xCoord,
-          B.y yCoord
+          B.y yCoord,
+          '' [Narrative]
         FROM vwClaypayCharges C
-        INNER JOIN bpMASTER_PERMIT M ON M.PermitNo = C.AssocKey
-        INNER JOIN bpBASE_PERMIT B ON B.BaseId = M.BaseId
+        left outer JOIN bpMASTER_PERMIT M ON M.PermitNo = C.AssocKey
+        left outer JOIN bpBASE_PERMIT B ON B.BaseId = M.BaseId
         INNER JOIN unpaid_building_fees UPF ON UPF.ItemId = C.ItemId
-        ORDER BY TimeStamp ASC
+        where UPPER(C.AssocKey) = @AK
+        ORDER BY C.TimeStamp ASC
 
       ";
 
@@ -182,17 +187,22 @@ namespace ClayPay.Models
       param.Add("@itemIds", itemIds);
       string sql = @"
 
-        DECLARE @AK VARCHAR(8);
-        SET @AK = (SELECT TOP 1 AssocKey FROM ccCashierItem WHERE ItemId IN @ids);
-
-        WITH discounted_permits AS (
+        WITH permits AS (
+        
+          SELECT Distinct
+            AssocKey
+          From ccCashierItem CI
+          WHERE ItemId IN @ids
+        
+        ), discounted_permits AS (
   
-          SELECT AssocKey, CatCode, SUM(Total) Total
-          FROM ccCashierItem
+          SELECT CI.AssocKey, CatCode, SUM(Total) Total
+          FROM ccCashierItem CI
+          INNER JOIN permits P ON P.AssocKey = CI.AssocKey
           WHERE CatCode IN ('100RE','100C')
             AND CashierId IS NULL
-            AND AssocKey = @AK
-          GROUP BY AssocKey, CatCode
+
+          GROUP BY CI.AssocKey, CatCode
 
 
         ), unpaid_building_fees AS (
@@ -204,7 +214,6 @@ namespace ClayPay.Models
           WHERE CI.CATCODE IN ('100RE','100C')
             AND CashierId IS NULL
             AND CI.Narrative IS NULL
-
 
         )
 

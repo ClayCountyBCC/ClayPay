@@ -90,6 +90,11 @@ namespace ClayPay.Models.ImpactFees
       {
         catCodes.Add("IFRD2");
         catCodes.Add("IFRD3");
+        catCodes.Add("MFD1");
+        catCodes.Add("MFD2");
+        catCodes.Add("MFD4");
+        catCodes.Add("MFD7");
+        catCodes.Add("MFD10");
       }
       dp.Add("@CatCodes", catCodes);
       string query = @"

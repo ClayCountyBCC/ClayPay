@@ -52,7 +52,7 @@ var clayPay;
                     //Utilities.Toggle_Loading_Button(voidbutton, true);
                     ClientResponse.Search(cr.ResponseCashierData.CashierId);
                 };
-                div.appendChild(voidbutton);
+                // div.appendChild(voidbutton);
             }
             var receiptDate = document.createElement("span");
             receiptDate.classList.add("level-item");

@@ -131,7 +131,9 @@ namespace ClayPay.Controllers.ImpactFees
     [Route("GetPermit")]
     public IHttpActionResult GetPermit(string Permit_Number, string Search_Type, string Agreement_Number = "")
     {
-      return Ok(PermitImpactFee.Get(Permit_Number, Search_Type, Agreement_Number));
+
+      var permit = PermitImpactFee.Get(Permit_Number, Search_Type, Agreement_Number);
+      return Ok(permit);
     }
 
   }
