@@ -126,7 +126,7 @@ namespace ClayPay.Models
 
       foreach (var l in lc)
       {
-        if (l.CatCode == "IFRD2" || l.CatCode == "IFRD3")
+        if (l.CatCode.Substring(0, 4) == "IFRD" || l.CatCode.Substring(0,3) == "MFD")
         {
           l.ImpactFeeCreditAvailable = l.CheckForCredit();
         }
@@ -254,23 +254,56 @@ namespace ClayPay.Models
     private bool CheckForCredit()
     {
       if (AssocKey.Length == 0) return false;
-      // 2881 is the SRID for our local state plane projection
+     
+      
+
+      string query = @"
+                 
+        WITH builder_allocations AS (
+
+          SELECT
+            Agreement_Number
+            ,SUM(Amount_Allocated) Total
+          FROM ImpactFees_Builder_Allocations B
+          GROUP BY Agreement_Number
+
+          )
+
+          SELECT
+            A.Agreement_Number agreements
+          FROM ImpactFees_Developer_Agreements A
+          LEFT OUTER JOIN builder_allocations B ON B.Agreement_Number = A.Agreement_Number
+          WHERE
+            ISNULL(B.Total, 0) < A.Agreement_Amount 
+
+
+        ";
+
+      var agreements = Constants.Get_Data<string>(query);
+
+
       var dp = new DynamicParameters();
       dp.Add("@X", xCoord);
       dp.Add("@Y", yCoord);
+      dp.Add("@LocalPlaneProjectionSRID", 2881);
+      dp.Add("@agreements", agreements);
 
-      string query = @"
-          DECLARE @Point geometry = geometry::STPointFromText('POINT (' + 
-              CAST(@X AS VARCHAR(20)) + ' ' + 
-              CAST(@Y AS VARCHAR(20)) + ')', 2881);
+      query = @" 
 
-          SELECT TOP 1
-            SHAPE.STIntersects(@Point) Inside
-          FROM IMS_APPLICATIONS A
-          WHERE SHAPE.STIntersects(@Point) = 1
-            AND LEFT(A.Appl_Number, 7) = 'TIMPACT'
+        use Clay;
 
-";
+        DECLARE @Point geometry = geometry::STPointFromText('POINT (' + 
+            CAST(@X AS VARCHAR(20)) + ' ' + 
+            CAST(@Y AS VARCHAR(20)) + ')', 2881);
+
+        SELECT
+          COUNT(Appl_Number)
+        FROM IMS_APPLICATIONS A
+        WHERE SHAPE.STIntersects(@Point) = 1
+          AND A.Appl_Number IN @agreements;
+        
+
+        ";
       try
       {
         using (IDbConnection db =
