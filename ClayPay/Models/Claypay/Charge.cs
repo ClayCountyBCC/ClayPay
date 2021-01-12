@@ -127,7 +127,7 @@ namespace ClayPay.Models
       {
         foreach (var l in lc)
         {
-          if (l.CatCode.Length > 2 && (l.CatCode.Substring(0, 3) == "IFR" || l.CatCode.Substring(0, 3) == "MFD"))
+          if (l.CatCode.Length > 3 && (l.CatCode.Substring(0, 4) == "IFRD" || l.CatCode.Substring(0, 3) == "MFD"))
           {
             l.ImpactFeeCreditAvailable = l.CheckForCredit();
           }
