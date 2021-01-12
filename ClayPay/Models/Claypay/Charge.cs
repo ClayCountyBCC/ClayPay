@@ -123,12 +123,14 @@ namespace ClayPay.Models
 
       var lc = Constants.Get_Data<Charge>(sql, dbArgs);
       if (lc == null) return lc;
-
-      foreach (var l in lc)
+      if (AssocKey[0] == '1')
       {
-        if (l.CatCode.Substring(0, 4) == "IFRD" || l.CatCode.Substring(0,3) == "MFD")
+        foreach (var l in lc)
         {
-          l.ImpactFeeCreditAvailable = l.CheckForCredit();
+          if (l.CatCode.Length > 2 && (l.CatCode.Substring(0, 3) == "IFR" || l.CatCode.Substring(0, 3) == "MFD"))
+          {
+            l.ImpactFeeCreditAvailable = l.CheckForCredit();
+          }
         }
       }
 
