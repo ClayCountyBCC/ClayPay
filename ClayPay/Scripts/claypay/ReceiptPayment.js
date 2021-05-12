@@ -170,7 +170,7 @@ var clayPay;
             saveButton.type = "button";
             saveButton.classList.add("button");
             saveButton.classList.add("is-success");
-            saveButton.appendChild(document.createTextNode("Convert To Cash Payment"));
+            saveButton.appendChild(document.createTextNode("Convert To Cash"));
             saveButton.onclick = function () {
                 saveButton.classList.add("is-loading");
                 var changed = new ReceiptPayment();

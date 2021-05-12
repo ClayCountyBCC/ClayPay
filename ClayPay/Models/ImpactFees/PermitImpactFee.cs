@@ -104,7 +104,7 @@ namespace ClayPay.Models.ImpactFees
             CashierId
           FROM ccCashier
           WHERE IsVoided = 1
-           )
+        )
 
         SELECT
           M.PermitNo Permit_Number,

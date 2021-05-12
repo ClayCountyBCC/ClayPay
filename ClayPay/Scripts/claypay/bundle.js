@@ -2012,7 +2012,7 @@ var clayPay;
             saveButton.type = "button";
             saveButton.classList.add("button");
             saveButton.classList.add("is-success");
-            saveButton.appendChild(document.createTextNode("Convert To Cash Payment"));
+            saveButton.appendChild(document.createTextNode("Convert To Cash"));
             saveButton.onclick = function () {
                 saveButton.classList.add("is-loading");
                 var changed = new ReceiptPayment();
@@ -2954,8 +2954,6 @@ var clayPay;
                 var cartLength = clayPay.CurrentTransaction.Cart.length;
                 CartNav.appendChild(document.createTextNode(+cartLength.toString() + (cartLength === 1 ? ' item' : ' items')));
                 Utilities.Show(fullCart);
-                //TODO: NEED TO ADD A CHECK FOR THE IMPACT FEE AVAILABLE BOOLEAN HERE
-                var show = false;
                 for (var _i = 0, _a = clayPay.CurrentTransaction.Cart; _i < _a.length; _i++) {
                     var i = _a[_i];
                     if (i.ImpactFeeCreditAvailable) {

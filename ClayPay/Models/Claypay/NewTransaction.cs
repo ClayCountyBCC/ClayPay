@@ -775,23 +775,30 @@ namespace ClayPay.Models.Claypay
       var dp = new DynamicParameters();
       dp.Add("@otid", TransactionCashierData.OTId);
       dp.Add("@TransactionDate", this.TransactionDate);
-      
+
       // I don't know if the year is supposed to be the fiscal year.
       // the code in  prc_upd_ccNextCashierId sets FY = the @Yr var
       // code for @Yr checks the current year against the FY field and if it is not equal,
       // it updates the FY and next avail fieldfield
-      
+
       // TODO: Add these queries to stored procedures
+
+
+      List<Payment> pmts = this.Payments;
       
       var query = @"
         USE WATSC;
-        INSERT INTO ccGU 
-          (OTId, CashierId, ItemId, PayID, CatCode, TransDt)
-        SELECT DISTINCT CCI.OTId, CCI.CashierId, CCI.ItemId, NULL, CCI.CatCode, @TransactionDate
+
+        INSERT INTO ccGU  (OTId, CashierId, ItemId,CatCode, TransDt)
+        SELECT DISTINCT CCI.OTId, CCI.CashierId, CCI.ItemId, CCI.CatCode, @TransactionDate
           FROM ccCashierItem CCI
           INNER JOIN ccGL GL ON CCI.CatCode = GL.CatCode
-        WHERE CCI.OTId = @otid;
-
+          INNER JOIN ccCashierPayment CP ON CP.OTid = CCI.OTId
+          INNER JOIN ccLookUp L ON UPPER(LEFT(CP.PmtType,5)) = UPPER(LEFT(L.Code,5))
+        WHERE CCI.OTid = @otid 
+          AND (CdType = 'PMTTYPE'
+          OR (CdType = 'SPECIALPT' 
+            AND LEFT(Code, 2) != 'IF' ));
 
         EXEC prc_claypay_insert_guitem_rows @otid
 
@@ -928,7 +935,7 @@ namespace ClayPay.Models.Claypay
 
         DECLARE @YR CHAR(2) = RIGHT(CAST(YEAR(GETDATE()) AS CHAR(4)), 2);
 
-          WITH permit_numbers AS (
+        WITH permit_numbers AS (
 
           SELECT DISTINCT
             AssocKey
@@ -946,6 +953,8 @@ namespace ClayPay.Models.Claypay
         INNER JOIN permit_numbers P ON P.AssocKey = CI.AssocKey
         WHERE CI.CatCode IN ('IFS2', 'IFS3', 'MFS1', 'MFS2', 'MFS4', 'MFS7', 'MFS10')
 
+        -- This statement adds the payment row for the subsidy. Finalize() is called after the GU and GUItems tables are updated.
+        -- TODO: Use the GU update to ignore the subsidies so they are added accidentally to the GL
 
         INSERT INTO ccCashierPayment (OTid, PmtType, AmtApplied, AmtTendered, Info, AddedBy, UpdatedBy, UpdatedOn)
         SELECT
@@ -1158,7 +1167,7 @@ namespace ClayPay.Models.Claypay
             FROM ccGU GU
             INNER JOIN ccGUItem GUI  ON GUI.GUID = GU.GUId
             INNER JOIN ccGL GL ON GL.CatCode = GU.CatCode
-            INNER JOIN ccCashierItem CI ON CI.OTId = GU.OTId AND CI.CATCODE IN ('IFRD2', 'IFRD3')
+            INNER JOIN ccCashierItem CI ON CI.OTId = GU.OTId AND CI.CATCODE IN ('IFRD2', 'IFRD3','MFD1','MFD2','MFD4','MFD7','MFD10')
             WHERE GU.OTId = @otid
 
           )
@@ -1167,7 +1176,7 @@ namespace ClayPay.Models.Claypay
             G1.GUItemId [guitem_id]
             ,G1.Amount + (G3.Amount - G1.Amount - G2.Amount) [amount]
           FROM gl_entries G1
-          INNER JOIN gl_entries G2 ON G2.ItemId = G1.ItemId AND (G2.Account = '305*324310**' OR G2.Account = '305*324311**')
+          INNER JOIN gl_entries G2 ON G2.ItemId = G1.ItemId AND (G2.Account = '303*324310**' OR G2.Account = '304*324311**' OR G2.Account = '312*324321' OR G2.Account = '312*324322' OR G2.Account = '312*324323' OR G2.Account = '312*324324' OR G2.Account = '312*324325')
           INNER JOIN gl_entries G3 ON G3.ItemId = G1.ItemId AND G3.Type = 'd'
           WHERE G1.Account = '138*369910**'
 

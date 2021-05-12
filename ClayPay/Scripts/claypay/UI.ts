@@ -399,9 +399,6 @@ namespace clayPay.UI
 
       Utilities.Show(fullCart);
 
-      //TODO: NEED TO ADD A CHECK FOR THE IMPACT FEE AVAILABLE BOOLEAN HERE
-      var show: boolean = false;
-
       for (var i of clayPay.CurrentTransaction.Cart)
       {
         if (i.ImpactFeeCreditAvailable)

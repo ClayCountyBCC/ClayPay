@@ -90,9 +90,12 @@ namespace ClayPay.Models
         FROM vwClaypayCharges C
         INNER JOIN ccCashierItem CI ON CI.ItemId = C.ItemId --AND RIGHT(CI.Narrative, 7) != 'SUBSIDY'
         left outer JOIN bpMASTER_PERMIT M ON M.PermitNo = C.AssocKey
+        LEFT OUTER JOIN bpASSOC_PERMIT A ON A.PermitNo = C.AssocKey
         left outer JOIN bpBASE_PERMIT B ON B.BaseId = M.BaseId
         INNER JOIN ccCatCd CC ON CC.CatCode = C.CatCode
         WHERE C.Total > 0
+          AND M.VoidDate IS NULL
+          AND A.VoidDate IS NULL
           AND RIGHT(ISNULL(CI.Narrative, ''), 7) != 'SUBSIDY'
           AND C.CashierId IS NULL 
           AND UPPER(C.AssocKey)=@AK
@@ -114,9 +117,12 @@ namespace ClayPay.Models
           '' [Narrative]
         FROM vwClaypayCharges C
         left outer JOIN bpMASTER_PERMIT M ON M.PermitNo = C.AssocKey
+        LEFT OUTER JOIN bpASSOC_PERMIT A ON A.PermitNo = C.AssocKey
         left outer JOIN bpBASE_PERMIT B ON B.BaseId = M.BaseId
         INNER JOIN unpaid_building_fees UPF ON UPF.ItemId = C.ItemId
         where UPPER(C.AssocKey) = @AK
+          AND M.VoidDate IS NULL
+          AND A.VoidDate IS NULL
         ORDER BY C.TimeStamp ASC
 
       ";

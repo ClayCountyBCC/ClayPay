@@ -63,7 +63,7 @@ namespace ClayPay.Models.Claypay
       ReceiptPayments = ReceiptPayment.Get(cashierid);
       if(!isVoid && (ua.void_manager_access || (ua.cashier_access && !ReceiptPayments.Any(p => p.IsFinalized == true))))
       {
-        CanVoid = true;
+        CanVoid = false;
       }
       else
       {
@@ -151,6 +151,9 @@ namespace ClayPay.Models.Claypay
 
     public void ValidateVoid(UserAccess ua, bool isVoid)
     {
+
+      CanVoid = false;
+      return;
       /**
         * 
         * 
@@ -174,57 +177,57 @@ namespace ClayPay.Models.Claypay
         *   
         *      
       **/
-      
-      var er = new List<string>();
+
+      //var er = new List<string>();
 
 
-      if (!ua.void_manager_access && !ua.cashier_access)
-      {
-        if (!isVoid) Errors.Add("Not Authorized to void payments");
-        return;
-      }
-
-
-      if (ResponseCashierData.IsVoided)
-      {
-        er.Add("Payment has already been voided.");
-
-      }
-
-      if (ResponseCashierData.TransactionDate.Date < DateTime.Today.Date.AddMonths(-6))
-      {
-        er.Add("Cannot void transactions older than six months");
-      }
-
-      CheckForClosedPermits();
-      //if ()
+      //if (!ua.void_manager_access && !ua.cashier_access)
       //{
-      //  er.Add("Cannot void any transaction which includes permits that have been CO'd or have a passed final inspection");
+      //  if (!isVoid) Errors.Add("Not Authorized to void payments");
+      //  return;
       //}
 
 
-      if (!er.Any() && !ua.void_manager_access)
-      {
-        if (ReceiptPayments.Any(p => p.IsFinalized == true))
-        {
-          er.Add("Cannot void a finalized receipt.");
-        }
-        else
-        {
-          if (ReceiptPayments.Any(p => p.TransactionId != ""))
-          {
-            er.Add("Cannot void a same day transaction with a Credit card payment");
-          }
-        }
-      }
+      //if (ResponseCashierData.IsVoided)
+      //{
+      //  er.Add("Payment has already been voided.");
+
+      //}
+
+      //if (ResponseCashierData.TransactionDate.Date < DateTime.Today.Date.AddMonths(-6))
+      //{
+      //  er.Add("Cannot void transactions older than six months");
+      //}
+
+      //CheckForClosedPermits();
+      ////if ()
+      ////{
+      ////  er.Add("Cannot void any transaction which includes permits that have been CO'd or have a passed final inspection");
+      ////}
+
+
+      //if (!er.Any() && !ua.void_manager_access)
+      //{
+      //  if (ReceiptPayments.Any(p => p.IsFinalized == true))
+      //  {
+      //    er.Add("Cannot void a finalized receipt.");
+      //  }
+      //  else
+      //  {
+      //    if (ReceiptPayments.Any(p => p.TransactionId != ""))
+      //    {
+      //      er.Add("Cannot void a same day transaction with a Credit card payment");
+      //    }
+      //  }
+      //}
 
       
 
-      if (isVoid)
-      {
-        Errors.AddRange(er);
-      }
-      CanVoid = false;
+      //if (isVoid)
+      //{
+      //  Errors.AddRange(er);
+      //}
+
     }
 
     private ClientResponse VoidPayments()

@@ -188,12 +188,28 @@ namespace ClayPay.Models.Balancing
       var sql = @"
       USE WATSC;
 
-      SELECT Case WHEN Type = 'd' THEN 'GU Debit' ELSE 'GU Credit' END [Type], sum(amount) TotalAmount from (
-       SELECT otid, cashierid, cast(transdt AS DATE) transdt, account, amount, type
-      FROM dbo.ccGU INNER JOIN dbo.ccGUItem ON dbo.ccGU.GUId = dbo.ccGUItem.GUID
-       WHERE CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)) AS tmp
-       GROUP BY type
-       ORDER BY Type DESC
+      SELECT 
+        Case
+          WHEN Type = 'd' 
+            THEN 'GU Debit' 
+            ELSE 'GU Credit' 
+          END [Type], 
+        sum(amount) TotalAmount from 
+          (
+            SELECT 
+              C.OTId, 
+              C.CashierId, 
+              cast(C.transdt AS DATE) transdt, 
+              account, 
+              amount, 
+              type
+            FROM dbo.ccGU 
+            INNER JOIN dbo.ccGUItem ON dbo.ccGU.GUId = dbo.ccGUItem.GUID
+            INNER JOIN ccCashier C ON C.OTId = ccGU.OTId
+            WHERE CAST(C.TransDt AS DATE) = CAST(@DateToBalance AS DATE)
+          ) AS tmp
+        GROUP BY type
+        ORDER BY Type DESC
 
        ";
       try

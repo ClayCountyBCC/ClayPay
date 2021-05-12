@@ -43,16 +43,21 @@ namespace ClayPay.Models
 
     public string CalcFee(decimal Amount)
     {
+      var myUrl = BuildFeeURL(Amount);
       try
       {
-        string result = PostToMFC(BuildFeeURL(Amount));
+        string result = PostToMFC(myUrl);
         ProcessResults(result);
 
         return ConvFee;
       }
       catch (Exception ex)
       {
-        Constants.Log(ex);
+        var e = new StringBuilder();
+
+        e.AppendLine(this.UseProduction ? "PRODUCTION" : "DEVELOPMENT")
+        .AppendLine("URL: " + myUrl);
+        Constants.Log(ex, e.ToString());
         return "";
       }
     }
@@ -82,24 +87,29 @@ namespace ClayPay.Models
 
     private bool Post(CCPayment ccd, string ipAddress)
     {
+      string myUrl = "";
+      var error = new StringBuilder(this.UseProduction ? "PRODUCTION" : "DEVELOPMENT");
+      string result = "";
       try
       {
-        string result = "";
-
+        
+        
 
         if (ccd.TransactionId != null && ccd.TransactionId.Length > 0)
         {
           NewTransaction.TimingDates.Send_CCData_Settle_Transmit = DateTime.Now;
-
-          result = PostToMFC(BuildSettlePaymentURL(ccd));
+          error.AppendLine("Settle Payment");
+          myUrl = BuildSettlePaymentURL(ccd);
+          result = PostToMFC(myUrl);
 
           NewTransaction.TimingDates.Return_CCData_Settle_Transmit = DateTime.Now;
         }
         else
         {
           NewTransaction.TimingDates.Send_CCData_Authorize_Transmit = DateTime.Now;
-
-          result = PostToMFC(BuildAuthorizePaymentURL(ccd, ipAddress));
+          error.AppendLine("Authorize Payment");
+          myUrl = BuildAuthorizePaymentURL(ccd, ipAddress);
+          result = PostToMFC(myUrl);
 
           NewTransaction.TimingDates.Return_CCData_Authorize_Transmit = DateTime.Now;
 
@@ -110,7 +120,9 @@ namespace ClayPay.Models
       }
       catch (Exception ex)
       {
-        Constants.Log(ex);
+        error.AppendLine("URL: " + myUrl);
+        error.AppendLine("Result: " + result);
+        Constants.Log(ex, error.ToString());
         return false;
       }
     }
@@ -156,6 +168,9 @@ namespace ClayPay.Models
 
     private static string PostToMFC(string url)
     {
+      var error = new StringBuilder(Constants.UseProduction() ? "PRODUCTION" : "DEVELOPMENT");
+      error.AppendLine("URL: " + url);
+
       if (url.Length == 0)
       {
         Constants.Log("Empty url in PostToMFC", "", "", "");
@@ -163,6 +178,7 @@ namespace ClayPay.Models
       }
       var req = WebRequest.Create(url);
       var resp = req.GetResponse();
+      error.AppendLine("Response(resp): " + resp.ToString());
       try
       {
         using (var reader = new StreamReader(resp.GetResponseStream(), encoding: Encoding.UTF8))
@@ -172,7 +188,7 @@ namespace ClayPay.Models
       }
       catch (Exception e)
       {
-        Constants.Log(e);
+        Constants.Log(e, error.ToString());
         return "";
       }
 

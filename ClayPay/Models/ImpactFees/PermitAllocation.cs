@@ -219,7 +219,10 @@ namespace ClayPay.Models.ImpactFees
             (Permit_Number, Builder_Id, Amount_Allocated, Audit_Log)
           VALUES 
             (@Permit_Number, @Builder_Id, @Amount_Allocated, @Audit_Log);";
-      return Constants.Save_Data<PermitAllocation>(query, this);
+
+
+      var i = Constants.Save_Data<PermitAllocation>(query, this);
+      return i;
     }
 
     public bool ApplyCredit()

@@ -39,12 +39,18 @@ namespace ClayPay.Models.Balancing
       this.GLAccountTotals = Account.GetGLAccountTotals(dateToProcess);
       var tempCd = CashierDetailData.Get(dateToProcess);
       string[] ImpactFeePaymentTypes = {
-      "IFCR",
-      "IFEX",
-      "IFWS",
-      "IFWR",
-      "IFS2",
-      "IFS3"
+        "IFCR",
+        "IFEX",
+        "IFWS",
+        "IFWR",
+        "IFSCR",
+        "IFS2",
+        "IFS3",
+        "MFS1",
+        "MFS2",
+        "MFS4",
+        "MFS7",
+        "MFS10"
       };
       this.CashierData = (from c in tempCd
                           where !ImpactFeePaymentTypes.Contains(c.PaymentType)
@@ -202,6 +208,7 @@ namespace ClayPay.Models.Balancing
     public static List<string> GetCAtCodesWithInvalidGLInformation()
     {
       var sql = @"
+
         USE WATSC;
 
         SELECT DISTINCT
@@ -214,7 +221,7 @@ namespace ClayPay.Models.Balancing
         FROM ccCatCd CC
         LEFT OUTER JOIN ccGL GL ON CC.CatCode = GL.CatCode AND GL.Type='c'
         WHERE 
-          CC.CatCode != '1TRN'
+          CC.CatCode not in ('1TRN', 'MFS1','MFS2','MFS4','MFS7','MFS10')
           AND (GL.Account IS NULL
           OR GL.Account = ''
           OR GL.[Percent] IS NULL
@@ -230,11 +237,12 @@ namespace ClayPay.Models.Balancing
         FROM ccCatCd CC
         LEFT OUTER JOIN ccGL GL ON CC.CatCode = GL.CatCode AND GL.Type='d'
         WHERE 
-          CC.CatCode != '1TRN'
+          CC.CatCode not in ('1TRN', 'MFS1','MFS2','MFS4','MFS7','MFS10')
           AND (GL.Account IS NULL
           OR GL.Account = ''
           OR GL.[Percent] IS NULL
           OR GL.Fund IS NULL)";
+
       var c = Constants.Get_Data<string>(sql);
       return c;
     }

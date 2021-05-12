@@ -343,8 +343,6 @@ var clayPay;
                 var cartLength = clayPay.CurrentTransaction.Cart.length;
                 CartNav.appendChild(document.createTextNode(+cartLength.toString() + (cartLength === 1 ? ' item' : ' items')));
                 Utilities.Show(fullCart);
-                //TODO: NEED TO ADD A CHECK FOR THE IMPACT FEE AVAILABLE BOOLEAN HERE
-                var show = false;
                 for (var _i = 0, _a = clayPay.CurrentTransaction.Cart; _i < _a.length; _i++) {
                     var i = _a[_i];
                     if (i.ImpactFeeCreditAvailable) {

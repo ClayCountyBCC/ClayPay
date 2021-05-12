@@ -19,7 +19,9 @@
   <section class="hero is-primary is-small hide-for-print">
     <!-- Hero head: will stick at the top -->
     <div class="hero-head">
+
       <nav class="navbar">
+
         <div class="container">
           <div class="navbar-brand">
             <a style="text-shadow: 2px 2px 0px rgba(90, 90, 90, 1);"
@@ -44,19 +46,29 @@
                    class="navbar-item @(ViewBag.Page == "impactfees" ? "is-active" : "")">
                   Impact Fees
                 </a>
+                <div class="navbar-item">
+                  @if (Model.cashier_access || Model.djournal_access)
+                  {
+                    @Model.display_name
+                  }
+                </div>
                 @*<span class="navbar-item">
-                  <a class="button is-primary is-inverted">
-                    <span class="icon">
-                      <i class="fab fas fa-search"></i>
-                    </span>
-                    <span>Permit Search</span>
-                  </a>
-                </span>*@
+                <a class="button is-primary is-inverted">
+                  <span class="icon">
+                    <i class="fab fas fa-search"></i>
+                  </span>
+                  <span>Permit Search</span>
+                </a>
+              </span>*@
+
               </div>
+
+
             </div>
           }
         </div>
       </nav>
+
     </div>
 
     <!-- Hero content: will be in the middle -->
@@ -112,20 +124,20 @@
   <div class="is-danger hide notification hide-for-print"
        id="danger-ie">
     <div class="is-large container ">
-      <p>This application has been designed to work recent versions of Chrome, FireFox, and Edge.<br />
-      To use this application, please switch to one of those browsers. Thank you.</p>
+      <p>
+        This application has been designed to work recent versions of Chrome, FireFox, and Edge.<br />
+        To use this application, please switch to one of those browsers. Thank you.
+      </p>
     </div>
   </div>
 
   <script>
 
-    function CheckBrowser()
-    {
-      return (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0); 
+    function CheckBrowser() {
+      return (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0);
     }
 
-    if (CheckBrowser())
-    {
+    if (CheckBrowser()) {
       document.getElementById('danger-ie').classList.remove("hide");
     }
   </script>

@@ -25,7 +25,7 @@ namespace ClayPay.Models
       ErrorMessage = message;
       ErrorStacktrace = stacktrace;
       ErrorSource = source;
-      Query = errorQuery;
+      Query = Constants.UseProduction() ? "Production":"Development" + errorQuery;
     }
 
     public ErrorLog(Exception ex, string errorQuery = "")
@@ -34,7 +34,7 @@ namespace ClayPay.Models
       ErrorMessage = ex.Message;
       ErrorStacktrace = ex.StackTrace;
       ErrorSource = ex.Source;
-      Query = errorQuery;
+      Query = Constants.UseProduction() ? "Production" : "Development" + errorQuery;
     }
 
   }
