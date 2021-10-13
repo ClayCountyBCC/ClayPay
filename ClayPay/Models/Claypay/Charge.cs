@@ -52,79 +52,9 @@ namespace ClayPay.Models
       var dbArgs = new DynamicParameters( );
       dbArgs.Add("@AK", AssocKey.ToUpper());
       string sql = @"
-        USE WATSC;
-        WITH discounted_permits AS (
-  
-          SELECT AssocKey, CatCode, SUM(Total) Total
-          FROM ccCashierItem
-          WHERE CatCode IN ('100RE','100C')
-            AND CashierId IS NULL
-            AND AssocKey = @AK
-          GROUP BY AssocKey, CatCode
-
-
-        ), unpaid_building_fees AS (
-
-          SELECT CI.ItemId, CC.Description, CI.TimeStamp, CI.Assoc, CI.AssocKey, CI.CatCode, D.Total
-          FROM ccCashierItem CI
-          INNER JOIN ccCatCd CC ON CC.CatCode = CI.CatCode
-          INNER JOIN discounted_permits D ON D.AssocKey = CI.AssocKey
-          WHERE CI.CATCODE IN ('100RE','100C')
-            AND CashierId IS NULL
-            AND CI.Narrative IS NULL
-
-        )
-
-        SELECT 
-	        C.ItemId,
-          C.CatCode,
-	        C.Description,
-	        C.TimeStamp,
-	        C.Assoc,
-	        C.AssocKey,
-          C.TOTAL,	
-	        Detail,
-          B.x xCoord,
-          B.y yCoord,
-          ISNULL(CI.Narrative,'') [Narrative]
-        FROM vwClaypayCharges C
-        INNER JOIN ccCashierItem CI ON CI.ItemId = C.ItemId --AND RIGHT(CI.Narrative, 7) != 'SUBSIDY'
-        left outer JOIN bpMASTER_PERMIT M ON M.PermitNo = C.AssocKey
-        LEFT OUTER JOIN bpASSOC_PERMIT A ON A.PermitNo = C.AssocKey
-        left outer JOIN bpBASE_PERMIT B ON B.BaseId = M.BaseId
-        INNER JOIN ccCatCd CC ON CC.CatCode = C.CatCode
-        WHERE C.Total > 0
-          AND M.VoidDate IS NULL
-          AND A.VoidDate IS NULL
-          AND RIGHT(ISNULL(CI.Narrative, ''), 7) != 'SUBSIDY'
-          AND C.CashierId IS NULL 
-          AND UPPER(C.AssocKey)=@AK
-          AND C.CatCode NOT IN ('100RE', '100C')
-
-        UNION
-
-        SELECT
-	        C.ItemId,
-          C.CatCode,
-	        C.Description,
-	        C.TimeStamp,
-	        C.Assoc,
-	        C.AssocKey,
-	        UPF.TOTAL,	
-	        C.Detail,
-          B.x xCoord,
-          B.y yCoord,
-          '' [Narrative]
-        FROM vwClaypayCharges C
-        left outer JOIN bpMASTER_PERMIT M ON M.PermitNo = C.AssocKey
-        LEFT OUTER JOIN bpASSOC_PERMIT A ON A.PermitNo = C.AssocKey
-        left outer JOIN bpBASE_PERMIT B ON B.BaseId = M.BaseId
-        INNER JOIN unpaid_building_fees UPF ON UPF.ItemId = C.ItemId
-        where UPPER(C.AssocKey) = @AK
-          AND M.VoidDate IS NULL
-          AND A.VoidDate IS NULL
-        ORDER BY C.TimeStamp ASC
-
+        
+        EXEC ClayPay_get_charges_by_assocKey @AK;
+      
       ";
 
       var lc = Constants.Get_Data<Charge>(sql, dbArgs);
