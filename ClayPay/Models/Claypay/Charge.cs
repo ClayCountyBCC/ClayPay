@@ -131,7 +131,7 @@ namespace ClayPay.Models
             AssocKey
           From ccCashierItem CI
           WHERE ItemId IN @ids
-        
+
         ), discounted_permits AS (
   
           SELECT CI.AssocKey, CatCode, SUM(Total) Total
@@ -151,7 +151,8 @@ namespace ClayPay.Models
           INNER JOIN discounted_permits D ON D.AssocKey = CI.AssocKey
           WHERE CI.CATCODE IN ('100RE','100C')
             AND CashierId IS NULL
-            AND CI.Narrative IS NULL
+            AND ISNULL(CI.Narrative,'') != 'PRIVATE PROVIDER DISC'
+            AND CI.ItemId IN @ids
 
         )
 

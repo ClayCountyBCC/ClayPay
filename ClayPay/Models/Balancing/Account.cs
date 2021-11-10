@@ -46,50 +46,8 @@ namespace ClayPay.Models.Balancing
       var sql = @"
       USE WATSC;
 
-      WITH GUItemData AS (
+      EXEC claypay_GetGLAccountTotals @DateToBalance
 
-        SELECT
-          GUID,
-          Account,
-          Amount,
-          Type,
-          CHARINDEX('*', Account, 0) FundLength
-        FROM ccGUItem
-        WHERE 
-          Type='c'
-
-      ), FormattedGUItemData AS (
-  
-        SELECT
-          GUID
-          ,Account
-          ,Amount
-          ,CAST(LEFT(Account, FundLength - 1) AS INT) Fund
-          ,SUBSTRING(Account, FundLength + 1,CHARINDEX('*', Account, FundLength + 1) - 1) AccountNumber
-          ,CAST(CAST(LEFT(Account, FundLength - 1) AS INT) AS VARCHAR(4)) + ' -104000' CashAccount
-        FROM GUItemData
-
-      )
-      
-      SELECT 
-
-        --left(GUI.Account, 3) Fund, 
-        --SUBSTRING(GUI.Account, 5,6) AccountNumber, 
-        --FORMAT(SUM(GUI.Amount),'$000000000.00') Total
-        --,FORMAT(CAST(LEFT(GUI.Account,3) AS INT), '000') + ' -104000' CashAccount
-
-        GUI.Fund
-        ,GUI.AccountNumber
-        ,FORMAT(SUM(GUI.Amount),'$000000000.00') Total
-        ,SUM(GUI.Amount) TotalAmount
-        ,GUI.CashAccount
-      FROM ccGU GU
-      INNER JOIN FormattedGUItemData GUI ON GU.GUId = GUI.GUID
-      LEFT OUTER JOIN ccGL GL ON GL.Account = GUI.AccountNumber
-      WHERE 
-        CAST(TransDt AS DATE) = CAST(@DateToBalance AS DATE)        
-      GROUP BY GUI.Fund, GUI.Account, GUI.AccountNumber,GL.Project, GL.ProjectAccount, GUI.CashAccount
-      ORDER BY GUI.Account
        ";
       try
       {
